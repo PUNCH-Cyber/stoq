@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+
+
+
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    
+    <title>StoqPluginManager &mdash; stoQ 0.9.6 documentation</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    
+
+<link rel="stylesheet" href="_static/css/basicstrap-base.css" type="text/css" />
+<link rel="stylesheet" id="current-theme" href="_static/css/bootstrap3/bootstrap.min.css" type="text/css" />
+<link rel="stylesheet" id="current-adjust-theme" type="text/css" />
+
+<link rel="stylesheet" href="_static/css/font-awesome.min.css">
+
+<style type="text/css">
+  body {
+    padding-top: 60px;
+    padding-bottom: 40px;
+  }
+</style>
+
+<link rel="stylesheet" href="_static/css/basicstrap.css" type="text/css" />
+<link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+<script type="text/javascript">
+  var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:    './',
+            VERSION:     '0.9.6',
+            COLLAPSE_INDEX: false,
+            FILE_SUFFIX: '.html',
+            HAS_SOURCE:  true
+  };
+</script>
+    <script type="text/javascript" src="_static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/js/bootstrap3.min.js"></script>
+<script type="text/javascript" src="_static/js/jquery.cookie.min.js"></script>
+<script type="text/javascript" src="_static/js/basicstrap.js"></script>
+<script type="text/javascript">
+</script>
+    <link rel="top" title="stoQ 0.9.6 documentation" href="index.html" />
+    <link rel="next" title="StoqScan" href="Scan.html" />
+    <link rel="prev" title="StoqArgs" href="Args.html" /> 
+  </head>
+  <body role="document">
+    <div id="navbar-top" class="navbar navbar-fixed-top navbar-default" role="navigation" aria-label="top navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="index.html">stoQ 0.9.6 documentation</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+              <li class="dropdown visible-xs">
+                <a role="button" id="localToc" data-toggle="dropdown" data-target="#" href="#">Table Of Contents <b class="caret"></b></a>
+                <ul class="dropdown-menu localtoc sp-localtoc" role="menu" aria-labelledby="localToc">
+                <ul>
+<li><a class="reference internal" href="#">StoqPluginManager</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+<li><a class="reference internal" href="#api">API</a></li>
+</ul>
+</li>
+</ul>
+
+                </ul>
+              </li>
+
+            
+              <li><a href="Args.html" title="StoqArgs" accesskey="P">previous </a></li>
+              <li><a href="Scan.html" title="StoqScan" accesskey="N">next </a></li>
+              <li><a href="py-modindex.html" title="Python Module Index" >modules </a></li>
+              <li><a href="genindex.html" title="General Index" accesskey="I">index </a></li>
+            
+            <li class="visible-xs"><a href="_sources/Plugins.txt" rel="nofollow">Show Source</a></li>
+
+            <li class="visible-xs">
+                <form class="search form-search form-inline navbar-form navbar-right sp-searchbox" action="search.html" method="get">
+                  <div class="input-append input-group">
+                    <input type="text" class="search-query form-control" name="q" placeholder="Search...">
+                    <span class="input-group-btn">
+                    <input type="submit" class="btn" value="Go" />
+                    </span>
+                  </div>
+                  <input type="hidden" name="check_keywords" value="yes" />
+                  <input type="hidden" name="area" value="default" />
+                </form>
+            </li>
+
+            
+
+          </ul>
+
+        </div>
+      </div>
+    </div>
+    
+
+    <!-- container -->
+    <div class="container-fluid">
+
+      <!-- row -->
+      <div class="row">
+         
+<div class="col-md-3 hidden-xs" id="sidebar-wrapper">
+  <div class="sidebar hidden-xs" role="navigation" aria-label="main navigation">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">StoqPluginManager</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+<li><a class="reference internal" href="#api">API</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Args.html"
+                        title="previous chapter">StoqArgs</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Scan.html"
+                        title="next chapter">StoqScan</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/Plugins.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" role="search">
+  <h3>Quick search</h3>
+  <form class="search form-inline" action="search.html" method="get">
+      <div class="input-append input-group">
+        <input type="text" class="search-query form-control" name="q" placeholder="Search...">
+        <span class="input-group-btn">
+        <input type="submit" class="btn" value="Go" />
+        </span>
+      </div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+  </div>
+</div> 
+        
+
+        <div class="col-md-9" id="content-wrapper">
+          <div class="document" role="main">
+            <div class="documentwrapper">
+              <div class="bodywrapper">
+                <div class="body">
+                  
+  <div class="section" id="stoqpluginmanager">
+<h1>StoqPluginManager<a class="headerlink" href="#stoqpluginmanager" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-stoq.plugins"></span><div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p><em>StoqPluginManager()</em> is the primary class that controls all aspects of
+plugin management to include initialization, loading, listing, and unloading.
+This class is instantiated within the <em>Stoq()</em> class. This should not be
+instatiated outside of <strong>stoQ</strong> as it relies on objects within <em>Stoq()</em> to
+function properly.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Full plugin development documentation can be found at
+<a class="reference internal" href="PluginDevelopment.html"><em>Plugin Development</em></a>.</p>
+</div>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>Instantiate Stoq:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">stoq.core</span> <span class="kn">import</span> <span class="n">Stoq</span>
+<span class="n">stoq</span> <span class="o">=</span> <span class="n">Stoq</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Listing all available plugins:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">stoq</span><span class="o">.</span><span class="n">list_plugins</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Once Stoq() is initialized, we can load a worker. The worker should always be
+instantiated first, then any additional plugins may be loaded through the
+worker plugin itself. The plugins will be instantiated within a dict in the
+worker plugin class. For example, a <strong>stoQ</strong> connector plugin may be accessed
+from it&#8217;s plural name (connectors) within the worker object by calling
+<code class="docutils literal"><span class="pre">worker.connectors</span></code> or a reader plugin may be called with
+<code class="docutils literal"><span class="pre">worker.readers</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">worker</span> <span class="o">=</span> <span class="n">stoq</span><span class="o">.</span><span class="n">load_plugin</span><span class="p">(</span><span class="s">&quot;yara&quot;</span><span class="p">,</span> <span class="s">&quot;worker&quot;</span><span class="p">)</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">load_connector</span><span class="p">(</span><span class="s">&quot;file&quot;</span><span class="p">)</span>
+<span class="n">payload</span> <span class="o">=</span> <span class="n">worker</span><span class="o">.</span><span class="n">connectors</span><span class="p">[</span><span class="s">&#39;file&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get_file</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="s">&quot;path&quot;</span><span class="p">:</span> <span class="s">&quot;/tmp/bad.exe&quot;</span><span class="p">})</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">worker</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We may also retrieve a payload from a connector, such as MongoDB:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">worker</span><span class="o">.</span><span class="n">load_connector</span><span class="p">(</span><span class="s">&quot;mongodb&quot;</span><span class="p">)</span>
+<span class="n">payload</span> <span class="o">=</span> <span class="n">worker</span><span class="o">.</span><span class="n">connectors</span><span class="p">[</span><span class="s">&#39;mongodb&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get_file</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="s">&quot;sha1&quot;</span><span class="p">:</span> <span class="s">&quot;da39a3ee5e6b4b0d3255bfef95601890afd80709&quot;</span><span class="p">})</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">worker</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Only certain connector plugins support <code class="docutils literal"><span class="pre">.get_file(**kwargs)</span></code>. Refer
+to the plugin to determine if it is supported or not.</p>
+</div>
+<p>Now that we have results, we can load our connector to save the results:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">worker</span><span class="o">.</span><span class="n">connectors</span><span class="p">[</span><span class="s">&#39;mongodb&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We may also save a file via the connector. In this example, we will save a
+payload to with some additional attributes to GridFS:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">payload_attributes</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">payload_attributes</span><span class="p">[</span><span class="s">&#39;md5&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;d41d8cd98f00b204e9800998ecf8427e&quot;</span>
+<span class="n">payload_attributes</span><span class="p">[</span><span class="s">&#39;sha1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;da39a3ee5e6b4b0d3255bfef95601890afd80709&quot;</span>
+<span class="n">payload_attributes</span><span class="p">[</span><span class="s">&#39;sha256&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855&quot;</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">connectors</span><span class="p">[</span><span class="s">&#39;mongodb&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">archive</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">payload_attributes</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><code class="docutils literal"><span class="pre">save()</span></code> accepts <code class="docutils literal"><span class="pre">**kwargs</span></code>, so one may pass any attribute that
+is needed to it. GridFS will automatically calculate the payload size
+and datetime uploaded.</p>
+</div>
+</div>
+<div class="section" id="api">
+<h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="stoq.plugins.StoqPluginManager">
+<em class="property">class </em><code class="descclassname">stoq.plugins.</code><code class="descname">StoqPluginManager</code><a class="headerlink" href="#stoq.plugins.StoqPluginManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>stoQ Plugin Manager Class</p>
+<dl class="method">
+<dt id="stoq.plugins.StoqPluginManager.collect_plugins">
+<code class="descname">collect_plugins</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqPluginManager.collect_plugins" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for yapsy.PluginManager.collectPlugins()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.plugins.StoqPluginManager.deactivate_plugin">
+<code class="descname">deactivate_plugin</code><span class="sig-paren">(</span><em>name</em>, <em>category</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqPluginManager.deactivate_plugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deactivate a plugin within a specific category</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; Name of plugin to deactivate</li>
+<li><strong>category</strong> (<em>str</em>) &#8211; Category of the named plugin</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.plugins.StoqPluginManager.get_all_plugin_names">
+<code class="descname">get_all_plugin_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqPluginManager.get_all_plugin_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>List all plugin names</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">All plugin names</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.plugins.StoqPluginManager.get_all_plugins">
+<code class="descname">get_all_plugins</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqPluginManager.get_all_plugins" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for yapsy.PluginManager.getAllPlugins()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.plugins.StoqPluginManager.get_categories">
+<code class="descname">get_categories</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqPluginManager.get_categories" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for yapsy.PluginManager.getCategories()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.plugins.StoqPluginManager.get_plugin">
+<code class="descname">get_plugin</code><span class="sig-paren">(</span><em>name</em>, <em>category</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqPluginManager.get_plugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a plugin within a specific category</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; Name of plugin to get</li>
+<li><strong>category</strong> (<em>str</em>) &#8211; Category of the named plugin</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">plugin object</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.plugins.StoqPluginManager.get_plugin_names_of_category">
+<code class="descname">get_plugin_names_of_category</code><span class="sig-paren">(</span><em>category</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqPluginManager.get_plugin_names_of_category" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lists plugin name of a specific category</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>category</strong> (<em>str</em>) &#8211; Category to discover plugins in</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list of discovered plugins</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.plugins.StoqPluginManager.get_plugins_of_category">
+<code class="descname">get_plugins_of_category</code><span class="sig-paren">(</span><em>category</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqPluginManager.get_plugins_of_category" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for yapsy.PluginManager.getPluginsOfCategory()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.plugins.StoqPluginManager.list_plugins">
+<code class="descname">list_plugins</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqPluginManager.list_plugins" title="Permalink to this definition">¶</a></dt>
+<dd><p>List all available plugins and their category</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.plugins.StoqPluginManager.load_plugin">
+<code class="descname">load_plugin</code><span class="sig-paren">(</span><em>name</em>, <em>category</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqPluginManager.load_plugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the desired plugin</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; Plugin name to be loaded</li>
+<li><strong>category</strong> (<em>str</em>) &#8211; The category of plugin to be loaded</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The loaded plugin object</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="stoq.plugins.StoqWorkerPlugin">
+<em class="property">class </em><code class="descclassname">stoq.plugins.</code><code class="descname">StoqWorkerPlugin</code><a class="headerlink" href="#stoq.plugins.StoqWorkerPlugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>stoQ Worker Plugin Class</p>
+<dl class="method">
+<dt id="stoq.plugins.StoqWorkerPlugin.activate">
+<code class="descname">activate</code><span class="sig-paren">(</span><em>options=None</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqWorkerPlugin.activate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Activate the plugin within the framework</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>options</strong> (<em>dict</em>) &#8211; argparse options</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The worker plugin object</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.plugins.StoqWorkerPlugin.deactivate">
+<code class="descname">deactivate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqWorkerPlugin.deactivate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deactivate the plugin within the framework</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.plugins.StoqWorkerPlugin.load_carver">
+<code class="descname">load_carver</code><span class="sig-paren">(</span><em>carver</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqWorkerPlugin.load_carver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load an carver plugin</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>carver</strong> (<em>str</em>) &#8211; The name of carver plugin to be loaded</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.plugins.StoqWorkerPlugin.load_connector">
+<code class="descname">load_connector</code><span class="sig-paren">(</span><em>connector</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqWorkerPlugin.load_connector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a connector plugin</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>connector</strong> (<em>str</em>) &#8211; The name of connector plugin to be loaded</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.plugins.StoqWorkerPlugin.load_decoder">
+<code class="descname">load_decoder</code><span class="sig-paren">(</span><em>decoder</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqWorkerPlugin.load_decoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load an decoder plugin</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>decoder</strong> (<em>str</em>) &#8211; The name of decoder plugin to be loaded</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.plugins.StoqWorkerPlugin.load_extractor">
+<code class="descname">load_extractor</code><span class="sig-paren">(</span><em>extractor</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqWorkerPlugin.load_extractor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load an extractor plugin</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>extractor</strong> (<em>str</em>) &#8211; The name of extractor plugin to be loaded</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.plugins.StoqWorkerPlugin.load_reader">
+<code class="descname">load_reader</code><span class="sig-paren">(</span><em>reader</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqWorkerPlugin.load_reader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a reader plugin</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>reader</strong> (<em>str</em>) &#8211; The name of reader plugin to be loaded</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.plugins.StoqWorkerPlugin.load_source">
+<code class="descname">load_source</code><span class="sig-paren">(</span><em>source</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqWorkerPlugin.load_source" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a source plugin</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>source</strong> (<em>str</em>) &#8211; The name of source plugin to be loaded</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.plugins.StoqWorkerPlugin.load_worker">
+<code class="descname">load_worker</code><span class="sig-paren">(</span><em>worker</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqWorkerPlugin.load_worker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a worker plugin from another worker plugin</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>worker</strong> (<em>str</em>) &#8211; The name of worker plugin to be loaded</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.plugins.StoqWorkerPlugin.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqWorkerPlugin.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the plugin with a source plugin, or standalone</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.plugins.StoqWorkerPlugin.save_payload">
+<code class="descname">save_payload</code><span class="sig-paren">(</span><em>payload</em>, <em>connector</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqWorkerPlugin.save_payload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save a payload using the designated connector</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>payload</strong> (<em>bytes</em>) &#8211; Payload to pass to the connector for saving</li>
+<li><strong>connector</strong> (<em>str</em>) &#8211; Connector plugin to save the payload with</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.plugins.StoqWorkerPlugin.start">
+<code class="descname">start</code><span class="sig-paren">(</span><em>payload=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqWorkerPlugin.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the payload with the worker plugin</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>payload</strong> (<em>bytes</em>) &#8211; (optional) Payload to be processed</li>
+<li><strong>**kwargs</strong> &#8211; addtional arguments that may be needed by the 
+worker plugin (i.e., username and password via HTTP)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Tuple of JSON results and template rendered results</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict and str</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.plugins.StoqWorkerPlugin.yara_dispatcher">
+<code class="descname">yara_dispatcher</code><span class="sig-paren">(</span><em>payload</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.plugins.StoqWorkerPlugin.yara_dispatcher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if a payload needs additional processing to extract
+or carve content from a payload</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>payload</strong> (<em>bytes</em>) &#8211; Payload to be processed</li>
+<li><strong>**kwargs</strong> &#8211; addtional arguments that may be needed</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Metadata and content from plugin</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of tuple or None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        
+      </div><!-- /row -->
+
+      <!-- row -->
+      <div class="row footer-relbar">
+<div id="navbar-related" class=" related navbar navbar-default" role="navigation" aria-label="related navigation">
+  <div class="navbar-inner">
+    <ul class="nav navbar-nav ">
+        <li><a href="index.html">stoQ 0.9.6 documentation</a></li>
+    </ul>
+<ul class="nav navbar-nav pull-right hidden-xs hidden-sm">
+      
+        <li><a href="Args.html" title="StoqArgs" >previous</a></li>
+        <li><a href="Scan.html" title="StoqScan" >next</a></li>
+        <li><a href="py-modindex.html" title="Python Module Index" >modules</a></li>
+        <li><a href="genindex.html" title="General Index" >index</a></li>
+        <li><a href="#">top</a></li> 
+      
+    </ul>
+  </div>
+</div>
+      </div><!-- /row -->
+
+      <!-- footer -->
+      <footer role="contentinfo">
+          &copy; Copyright 2014-2015, PUNCH Cyber Analytics Group.
+        Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+      </footer>
+      <!-- /footer -->
+
+    </div>
+    <!-- /container -->
+
+  </body>
+</html>

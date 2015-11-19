@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+
+
+
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    
+    <title>Plugin Development &mdash; stoQ 0.9.6 documentation</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    
+
+<link rel="stylesheet" href="_static/css/basicstrap-base.css" type="text/css" />
+<link rel="stylesheet" id="current-theme" href="_static/css/bootstrap3/bootstrap.min.css" type="text/css" />
+<link rel="stylesheet" id="current-adjust-theme" type="text/css" />
+
+<link rel="stylesheet" href="_static/css/font-awesome.min.css">
+
+<style type="text/css">
+  body {
+    padding-top: 60px;
+    padding-bottom: 40px;
+  }
+</style>
+
+<link rel="stylesheet" href="_static/css/basicstrap.css" type="text/css" />
+<link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+<script type="text/javascript">
+  var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:    './',
+            VERSION:     '0.9.6',
+            COLLAPSE_INDEX: false,
+            FILE_SUFFIX: '.html',
+            HAS_SOURCE:  true
+  };
+</script>
+    <script type="text/javascript" src="_static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/js/bootstrap3.min.js"></script>
+<script type="text/javascript" src="_static/js/jquery.cookie.min.js"></script>
+<script type="text/javascript" src="_static/js/basicstrap.js"></script>
+<script type="text/javascript">
+</script>
+    <link rel="top" title="stoQ 0.9.6 documentation" href="index.html" />
+    <link rel="next" title="Dispatcher" href="Dispatcher.html" />
+    <link rel="prev" title="Installing" href="Installation.html" /> 
+  </head>
+  <body role="document">
+    <div id="navbar-top" class="navbar navbar-fixed-top navbar-default" role="navigation" aria-label="top navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="index.html">stoQ 0.9.6 documentation</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+              <li class="dropdown visible-xs">
+                <a role="button" id="localToc" data-toggle="dropdown" data-target="#" href="#">Table Of Contents <b class="caret"></b></a>
+                <ul class="dropdown-menu localtoc sp-localtoc" role="menu" aria-labelledby="localToc">
+                <ul>
+<li><a class="reference internal" href="#">Plugin Development</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#configuration">Configuration</a></li>
+<li><a class="reference internal" href="#id1">Plugin Development</a><ul>
+<li><a class="reference internal" href="#workers">Workers</a></li>
+<li><a class="reference internal" href="#connectors">Connectors</a></li>
+<li><a class="reference internal" href="#readers">Readers</a></li>
+<li><a class="reference internal" href="#sources">Sources</a></li>
+<li><a class="reference internal" href="#extractors">Extractors</a></li>
+<li><a class="reference internal" href="#carvers">Carvers</a></li>
+<li><a class="reference internal" href="#decoders">Decoders</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#packaging-plugins">Packaging Plugins</a><ul>
+<li><a class="reference internal" href="#templates">Templates</a></li>
+<li><a class="reference internal" href="#installing-a-plugin">Installing a Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+                </ul>
+              </li>
+
+            
+              <li><a href="Installation.html" title="Installing" accesskey="P">previous </a></li>
+              <li><a href="Dispatcher.html" title="Dispatcher" accesskey="N">next </a></li>
+              <li><a href="py-modindex.html" title="Python Module Index" >modules </a></li>
+              <li><a href="genindex.html" title="General Index" accesskey="I">index </a></li>
+            
+            <li class="visible-xs"><a href="_sources/PluginDevelopment.txt" rel="nofollow">Show Source</a></li>
+
+            <li class="visible-xs">
+                <form class="search form-search form-inline navbar-form navbar-right sp-searchbox" action="search.html" method="get">
+                  <div class="input-append input-group">
+                    <input type="text" class="search-query form-control" name="q" placeholder="Search...">
+                    <span class="input-group-btn">
+                    <input type="submit" class="btn" value="Go" />
+                    </span>
+                  </div>
+                  <input type="hidden" name="check_keywords" value="yes" />
+                  <input type="hidden" name="area" value="default" />
+                </form>
+            </li>
+
+            
+
+          </ul>
+
+        </div>
+      </div>
+    </div>
+    
+
+    <!-- container -->
+    <div class="container-fluid">
+
+      <!-- row -->
+      <div class="row">
+         
+<div class="col-md-3 hidden-xs" id="sidebar-wrapper">
+  <div class="sidebar hidden-xs" role="navigation" aria-label="main navigation">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Plugin Development</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#configuration">Configuration</a></li>
+<li><a class="reference internal" href="#id1">Plugin Development</a><ul>
+<li><a class="reference internal" href="#workers">Workers</a></li>
+<li><a class="reference internal" href="#connectors">Connectors</a></li>
+<li><a class="reference internal" href="#readers">Readers</a></li>
+<li><a class="reference internal" href="#sources">Sources</a></li>
+<li><a class="reference internal" href="#extractors">Extractors</a></li>
+<li><a class="reference internal" href="#carvers">Carvers</a></li>
+<li><a class="reference internal" href="#decoders">Decoders</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#packaging-plugins">Packaging Plugins</a><ul>
+<li><a class="reference internal" href="#templates">Templates</a></li>
+<li><a class="reference internal" href="#installing-a-plugin">Installing a Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Installation.html"
+                        title="previous chapter">Installing</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Dispatcher.html"
+                        title="next chapter">Dispatcher</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/PluginDevelopment.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" role="search">
+  <h3>Quick search</h3>
+  <form class="search form-inline" action="search.html" method="get">
+      <div class="input-append input-group">
+        <input type="text" class="search-query form-control" name="q" placeholder="Search...">
+        <span class="input-group-btn">
+        <input type="submit" class="btn" value="Go" />
+        </span>
+      </div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+  </div>
+</div> 
+        
+
+        <div class="col-md-9" id="content-wrapper">
+          <div class="document" role="main">
+            <div class="documentwrapper">
+              <div class="bodywrapper">
+                <div class="body">
+                  
+  <div class="section" id="plugin-development">
+<h1>Plugin Development<a class="headerlink" href="#plugin-development" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>There are several plugin categories that are available currently:</p>
+<blockquote>
+<div><ul class="simple">
+<li>worker</li>
+<li>connector</li>
+<li>reader</li>
+<li>source</li>
+<li>extractor</li>
+<li>carver</li>
+<li>decoder</li>
+</ul>
+</div></blockquote>
+<p>The <strong>worker</strong> plugin category is for the plugins that will produce data from
+payloads and provide the results back to the framework for output. Once the
+<strong>worker</strong> plugin is complete, the framework will want to handle the results in
+some fashion. This is where the <strong>connector</strong> plugins come into play. Once the
+results have been provided back to the framework, the connector is then called.
+The <strong>connector</strong> plugins may also be used for file archiving if supported
+within the plugin. One may save a file using a connector by simply calling
+<code class="docutils literal"><span class="pre">save()</span></code> with the <code class="docutils literal"><span class="pre">archive=True</span></code> option. Conversely, in order to retrieve a
+file from MongoDB&#8217;s GridFS, one simply would call <code class="docutils literal"><span class="pre">get_file()</span></code>.  <strong>Reader</strong>
+plugins are used to enrich data for worker plugins such as indicator
+extraction, STIX support, or a multitude of other enhancements. <strong>Source</strong>
+plugins handle the messaging and queueing of objects that the worker should
+handle. For instance, monitoring a directory for new files or AMQP.
+<strong>Extractor</strong> plugins handle various tasks such as decompressing zip files and
+deflating pdf streams. <strong>Carver</strong> plugins are used to carve content out of
+payloads (e.g., SWF streams out of DOC files, PE out of RTF, etc...).
+<strong>Decoder</strong> plugins provide the capability to automatically decode a payload,
+such as XOR, ROR, and base64.</p>
+</div>
+<div class="section" id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
+<p>Each plugin has it&#8217;s own configuration file ending in <em>.stoq</em>. Upon
+initialization of the plugin, the configuration options within the file will be
+loaded and made available to the worker object.</p>
+<p>At a minimum, the below configuration options are required for all plugins.</p>
+<div class="code yaml highlight-python"><div class="highlight"><pre>[Core]
+# Name of plugin. stoQ will use this when calling the plugin.
+Name = basicplugin
+# Name of the .py file for this plugin
+Module = basicplugin
+
+[Documentation]
+Author = Joe Stoq
+Version = 0.1
+Website = https://github.com/PUNCH-Cyber/stoq
+Description = Basic Plugin Example
+</pre></div>
+</div>
+<p>If a plugin requires additional configuration parameters, they can be added to
+the <code class="docutils literal"><span class="pre">[options]</span></code> section and will be made available via the plugin object. For
+example, if we have defined our plugin object as <code class="docutils literal"><span class="pre">plugin</span></code>, we can access the
+<code class="docutils literal"><span class="pre">hashpayload</span></code> attribute by calling <code class="docutils literal"><span class="pre">plugin.hashpayload</span></code>.</p>
+<div class="code yaml highlight-python"><div class="highlight"><pre><span class="p">[</span><span class="n">options</span><span class="p">]</span>
+<span class="n">hashpayload</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">saveresults</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><em>Worker</em> plugins require the <code class="docutils literal"><span class="pre">hashpayload</span></code> and <code class="docutils literal"><span class="pre">saveresults</span></code>
+configuration options. No other plugins have additional requirements.</p>
+</div>
+</div>
+<div class="section" id="id1">
+<h2>Plugin Development<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>A <em>Worker</em> plugin extends the <code class="docutils literal"><span class="pre">StoqWorkerPlugin</span></code> class. As such, it must
+inherit the <code class="docutils literal"><span class="pre">StoqWorkerPlugin</span></code> class when initialized. In order to function
+properly, there must be several methods defined within the worker plugin.</p>
+<blockquote>
+<div><ul class="simple">
+<li>__init__</li>
+<li>activate</li>
+</ul>
+</div></blockquote>
+<p>The <code class="docutils literal"><span class="pre">__init__</span></code> method is called upon initialization of the plugin. This
+occurs when the <code class="docutils literal"><span class="pre">Stoq.load_plugin</span></code> method is called with the plugin name or
+when <code class="docutils literal"><span class="pre">Stoq.collect_plugins</span></code> plugins is called.</p>
+<p>The <code class="docutils literal"><span class="pre">activate</span></code> method is automatically called after the plugin has been
+initialized. When it is called, it must have <code class="docutils literal"><span class="pre">stoq</span></code> as an attribute.  This
+allows the plugin to have full access to the <strong>stoQ</strong> framework and configuration
+options. The <code class="docutils literal"><span class="pre">activate</span></code> method should only be called once by the framework
+upon initialization. Any initial configuration and command line options should
+be placed here. This method must also return <code class="docutils literal"><span class="pre">True</span></code> in order for the
+framework to continue, otherwise <strong>stoQ</strong> will assume that the plugin activation
+has failed.</p>
+<p>Additionally, the <code class="docutils literal"><span class="pre">deactivate</span></code> method is called when/if the plugin is ever
+deactivated. This method is not required, though it is recommended should
+<strong>stoQ</strong> need to cleanup or deactivate the plugin for any reason.</p>
+<p>For each of the above core methods, they should minimally call
+<code class="docutils literal"><span class="pre">super().METHOD_NAME()</span></code> right before they return. METHOD_NAME should be
+changed to the repsective method. This will allow the respective parent class
+execute any required code.</p>
+<div class="section" id="workers">
+<h3>Workers<a class="headerlink" href="#workers" title="Permalink to this headline">¶</a></h3>
+<p>In addition to the above requirements, the below method is required for
+<em>Worker</em> plugins:</p>
+<blockquote>
+<div><ul class="simple">
+<li>scan</li>
+</ul>
+</div></blockquote>
+<p>The <code class="docutils literal"><span class="pre">scan</span></code> method is called when <code class="docutils literal"><span class="pre">stoq-cli.py</span></code> has a payload available for
+processing. <code class="docutils literal"><span class="pre">scan</span></code> requires two attributes, <code class="docutils literal"><span class="pre">payload</span></code> and <code class="docutils literal"><span class="pre">**kwargs</span></code>.
+<code class="docutils literal"><span class="pre">payload</span></code> is the payload that the plugin should process. If the plugin does
+not require a payload, <code class="docutils literal"><span class="pre">payload</span></code> will be <code class="docutils literal"><span class="pre">None</span></code>. <code class="docutils literal"><span class="pre">**kwargs</span></code> is a
+<code class="docutils literal"><span class="pre">dict()</span></code> that contains the message provide by RabbitMQ, or some basic
+metadata if RabbitMQ is not utilized. Once the <code class="docutils literal"><span class="pre">scan</span></code> method has completed
+processing the payload, it should return it&#8217;s results as a <code class="docutils literal"><span class="pre">dict()</span></code>.
+Optionally, if the results do not need to be process, it can return <code class="docutils literal"><span class="pre">None</span></code>.</p>
+<p>Below is an example of a basic worker plugin.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># Required imports</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">from</span> <span class="nn">stoq.args</span> <span class="kn">import</span> <span class="n">StoqArgs</span>
+<span class="kn">from</span> <span class="nn">stoq.plugins</span> <span class="kn">import</span> <span class="n">StoqWorkerPlugin</span>
+
+
+<span class="c"># The worker plugin class must be unique. It will be inheriting</span>
+<span class="c"># the StoqWorkerPlugin class.</span>
+<span class="k">class</span> <span class="nc">BasicWorker</span><span class="p">(</span><span class="n">StoqWorkerPlugin</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># In nearly all cases, we do not want to handle anything here</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+    <span class="c"># This function is required in order to initialize the worker.</span>
+    <span class="c"># The framework will call the activate() function upon initialization</span>
+    <span class="c"># and must return True in order for the framework to continue</span>
+    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stoq</span><span class="p">):</span>
+
+        <span class="c"># Ensure the stoQ class is available throughout the</span>
+        <span class="c"># plugin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stoq</span> <span class="o">=</span> <span class="n">stoq</span>
+
+        <span class="c"># Instantiate our workers command line argument parser</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+
+        <span class="c"># Initialize the default requirements for a worker, if needed.</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">StoqArgs</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+
+        <span class="c"># Define the argparse group for this plugin</span>
+        <span class="n">worker_opts</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="s">&quot;Plugin Options&quot;</span><span class="p">)</span>
+
+        <span class="c"># Define the command line arguments for the worker</span>
+        <span class="n">worker_opts</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&quot;-r&quot;</span><span class="p">,</span> <span class="s">&quot;--rules&quot;</span><span class="p">,</span>
+                                 <span class="n">dest</span><span class="o">=</span><span class="s">&#39;rulepath&#39;</span><span class="p">,</span>
+                                 <span class="n">help</span><span class="o">=</span><span class="s">&quot;Path to rules file.&quot;</span><span class="p">)</span>
+
+        <span class="c"># The first command line argument is reserved for the framework.</span>
+        <span class="c"># The work should only parse everything after the first command</span>
+        <span class="c"># line argument</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+
+        <span class="c"># If we need to handle command line argument, let&#39;s pass them</span>
+        <span class="c"># to super().activate so they can be instantied within the worker</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">activate</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+
+        <span class="c"># Must return true, otherwise the framework believes something</span>
+        <span class="c"># went wrong</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="c"># The framework will call the scan() function when it is ready to</span>
+    <span class="c"># scan. All of the initial functionality should reside here</span>
+    <span class="k">def</span> <span class="nf">scan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="c"># Must return a dict</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;err&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;Need more to do!&quot;</span>
+        <span class="k">return</span> <span class="n">kwargs</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><code class="docutils literal"><span class="pre">super().activate(options=options)</span></code> must be called for the plugin
+to be fully initialized.</p>
+</div>
+</div>
+<div class="section" id="connectors">
+<h3>Connectors<a class="headerlink" href="#connectors" title="Permalink to this headline">¶</a></h3>
+<p>In addition to the above requirements, the below methods are required for
+<em>Connector</em> plugins</p>
+<blockquote>
+<div><ul class="simple">
+<li>save</li>
+</ul>
+</div></blockquote>
+<p>The <code class="docutils literal"><span class="pre">save</span></code> method is called to save a payload to the specified connector. It
+must have the <code class="docutils literal"><span class="pre">payload</span></code> and <code class="docutils literal"><span class="pre">**kwargs</span></code> attributes. The <code class="docutils literal"><span class="pre">payload</span></code>
+attribute should be the data that will be saved via the connector. <code class="docutils literal"><span class="pre">**kwargs</span></code>
+are any additional attributes that the method may require.</p>
+<p>Optionally, the below methods can be provided.</p>
+<blockquote>
+<div><ul class="simple">
+<li>connect</li>
+<li>disconnect</li>
+<li>get_file</li>
+</ul>
+</div></blockquote>
+<p><code class="docutils literal"><span class="pre">connect</span></code> should be called when a connection, or reconnection, to the
+connector database is required. Ideally, logic should be placed in <code class="docutils literal"><span class="pre">save</span></code>
+that will call <code class="docutils literal"><span class="pre">connect</span></code> to verify a live connection still exists.</p>
+<p><code class="docutils literal"><span class="pre">disconnect</span></code> is called when the connector should cleanly disconnect from the
+database.</p>
+<p><code class="docutils literal"><span class="pre">get_file</span></code> is used if the database supports the saving of files. <code class="docutils literal"><span class="pre">get_file</span></code>
+may be used to retrieve any files that are saved to the connector. The
+<code class="docutils literal"><span class="pre">**kwargs</span></code> attribute should contain whatever datapoints are need to retrieve
+the file.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">stoq.plugins</span> <span class="kn">import</span> <span class="n">StoqConnectorPlugin</span>
+
+
+<span class="k">class</span> <span class="nc">BasicConnector</span><span class="p">(</span><span class="n">StoqConnectorPlugin</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stoq</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stoq</span> <span class="o">=</span> <span class="n">stoq</span>
+
+        <span class="c"># Any additonal requirements once the connector is activated</span>
+        <span class="c"># should be placed here</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">get_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="c"># Code to retrieve file from this connector should be placed here</span>
+
+        <span class="c"># No results, carry on.</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save results to mongodb</span>
+
+<span class="sd">        :param str payload: Content to be inserted into database</span>
+<span class="sd">        :param dict **kwargs: Any additional attributes that should</span>
+<span class="sd">                                be added to the GridFS object on insert</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Make sure we have a valid connection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+
+        <span class="c"># Code to handle saving of the results should be placed here</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_connect</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="c"># Logic should reside here that determines if we have an</span>
+        <span class="c"># active/valid connection, and if not, make one. Otherwise</span>
+        <span class="c"># continue on so the framework can save it&#39;s results.</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="readers">
+<h3>Readers<a class="headerlink" href="#readers" title="Permalink to this headline">¶</a></h3>
+<p>In addition to the above requirements, the below method is required for
+<em>Reader</em> plugins:</p>
+<blockquote>
+<div><ul class="simple">
+<li>read</li>
+</ul>
+</div></blockquote>
+<p>The <code class="docutils literal"><span class="pre">read</span></code> method requires the <code class="docutils literal"><span class="pre">payload</span></code> attribute, and optionally
+<code class="docutils literal"><span class="pre">**kwargs</span></code>. The <code class="docutils literal"><span class="pre">payload</span></code> should be the content that the <em>Reader</em> plugin
+should process. Any additional attributes should be defined in <code class="docutils literal"><span class="pre">**kwargs</span></code>.
+Once the <em>Reader</em> plugin is done processing the <code class="docutils literal"><span class="pre">payload</span></code>, it should return
+its results.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">stoq.plugins</span> <span class="kn">import</span> <span class="n">StoqReaderPlugin</span>
+
+
+<span class="k">class</span> <span class="nc">BasicReader</span><span class="p">(</span><span class="n">StoqReaderPlugin</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stoq</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stoq</span> <span class="o">=</span> <span class="n">stoq</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Basic Reader</span>
+
+<span class="sd">        :param bytes payload: Payload to be processed</span>
+<span class="sd">        :returns: Content of payload</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">payload</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="sources">
+<h3>Sources<a class="headerlink" href="#sources" title="Permalink to this headline">¶</a></h3>
+<p>In addition to the above requirements, the below methods are required for
+<em>Source</em> plugins:</p>
+<blockquote>
+<div><ul class="simple">
+<li>ingest</li>
+</ul>
+</div></blockquote>
+<p>The <code class="docutils literal"><span class="pre">ingest</span></code> method does not require any arrtributes when called. <em>Source</em>
+plugins should be the method used to call <code class="docutils literal"><span class="pre">worker.start</span></code>. This is the
+main method for processing data in and our of the framework to include
+retrieving payloads, hashing, metadata generation, result handling, and saving
+of results.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">stoq.plugins</span> <span class="kn">import</span> <span class="n">StoqSourcePlugin</span>
+
+
+<span class="k">class</span> <span class="nc">FileSource</span><span class="p">(</span><span class="n">StoqSourcePlugin</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stoq</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stoq</span> <span class="o">=</span> <span class="n">stoq</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">ingest</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">path</span> <span class="o">=</span> <span class="s">&quot;/tmp/bad.exe&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stoq</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">archive</span><span class="o">=</span><span class="s">&#39;file&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>A source plugin also requires the <code class="docutils literal"><span class="pre">multiprocess</span></code> boolean configuration
+option in it&#8217;s <code class="docutils literal"><span class="pre">.stoq</span></code> file under the [options] header. For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span><span class="n">options</span><span class="p">]</span>
+<span class="n">multiprocess</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>If set to <code class="docutils literal"><span class="pre">True</span></code>, source plugin will be able to publish to a <code class="docutils literal"><span class="pre">multiprocess</span></code>
+queue. Objects may be added to the queue by calling
+<code class="docutils literal"><span class="pre">self.stoq.worker.multiprocess_put()</span></code>. As an example, we can use the
+previous example with multiprocessing support.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">stoq.plugins</span> <span class="kn">import</span> <span class="n">StoqSourcePlugin</span>
+
+
+<span class="k">class</span> <span class="nc">FileSource</span><span class="p">(</span><span class="n">StoqSourcePlugin</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stoq</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stoq</span> <span class="o">=</span> <span class="n">stoq</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">ingest</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">paths</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;/tmp/bad.exe&quot;</span><span class="p">,</span> <span class="s">&quot;/tmp/bad1.exe&quot;</span><span class="p">,</span> <span class="s">&quot;/tmp/bad3.exe&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stoq</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">multiprocess_put</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">archive</span><span class="o">=</span><span class="s">&#39;file&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="extractors">
+<h3>Extractors<a class="headerlink" href="#extractors" title="Permalink to this headline">¶</a></h3>
+<p>In addition to the above requirements, the below methods are required for
+<em>Extractor</em> plugins:</p>
+<blockquote>
+<div><ul class="simple">
+<li>extract</li>
+</ul>
+</div></blockquote>
+<p><code class="docutils literal"><span class="pre">extract()</span></code> must be called with the <code class="docutils literal"><span class="pre">payload</span></code> parameter. Optionally,
+<code class="docutils literal"><span class="pre">**kwargs</span></code> may be provided. The plugin may return None or a list of tuples.
+Index 0 of the tuple must be a dict() containing metadata associated with
+the decoded content, and Index 1 must be the decoded content itself as bytes.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">stoq.plugins</span> <span class="kn">import</span> <span class="n">StoqExtractorPlugin</span>
+
+
+<span class="k">class</span> <span class="nc">ExampleExtractor</span><span class="p">(</span><span class="n">StoqExtractorPlugin</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stoq</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stoq</span> <span class="o">=</span> <span class="n">stoq</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">extract</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="c"># handle any extraction requirements here</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;size&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="s">&quot;type&quot;</span><span class="p">:</span> <span class="s">&quot;test&quot;</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="n">meta</span><span class="p">,</span> <span class="n">payload</span><span class="p">)]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="carvers">
+<h3>Carvers<a class="headerlink" href="#carvers" title="Permalink to this headline">¶</a></h3>
+<p>In addition to the above requirements, the below methods are required for
+<em>Carver</em> plugins:</p>
+<blockquote>
+<div><ul class="simple">
+<li>carve</li>
+</ul>
+</div></blockquote>
+<p><code class="docutils literal"><span class="pre">carve()</span></code> must be called with the <code class="docutils literal"><span class="pre">payload</span></code> parameter. Optionally,
+<code class="docutils literal"><span class="pre">**kwargs</span></code> may be provided. The plugin may return None or a list of tuples.
+Index 0 of the tuple must be a dict() containing metadata associated with
+the decoded content, and Index 1 must be the decoded content itself as bytes.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">stoq.plugins</span> <span class="kn">import</span> <span class="n">StoqCarverPlugin</span>
+
+
+<span class="k">class</span> <span class="nc">ExampleCarver</span><span class="p">(</span><span class="n">StoqExtractorPlugin</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stoq</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stoq</span> <span class="o">=</span> <span class="n">stoq</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">carve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="c"># handle any carving requirements here</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;size&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="s">&quot;type&quot;</span><span class="p">:</span> <span class="s">&quot;test&quot;</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="n">meta</span><span class="p">,</span> <span class="n">payload</span><span class="p">)]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="decoders">
+<h3>Decoders<a class="headerlink" href="#decoders" title="Permalink to this headline">¶</a></h3>
+<p>In addition to the above requirements, the below methods are required for
+<em>Decoder</em> plugins:</p>
+<blockquote>
+<div><ul class="simple">
+<li>decode</li>
+</ul>
+</div></blockquote>
+<p><code class="docutils literal"><span class="pre">decode()</span></code> must be called with the <code class="docutils literal"><span class="pre">payload</span></code> parameter. Optionally,
+<code class="docutils literal"><span class="pre">**kwargs</span></code> may be provided. The plugin may return None or a list of tuples.
+Index 0 of the tuple must be a dict() containing metadata associated with
+the decoded content, and Index 1 must be the decoded content itself as bytes.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">stoq.plugins</span> <span class="kn">import</span> <span class="n">StoqDecoderPlugin</span>
+
+
+<span class="k">class</span> <span class="nc">ExampleDecoder</span><span class="p">(</span><span class="n">StoqDecoderPlugin</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stoq</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stoq</span> <span class="o">=</span> <span class="n">stoq</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="c"># handle any decoding requirements here</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;size&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="s">&quot;type&quot;</span><span class="p">:</span> <span class="s">&quot;test&quot;</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="n">meta</span><span class="p">,</span> <span class="n">payload</span><span class="p">)]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="packaging-plugins">
+<h2>Packaging Plugins<a class="headerlink" href="#packaging-plugins" title="Permalink to this headline">¶</a></h2>
+<p><strong>stoQ</strong> provides a method to install plugins and their dependencies utilzing
+setuptool and pip. In order to leverage the plugin installation feature, some
+requirements must be met for the plugin package.</p>
+<blockquote>
+<div><ul class="simple">
+<li>The plugin package must be a directory</li>
+<li>The plugin directory must have a subdirectory by the same name as defined
+in the plugins <code class="docutils literal"><span class="pre">.stoq</span></code> configuration file</li>
+<li>The plugin directory must contain a valid <strong>stoQ</strong> configuration file</li>
+<li>The plugin directory must contain a valid <strong>stoQ</strong> plugin</li>
+<li>The plugin directory must contain a file named <code class="docutils literal"><span class="pre">__init__.py</span></code></li>
+<li>Optionally, the archive/directory may contain a valid pip <em>requirements.txt</em> file.
+The pip packages within this file will automatically be installed with
+the <strong>stoQ</strong> plugin.</li>
+<li>Optionally, a MANIFEST.in file can be included to define which files within the package
+should be copied to the installation path.</li>
+</ul>
+</div></blockquote>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The plugin&#8217;s configuration file will not be copied by default, this
+file should either be defined here or within <code class="docutils literal"><span class="pre">package_data</span></code> in
+<code class="docutils literal"><span class="pre">setup.py</span></code>.</p>
+</div>
+<p>As an example, a <strong>stoQ</strong> plugin archive should have the following structure:</p>
+<div class="highlight-python"><div class="highlight"><pre>basicworker-plugin/
+    setup.py
+    MANIFEST.in (optional)
+    requirements.txt (optional)
+    basicworker/
+        __init__.py
+        basicworker.stoq
+        basicworker.py
+</pre></div>
+</div>
+<p>The <strong>stoQ</strong> installation process will extract plugin options from it&#8217;s <code class="docutils literal"><span class="pre">.stoq</span></code>
+configuration file. As such, the plugin&#8217;s <code class="docutils literal"><span class="pre">setup.py</span></code> file should be fairly
+simple. The below <code class="docutils literal"><span class="pre">setup.py</span></code> should suffice for most plugins.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">setuptools</span> <span class="kn">import</span> <span class="n">setup</span><span class="p">,</span> <span class="n">find_packages</span>
+
+<span class="n">setup</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s">&quot;NAME&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span>
+    <span class="n">version</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s">&quot;VERSION&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span>
+    <span class="n">author</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s">&quot;AUTHOR&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span>
+    <span class="n">url</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s">&quot;WEBSITE&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span>
+    <span class="n">license</span><span class="o">=</span><span class="s">&quot;Apache License 2.0&quot;</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s">&quot;DESCRIPTION&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span>
+    <span class="n">packages</span><span class="o">=</span><span class="n">find_packages</span><span class="p">(),</span>
+    <span class="n">include_package_data</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">classifiers</span><span class="o">=</span><span class="p">[</span>
+        <span class="s">&quot;Development Status :: 3 - Alpha&quot;</span><span class="p">,</span>
+        <span class="s">&quot;Topic :: Utilities&quot;</span><span class="p">,</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="templates">
+<h3>Templates<a class="headerlink" href="#templates" title="Permalink to this headline">¶</a></h3>
+<p><strong>stoQ</strong> allows for two types of outputs. First, a JSON blob that can be easily
+parsed in an automated fashion. In addition, <strong>stoQ</strong> can handle output using
+Jinja2 templating. This allows for highly customizable and human readable
+output that may be neccessary in many circumstances. As an example, when using
+the slack worker plugin, it is not ideal to have hundreds, maybe even
+thousands, of lines sent to a channel as a result of scanning a payload. With
+<strong>stoQ</strong>&#8216;s templating engine, one can easily send human readable and easily
+digested results to the Slack channel, while at the same time providing the
+JSON results to a connector for saving into a database for later use.</p>
+<p>Using <strong>stoQ</strong>&#8216;s templates is a simple process. Simply create a <code class="docutils literal"><span class="pre">templates</span></code>
+directory in the plugin&#8217;s directory and then create a new <code class="docutils literal"><span class="pre">template</span></code> file
+in Jinja2 format. For example, let&#8217;s say we have a worker plugin by the
+name <em>peinfo</em>. We want to create a Slack template for this plugin.
+All that is needed now is for a <code class="docutils literal"><span class="pre">slack.tpl</span></code> template to be placed in this
+directory. Now, we just need to run the slack worker with the <code class="docutils literal"><span class="pre">-T</span> <span class="pre">slack.tpl</span></code>
+argument. The slack worker plugin will then load the template and render the
+results.</p>
+<p>Additionally, content that is passed to the connector plugin may also be parsed
+using the templating engine. In order to use this functionality, the worker
+plugin that is producing the data must have a template named after the connector
+plugin that is being utilized. For instance, if one would like to ensure the
+stdout connector output is human readable and not the JSON results, simply
+create a new template with the name <code class="docutils literal"><span class="pre">stdout.tpl</span></code> and call the worker with
+<code class="docutils literal"><span class="pre">-T</span> <span class="pre">stdout.tpl</span></code>.</p>
+</div>
+<div class="section" id="installing-a-plugin">
+<h3>Installing a Plugin<a class="headerlink" href="#installing-a-plugin" title="Permalink to this headline">¶</a></h3>
+<p>Installation of a <strong>stoQ</strong> plugin is very simple. Let&#8217;s assume that we want to
+install the basicworker plugin that comes prepackaged with <strong>stoQ</strong>. We must
+first package the plugin as detailed above, and then run the command from
+within the <strong>stoQ</strong> directory:</p>
+<div class="highlight-python"><div class="highlight"><pre>stoq-cli.py install basicworker-plugin
+
+
+    .d8888b.  888             .d88888b.
+   d88P  Y88b 888            d88P&quot; &quot;Y88b
+   Y88b.      888            888     888
+    &quot;Y888b.   888888 .d88b.  888     888
+       &quot;Y88b. 888   d88&quot;&quot;88b 888     888
+         &quot;888 888   888  888 888 Y8b 888
+   Y88b  d88P Y88b. Y88..88P Y88b.Y8b88P
+    &quot;Y8888P&quot;   &quot;Y888 &quot;Y88P&quot;   &quot;Y888888&quot;
+                                    Y8b
+
+[+] Looking for plugin in /vagrant/stoq/plugin-packages/worker/yara...
+[+] Found a plugin named yara
+[+] yara&#39;s category is worker
+[+] Installing yara plugin into /vagrant/stoq/stoq/plugins/worker...
+[+] Install complete.
+</pre></div>
+</div>
+<p>Let&#8217;s examine what <strong>stoQ</strong> just did. First, we opened the <em>basicworker-plugin</em>
+plugin package and began searching for a <strong>stoQ</strong> plugin configuration file. Once
+it was found, we loaded it and searched for the Name and Module configuration
+options within the file. That allowed us to discover the plugin name along with
+the plugins .py filename. <strong>stoQ</strong> then discovered the plugin class to determine
+the full path where the plugin should be installed to. It then called pip to
+complete the installation.</p>
+<p>If a file or directory exists, it will not be overwritten. Instead, a warning
+message will be displayed letting the user know that the plugin will not be
+installed.  In order to successfully install the plugin, the file or directory
+must be removed, renamed, or &#8211;upgrade be called at the command line.</p>
+</div>
+</div>
+</div>
+
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        
+      </div><!-- /row -->
+
+      <!-- row -->
+      <div class="row footer-relbar">
+<div id="navbar-related" class=" related navbar navbar-default" role="navigation" aria-label="related navigation">
+  <div class="navbar-inner">
+    <ul class="nav navbar-nav ">
+        <li><a href="index.html">stoQ 0.9.6 documentation</a></li>
+    </ul>
+<ul class="nav navbar-nav pull-right hidden-xs hidden-sm">
+      
+        <li><a href="Installation.html" title="Installing" >previous</a></li>
+        <li><a href="Dispatcher.html" title="Dispatcher" >next</a></li>
+        <li><a href="py-modindex.html" title="Python Module Index" >modules</a></li>
+        <li><a href="genindex.html" title="General Index" >index</a></li>
+        <li><a href="#">top</a></li> 
+      
+    </ul>
+  </div>
+</div>
+      </div><!-- /row -->
+
+      <!-- footer -->
+      <footer role="contentinfo">
+          &copy; Copyright 2014-2015, PUNCH Cyber Analytics Group.
+        Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+      </footer>
+      <!-- /footer -->
+
+    </div>
+    <!-- /container -->
+
+  </body>
+</html>

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+
+
+
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    
+    <title>Installing &mdash; stoQ 0.9.6 documentation</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    
+
+<link rel="stylesheet" href="_static/css/basicstrap-base.css" type="text/css" />
+<link rel="stylesheet" id="current-theme" href="_static/css/bootstrap3/bootstrap.min.css" type="text/css" />
+<link rel="stylesheet" id="current-adjust-theme" type="text/css" />
+
+<link rel="stylesheet" href="_static/css/font-awesome.min.css">
+
+<style type="text/css">
+  body {
+    padding-top: 60px;
+    padding-bottom: 40px;
+  }
+</style>
+
+<link rel="stylesheet" href="_static/css/basicstrap.css" type="text/css" />
+<link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+<script type="text/javascript">
+  var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:    './',
+            VERSION:     '0.9.6',
+            COLLAPSE_INDEX: false,
+            FILE_SUFFIX: '.html',
+            HAS_SOURCE:  true
+  };
+</script>
+    <script type="text/javascript" src="_static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/js/bootstrap3.min.js"></script>
+<script type="text/javascript" src="_static/js/jquery.cookie.min.js"></script>
+<script type="text/javascript" src="_static/js/basicstrap.js"></script>
+<script type="text/javascript">
+</script>
+    <link rel="top" title="stoQ 0.9.6 documentation" href="index.html" />
+    <link rel="next" title="Plugin Development" href="PluginDevelopment.html" />
+    <link rel="prev" title="stoQ: Analysis. Simplified." href="index.html" /> 
+  </head>
+  <body role="document">
+    <div id="navbar-top" class="navbar navbar-fixed-top navbar-default" role="navigation" aria-label="top navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="index.html">stoQ 0.9.6 documentation</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+              <li class="dropdown visible-xs">
+                <a role="button" id="localToc" data-toggle="dropdown" data-target="#" href="#">Table Of Contents <b class="caret"></b></a>
+                <ul class="dropdown-menu localtoc sp-localtoc" role="menu" aria-labelledby="localToc">
+                <ul>
+<li><a class="reference internal" href="#">Installing</a><ul>
+<li><a class="reference internal" href="#installation-script">Installation Script</a></li>
+<li><a class="reference internal" href="#detailed-installation">Detailed Installation</a><ul>
+<li><a class="reference internal" href="#core-requirements">Core Requirements</a></li>
+<li><a class="reference internal" href="#additional-plugins">Additional Plugins</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#supervisord">Supervisord</a><ul>
+<li><a class="reference internal" href="#id1">Additional Plugins</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id2">Supervisord</a></li>
+<li><a class="reference internal" href="#vagrant">Vagrant</a></li>
+</ul>
+</li>
+</ul>
+
+                </ul>
+              </li>
+
+            
+              <li><a href="index.html" title="stoQ: Analysis. Simplified." accesskey="P">previous </a></li>
+              <li><a href="PluginDevelopment.html" title="Plugin Development" accesskey="N">next </a></li>
+              <li><a href="py-modindex.html" title="Python Module Index" >modules </a></li>
+              <li><a href="genindex.html" title="General Index" accesskey="I">index </a></li>
+            
+            <li class="visible-xs"><a href="_sources/Installation.txt" rel="nofollow">Show Source</a></li>
+
+            <li class="visible-xs">
+                <form class="search form-search form-inline navbar-form navbar-right sp-searchbox" action="search.html" method="get">
+                  <div class="input-append input-group">
+                    <input type="text" class="search-query form-control" name="q" placeholder="Search...">
+                    <span class="input-group-btn">
+                    <input type="submit" class="btn" value="Go" />
+                    </span>
+                  </div>
+                  <input type="hidden" name="check_keywords" value="yes" />
+                  <input type="hidden" name="area" value="default" />
+                </form>
+            </li>
+
+            
+
+          </ul>
+
+        </div>
+      </div>
+    </div>
+    
+
+    <!-- container -->
+    <div class="container-fluid">
+
+      <!-- row -->
+      <div class="row">
+         
+<div class="col-md-3 hidden-xs" id="sidebar-wrapper">
+  <div class="sidebar hidden-xs" role="navigation" aria-label="main navigation">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installing</a><ul>
+<li><a class="reference internal" href="#installation-script">Installation Script</a></li>
+<li><a class="reference internal" href="#detailed-installation">Detailed Installation</a><ul>
+<li><a class="reference internal" href="#core-requirements">Core Requirements</a></li>
+<li><a class="reference internal" href="#additional-plugins">Additional Plugins</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#supervisord">Supervisord</a><ul>
+<li><a class="reference internal" href="#id1">Additional Plugins</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id2">Supervisord</a></li>
+<li><a class="reference internal" href="#vagrant">Vagrant</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">stoQ: Analysis. Simplified.</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="PluginDevelopment.html"
+                        title="next chapter">Plugin Development</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/Installation.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" role="search">
+  <h3>Quick search</h3>
+  <form class="search form-inline" action="search.html" method="get">
+      <div class="input-append input-group">
+        <input type="text" class="search-query form-control" name="q" placeholder="Search...">
+        <span class="input-group-btn">
+        <input type="submit" class="btn" value="Go" />
+        </span>
+      </div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+  </div>
+</div> 
+        
+
+        <div class="col-md-9" id="content-wrapper">
+          <div class="document" role="main">
+            <div class="documentwrapper">
+              <div class="bodywrapper">
+                <div class="body">
+                  
+  <div class="section" id="installing">
+<h1>Installing<a class="headerlink" href="#installing" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="installation-script">
+<h2>Installation Script<a class="headerlink" href="#installation-script" title="Permalink to this headline">¶</a></h2>
+<p>If using Ubuntu, installation of the core framework and plugins can be
+installed utilzing the installation script provided with the framework.:</p>
+<div class="highlight-python"><div class="highlight"><pre>git clone https://github.com/PUNCH-Cyber/stoq.git
+cd stoq/
+./install.sh
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><strong>stoQ</strong> has not been tested on other operating systems, however,
+if the required packages are available it should work without issue.</p>
+</div>
+</div>
+<div class="section" id="detailed-installation">
+<h2>Detailed Installation<a class="headerlink" href="#detailed-installation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="core-requirements">
+<h3>Core Requirements<a class="headerlink" href="#core-requirements" title="Permalink to this headline">¶</a></h3>
+<p>Install the core requirements via apt-get and pip:</p>
+<div class="highlight-python"><div class="highlight"><pre>apt-add-repository -y multiverse
+sudo apt-get install automake build-essential cython autoconf  \
+                     python3 python3-dev python3-setuptools \
+                     libyaml-dev libffi-dev libfuzzy-dev \
+                     libxml2-dev libxslt1-dev libz-dev p7zip-full \
+                     p7zip-rar unace-nonfree libssl-dev libmagic-dev
+sudo easy_install3 pip
+</pre></div>
+</div>
+<p>It is recommended to install <strong>stoQ</strong> within a virtualenv. This is however
+completely optional.  In order to setup the virtualenv, the following should be
+completed:</p>
+<div class="highlight-python"><div class="highlight"><pre>sudo pip3 install virtualenv
+virtualenv /usr/local/stoq/.stoq-pyenv
+source /usr/local/stoq/.stoq-pyenv/bin/activate
+</pre></div>
+</div>
+<p>Install the latest version of yara from <a class="reference external" href="https://plusvic.github.io/yara/">https://plusvic.github.io/yara/</a></p>
+<p>Once the virtualenv has been activated and yara is installed, we can install
+the core <strong>stoQ</strong> requirements:</p>
+<div class="highlight-python"><div class="highlight"><pre>pip install cython
+python setup.py install
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">cython must be installed first, otherwise setuptools will fail to
+find dependencies</p>
+</div>
+<p>Make a directory to store all of <strong>stoQ</strong> and then copy the required files:</p>
+<div class="highlight-python"><div class="highlight"><pre>mkdir /usr/local/stoq
+cp -R stoq/* /usr/local/stoq/
+chmod +x /usr/local/stoq/stoq-cli.py
+</pre></div>
+</div>
+<p><strong>stoQ</strong> does not require any special permissions to run. For security reasons,
+it is recommended that <strong>stoQ</strong> is run as a non-privileged user. To create a
+<strong>stoQ</strong> user, run:</p>
+<div class="highlight-python"><div class="highlight"><pre>sudo groupadd -r stoq
+sudo useradd -r -c stoQ -g stoq -d /usr/local/stoq stoq
+chown -R stoq:stoq /usr/local/stoq
+</pre></div>
+</div>
+<p>The core framework for <strong>stoQ</strong> should now be installed. We can use <strong>stoQ</strong>&#8216;s plugin
+installation feature to handle this. First, we will need to clone <strong>stoQ</strong>&#8216;s public
+plugin repository:</p>
+<div class="highlight-python"><div class="highlight"><pre>git clone https://github.com/PUNCH-Cyber/stoq-plugins-public.git /tmp/stoq-plugins-public
+</pre></div>
+</div>
+<p>Now, we can install the basic plugins that are commonly used within <strong>stoQ</strong>:</p>
+<div class="highlight-python"><div class="highlight"><pre>cd /usr/local/stoq
+stoq-cli.py install /tmp/stoq-plugins-public/connector/file
+stoq-cli.py install /tmp/stoq-plugins-public/connector/stdout
+stoq-cli.py install /tmp/stoq-plugins-public/connector/mongodb
+stoq-cli.py install /tmp/stoq-plugins-public/connector/elasticsearch
+stoq-cli.py install /tmp/stoq-plugins-public/connector/emailer
+stoq-cli.py install /tmp/stoq-plugins-public/connector/queue
+stoq-cli.py install /tmp/stoq-plugins-public/decoder/b64
+stoq-cli.py install /tmp/stoq-plugins-public/decoder/b85
+stoq-cli.py install /tmp/stoq-plugins-public/decoder/bitrot
+stoq-cli.py install /tmp/stoq-plugins-public/decoder/rot47
+stoq-cli.py install /tmp/stoq-plugins-public/decoder/xor
+stoq-cli.py install /tmp/stoq-plugins-public/extractor/gpg
+stoq-cli.py install /tmp/stoq-plugins-public/extractor/decompress
+stoq-cli.py install /tmp/stoq-plugins-public/carver/ole
+stoq-cli.py install /tmp/stoq-plugins-public/carver/rtf
+stoq-cli.py install /tmp/stoq-plugins-public/carver/pe
+stoq-cli.py install /tmp/stoq-plugins-public/carver/swf
+stoq-cli.py install /tmp/stoq-plugins-public/carver/xdp
+stoq-cli.py install /tmp/stoq-plugins-public/source/dirmon
+stoq-cli.py install /tmp/stoq-plugins-public/source/filedir
+stoq-cli.py install /tmp/stoq-plugins-public/reader/iocregex
+stoq-cli.py install /tmp/stoq-plugins-public/reader/pdftext
+stoq-cli.py install /tmp/stoq-plugins-public/worker/publisher
+stoq-cli.py install /tmp/stoq-plugins-public/worker/yara
+stoq-cli.py install /tmp/stoq-plugins-public/worker/iocextract
+stoq-cli.py install /tmp/stoq-plugins-public/worker/peinfo
+stoq-cli.py install /tmp/stoq-plugins-public/worker/xorsearch
+stoq-cli.py install /tmp/stoq-plugins-public/worker/exif
+stoq-cli.py install /tmp/stoq-plugins-public/worker/tika
+stoq-cli.py install /tmp/stoq-plugins-public/worker/clamav
+stoq-cli.py install /tmp/stoq-plugins-public/worker/vtmis
+stoq-cli.py install /tmp/stoq-plugins-public/worker/censys
+stoq-cli.py install /tmp/stoq-plugins-public/worker/threatcrowd
+stoq-cli.py install /tmp/stoq-plugins-public/worker/passivetotal
+stoq-cli.py install /tmp/stoq-plugins-public/worker/totalhash
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ul class="last">
+<li><dl class="first docutils">
+<dt><em>xorsearch</em> requires XORsearch to be installed</dt>
+<dd><p class="first last"><a class="reference external" href="http://blog.didierstevens.com/programs/xorsearch/">http://blog.didierstevens.com/programs/xorsearch/</a></p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><em>exif</em> requires ExifTool to be installed</dt>
+<dd><p class="first last"><a class="reference external" href="http://www.sno.phy.queensu.ca/~phil/exiftool/">http://www.sno.phy.queensu.ca/~phil/exiftool/</a></p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><em>tika</em> requires that Apache Tika be installed</dt>
+<dd><p class="first last"><a class="reference external" href="https://tika.apache.org/download.html">https://tika.apache.org/download.html</a></p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><em>clamav</em> requires that a ClamAV daemon be installed</dt>
+<dd><p class="first last"><a class="reference external" href="http://www.clamav.net/">http://www.clamav.net/</a></p>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="additional-plugins">
+<h3>Additional Plugins<a class="headerlink" href="#additional-plugins" title="Permalink to this headline">¶</a></h3>
+<p>There are several other plugins that are available in the <em>stoQ</em> public
+plugin repository at <a class="reference external" href="https://github.com/PUNCH-Cyber/stoq-plugins-public">https://github.com/PUNCH-Cyber/stoq-plugins-public</a></p>
+</div>
+</div>
+<div class="section" id="supervisord">
+<h2>Supervisord<a class="headerlink" href="#supervisord" title="Permalink to this headline">¶</a></h2>
+<p><strong>stoQ</strong> can easily be added to supervisord for running as a system service in
+daemon mode. In our example, let&#8217;s say that we want to use the yara and exif
+plugins to monitor RabbitMQ and save any results into MongoDB. We&#8217;ve installed
+<strong>stoQ</strong> into /usr/local/stoq and our python virtual environment is in
+<code class="docutils literal"><span class="pre">`/usr/local/stoq/env`</span></code>. First, let&#8217;s install the supervisor Ubuntu package:</p>
+<div class="highlight-python"><div class="highlight"><pre>sudo apt-get install supervisor
+</pre></div>
+</div>
+<p>Now, let&#8217;s create a new file in <code class="docutils literal"><span class="pre">`/etc/supervisor/conf.d`</span></code> named <code class="docutils literal"><span class="pre">`stoq.conf`</span></code></p>
+<div class="section" id="id1">
+<h3>Additional Plugins<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>There are several other plugins that are available in the <em>stoQ</em> public
+plugin repository at <a class="reference external" href="https://github.com/PUNCH-Cyber/stoq-plugins-public">https://github.com/PUNCH-Cyber/stoq-plugins-public</a></p>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>Supervisord<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p><strong>stoQ</strong> can easily be added to supervisord for running as a system service in
+daemon mode. In our example, let&#8217;s say that we want to use the yara and exif
+plugins to monitor RabbitMQ and save any results into MongoDB. We&#8217;ve installed
+<strong>stoQ</strong> into /usr/local/stoq and our python virtual environment is in
+<code class="docutils literal"><span class="pre">`/usr/local/stoq/env`</span></code>. First, let&#8217;s install the supervisor Ubuntu package:</p>
+<div class="highlight-python"><div class="highlight"><pre>sudo apt-get install supervisor
+</pre></div>
+</div>
+<p>Now, let&#8217;s create a new file in <code class="docutils literal"><span class="pre">`/etc/supervisor/conf.d`</span></code> named <code class="docutils literal"><span class="pre">`stoq.conf`</span></code>
+with the below content:</p>
+<div class="highlight-python"><div class="highlight"><pre>[program:exif]
+command=/usr/local/stoq/.stoq-pyenv/bin/python stoq-cli.py %(program_name)s -i rabbitmq -C mongodb
+process_name=%(program_name)s_%(process_num)02d
+directory=/usr/local/stoq
+autostart=true
+autorestart=true
+startretries=3
+numprocs=1
+user=stoq
+
+[program:yara]
+command=/usr/local/stoq/.stoq-pyenv/bin/python stoq-cli.py %(program_name)s -i rabbitmq -C mongodb
+process_name=%(program_name)s_%(process_num)02d
+directory=/usr/local/stoq
+autostart=true
+autorestart=true
+startretries=3
+numprocs=1
+user=stoq
+</pre></div>
+</div>
+<p>Then, simply restart supervisord:</p>
+<div class="highlight-python"><div class="highlight"><pre>supervisorctl reload
+</pre></div>
+</div>
+<p>You should now have two <strong>stoQ</strong> workers running, monitoring their RabbitMQ queue,
+and saving their results into your MongoDB instance.</p>
+</div>
+<div class="section" id="vagrant">
+<h2>Vagrant<a class="headerlink" href="#vagrant" title="Permalink to this headline">¶</a></h2>
+<p>If testing <strong>stoQ</strong> is something you are interested in doing, you can use Vagrant
+to setup a simple instance.</p>
+<p>First, install Vagrant from <a class="reference external" href="https://www.vagrantup.com/downloads">https://www.vagrantup.com/downloads</a>, then, install
+VirtualBox from <a class="reference external" href="https://www.virtualbox.org/wiki/Downloads">https://www.virtualbox.org/wiki/Downloads</a>.</p>
+<p>Once the prerequisits are installed, download the Ubuntu box:</p>
+<div class="highlight-python"><div class="highlight"><pre>vagrant box add ubuntu/trusty64
+</pre></div>
+</div>
+<p>Next, create a new directory named <code class="docutils literal"><span class="pre">`stoq`</span></code> and save the Vagrantfile in it:</p>
+<div class="highlight-python"><div class="highlight"><pre>wget -O Vagrantfile https://raw.githubusercontent.com/PUNCH-Cyber/stoq/master/Vagrantfile
+</pre></div>
+</div>
+<p>Now, let&#8217;s bring up the Vagrant box:</p>
+<div class="highlight-python"><div class="highlight"><pre>vagrant up
+</pre></div>
+</div>
+<p>Log into the new box:</p>
+<div class="highlight-python"><div class="highlight"><pre>vagrant ssh
+</pre></div>
+</div>
+<p>Switch to the <code class="docutils literal"><span class="pre">stoq</span></code> user:</p>
+<div class="highlight-python"><div class="highlight"><pre>sudo su - stoq
+</pre></div>
+</div>
+<p>Your newly installed <strong>stoQ</strong> instance is now available in <code class="docutils literal"><span class="pre">/usr/local/stoq</span></code>.</p>
+<p>All done!</p>
+</div>
+</div>
+
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        
+      </div><!-- /row -->
+
+      <!-- row -->
+      <div class="row footer-relbar">
+<div id="navbar-related" class=" related navbar navbar-default" role="navigation" aria-label="related navigation">
+  <div class="navbar-inner">
+    <ul class="nav navbar-nav ">
+        <li><a href="index.html">stoQ 0.9.6 documentation</a></li>
+    </ul>
+<ul class="nav navbar-nav pull-right hidden-xs hidden-sm">
+      
+        <li><a href="index.html" title="stoQ: Analysis. Simplified." >previous</a></li>
+        <li><a href="PluginDevelopment.html" title="Plugin Development" >next</a></li>
+        <li><a href="py-modindex.html" title="Python Module Index" >modules</a></li>
+        <li><a href="genindex.html" title="General Index" >index</a></li>
+        <li><a href="#">top</a></li> 
+      
+    </ul>
+  </div>
+</div>
+      </div><!-- /row -->
+
+      <!-- footer -->
+      <footer role="contentinfo">
+          &copy; Copyright 2014-2015, PUNCH Cyber Analytics Group.
+        Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+      </footer>
+      <!-- /footer -->
+
+    </div>
+    <!-- /container -->
+
+  </body>
+</html>

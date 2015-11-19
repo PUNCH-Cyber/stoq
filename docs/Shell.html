@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+
+
+
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    
+    <title>StoqShell &mdash; stoQ 0.9.6 documentation</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    
+
+<link rel="stylesheet" href="_static/css/basicstrap-base.css" type="text/css" />
+<link rel="stylesheet" id="current-theme" href="_static/css/bootstrap3/bootstrap.min.css" type="text/css" />
+<link rel="stylesheet" id="current-adjust-theme" type="text/css" />
+
+<link rel="stylesheet" href="_static/css/font-awesome.min.css">
+
+<style type="text/css">
+  body {
+    padding-top: 60px;
+    padding-bottom: 40px;
+  }
+</style>
+
+<link rel="stylesheet" href="_static/css/basicstrap.css" type="text/css" />
+<link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+<script type="text/javascript">
+  var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:    './',
+            VERSION:     '0.9.6',
+            COLLAPSE_INDEX: false,
+            FILE_SUFFIX: '.html',
+            HAS_SOURCE:  true
+  };
+</script>
+    <script type="text/javascript" src="_static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/js/bootstrap3.min.js"></script>
+<script type="text/javascript" src="_static/js/jquery.cookie.min.js"></script>
+<script type="text/javascript" src="_static/js/basicstrap.js"></script>
+<script type="text/javascript">
+</script>
+    <link rel="top" title="stoQ 0.9.6 documentation" href="index.html" />
+    <link rel="prev" title="StoqBloomFilter" href="Filters.html" /> 
+  </head>
+  <body role="document">
+    <div id="navbar-top" class="navbar navbar-fixed-top navbar-default" role="navigation" aria-label="top navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="index.html">stoQ 0.9.6 documentation</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+              <li class="dropdown visible-xs">
+                <a role="button" id="localToc" data-toggle="dropdown" data-target="#" href="#">Table Of Contents <b class="caret"></b></a>
+                <ul class="dropdown-menu localtoc sp-localtoc" role="menu" aria-labelledby="localToc">
+                <ul>
+<li><a class="reference internal" href="#">StoqShell</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+</ul>
+
+                </ul>
+              </li>
+
+            
+              <li><a href="Filters.html" title="StoqBloomFilter" accesskey="P">previous </a></li>
+              <li><a href="py-modindex.html" title="Python Module Index" >modules </a></li>
+              <li><a href="genindex.html" title="General Index" accesskey="I">index </a></li>
+            
+            <li class="visible-xs"><a href="_sources/Shell.txt" rel="nofollow">Show Source</a></li>
+
+            <li class="visible-xs">
+                <form class="search form-search form-inline navbar-form navbar-right sp-searchbox" action="search.html" method="get">
+                  <div class="input-append input-group">
+                    <input type="text" class="search-query form-control" name="q" placeholder="Search...">
+                    <span class="input-group-btn">
+                    <input type="submit" class="btn" value="Go" />
+                    </span>
+                  </div>
+                  <input type="hidden" name="check_keywords" value="yes" />
+                  <input type="hidden" name="area" value="default" />
+                </form>
+            </li>
+
+            
+
+          </ul>
+
+        </div>
+      </div>
+    </div>
+    
+
+    <!-- container -->
+    <div class="container-fluid">
+
+      <!-- row -->
+      <div class="row">
+         
+<div class="col-md-3 hidden-xs" id="sidebar-wrapper">
+  <div class="sidebar hidden-xs" role="navigation" aria-label="main navigation">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">StoqShell</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Filters.html"
+                        title="previous chapter">StoqBloomFilter</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/Shell.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" role="search">
+  <h3>Quick search</h3>
+  <form class="search form-inline" action="search.html" method="get">
+      <div class="input-append input-group">
+        <input type="text" class="search-query form-control" name="q" placeholder="Search...">
+        <span class="input-group-btn">
+        <input type="submit" class="btn" value="Go" />
+        </span>
+      </div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+  </div>
+</div> 
+        
+
+        <div class="col-md-9" id="content-wrapper">
+          <div class="document" role="main">
+            <div class="documentwrapper">
+              <div class="bodywrapper">
+                <div class="body">
+                  
+  <div class="section" id="stoqshell">
+<h1>StoqShell<a class="headerlink" href="#stoqshell" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-stoq.shell"></span><div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>A stoQ Interactive Shell</p>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>Instantiate a stoQ Interactive Shell session:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ ./stoq-cli.py shell
+
+ .d8888b.  888             .d88888b.
+d88P  Y88b 888            d88P&quot; &quot;Y88b
+Y88b.      888            888     888
+ &quot;Y888b.   888888 .d88b.  888     888
+    &quot;Y88b. 888   d88&quot;&quot;88b 888     888
+      &quot;888 888   888  888 888 Y8b 888
+Y88b  d88P Y88b. Y88..88P Y88b.Y8b88P
+ &quot;Y8888P&quot;   &quot;Y888 &quot;Y88P&quot;   &quot;Y888888&quot;
+                                 Y8b
+        Analysis. Simplified.
+
+
+[stoQ] &gt;
+</pre></div>
+</div>
+<p>List all available plugins:</p>
+<div class="highlight-python"><div class="highlight"><pre>[stoQ] &gt; list
+Available Plugins:
+connectors
+- stdout              v0.9    Sends content to STDOUT
+- file                v0.9    Retrieves and saves content to local disk
+extractors
+- decompress          v0.9    Extract content from a multitude of archive formats
+- gpg                 v0.1    Handle GnuPG encrypted content
+carvers
+- pe                  v0.9    Carve portable executable files from a data stream
+- swf                 v0.9    Carve and decompress SWF payloads
+- ole                 v0.9    Carve OLE streams within Microsoft Office Documents
+- xdp                 v0.9    Carve and decode streams from XDP documents
+- rtf                 v0.9    Carve hex/binary streams from RTF payloads
+readers
+- pdftext             v0.9    Extract text from a PDF document
+- tika                v0.1    Upload content to a Tika server for automated text extraction
+- iocregex            v0.9    Regex routines to extract and normalize IOC&#39;s from a payload
+sources
+- rabbitmq            v0.9    Publish and Consume messages from a RabbitMQ Server
+- dirmon              v0.9    Monitor a directory for newly created files for processing
+- filedir             v0.9    Ingest a file or directory for processing
+workers
+- peinfo              v0.9    Gather relevant information about an executable using pefile
+- exif                v0.9    Processes a payload using ExifTool
+- publisher           v0.9    Publish messages to single or multiple RabbitMQ queues for processing
+- trid                v0.4    Identify file types from their TrID signature
+- xorsearch           v0.9    Search a payload for XOR&#39;d strings
+- yara                v0.9    Process a payload using yara
+- iocextract          v0.9    Utilizes reader/iocregex plugin to extract indicators of compromise from documents
+decoders
+- rot47               v0.1    Decode ROT47 encoded content
+- bitwise_rotate      v0.1    Rotate bits left or right. Defaults to 4 bits right for nibble swapping.
+- b64                 v0.1    Decode base64 encoded content
+- b85                 v0.1    Decode base85 encoded content
+- xor                 v0.1    Decode XOR encoded content
+</pre></div>
+</div>
+<p>Load the yara plugin:</p>
+<div class="highlight-python"><div class="highlight"><pre>[stoQ] &gt; load worker yara
+</pre></div>
+</div>
+<p>Conduct a simple scan of a payload using only the yara plugin:</p>
+<div class="highlight-python"><div class="highlight"><pre>[stoQ] &gt; read /tmp/bad.exe
+[*] Read /tmp/bad.exe(510968 bytes)
+[*] sha1: 074c5b3707ebcda408a186082e529cf8ae5859ed
+[*] sha256: 3cb2eb909ea3cfac42621ed4d024ed9d15a2005cc91a54050ef75fc9bee695b7
+[*] sha512: 53fcb7f9087b5f356067f6f2cd288575e97876fdad9e1376231923e414b541b0fdba7f17095daba0899155f2cde11efb5d4fcad1bfd3390e59c5a894d8bc1c1d
+[*] md5: 0b40e4e5987e7fb14b7a9b9b9218c703
+[*] magic: application/x-dosexec
+[stoQ] &gt; run worker yara
+[stoQ] &gt; results
+{ &quot;hits&quot; : [ {
+        &quot;matches&quot; : true,
+        &quot;meta&quot; : {
+                &quot;author&quot; : &quot;PUNCH Cyber Analytics Group&quot;,
+                &quot;cve&quot; : &quot;N/A&quot;,
+                &quot;description&quot; : &quot;Badness&quot;,
+                &quot;type&quot; : &quot;Suspicious String&quot;,
+                &quot;version&quot; : &quot;1.0&quot;,
+                &quot;weight&quot; : 100
+                },
+        &quot;namespace&quot; : &quot;default&quot;,
+        &quot;rule&quot; : &quot;win_api_LoadLibrary&quot;,
+        &quot;strings&quot; : [
+                [
+                    &quot;23967&quot;,
+                    &quot;$LoadLibrary&quot;,
+                    &quot;b&#39;LoadLibrary&#39;&quot;
+                ],
+            ],
+        &quot;tags&quot; : [  ]
+        } ],
+    }
+</pre></div>
+</div>
+<p>Display all available settings:</p>
+<div class="highlight-python"><div class="highlight"><pre>[stoQ] &gt; set
+worker.yara.saveresults = True
+worker.yara.max_processes = 1
+worker.yara.website = https://github.com/PUNCH-Cyber/stoq-plugins-public
+worker.yara.templates = plugins/worker/yara/templates/
+worker.yara.carvers = {}
+worker.yara.template = False
+worker.yara.readers = {}
+worker.yara.plugin_path = /usr/local/stoq/plugins/worker/yara
+worker.yara.dispatch = False
+worker.yara.version = 0.9
+worker.yara.description = Process a payload using yara
+worker.yara.yararules = plugins/worker/yara/rules/stoq.yar
+worker.yara.name = yara
+worker.yara.path = False
+worker.yara.module = /usr/local/stoq/plugins/worker/yara/yarascan
+worker.yara.extractors = {}
+worker.yara.archive_connector = False
+worker.yara.source_plugin = False
+worker.yara.workers = {}
+worker.yara.decoders = {}
+worker.yara.category = worker
+worker.yara.log_level = False
+worker.yara.hashpayload = True
+worker.yara.is_activated = True
+worker.yara.output_connector = stdout
+worker.yara.author = Marcus LaFerrera
+worker.yara.error_queue = False
+worker.yara.sources = {}
+stoq.config_file = /usr/local/stoq/stoq.cfg
+stoq.default_connector = stdout
+stoq.log_dir = /usr/local/stoq/logs
+stoq.log_maxbytes = 1500000
+stoq.log_path = /usr/local/stoq/logs/stoq.log
+stoq.base_dir = /usr/local/stoq
+stoq.useragent = Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.1)
+stoq.url_prefix_tuple = http://, https://
+stoq.results_dir = /usr/local/stoq/results
+stoq.temp_dir = /usr/local/stoq/temp
+stoq.dispatch_rules = /usr/local/stoq/dispatcher.yar
+stoq.default_source = filedir
+stoq.log_level = INFO
+stoq.log_backup_count = 5
+stoq.source_base_tuple = /usr/local/stoq
+stoq.max_recursion = 3
+stoq.plugin_dir = /usr/local/stoq/plugins
+stoq.archive_base = /usr/local/stoq/archive
+</pre></div>
+</div>
+<p>Update a configuration setting:</p>
+<div class="highlight-python"><div class="highlight"><pre>[stoQ] &gt; set stoq.log_level DEBUG
+stoq.log_level -&gt; DEBUG
+</pre></div>
+</div>
+<p>Save results, to include any payloads that may have been carved/extracted/decoded.
+If mutiple results have been processed, the integert will be incremented and 
+correspond to the payload id viewable in the <code class="docutils literal"><span class="pre">results</span></code> command:</p>
+<div class="highlight-python"><div class="highlight"><pre>[stoQ] &gt; save
+[*] Saving content to /usr/local/stoq/results/results-0-bad.exe
+</pre></div>
+</div>
+<p>Now&#8217;s let pass arguments to a plugin. In this instance we want to XOR a
+payload using a specific XOR key:</p>
+<div class="highlight-python"><div class="highlight"><pre>[stoQ] &gt; run decoder xor key=2
+[*] Run using xor complete. View results with &#39;results&#39;
+</pre></div>
+</div>
+<p>List contents of a directory:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span><span class="n">stoQ</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ls</span> <span class="o">/</span><span class="n">tmp</span>
+<span class="n">bad</span><span class="o">.</span><span class="n">exe</span>
+</pre></div>
+</div>
+<dl class="class">
+<dt id="stoq.shell.StoqShell">
+<em class="property">class </em><code class="descclassname">stoq.shell.</code><code class="descname">StoqShell</code><span class="sig-paren">(</span><em>stoq</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.shell.StoqShell" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="stoq.shell.StoqShell.do_EOF">
+<code class="descname">do_EOF</code><span class="sig-paren">(</span><em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.shell.StoqShell.do_EOF" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="stoq.shell.StoqShell.do_exit">
+<code class="descname">do_exit</code><span class="sig-paren">(</span><em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.shell.StoqShell.do_exit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="stoq.shell.StoqShell.do_list">
+<code class="descname">do_list</code><span class="sig-paren">(</span><em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.shell.StoqShell.do_list" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>list</dt>
+<dd>List available plugins</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.shell.StoqShell.do_load">
+<code class="descname">do_load</code><span class="sig-paren">(</span><em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.shell.StoqShell.do_load" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>load &lt;category&gt; &lt;plugin&gt;</dt>
+<dd>Load plugin of category</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.shell.StoqShell.do_ls">
+<code class="descname">do_ls</code><span class="sig-paren">(</span><em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.shell.StoqShell.do_ls" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>ls &lt;path&gt;</dt>
+<dd>List contents in the specified directory</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.shell.StoqShell.do_payload">
+<code class="descname">do_payload</code><span class="sig-paren">(</span><em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.shell.StoqShell.do_payload" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>payload &lt;id&gt;</dt>
+<dd>Switch object to scan to an extracted stream</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.shell.StoqShell.do_read">
+<code class="descname">do_read</code><span class="sig-paren">(</span><em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.shell.StoqShell.do_read" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>read &lt;path to file&gt;</dt>
+<dd>Open a file at specified path</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.shell.StoqShell.do_results">
+<code class="descname">do_results</code><span class="sig-paren">(</span><em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.shell.StoqShell.do_results" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>results</dt>
+<dd>Display results of previous plugin run</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.shell.StoqShell.do_run">
+<code class="descname">do_run</code><span class="sig-paren">(</span><em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.shell.StoqShell.do_run" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>run &lt;category&gt; &lt;plugin&gt; [key=value]</dt>
+<dd>Run an individual plugin against the loaded payload</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.shell.StoqShell.do_save">
+<code class="descname">do_save</code><span class="sig-paren">(</span><em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.shell.StoqShell.do_save" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>save [payload | id]</dt>
+<dd>Save all results, the current payload, or only a specific results ID to disk</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.shell.StoqShell.do_set">
+<code class="descname">do_set</code><span class="sig-paren">(</span><em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.shell.StoqShell.do_set" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>set &lt;global setting&gt; &lt;new value&gt;</dt>
+<dd>Set global setting to value</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.shell.StoqShell.do_usage">
+<code class="descname">do_usage</code><span class="sig-paren">(</span><em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.shell.StoqShell.do_usage" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>usage &lt;category&gt; &lt;plugin&gt;</dt>
+<dd>Display any documentation available for the specified plugin</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="stoq.shell.StoqShell.set_prompt">
+<code class="descname">set_prompt</code><span class="sig-paren">(</span><em>msg=''</em><span class="sig-paren">)</span><a class="headerlink" href="#stoq.shell.StoqShell.set_prompt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        
+      </div><!-- /row -->
+
+      <!-- row -->
+      <div class="row footer-relbar">
+<div id="navbar-related" class=" related navbar navbar-default" role="navigation" aria-label="related navigation">
+  <div class="navbar-inner">
+    <ul class="nav navbar-nav ">
+        <li><a href="index.html">stoQ 0.9.6 documentation</a></li>
+    </ul>
+<ul class="nav navbar-nav pull-right hidden-xs hidden-sm">
+      
+        <li><a href="Filters.html" title="StoqBloomFilter" >previous</a></li>
+        <li><a href="py-modindex.html" title="Python Module Index" >modules</a></li>
+        <li><a href="genindex.html" title="General Index" >index</a></li>
+        <li><a href="#">top</a></li> 
+      
+    </ul>
+  </div>
+</div>
+      </div><!-- /row -->
+
+      <!-- footer -->
+      <footer role="contentinfo">
+          &copy; Copyright 2014-2015, PUNCH Cyber Analytics Group.
+        Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+      </footer>
+      <!-- /footer -->
+
+    </div>
+    <!-- /container -->
+
+  </body>
+</html>

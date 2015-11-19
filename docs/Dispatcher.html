@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+
+
+
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    
+    <title>Dispatcher &mdash; stoQ 0.9.6 documentation</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    
+
+<link rel="stylesheet" href="_static/css/basicstrap-base.css" type="text/css" />
+<link rel="stylesheet" id="current-theme" href="_static/css/bootstrap3/bootstrap.min.css" type="text/css" />
+<link rel="stylesheet" id="current-adjust-theme" type="text/css" />
+
+<link rel="stylesheet" href="_static/css/font-awesome.min.css">
+
+<style type="text/css">
+  body {
+    padding-top: 60px;
+    padding-bottom: 40px;
+  }
+</style>
+
+<link rel="stylesheet" href="_static/css/basicstrap.css" type="text/css" />
+<link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+<script type="text/javascript">
+  var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:    './',
+            VERSION:     '0.9.6',
+            COLLAPSE_INDEX: false,
+            FILE_SUFFIX: '.html',
+            HAS_SOURCE:  true
+  };
+</script>
+    <script type="text/javascript" src="_static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/js/bootstrap3.min.js"></script>
+<script type="text/javascript" src="_static/js/jquery.cookie.min.js"></script>
+<script type="text/javascript" src="_static/js/basicstrap.js"></script>
+<script type="text/javascript">
+</script>
+    <link rel="top" title="stoQ 0.9.6 documentation" href="index.html" />
+    <link rel="next" title="Stoq" href="Stoq.html" />
+    <link rel="prev" title="Plugin Development" href="PluginDevelopment.html" /> 
+  </head>
+  <body role="document">
+    <div id="navbar-top" class="navbar navbar-fixed-top navbar-default" role="navigation" aria-label="top navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="index.html">stoQ 0.9.6 documentation</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+              <li class="dropdown visible-xs">
+                <a role="button" id="localToc" data-toggle="dropdown" data-target="#" href="#">Table Of Contents <b class="caret"></b></a>
+                <ul class="dropdown-menu localtoc sp-localtoc" role="menu" aria-labelledby="localToc">
+                <ul>
+<li><a class="reference internal" href="#">Dispatcher</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#usage">Usage</a><ul>
+<li><a class="reference internal" href="#writing-a-dispatcher-rule">Writing a Dispatcher Rule</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
+</ul>
+
+                </ul>
+              </li>
+
+            
+              <li><a href="PluginDevelopment.html" title="Plugin Development" accesskey="P">previous </a></li>
+              <li><a href="Stoq.html" title="Stoq" accesskey="N">next </a></li>
+              <li><a href="py-modindex.html" title="Python Module Index" >modules </a></li>
+              <li><a href="genindex.html" title="General Index" accesskey="I">index </a></li>
+            
+            <li class="visible-xs"><a href="_sources/Dispatcher.txt" rel="nofollow">Show Source</a></li>
+
+            <li class="visible-xs">
+                <form class="search form-search form-inline navbar-form navbar-right sp-searchbox" action="search.html" method="get">
+                  <div class="input-append input-group">
+                    <input type="text" class="search-query form-control" name="q" placeholder="Search...">
+                    <span class="input-group-btn">
+                    <input type="submit" class="btn" value="Go" />
+                    </span>
+                  </div>
+                  <input type="hidden" name="check_keywords" value="yes" />
+                  <input type="hidden" name="area" value="default" />
+                </form>
+            </li>
+
+            
+
+          </ul>
+
+        </div>
+      </div>
+    </div>
+    
+
+    <!-- container -->
+    <div class="container-fluid">
+
+      <!-- row -->
+      <div class="row">
+         
+<div class="col-md-3 hidden-xs" id="sidebar-wrapper">
+  <div class="sidebar hidden-xs" role="navigation" aria-label="main navigation">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Dispatcher</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#usage">Usage</a><ul>
+<li><a class="reference internal" href="#writing-a-dispatcher-rule">Writing a Dispatcher Rule</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="PluginDevelopment.html"
+                        title="previous chapter">Plugin Development</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Stoq.html"
+                        title="next chapter">Stoq</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/Dispatcher.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" role="search">
+  <h3>Quick search</h3>
+  <form class="search form-inline" action="search.html" method="get">
+      <div class="input-append input-group">
+        <input type="text" class="search-query form-control" name="q" placeholder="Search...">
+        <span class="input-group-btn">
+        <input type="submit" class="btn" value="Go" />
+        </span>
+      </div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+  </div>
+</div> 
+        
+
+        <div class="col-md-9" id="content-wrapper">
+          <div class="document" role="main">
+            <div class="documentwrapper">
+              <div class="bodywrapper">
+                <div class="body">
+                  
+  <div class="section" id="dispatcher">
+<h1>Dispatcher<a class="headerlink" href="#dispatcher" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p><strong>stoQ</strong> provides for the ability to dispatch, or route, payloads to other
+plugins. This is done by leveraging <em>yara</em> to identify payloads that have
+certain characteristics and then automatically routing to specific plugins
+based on the results. Currently two plugin categories are supported for
+use with dispatching, <em>extractor</em> and <em>carver</em>.</p>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>If dispatching is desired, simply start the worker with the <code class="docutils literal"><span class="pre">-D</span></code> command
+line argument. Ensure that your <em>dispatcher.yar</em> file contains the appropriate
+rules to properly route the payloads.</p>
+<div class="section" id="writing-a-dispatcher-rule">
+<h3>Writing a Dispatcher Rule<a class="headerlink" href="#writing-a-dispatcher-rule" title="Permalink to this headline">¶</a></h3>
+<p>Dispatching relies on <em>yara</em> and a set of rules to appropriately route
+payloads to their intended plugin. As with any yara rules, the <code class="docutils literal"><span class="pre">strings</span></code>
+and <code class="docutils literal"><span class="pre">condition</span></code> parameters are required, but dispatching also requires
+the <code class="docutils literal"><span class="pre">meta</span></code> attribute. Two keys, <code class="docutils literal"><span class="pre">plugin</span></code> and <code class="docutils literal"><span class="pre">save</span></code> are required
+within the <code class="docutils literal"><span class="pre">meta</span></code> attribute. The <code class="docutils literal"><span class="pre">plugin</span></code> key identifies the <strong>stoQ</strong>
+plugin category and plugin namei (e.g., <code class="docutils literal"><span class="pre">plugin</span> <span class="pre">=</span> <span class="pre">&quot;carver:rtf&quot;</span></code>) that should
+be loaded if the <em>yara</em> rule hits. The <code class="docutils literal"><span class="pre">save</span></code> key identifies whether
+content that is extracted or carved from the payload should be saved.
+Additionally, all of the meta values are passed to the specified plugin
+as <a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs.</p>
+<p>As an example, a <strong>stoQ</strong> dispatcher plugin that would identify RTF documents
+and then send the document to the RTF carver plugin would be written as:</p>
+<div class="highlight-python"><div class="highlight"><pre>rule rtf_file
+{
+    meta:
+        plugin = &quot;carver:rtf&quot;
+        save = &quot;True&quot;
+    strings:
+        $rtf = &quot;{\\rt&quot; nocase
+    condition:
+        $rtf at 0
+}
+</pre></div>
+</div>
+<p>Results from the specified plugin are returned as a <code class="docutils literal"><span class="pre">list()</span></code> of <code class="docutils literal"><span class="pre">sets()</span></code>.
+Each unique object, or <code class="docutils literal"><span class="pre">payload</span></code>, that is extracted from the primary payload
+is assigned an incremental <code class="docutils literal"><span class="pre">payload</span></code> and a unique <code class="docutils literal"><span class="pre">uuid</span></code>. In addition, the
+<code class="docutils literal"><span class="pre">puuid</span></code> is added to the results to identify the parent uuid the stream was
+extracted from. The results from the dispatcher are then appended to the
+primary results <code class="docutils literal"><span class="pre">dict()</span></code> and the key <code class="docutils literal"><span class="pre">payloads</span></code> is added with the total
+count of streams processed, to include the original payload.</p>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span>Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span>Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span>Search Page</span></a></li>
+</ul>
+</div>
+</div>
+
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        
+      </div><!-- /row -->
+
+      <!-- row -->
+      <div class="row footer-relbar">
+<div id="navbar-related" class=" related navbar navbar-default" role="navigation" aria-label="related navigation">
+  <div class="navbar-inner">
+    <ul class="nav navbar-nav ">
+        <li><a href="index.html">stoQ 0.9.6 documentation</a></li>
+    </ul>
+<ul class="nav navbar-nav pull-right hidden-xs hidden-sm">
+      
+        <li><a href="PluginDevelopment.html" title="Plugin Development" >previous</a></li>
+        <li><a href="Stoq.html" title="Stoq" >next</a></li>
+        <li><a href="py-modindex.html" title="Python Module Index" >modules</a></li>
+        <li><a href="genindex.html" title="General Index" >index</a></li>
+        <li><a href="#">top</a></li> 
+      
+    </ul>
+  </div>
+</div>
+      </div><!-- /row -->
+
+      <!-- footer -->
+      <footer role="contentinfo">
+          &copy; Copyright 2014-2015, PUNCH Cyber Analytics Group.
+        Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+      </footer>
+      <!-- /footer -->
+
+    </div>
+    <!-- /container -->
+
+  </body>
+</html>
