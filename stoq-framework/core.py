@@ -1,0 +1,464 @@
+#   Copyright 2014-2015 PUNCH Cyber Analytics Group
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
+"""
+
+Overview
+========
+
+The *Stoq* class is the core of the framework. It must be
+instantiated in order for all other modules to function properly.
+This class is meant to be called from stoq.py.
+
+Upon instantiation, default configuration options are defined
+within *__init__*. These are overridden if there is identical
+configuration option in *stoq.cfg*.
+
+The *StoqPluginManager* will also be instantiated as a child 
+class automatically. This allows for the ability to globally
+access the API for plugins and easily grant the ability for
+plugins to load other plugins.
+
+Examples
+========
+
+Instantiate the *Stoq* class::
+
+    from stoq.core import Stoq
+    stoq = Stoq()
+
+Retrieve a file from a url::
+
+    content = stoq.get_file("http://google.com")
+
+Write content to disk::
+
+    stoq.write("example content", path="/tmp", filename="example.txt")
+
+.. note:: If no filename is given, ``Stoq.get_uuid`` will be called and a
+          random filename will be defined automatically. Additionally, if
+          the filename already exists, the file will not be overwritten. 
+          However, if ``Stoq.write()`` is called with ``overwrite=True``,
+          the file will be overwritten. If the content to be written is 
+          binary, one may add ``binary=True`` when calling ``Stoq.write()``.
+
+API
+===
+"""
+
+import os
+import sys
+import uuid
+import logging
+import requests
+import datetime
+import configparser
+import demjson as json
+import logging.handlers
+
+from bs4 import UnicodeDammit
+
+from stoq.plugins import StoqPluginManager
+
+
+__version__ = "0.9.6"
+
+
+class Stoq(StoqPluginManager):
+    """
+    Core stoQ Framework Class
+
+    """
+
+    def __init__(self):
+        # Make sure the stoQ objects we require exist.
+        # Setup our basic directory structure. This is overwritten
+        # if we have anything set in our configuration file.
+        self.base_dir = os.path.realpath(os.path.dirname(sys.argv[0]))
+        self.log_dir = os.path.join(self.base_dir, "logs")
+        self.results_dir = os.path.join(self.base_dir, "results")
+        self.temp_dir = os.path.join(self.base_dir, "temp")
+        self.plugin_dir = os.path.join(self.base_dir, "plugins")
+        self.archive_base = os.path.join(self.base_dir, "archive")
+        self.config_file = os.path.join(self.base_dir, "stoq.cfg")
+        self.dispatch_rules = os.path.join(self.base_dir, 'dispatcher.yar')
+
+        # What should be our default user agent when retrieving urls?
+        self.useragent = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.1)"
+
+        self.worker = None
+
+        # Default logging options
+        # Valid options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+        self.log_level = "INFO"
+        self.log_maxbytes = 1500000
+        self.log_backup_count = 5
+
+        # Default connector plugin to be used for output
+        self.default_connector = "stdout"
+
+        # Default source plugin to be used for input
+        self.default_source = "filedir"
+
+        # Define the default maximum recursion depth for the dispatcher
+        self.max_recursion = 3
+
+        # tuple() to match the root directory of where files can be ingested from.
+        # Need for get_file(). Setting to the root path of our command by
+        # default, just in case it isn't run from the CWD.
+        self.source_base_tuple = (os.path.realpath(os.path.dirname(sys.argv[0])))
+
+        # Define what URL prefixes we accept
+        self.url_prefix_tuple = ('http://', 'https://')
+
+        # Load the configuration file, if it exists
+        if os.path.exists(self.config_file):
+            self.load_config()
+
+        # Initialize the logger
+        self.logger_init()
+
+        # Ensure our plugin manager is initiated
+        StoqPluginManager.__init__(self)
+
+    def load_config(self):
+        """
+        Load configuration file. Defaults to stoq.cfg.
+
+        """
+
+        config = configparser.ConfigParser()
+        config.read(self.config_file)
+        for sect in config.sections():
+            for opt in config.options(sect):
+                # define each configuration option as an object within
+                # self class
+                value = config.get(sect, opt)
+
+                # Support loading of dict(), list(), and tuple()
+                if opt.endswith("_list"):
+                    value = [i.strip() for i in value.split(",")]
+                elif opt.endswith("_dict"):
+                    value = self.loads(value)
+                elif opt.endswith("_tuple"):
+                    value = tuple(i.strip() for i in value.split(","))
+
+                setattr(self, opt, value)
+
+    def logger_init(self):
+        """
+        Initialize the logger globally.
+
+        :returns: True
+
+        """
+
+        # Let's attempt to make the log directory if it doesn't exist
+        os.makedirs(self.log_dir, exist_ok=True)
+
+        # Define out loggername as our current worker's name
+        self.log = logging.getLogger()
+
+        # Set the default logging level
+        self.log.setLevel(self.log_level)
+
+        # Define the log filename and path
+        log_file = "stoq.log"
+        self.log_path = os.path.abspath(os.path.join(self.log_dir, log_file))
+
+        # Setup our logfile
+        file_handler = logging.handlers.RotatingFileHandler(filename=self.log_path,
+                                                            mode='a',
+                                                            maxBytes=int(self.log_maxbytes),
+                                                            backupCount=int(self.log_backup_count))
+
+        # Setup our STDERR output
+        stderr_handler = logging.StreamHandler()
+
+        # Define the format of the log file
+        log_format = logging.Formatter("%(asctime)s %(levelname)s %(name)s: "
+                                       "%(message)s",
+                                       datefmt='%Y-%m-%d %H:%M:%S')
+
+        stderr_log_format = logging.Formatter("[*] %(name)s: %(message)s")
+
+        file_handler.setFormatter(log_format)
+        stderr_handler.setFormatter(stderr_log_format)
+
+        # Attach the handler to the logger
+        self.log.addHandler(file_handler)
+        self.log.addHandler(stderr_handler)
+
+    def get_file(self, source, params=None, verify=True,
+                 auth=None, **kwargs):
+        """
+        Obtain contents of file from disk or URL.
+
+        .. note:: A file will only be opened from disk if the
+                  path of the file matches the regex defined by
+                  ingest_base in stoq.cfg.
+
+        :param bytes source: Path or URL of file to read.
+        :param bytes params: Additional parameters to pass if requesting a URL
+        :param bool verify: Ensure SSL Certification Verification
+        :param auth: Authentication methods supported by python-requests
+        :param \*\*kwargs: Additional HTTP headers
+
+        :returns: Content of file retrieved
+        :rtype: bytes or None
+
+        """
+
+
+        if source.startswith(self.url_prefix_tuple):
+            # Set our default headers
+            headers = self.__set_requests_headers(**kwargs)
+            response = requests.get(source, params=params, auth=auth,
+                                    verify=verify, headers=headers)
+
+            # Raise an exception if it was not successful
+            response.raise_for_status()
+            return response.content
+
+        else:
+            # Ensure we have an absolute path for security reasons
+            abspath = os.path.abspath(source)
+            # use our ingest_base regex to validate the base path
+            # in order to ensure we are ingesting from a safe path
+            if abspath.startswith(self.source_base_tuple):
+                if os.path.isfile(abspath):
+                    # Looking good, read file
+                    try:
+                        with open(abspath, "rb") as f:
+                            return f.read()
+                    except PermissionError as err:
+                        self.log.warn("{}".format(err))
+            else:
+                self.log.error("Unauthorized source path. Update "
+                               "source_base_tuple path in stoq.cfg.")
+
+        return None
+
+    def put_file(self, url, params=None, data=None, auth=None, **kwargs):
+        """
+        Handles PUT request to specified URL
+
+        :param bytes url: URL to for PUT request
+        :param bytes params: Additional parameters to pass if requesting a URL
+        :param bytes data: Content to PUT
+        :param auth: Authentication methods supported by python-requests
+        :param \*\*kwargs: Additional HTTP headers
+
+        :returns: Content returned from PUT request
+        :rtype: bytes or None
+
+        """
+
+        # Set our default headers
+        headers = self.__set_requests_headers(**kwargs)
+        response = requests.put(url, data, params=params,
+                                auth=auth, headers=headers)
+
+        response.raise_for_status()
+        return response.content
+
+    def post_file(self, url, params=None, files=None, data=None, auth=None, **kwargs):
+        """
+        Handles POST request to specified URL
+
+        :param bytes url: URL to for POST request
+        :param bytes params: Additional parameters to pass if requesting a URL
+        :param tuple files: Tuple of file data to POST
+        :param bytes data: Content to POST
+        :param auth: Authentication methods supported by python-requests
+        :param \*\*kwargs: Additional HTTP headers
+
+        :returns: Content returned from POST request
+        :rtype: bytes or None
+
+        """
+
+        # Set our default headers
+        headers = self.__set_requests_headers(**kwargs)
+        response = requests.post(url, data, params=params, files=files,
+                                 auth=auth, headers=headers)
+
+        response.raise_for_status()
+        return response.content
+
+    def write(self, payload, filename=None, path=None,
+              binary=False, overwrite=False):
+        """
+        Write content to disk
+
+        :param str payload: Data to be written to disk
+        :param str filename: Filename, if none is provided, a random filename
+                             will be used
+        :type filename: str or None
+        :param path: Path for output file
+        :type path: str or None
+        :param binary: Define whether content is binary or not
+        :type binary: True or False
+        :param overwrite: Define whether output file should be
+                          overwritten
+        :type overwrite: True or False
+
+        :returns: Full path of file that was written
+        :rtype: str or False
+
+        """
+
+        if not filename:
+            filename = self.get_uuid
+
+        # Create our full path to file and make sure it's safe
+        # This method is x4 faster than os.path.join
+        fullpath = "{}/{}".format(path, filename)
+        fullpath = os.path.abspath(fullpath)
+
+        # Default write mode, do not overwrite
+        write_mode = "x"
+
+        if overwrite:
+            write_mode = "w"
+
+        if binary:
+            write_mode += "b"
+
+        # Check to see if the directory exists, if not, create it
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        # Finally ready to write
+        try:
+            with open(fullpath, write_mode) as outfile:
+                outfile.write(payload)
+        except FileExistsError:
+            self.log.debug("File already exists: {}".format(fullpath))
+            return False
+
+        return fullpath
+
+    def force_unicode(self, payload):
+        """ 
+        Force a string to be properly encoded in unicode using BeautifulSoup4
+
+        :param bytes payload: String to be forced into unicode
+
+        :returns: Unicode bytes
+        :rtype: bytes
+
+        """
+
+        return UnicodeDammit(payload).unicode_markup
+
+    @property
+    def get_time(self):
+        """
+        Get the current time, in ISO format
+
+        :returns: Current time in ISO Format
+        :rtype: str
+
+        """
+
+        return datetime.datetime.now().isoformat()
+
+    @property
+    def get_uuid(self):
+        """
+        Generate a random uuid
+
+        :returns: Random uuid
+        :rtype: str
+
+        """
+
+        return str(uuid.uuid4())
+
+    def hashpath(self, sha1):
+        """
+        Generate a path based on the first five chars of a SHA1 hash
+
+        example:
+        The SHA1 4caa16eba080d3d4937b095fb68999f3dbabd99d
+        would return a path similar to:
+        /opt/malware/4/c/a/a/1
+
+        :param str sha1: SHA1 hash of a payload
+
+        :returns: Path
+        :rtype: str
+
+        """
+
+        return os.path.join(self.archive_base, '/'.join(list(sha1[:5])))
+
+    def dumps(self, data, compactly=True):
+        """
+        Wrapper for json library. Dump dict to a json string
+
+        :param dict data: Python dict to convert to json
+        :param bool indent: Indent to prettify json results.
+
+        :returns: Converted json string
+        :rtype: str
+
+        """
+
+        return json.encode(data, encode_bytes=str, compactly=compactly)
+
+    def loads(self, data):
+        """
+        Wrapper for json library. Load json string as a python dict
+
+        :param str data: json string to load into dict
+
+        :returns: Converted dict
+        :rtype: dict
+
+        """
+
+        try:
+            return json.decode(data.decode('utf-8'))
+        except:
+            return json.decode(data)
+
+    def __set_requests_headers(self, headers=None):
+        """
+        Set default requests headers.
+
+        :param dict headers: Dictionary containing any headers defined by 
+                             the plugin
+
+        :returns: The same dictionary, plus any default headers that were not
+                  defined.
+        :rtype: dict
+
+        """
+
+        if not headers:
+            headers = {}
+
+        # Define a set of default headers, in case none are provided
+        default_headers = [('User-Agent', self.useragent)]
+
+        # Iterate over our default headers and assign them
+        # if they are not defined in **kwargs
+        for header, value in default_headers:
+            if header not in headers:
+                headers[header] = value
+
+        return headers
+
