@@ -1,0 +1,152 @@
+@font-face {
+	font-family: 'icomoon';
+	src:url('fonts/icomoon.eot?5fqo1b');
+	src:url('fonts/icomoon.eot?5fqo1b#iefix') format('embedded-opentype'),
+		url('fonts/icomoon.ttf?5fqo1b') format('truetype'),
+		url('fonts/icomoon.woff?5fqo1b') format('woff'),
+		url('fonts/icomoon.svg?5fqo1b#icomoon') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+	font-family: 'icomoon';
+	speak: none;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+
+	/* Better Font Rendering =========== */
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.icon-stoQ-mini-outline .path1:before {
+	content: "\e906";
+	color: rgb(239, 239, 239);
+}
+.icon-stoQ-mini-outline .path2:before {
+	content: "\e907";
+	margin-left: -1.7138671875em;
+	color: rgb(239, 239, 239);
+}
+.icon-stoQ-mini-outline .path3:before {
+	content: "\e908";
+	margin-left: -1.7138671875em;
+	color: rgb(239, 239, 239);
+}
+.icon-stoQ-mini-outline .path4:before {
+	content: "\e909";
+	margin-left: -1.7138671875em;
+	color: rgb(239, 239, 239);
+}
+.icon-stoQ-mini-outline .path5:before {
+	content: "\e90a";
+	margin-left: -1.7138671875em;
+	color: rgb(188, 188, 188);
+}
+.icon-stoQ-mini-outline .path6:before {
+	content: "\e90b";
+	margin-left: -1.7138671875em;
+	color: rgb(188, 188, 188);
+}
+.icon-stoQ-mini-outline .path7:before {
+	content: "\e90c";
+	margin-left: -1.7138671875em;
+	color: rgb(188, 188, 188);
+}
+.icon-stoQ-mini-outline .path8:before {
+	content: "\e90d";
+	margin-left: -1.7138671875em;
+	color: rgb(188, 188, 188);
+}
+.icon-stoQ-mini-outline .path9:before {
+	content: "\e90e";
+	margin-left: -1.7138671875em;
+	color: rgb(188, 188, 188);
+}
+.icon-stoQ-mini-outline .path10:before {
+	content: "\e90f";
+	margin-left: -1.7138671875em;
+	color: rgb(188, 188, 188);
+}
+.icon-stoQ-mini-outline .path11:before {
+	content: "\e910";
+	margin-left: -1.7138671875em;
+	color: rgb(188, 188, 188);
+}
+.icon-stoQ-mini-outline2 .path1:before {
+	content: "\e911";
+	color: rgb(239, 239, 239);
+}
+.icon-stoQ-mini-outline2 .path2:before {
+	content: "\e912";
+	margin-left: -1.7138671875em;
+	color: rgb(239, 239, 239);
+}
+.icon-stoQ-mini-outline2 .path3:before {
+	content: "\e913";
+	margin-left: -1.7138671875em;
+	color: rgb(239, 239, 239);
+}
+.icon-stoQ-mini-outline2 .path4:before {
+	content: "\e914";
+	margin-left: -1.7138671875em;
+	color: rgb(239, 239, 239);
+}
+.icon-stoQ-mini-outline2 .path5:before {
+	content: "\e915";
+	margin-left: -1.7138671875em;
+	color: rgb(188, 188, 188);
+}
+.icon-stoQ-mini-outline2 .path6:before {
+	content: "\e916";
+	margin-left: -1.7138671875em;
+	color: rgb(188, 188, 188);
+}
+.icon-stoQ-mini-outline2 .path7:before {
+	content: "\e917";
+	margin-left: -1.7138671875em;
+	color: rgb(188, 188, 188);
+}
+.icon-stoQ-mini-outline2 .path8:before {
+	content: "\e918";
+	margin-left: -1.7138671875em;
+	color: rgb(188, 188, 188);
+}
+.icon-stoQ-mini-outline2 .path9:before {
+	content: "\e919";
+	margin-left: -1.7138671875em;
+	color: rgb(188, 188, 188);
+}
+.icon-stoQ-mini-outline2 .path10:before {
+	content: "\e91a";
+	margin-left: -1.7138671875em;
+	color: rgb(188, 188, 188);
+}
+.icon-stoQ-mini-outline2 .path11:before {
+	content: "\e91b";
+	margin-left: -1.7138671875em;
+	color: rgb(188, 188, 188);
+}
+.icon-ic_flash_on_black_48px-2:before {
+	content: "\e900";
+}
+.icon-ic_group_black_48px:before {
+	content: "\e901";
+}
+.icon-ic_remove_red_eye_black_48px:before {
+	content: "\e902";
+}
+.icon-ic_settings_black_48px-2:before {
+	content: "\e903";
+}
+.icon-ic_storage_black_48px:before {
+	content: "\e904";
+}
+.icon-ic_sync_black_48px:before {
+	content: "\e905";
+}
+
