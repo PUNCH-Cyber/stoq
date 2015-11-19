@@ -1,173 +1,220 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="overflow-x: hidden">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no"/>
-  <title>StoQ - Analysis. Simplified.</title>
+<meta charset=utf-8>
 
-  <!-- CSS  -->
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="css/materialize.css" type="text/css" rel="stylesheet" media="screen,projection"/>
-  <link href="css/style.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+<title>stoQ - Analysis. Simplified.</title>
+
+<meta content="&amp;2013-2015 Punch, LLC." name="copyright">
+<meta content="Punch is a boutique cyber-consulting firm that provides advanced analytics and strategic support to government and commercial clients. Our primary focus is in improving an organization’s awareness of and ability to manage a growing cyber threat environment. We focus on bolstering cyber preparedness by improving an organization’s analysts and the tools at their disposal. " name="description">
+<meta content="Punch, Cyber, Punch Cyber, security, consulting firm, strategic, government, commercial, cyber threat, analysts, " name="keywords">
+<meta name="robots" content="index,follow,archive" />
+<meta name="viewport" content="width=device-width, minimum-scale=1.0" />
+  
+  
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" integrity="sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous">
+
+	<!-- Bootstrap JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" crossorigin="anonymous"></script>
+  
+  
+<link rel="stylesheet" type="text/css" media="all" href="style.css">
+<link rel="stylesheet" href="iconfont/style.css">
+    
+
+<script src="https://use.typekit.net/hgw2ktb.js"></script>
+<script type="text/javascript">try{Typekit.load({ async: true });}catch(e){}</script>
+    
+    
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script>
+			$(document).ready(function() {
+				function scrollToAnchor(aid){
+					var aTag = $("a[name='"+ aid +"']");
+					$('html,body').animate({scrollTop: aTag.offset().top},'slow');
+				}
+				$("a").click(function() {
+					var href = $(this).attr('href').replace('#', '')
+					scrollToAnchor(href);
+				});			
+			});
+		</script>
+    
+    
 </head>
+
 <body>
-  <nav class="white" role="navigation">
-    <div class="nav-wrapper container">
-      <a id="logo-container" href="http://punchcyber.com" class="brand-logo"><img src="punch.jpg" alt="PUNCH"></a>
-      <ul class="right hide-on-med-and-down">
-          <li><a href="/docs/">Documentation</a></li>
-          <li><a href="https://github.com/PUNCH-Cyber/stoq">Download</a></li>
-          <li><a href="https://github.com/PUNCH-Cyber/stoq/issues">Issues</a></li>
-      </ul>
+<a name="top"></a>
+    
+    
+<div id="floatmenu" class="menu">
+    <div class="moveRightPerm"><a href="#top" onclick="hidestuff('floatmenu');"><img src="i/top.png" class="backtotop"></a></div>
+    <div class="mark"><img src="i/logo_stoq_small.png"></div>
+</div>
 
-      <ul id="nav-mobile" class="side-nav">
-        <li><a href="#">Navbar Link</a></li>
-      </ul>
-      <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
-    </div>
-  </nav>
+    <nav id="top-navigation">
+        <div class="content">
+        	<div class="pagelogo-stoq"><img src="i/logo_stoq_small.png"></div>
+        	
+        	<ul class="mainNav left" style="float:left;">
+        		<li class="punch"><a href="http://www.punchcyber.com">PUNCH Cyber</a></li>
+        	</ul>
+            <ul class="mainNav">
+                <!--<li><a href="#aboutStart">News</a></li>-->
+				<li><a href="http://stoq.punchcyber.com/docs">Documentation</a></li>
+				<li><a href="https://github.com/PUNCH-Cyber/stoq">Download</a></li>
+				<!--<li><a href="#contactStart">Issues</a></li>-->
+            </ul>
 
-  <div id="index-banner" class="parallax-container">
-    <div class="section no-pad-bot">
-      <div class="container">
-        <br><br>
-        <h1 class="header center teal-text text-lighten-2">StoQ</h1>
-        <div class="row center">
-            <h5 class="header col s12 light">Analysis. Simplified.</h5>
         </div>
-        <div class="row center">
-            <a href="https://github.com/PUNCH-Cyber/stoq" id="download-button" class="btn-large waves-effect waves-light teal lighten-1">Download</a>
+    </nav>
+
+<section id="main-header">
+
+    <div class="content">
+        
+        <div class="logo">
+            <h1><img src="i/logo_stoq.png" alt="StoQ" /></h1>
         </div>
-        <br><br>
+			
+        <div id="headline">
+            <h2>analysis. simplified.</h2>
+            <a href="https://github.com/PUNCH-Cyber/stoq" class="btnOrange">Download</a>
+        </div>	
+    </div>    
+</section>
 
-      </div>
-    </div>
-    <div class="parallax"><img src="background5.jpg" alt="background image 5"></div>
-  </div>
+<div style="position:relative"><a name="aboutStart" style="position:absolute;top:-30px;"></a></div>
+<section id="overview" data-type="background" data-speed="10">
+    <div class="content">
 
-  <div class="container">
-    <div class="section">
-
-      <div class="row">
-        <div class="col s12 center">
-          <h3><i class="mdi-content-send brown-text"></i></h3>
-          <h4>Overview</h4>
-          <p class="left-align light">StoQ is a modular and highly customizable framework for the creation of data sets from multiple disparate data sources. StoQ leverages multiple robust technologies in order to allow for a scalable and distributed architecture. The framework can be quickly and easily extended by utilizing an embedded plugin architecture.</p>
+        <div class="overview"><a name="overview"></a>
+            <h3>Overview</h3>
+            <img src="i/logo_stoq_mark.png" alt="StoQ">
+            <!--<span class="icon-stoQ-mini-outline2" style="font-size:5rem;"></span>-->
+            <p class="intro">stoQ is a modular and highly customizable framework for the creation of data sets from multiple disparate data sources. stoQ leverages multiple robust technologies in order to allow for a scalable and distributed architecture. The framework can be quickly and easily extended by utilizing an embedded plugin architecture.</p>
+            
+            
+          <div class="col-md-12">
+            <div class="col-md-4">
+            	<h4><span class="icon icon-ic_flash_on_black_48px-2"></span>Simplified Automation</h4>
+            	<p>A modern and highly modular framework that allows for quick and easy analysis of files, network traffic, IOC extraction, and just about anything else an analyst may need.</p>
+            </div>
+            <div class="col-md-4">
+            	<h4><span class="icon icon-ic_group_black_48px"></span>Individual and Enterprise Ready</h4>
+            	<p>From junior to senior analysts, everyone can use stoQ. By collecting analytic results from all sources utilized by an individual or a team, anyone can quickly search for previous examples of anything collected. From enterprise level automated analysis to an analyst processing individuals files, stoQ can do it.</p>
+            </div>
+            <div class="col-md-4">
+            	<h4><span class="icon icon-ic_storage_black_48px"></span>Database Independent</h4>
+  				<p>Multiple databases to rule them all. Whether you want to use an RDBM, NoSQL, NewSQL, raw files, or a mixture of them all, stoQ has you covered.</p>
+            </div>
+          </div>
+          
+          <div class="col-md-12">
+            <div class="col-md-4">
+            	<h4><span class="icon icon-ic_settings_black_48px-2"></span>Robust Plugin Architecture</h4>
+            	<p>The primary purpose of stoQ is to simplify repetetive analytic tasks. The modular plugin framework embedded within stoQ allows for analysts to quickly develop new plugins without having to worry about databases, input, or output.</p>
+            </div>
+            <div class="col-md-4">
+            	<h4><span class="icon icon-ic_sync_black_48px"></span>Agile Template Engine</h4>
+            	<p>Have you ever needed to format data specifically for a device, database, or some archaic requirement? Well, you no longer need worry about how to transform your data since stoQ supports Jinja2 templating for all plugin outputs.</p>
+            </div>
+            <div class="col-md-4">
+            	<h4><span class="icon icon-ic_remove_red_eye_black_48px"></span>Advanced Content Extraction</h4>
+  				<p>Do you need to analyze content with multiple layers of obfuscation or encoding? Perhaps you have an XOR encoded Executable file within an OLE stream within a compressed archive? No problem. Using stoQ's dispatching capabilities, this is a completely automated process.</p>
+            </div>
+          </div>
+          
+          <div class="col-md-12 callOut">
+          	<p>A modern framework to simplify analysis.</p>
+          	<div class="col-md-12 btnWrapper"><a href="https://github.com/PUNCH-Cyber/stoq" class="btnGray">Download</a></div>
+          </div>
+          
         </div>
-      </div>
 
+        
+    <div class="clearFloat"></di>    
     </div>
-  </div>
+</section>
+	
+	
+<div style="position:relative"><a name="contactStart" style="position:absolute;top:-80px;"></a></div>
+<section id="contact">
+    <div class="content">
 
-  <div class="container">
-    <div class="section">
 
-      <!--   Icon Section   -->
-      <div class="row">
-        <div class="col s12 m4">
-          <div class="icon-block">
-            <h2 class="center brown-text"><i class="material-icons">flash_on</i></h2>
-            <h5 class="center">Simplified Automation</h5>
-
-            <p class="light">A modern and highly modular framework that allows for quick and easy analysis of files, network traffic, IOC extraction, and just about anything else an analyst may need.</p>
+        <div class="col-md-6">
+        	<h3>About Us</h3>
+        	<h4 class="grayDark large initialCaps">PUNCH Cyber Analytics Group</h4>
+        	<div class="contactInfo">
+        		<p>PUNCH is a boutique cyber-consulting firm that provides advanced analytics and strategic support to government and commercial clients. Our primary focus is in improving an organization’s awareness of and ability to manage a growing cyber threat environment. We focus on bolstering cyber preparedness by improving an organization’s analysts and the tools at their disposal.</p>
+            <!--
+            <p><strong>Phone:</strong> 703-594-7266</p>
+            <p><strong>Email:</strong> <a href="mailto:info@punchcyber.com">info@punchcyber.com</a></p>
+            -->
+	        </div> 
+    	</div>    
+    	<div class="col-md-6 footerNav">
+          <div class="col-md-6">
+        	<h3>stoQ</h3>
+        	<ul>
+        		<li><a href="http://stoq.punchcyber.com/docs">Documentation</a></li>
+        		<li><a href="https://github.com/PUNCH-Cyber/stoq">Download</a></li>
+        		<!--<li><a href="">Issues</a></li>-->
+        	</ul>
+          </div>
+          <div class="col-md-6">
+        	<h3>Connect</h3>
+        	<ul>
+        		<li><a href="http://www.punchcyber.com">Punch</a></li>
+        		<li><a href="https://twitter.com/PunchCyber">twitter</a></li>
+        	</ul>
           </div>
         </div>
-
-        <div class="col s12 m4">
-          <div class="icon-block">
-            <h2 class="center brown-text"><i class="material-icons">group</i></h2>
-            <h5 class="center">Individual and Enterprise Ready</h5>
-
-            <p class="light">From junior to senior analysts, everyone can use StoQ. By collecting analytic results from all sources utilized by an individual or a team, anyone can quickly search for previous examples of anything collected. From enterprise level automated analysis to an analyst processing individuals files, StoQ can do it.</p>
-          </div>
+        <!--
+        <div class="moveLeft address">
+            <p>One Round Apple Way</p>
+            <p>Suite 490</p>
+            <p>Great Falls, VA 2356</p>
+        </div>    
+        -->
+        <div class="clearFloat"></div>
+        
+        <div id="sociallinks">
+            <ul>
+                <!--<li><a href="#" class="facebook">On Facebook</a></li>-->
+                <li><a href="https://twitter.com/PunchCyber" target="_blank" class="twitter">On Twitter</a></li>
+            </ul>
         </div>
+        
+        <p class="copyright">&copy;2015 <strong>PUNCH CYBER</strong> ANALYTICS GROUP. All Rights Reserved.</p>
+        
+        
+		</div>
+</section>
+	
+	
+        <!-- nav fixed top -->
+        <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+        <script type="text/javascript">
+        
+            var num = 1180; //number of pixels before modifying styles
 
-        <div class="col s12 m4">
-          <div class="icon-block">
-            <h2 class="center brown-text"><i class="mdi-device-storage"></i></h2>
-            <h5 class="center">Database Independent</h5>
+            $(window).bind('scroll', function () {
+                if ($(window).scrollTop() > num) {
+                    $('.menu').addClass('floatmenu');
+                    $('.floatmenu').fadeIn();
+                } else {
+                    $('.menu').removeClass('floatmenu');
+                    $(".menu").css({"display":"none"});
+                }
+            });
 
-            <p class="light">Multiple databases to rule them all. Whether you want to use an RDBM, NoSQL, NewSQL, raw files, or a mixture of them all, StoQ has you covered.</p>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col s12 m4 l4">
-          <div class="icon-block">
-            <h2 class="center brown-text"><i class="material-icons">settings</i></h2>
-            <h5 class="center">Robust Plugin Architecture</h5>
-
-            <p class="light">The primary purpose of StoQ is to simplify repetetive analytic tasks. The modular plugin framework embedded within StoQ allows for analysts to quickly develop new plugins without having to worry about databases, input, or output.</p>
-          </div>
-        </div>
-        <div class="col s12 m4 l4">
-          <div class="icon-block">
-            <h2 class="center brown-text"><i class="mdi-maps-layers"></i></h2>
-            <h5 class="center">Agile Template Engine</h5>
-
-            <p class="light">Have you ever needed to format data specifically for a device, database, or some archaic requirement? Well, you no longer need worry about how to transform your data since StoQ supports Jinja2 templating for all plugin outputs.</p>
-          </div>
-        </div>
-        <div class="col s12 m4 l4">
-          <div class="icon-block">
-            <h2 class="center brown-text"><i class="material-icons">visibility</i></h2>
-            <h5 class="center">Advanced Content Extraction</h5>
-
-            <p class="light">Do you need to analyze content with multiple layers of obfuscation or encoding? Perhaps you have an XOR encoded Executable file within an OLE stream within a compressed archive? No problem. Using StoQ's dispatching capabilities, this is a completely automated process.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="parallax-container valign-wrapper">
-    <div class="section no-pad-bot">
-      <div class="container">
-        <div class="row center">
-          <h5 class="header col s12 light">A modern framework to simplify analysis.</h5>
-        </div>
-      </div>
-    </div>
-    <div class="parallax"><img src="background3.jpg" alt="background image 3"></div>
-  </div>
-
-  <footer class="page-footer teal">
-    <div class="container">
-      <div class="row">
-        <div class="col l6 s12">
-            <h5 class="white-text">PUNCH Cyber Analytics Group</h5>
-          <p class="grey-text text-lighten-4">PUNCH is a boutique cyber-consulting firm that provides advanced analytics and strategic support to government and commercial clients. Our primary focus is in improving an organization’s awareness of and ability to manage a growing cyber threat environment. We focus on bolstering cyber preparedness by improving an organization’s analysts and the tools at their disposal.</p>
+        </script>
+    
 
 
-        </div>
-        <div class="col l3 s12">
-            <h5 class="white-text">StoQ</h5>
-          <ul>
-            <li><a class="white-text" href="/docs/">Documentation</a></li>
-            <li><a class="white-text" href="https://github.com/PUNCH-Cyber/stoq/">Download</a></li>
-            <li><a class="white-text" href="https://github.com/PUNCH-Cyber/stoq/issues">Issues</a></li>
-          </ul>
-        </div>
-        <div class="col l3 s12">
-          <h5 class="white-text">Connect</h5>
-          <ul>
-            <li><a class="white-text" href="http://punchcyber.com">PUNCH</a></li>
-            <li><a class="white-text" href="https://twitter.com/punchcyber">Twitter</a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <div class="footer-copyright">
-      <div class="container">
-      </div>
-    </div>
-  </footer>
 
-
-  <!--  Scripts-->
-  <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-  <script src="js/materialize.js"></script>
-  <script src="js/init.js"></script>
-
-  </body>
+</body>
 </html>
