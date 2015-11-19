@@ -54,12 +54,17 @@ section#main-header {background:#1e1e1e url('i/DLbg.png') center top no-repeat; 
 section#main-header p {font-size:1.3em; line-height:1.3em;}
 
 #top-navigation {height:140px;}
-#top-navigation ul.mainNav {float:right; position:relative; top:28px;}
+#top-navigation ul {margin-top:15px;}
+#top-navigation ul.mainNav {float:right; position:relative; top:15px; z-index:10;}
 #top-navigation ul li.punch {padding-left:60px; height:60px; display:block; background:url("i/logo_punch_small.png")  1px 10px no-repeat;}
-#top-navigation ul {min-width:310px;}
 #top-navigation ul li {display:inline; margin-right:44px;}
 #top-navigation ul li a {font-size:.7em; font-weight:800; text-transform:uppercase; padding:18px 0 25px 0; color:#595959; border-bottom:1px solid #595959;}
 #top-navigation ul li a:hover {color:#a8a8a8; border-bottom:3px solid #ff8847;}
+
+.navbar-default {background:transparent; border:transparent;}
+.navbar-default .navbar-toggle {border-color:transparent; margin-top:40px;}
+.navbar-default .navbar-toggle:hover {background-color:#ff8847; color:#231f20;}
+.navbar-default .navbar-toggle:hover .icon-bar {background-color:#231f20;}
 
 .pagelogo-punch {display:inline-block; position:relative; top:40px;}
 .pagelogo-stoq {display:inline-block; position:absolute; width:100%; text-align:center; top:40px; left:0;;}
@@ -67,6 +72,7 @@ section#main-header p {font-size:1.3em; line-height:1.3em;}
 #floatmenu {display:none; background:#1e1e1e; opacity:0.9; position:fixed; top:0; left:0; padding-top:0; z-index:1000; width:100%; height:105px;}
 #floatmenu .mark {width:100%; margin:30px; text-align:center; background:none;}
 #floatmenu .backtotop {margin-top:35px; margin-right:40px;}
+
 
 #headline {max-width:670px; margin:0 auto; margin-bottom:70px;}
 #headline h2 {font-family:ff-meta-serif-web-pro; font-weight:700; font-size:2em; color:#8f8d8d; line-height:1em; margin-bottom:85px;}
@@ -149,7 +155,7 @@ input[type="submit"]:hover, input.habla_offline_submit_input[type="submit"]:hove
 .copyright {font-size:.8em; margin-top:80px; color:#c2c2c2;}
 
 
-/* Smartphones (portrait) ----------- */
+/* Phone Size ----------- */
 @media all and (max-device-width:320px), (max-width:410px) {
 
     #top-navigation ul li a {font-size:.7em;}
@@ -175,24 +181,27 @@ input[type="submit"]:hover, input.habla_offline_submit_input[type="submit"]:hove
 	input[type="text"], textarea {padding: 10px;}
 	input[type="submit"] {padding: 17px 25px 15px 30px;}
 	input.habla_offline_submit_input[type="submit"] {display:inline; padding: 5px 0 0; text-align: center; width:100%;}
+	
+	#top-navigation ul li.punch {display:none;}
+	.navbar-default .navbar-collapse, .navbar-default .navbar-form {border-top:4px solid #ff8847; padding:0;}
+	#top-navigation ul {background:#1e1e1e; width:100%; margin:0;}
+	#top-navigation ul li a {padding-left:20px; border-color:#000;}
+	
+	.callOut {width:100%; left:0;}
 
 
 
 }
 
-/* Smartphones (landscape) ----------- */
-@media all and (max-device-width: 760px) and (orientation: landscape) {
-
-.grid1-2 {float:none; width:100%; margin-right:0;}
-
-    
-}
 
 /* Minimized Browser  ----------- */
-@media all and (min-width:411px) and (max-width:600px) {
+@media all and (min-width:411px) and (max-width:768px) {
 
+	.container {width:100%;}
+	
     .grid1-2 {float:none; width:100%; margin-right:0;}
     .moveRight {float:none; margin:20px 0;}
+    
     
     #about .aboutBody {width: 100%; margin-bottom:80px;}
     #about .team {float:none; margin-left:0; width:100%; padding-top:0;}
@@ -210,18 +219,21 @@ input[type="submit"]:hover, input.habla_offline_submit_input[type="submit"]:hove
 	input[type="submit"] {padding: 17px 25px 15px 30px;}
 	input.habla_offline_submit_input[type="submit"] {display:inline; padding: 5px 0 0; text-align: center; width:100%;}
 
-	.mainNav {display:none;}
-	.pagelogo-punch {display:none;}
-	
+	#top-navigation ul li.punch {display:none;}
+	.navbar-default .navbar-collapse, .navbar-default .navbar-form {border-top:4px solid #ff8847; padding:0;}
+	#top-navigation ul {background:#1e1e1e; width:100%; margin:0;}
+	#top-navigation ul li a {padding-left:20px; border-color:#000;}
+ 	
 	.callOut {width:100%; left:0;}
 
 }
 
-/* iPads (portrait) ----------- */
-@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) and (orientation : portrait) {
 
+
+/* Bootstarp Overrides  ----------- */
+@media all and (min-width: 768px) {
+	.container {width:100%;}
 }
-
 
 
 
