@@ -9,6 +9,11 @@ technologies in order to allow for a scalable and distributed architecture.
 The framework can be quickly and easily extended by utilizing an embedded
 plugin architecture.
 
+### Plugins
+
+stoQ plugins are available separately in the [plugin repository](https://github.com/PUNCH-Cyber/stoq-plugins-public)
+
+
 ## Installation and Usage
 
  - Additional documentation can be found at [docs](http://stoq.punchcyber.com/docs/).
@@ -124,11 +129,6 @@ Now, we can install the basic plugins that are commonly used within *stoQ*::
 *Note: tika requires that Apache Tika be installed (https://tika.apache.org/download.html)*
 
 *Note: clamav requires that a ClamAV daemon be installed (http://www.clamav.net/)*
-
-### Additional Plugins
-
-There are several other plugins that available in the *stoQ* public
-plugin repository at https://github.com/PUNCH-Cyber/stoq-plugins-public
 
 
 ## Supervisord
