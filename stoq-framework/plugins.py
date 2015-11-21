@@ -784,8 +784,8 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         # If we are saving the results from the worker, let's take care of
         # it. This is defined in the .stoq configuration file for the
-        # worker plugin.
-        if self.saveresults:
+        # worker plugin. An output_connector must also be defined.
+        if self.saveresults and self.output_connector:
             # Just to ensure we have loaded a connector for output
             self.load_connector(self.output_connector)
             # If there is a template that is named after the output connector
