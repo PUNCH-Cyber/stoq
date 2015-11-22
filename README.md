@@ -201,6 +201,11 @@ Log into the new box::
     vagrant ssh
 
 
+Switch to the ```stoq``` user::
+
+    sudo su - stoq
+
+
 Your newly installed *stoQ* instance is now available in ``/usr/local/stoq``.
 
 All done!
