@@ -25,7 +25,7 @@ from stoq.logo import print_logo
 
 if __name__ == '__main__':
 
-    stoq = Stoq()
+    stoq = Stoq(argv=sys.argv)
 
     parser = ArgumentParser(formatter_class=RawDescriptionHelpFormatter,
                             description=print_logo(),
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     ''')
 
     parser.add_argument("command", help="Subcommand to be run")
-    options = parser.parse_args(sys.argv[1:2])
+    options = parser.parse_args(stoq.argv[1:2])
 
     if not options.command or options.command == 'help':
         parser.print_help()

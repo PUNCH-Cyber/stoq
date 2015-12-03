@@ -89,7 +89,6 @@ try:
     import yara
     yara_imported = True
 except ImportError:
-    print("[!] yara-python not installed. Dispatching will not work.")
     yara_imported = False
 
 from yapsy.PluginManager import PluginManager
@@ -1069,7 +1068,6 @@ class StoqDecoderPlugin(StoqPluginBase):
 
 class StoqPluginInstaller:
 
-    import sys
     import pip
     import glob
     import argparse
@@ -1088,7 +1086,7 @@ class StoqPluginInstaller:
                                     action="store_true",
                                     help="Upgrade the stoQ Plugin")
 
-        options = parser.parse_args(self.sys.argv[2:])
+        options = parser.parse_args(self.stoq.argv[2:])
 
         if not options.plugin:
             parser.print_help()

@@ -34,8 +34,8 @@ API
 ===
 """
 
-import hashlib
 import magic
+import hashlib
 import ssdeep
 
 

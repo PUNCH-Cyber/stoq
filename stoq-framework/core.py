@@ -58,7 +58,6 @@ API
 """
 
 import os
-import sys
 import uuid
 import logging
 import requests
@@ -72,7 +71,7 @@ from bs4 import UnicodeDammit
 from stoq.plugins import StoqPluginManager
 
 
-__version__ = "0.9.6"
+__version__ = "0.9.7"
 
 
 class Stoq(StoqPluginManager):
@@ -81,11 +80,37 @@ class Stoq(StoqPluginManager):
 
     """
 
-    def __init__(self):
+    def __init__(self, argv=None, base_dir=None):
+        """
+        Initialize a stoQ class
+
+        :param list argv: sys.argv or list of command line arguments
+        :param str base_dir: Base directory that is the root for all paths
+
+        """
+
+        # If Stoq is instantiated from a command line script, such as
+        # stoq-cli.py, we will parse the command line parameters. If not,
+        # we will set the command line parameters to an empty list so we
+        # can still have our required variables set without making spaghetti
+        # code.
+        if argv:
+            self.argv = argv
+        else:
+            self.argv = ['']
+
+        # Default to the base directory as the working directory, otherwise
+        # it will be set to the value passed at instantiation. This value
+        # will determine the default values for all paths required by stoQ,
+        # unless they are overridden within the configuration file.
+        if not base_dir:
+            self.base_dir = os.path.realpath(os.path.dirname(self.argv[0]))
+        else:
+            self.base_dir = os.path.realpath(base_dir)
+
         # Make sure the stoQ objects we require exist.
         # Setup our basic directory structure. This is overwritten
         # if we have anything set in our configuration file.
-        self.base_dir = os.path.realpath(os.path.dirname(sys.argv[0]))
         self.log_dir = os.path.join(self.base_dir, "logs")
         self.results_dir = os.path.join(self.base_dir, "results")
         self.temp_dir = os.path.join(self.base_dir, "temp")
@@ -115,9 +140,8 @@ class Stoq(StoqPluginManager):
         self.max_recursion = 3
 
         # tuple() to match the root directory of where files can be ingested from.
-        # Need for get_file(). Setting to the root path of our command by
-        # default, just in case it isn't run from the CWD.
-        self.source_base_tuple = (os.path.realpath(os.path.dirname(sys.argv[0])))
+        # Need for get_file().
+        self.source_base_tuple = (self.base_dir)
 
         # Define what URL prefixes we accept
         self.url_prefix_tuple = ('http://', 'https://')

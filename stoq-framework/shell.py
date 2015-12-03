@@ -201,7 +201,6 @@ List contents of a directory::
 
 import os
 import cmd
-import sys
 import time
 
 from stoq.scan import get_hashes, get_magic 
@@ -536,5 +535,5 @@ class StoqShell(cmd.Cmd):
 
     def do_EOF(self, input):
         print("\nExiting...")
-        sys.exit(0)
+        exit(0)
 
