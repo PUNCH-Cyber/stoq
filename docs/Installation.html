@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     
-    <title>Installing &mdash; stoQ 0.9.6 documentation</title>
+    <title>Installing &mdash; stoQ 0.9.7 documentation</title>
     <meta name="description" content="">
     <meta name="author" content="">
 
@@ -32,7 +32,7 @@
 <script type="text/javascript">
   var DOCUMENTATION_OPTIONS = {
             URL_ROOT:    './',
-            VERSION:     '0.9.6',
+            VERSION:     '0.9.7',
             COLLAPSE_INDEX: false,
             FILE_SUFFIX: '.html',
             HAS_SOURCE:  true
@@ -46,7 +46,7 @@
 <script type="text/javascript" src="_static/js/basicstrap.js"></script>
 <script type="text/javascript">
 </script>
-    <link rel="top" title="stoQ 0.9.6 documentation" href="index.html" />
+    <link rel="top" title="stoQ 0.9.7 documentation" href="index.html" />
     <link rel="next" title="Plugin Development" href="PluginDevelopment.html" />
     <link rel="prev" title="stoQ: Analysis. Simplified." href="index.html" /> 
   </head>
@@ -60,7 +60,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="index.html">stoQ 0.9.6 documentation</a>
+          <a class="navbar-brand" href="index.html">stoQ 0.9.7 documentation</a>
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
@@ -360,7 +360,7 @@ plugins to monitor RabbitMQ and save any results into MongoDB. We&#8217;ve insta
 <p>Now, let&#8217;s create a new file in <code class="docutils literal"><span class="pre">`/etc/supervisor/conf.d`</span></code> named <code class="docutils literal"><span class="pre">`stoq.conf`</span></code>
 with the below content:</p>
 <div class="highlight-python"><div class="highlight"><pre>[program:exif]
-command=/usr/local/stoq/.stoq-pyenv/bin/python stoq-cli.py %(program_name)s -i rabbitmq -C mongodb
+command=/usr/local/stoq/.stoq-pyenv/bin/python stoq-cli.py %(program_name)s -I rabbitmq -C mongodb
 process_name=%(program_name)s_%(process_num)02d
 directory=/usr/local/stoq
 autostart=true
@@ -370,7 +370,7 @@ numprocs=1
 user=stoq
 
 [program:yara]
-command=/usr/local/stoq/.stoq-pyenv/bin/python stoq-cli.py %(program_name)s -i rabbitmq -C mongodb
+command=/usr/local/stoq/.stoq-pyenv/bin/python stoq-cli.py %(program_name)s -I rabbitmq -C mongodb
 process_name=%(program_name)s_%(process_num)02d
 directory=/usr/local/stoq
 autostart=true
@@ -433,7 +433,7 @@ VirtualBox from <a class="reference external" href="https://www.virtualbox.org/w
 <div id="navbar-related" class=" related navbar navbar-default" role="navigation" aria-label="related navigation">
   <div class="navbar-inner">
     <ul class="nav navbar-nav ">
-        <li><a href="index.html">stoQ 0.9.6 documentation</a></li>
+        <li><a href="index.html">stoQ 0.9.7 documentation</a></li>
     </ul>
 <ul class="nav navbar-nav pull-right hidden-xs hidden-sm">
       

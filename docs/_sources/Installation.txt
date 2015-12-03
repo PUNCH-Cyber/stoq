@@ -171,7 +171,7 @@ Now, let's create a new file in ```/etc/supervisor/conf.d``` named ```stoq.conf`
 with the below content::
 
     [program:exif]
-    command=/usr/local/stoq/.stoq-pyenv/bin/python stoq-cli.py %(program_name)s -i rabbitmq -C mongodb
+    command=/usr/local/stoq/.stoq-pyenv/bin/python stoq-cli.py %(program_name)s -I rabbitmq -C mongodb
     process_name=%(program_name)s_%(process_num)02d
     directory=/usr/local/stoq
     autostart=true
@@ -181,7 +181,7 @@ with the below content::
     user=stoq
 
     [program:yara]
-    command=/usr/local/stoq/.stoq-pyenv/bin/python stoq-cli.py %(program_name)s -i rabbitmq -C mongodb
+    command=/usr/local/stoq/.stoq-pyenv/bin/python stoq-cli.py %(program_name)s -I rabbitmq -C mongodb
     process_name=%(program_name)s_%(process_num)02d
     directory=/usr/local/stoq
     autostart=true

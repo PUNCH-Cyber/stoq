@@ -112,38 +112,60 @@ To view a complete listing of available plugins simply call ``stoq-cli.py`` with
         |______    |    |     | |   __|
         ______|    |    |_____| |____\|
 
+             Analysis. Simplified.
+                   v0.9.7
+
     Available Plugins:
-    connectors
-        - file                v0.9    Retrieves and saves content to local disk
+     connectors
+        - s3                  v0.1    Sends and retrieves content from Amazon S3 buckets
+        - queue               v0.1    Send results to a queuing system, such as RabbitMQ
+        - mongodb             v0.9    Sends and retrieves content from MongoDB
+        - emailer             v0.1    Send results to recipients via e-mail
+        - elasticsearch       v0.2    Saves content to an ElasticSearch index
         - stdout              v0.9    Sends content to STDOUT
-    extractors
-        - decompress          v0.9    Extract content from a multitude of archive formats
-        - gpg                 v0.1    Handle GnuPG encrypted content
-    readers
-        - iocregex            v0.9    Regex routines to extract and normalize IOC's from a payload
-    carvers
-        - ole                 v0.9    Carve OLE streams within Microsoft Office Documents
-        - pe                  v0.9    Carve portable executable files from a data stream
-        - rtf                 v0.9    Carve hex/binary streams from RTF payloads
-        - swf                 v0.9    Carve and decompress SWF payloads
-        - xdp                 v0.9    Carve and decode streams from XDP documents
-    workers
-        - censys              v0.1    Interact with Censys.io API
-        - exif                v0.9    Processes a payload using ExifTool
-        - peinfo              v0.9    Gather relevant information about an executable using pefile
-        - publisher           v0.9    Publish messages to single or multiple RabbitMQ queues for processing
-        - threatcrowd         v0.1    Interact with ThreatCrowd API
-        - yara                v0.9    Process a payload using yara
-    decoders
-        - b64                 v0.1    Decode base64 encoded content
-        - b85                 v0.1    Decode base85 encoded content
-        - bitwise_rotate      v0.1    Rotate bits left or right. Defaults to 4 bits right for nibble swapping.
-        - rot47               v0.1    Decode ROT47 encoded content
-        - xor                 v0.1    Decode XOR encoded content
-    sources
+        - file                v0.9    Retrieves and saves content to local disk
+        - fluentd             v0.1    Sends content to a fluentd server
+     sources
+        - rabbitmq            v0.9    Publish and Consume messages from a RabbitMQ Server
         - dirmon              v0.9    Monitor a directory for newly created files for processing
         - filedir             v0.9    Ingest a file or directory for processing
-
+     carvers
+        - pe                  v0.9    Carve portable executable files from a data stream
+        - swf                 v0.9    Carve and decompress SWF payloads
+        - ole                 v0.9    Carve OLE streams within Microsoft Office Documents
+        - xdp                 v0.9    Carve and decode streams from XDP documents
+        - rtf                 v0.9    Carve hex/binary streams from RTF payloads
+     workers
+        - basicworker         v0.1    StoQ framework example of a basic worker plugin
+        - peinfo              v0.9    Gather relevant information about an executable using pefile
+        - passivetotal        v0.5    Query PassiveTotal API for a domain or IP address
+        - threatcrowd         v0.1    Interact with ThreatCrowd API
+        - opswat              v0.9    Submit content to an OPSWAT Metascan server for scanning and retrieve the results
+        - exif                v0.9    Processes a payload using ExifTool
+        - publisher           v0.9    Publish messages to single or multiple RabbitMQ queues for processing
+        - trid                v0.4    Identify file types from their TrID signature
+        - totalhash           v0.7    Query TotalHash API for analysis results
+        - xorsearch           v0.9    Search a payload for XOR'd strings
+        - clamav              v0.1    Scan content with ClamAV
+        - yara                v0.9    Process a payload using yara
+        - censys              v0.2    Interact with Censys.io API
+        - iocextract          v0.9    Utilizes reader/iocregex plugin to extract indicators of compromise from documents
+        - vtmis               v0.9    Interact with VTMIS public and private API
+        - slack               v0.9    Interact with StoQ Plugins using Slack as an interface
+        - fireeye             v0.1    Saves a file into a directory fireeye monitors via CIFS for analysis
+     readers
+        - pdftext             v0.9    Extract text from a PDF document
+        - tika                v0.1    Upload content to a Tika server for automated text extraction
+        - iocregex            v0.9    Regex routines to extract and normalize IOC's from a payload
+     extractors
+        - decompress          v0.9    Extract content from a multitude of archive formats
+        - gpg                 v0.1    Handle GnuPG encrypted content
+     decoders
+        - rot47               v0.1    Decode ROT47 encoded content
+        - bitrot              v0.1    Rotate bits left or right. Defaults to 4 bits right for nibble swapping.
+        - b64                 v0.1    Decode base64 encoded content
+        - b85                 v0.1    Decode base85 encoded content
+        - xor                 v0.1    Decode XOR encoded content
 
 
 Now that we have a complete listing of available worker and connector plugins,
@@ -160,28 +182,26 @@ We can simply run |stoQ| with the following command line arguments::
             "md5" : "0ace1c67d408986ca60cd52272dc8d35",
             "payload_id" : 0,
             "plugin" : "yara",
-            "scan" : [ {"hits" : [ {
-                            "matches" : true,
-                            "meta" : {
-                                    "author" : "PUNCH Cyber Analytics Group",
-                                    "cve" : "N/A",
-                                    "description" : "Badness",
-                                    "type" : "Suspicious String",
-                                    "version" : "1.0",
-                                    "weight" : 100
-                                    },
-                            "namespace" : "default",
-                            "rule" : "win_api_LoadLibrary",
-                            "strings" : [
-                                    [
-                                        "23967",
-                                        "$LoadLibrary",
-                                        "b'LoadLibrary'"
-                                    ],
-                                ],
-                            "tags" : [  ]
-                            } ],
-                        }
+            "scan" : [ { "matches" : true,
+                         "meta" : {
+                                 "author" : "PUNCH Cyber Analytics Group",
+                                 "cve" : "N/A",
+                                 "description" : "Badness",
+                                 "type" : "Suspicious String",
+                                 "version" : "1.0",
+                                 "weight" : 100
+                                 },
+                         "namespace" : "default",
+                         "rule" : "win_api_LoadLibrary",
+                         "strings" : [
+                                 [
+                                     "23967",
+                                     "$LoadLibrary",
+                                     "b'LoadLibrary'"
+                                 ],
+                             ],
+                         "tags" : [  ]
+                       }
                     ],
             "sha1" : "5a04547c1c56064855c3c6426448d67ccc1e0829",
             "sha256" : "458f1bb61b7ef167467228141ad44295f3425fbeb6303e9d31607097d6869932",

@@ -129,7 +129,6 @@ Below is an example of a basic worker plugin.
 .. code:: python
 
     # Required imports
-    import sys
     import argparse
     from stoq.args import StoqArgs
     from stoq.plugins import StoqWorkerPlugin
@@ -168,8 +167,10 @@ Below is an example of a basic worker plugin.
 
             # The first command line argument is reserved for the framework.
             # The work should only parse everything after the first command
-            # line argument
-            options = parser.parse_args(sys.argv[2:])
+            # line argument. We must always use stoQ's argv object to ensure
+            # the plugin is properly instantied whether it is imported or
+            # used via a command line script
+            options = parser.parse_args(self.stoq.argv[2:])
 
             # If we need to handle command line argument, let's pass them
             # to super().activate so they can be instantied within the worker
