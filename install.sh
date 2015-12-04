@@ -90,10 +90,9 @@ install_core() {
     set -e
     cd $STAGE_DIR
 
-    # We have to install cython first, because setuptools will fail to find
-    # dependencies
-    pip install cython
     python setup.py install 
+    # hydra requires Cython to be installed, so we will install it separately
+    pip install hydra
 
     if [ ! -d $PLUGIN_DIR ]; then
         git clone https://github.com/PUNCH-Cyber/stoq-plugins-public.git 
