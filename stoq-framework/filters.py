@@ -24,7 +24,10 @@ Examples
 
 import time
 import threading
-from hydra import UpdatingBloomFilter, WritingBloomFilter
+try:
+    from hydra import UpdatingBloomFilter, WritingBloomFilter
+except ImportError:
+    raise Exception("[!] hydra must be installed to use bloom filters")
 
 
 class StoqBloomFilter(object):
