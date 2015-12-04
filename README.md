@@ -16,6 +16,7 @@ stoQ plugins are available separately in the [plugin repository](https://github.
 
 ## Installation and Usage
 
+ - Requires python 3.3 or greater
  - Additional documentation can be found at [docs](http://stoq.punchcyber.com/docs/).
 
 
@@ -123,9 +124,9 @@ Now, we can install the basic plugins that are commonly used within *stoQ*::
 
 
 *Note: xorsearch requires XORsearch to be installed (http://blog.didierstevens.com/programs/xorsearch)*
-       
+
 *Note: exif requires ExifTool to be installed (http://www.sno.phy.queensu.ca/~phil/exiftool)*
-       
+
 *Note: tika requires that Apache Tika be installed (https://tika.apache.org/download.html)*
 
 *Note: clamav requires that a ClamAV daemon be installed (http://www.clamav.net/)*
@@ -137,7 +138,7 @@ Now, we can install the basic plugins that are commonly used within *stoQ*::
 daemon mode. In our example, let's say that we want to use the yara and exif
 plugins to monitor RabbitMQ and save any results into MongoDB. We've installed
 *stoQ* into /usr/local/stoq and our python virtual environment is in 
-```/usr/local/stoq/env```. First, let's install the supervisor Ubuntu package::
+```/usr/local/stoq/.stoq-pyenv```. First, let's install the supervisor Ubuntu package::
 
     sudo apt-get install supervisor
 
