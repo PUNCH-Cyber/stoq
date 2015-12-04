@@ -231,7 +231,7 @@ class Stoq(StoqPluginManager):
 
         .. note:: A file will only be opened from disk if the
                   path of the file matches the regex defined by
-                  ingest_base in stoq.cfg.
+                  source_base_tuple in stoq.cfg.
 
         :param bytes source: Path or URL of file to read.
         :param bytes params: Additional parameters to pass if requesting a URL
@@ -329,14 +329,10 @@ class Stoq(StoqPluginManager):
         :param str payload: Data to be written to disk
         :param str filename: Filename, if none is provided, a random filename
                              will be used
-        :type filename: str or None
-        :param path: Path for output file
-        :type path: str or None
-        :param binary: Define whether content is binary or not
-        :type binary: True or False
-        :param overwrite: Define whether output file should be
+        :param str path: Path for output file
+        :param bool binary: Define whether content is binary or not
+        :param bool overwrite: Define whether output file should be
                           overwritten
-        :type overwrite: True or False
 
         :returns: Full path of file that was written
         :rtype: str or False
