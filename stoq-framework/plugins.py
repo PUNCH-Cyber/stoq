@@ -717,7 +717,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         worker_result['uuid'] = kwargs['uuid']
 
         # Preserve the original metadata that was submitted with this payload
-        worker_result['source_meta'] = kwargs
+        worker_result['source_meta'] = kwargs.copy()
         # We store the uuid at the top level of the dict, let's not duplicate
         # it in the metadata key as well.
         worker_result['source_meta'].pop('uuid', None)
