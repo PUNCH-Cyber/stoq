@@ -715,8 +715,16 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         worker_result['plugin'] = self.name
         worker_result['uuid'] = kwargs['uuid']
+
+        # Preserve the original metadata that was submitted with this payload
+        worker_result['source_meta'] = kwargs
+        # We store the uuid at the top level of the dict, let's not duplicate
+        # it in the metadata key as well.
+        worker_result['source_meta'].pop('uuid', None)
+
         if payload:
             worker_result['size'] = len(payload)
+
         worker_result['payload_id'] = 0
 
         # Keep track of our total count of payloads, in case yara dispatch
