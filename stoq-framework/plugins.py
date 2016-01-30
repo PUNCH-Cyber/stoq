@@ -675,6 +675,8 @@ class StoqWorkerPlugin(StoqPluginBase):
             # load the appropriate plugin if required. Then, we will call
             # get_file() to grab the payload.
             archive_type = kwargs['archive']
+            worker_result['archive'] = kwargs['archive']
+
             self.load_connector(archive_type)
             if hasattr(self.connectors[archive_type], 'get_file'):
                 payload = self.connectors[archive_type].get_file(**kwargs)
@@ -688,8 +690,12 @@ class StoqWorkerPlugin(StoqPluginBase):
             if 'filename' not in kwargs:
                 if 'path' in kwargs:
                     kwargs['filename'] = os.path.basename(kwargs['path'])
+                    worker_result['path'] = kwargs['path']
                 else:
                     kwargs['filename'] = "Unknown"
+
+                # Make sure we save the filename in the worker results as well
+                worker_result['filename'] = kwargs['filename']
 
             # If this worker wants us to save this payload to the archive, let's
             # handle that now before anything else. Otherwise any subsequent
@@ -718,9 +724,12 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         # Preserve the original metadata that was submitted with this payload
         worker_result['source_meta'] = kwargs.copy()
-        # We store the uuid at the top level of the dict, let's not duplicate
+        # We store these at the top level of the dict, let's not duplicate
         # it in the metadata key as well.
         worker_result['source_meta'].pop('uuid', None)
+        worker_result['source_meta'].pop('filename', None)
+        worker_result['source_meta'].pop('path', None)
+        worker_result['source_meta'].pop('archive', None)
 
         if payload:
             worker_result['size'] = len(payload)
