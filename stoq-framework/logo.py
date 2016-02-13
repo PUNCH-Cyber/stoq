@@ -174,19 +174,6 @@ def print_logo():
                          v{}
     """.format(__version__))
 
-    logo.append("""
-      ######        #     #   #        ##  
-                 #######  #   #  ######    
-    ##########    # #     #   #      #     
-         #        # #     #   # ########## 
-         #     ##########    #       #     
-        #           #       #        #     
-      ##            #     ##       ##      
-
-           Analysis. Simplified.
-                 v{}
-    """.format(__version__))
-
     sys.stdout.flush()
     print(random.choice(logo))
     sys.stdout.flush()
