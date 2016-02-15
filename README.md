@@ -37,7 +37,7 @@ installed utilzing the installation script provided with the framework.::
 
 Install the core requirements via apt-get and pip::
 
-    sudo apt-add-repository -yq multiverse
+    sudo apt-add-repository -y multiverse
     sudo apt-get install automake build-essential cython autoconf  \
                          python3 python3-dev python3-setuptools \
                          libyaml-dev libffi-dev libfuzzy-dev \
@@ -108,13 +108,13 @@ Now, we can install the basic plugins that are commonly used within *stoQ*::
     stoq-cli.py install /tmp/stoq-plugins-public/source/filedir
     stoq-cli.py install /tmp/stoq-plugins-public/reader/iocregex
     stoq-cli.py install /tmp/stoq-plugins-public/reader/pdftext
+    stoq-cli.py install /tmp/stoq-plugins-public/reader/tika
     stoq-cli.py install /tmp/stoq-plugins-public/worker/publisher
     stoq-cli.py install /tmp/stoq-plugins-public/worker/yara
     stoq-cli.py install /tmp/stoq-plugins-public/worker/iocextract
     stoq-cli.py install /tmp/stoq-plugins-public/worker/peinfo
     stoq-cli.py install /tmp/stoq-plugins-public/worker/xorsearch
     stoq-cli.py install /tmp/stoq-plugins-public/worker/exif
-    stoq-cli.py install /tmp/stoq-plugins-public/worker/tika
     stoq-cli.py install /tmp/stoq-plugins-public/worker/clamav
     stoq-cli.py install /tmp/stoq-plugins-public/worker/vtmis
     stoq-cli.py install /tmp/stoq-plugins-public/worker/censys
