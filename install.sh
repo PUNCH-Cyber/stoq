@@ -85,8 +85,8 @@ install_prereqs() {
 install_core() {
     echo "[stoQ] Installing core components..."
     set +e
-    sudo groupadd -r $STOQ_GROUP
-    sudo useradd -r -c stoQ -g $STOQ_GROUP -d $STOQ_DIR -s /bin/bash $STOQ_USER
+    groupadd -r $STOQ_GROUP
+    useradd -r -c stoQ -g $STOQ_GROUP -d $STOQ_DIR -s /bin/bash $STOQ_USER
     set -e
     cd $STAGE_DIR
 
@@ -187,12 +187,12 @@ install_xor() {
 # TrID worker
 install_trid() {
     echo "[stoQ] Installing trid"
-    sudo apt-get -yq install libc6-i386 lib32ncurses5
+    apt-get -yq install libc6-i386 lib32ncurses5
     cd $TMP_DIR
     # Download and install TRiD
     wget -O trid_linux_64.zip "http://mark0.net/download/trid_linux_64.zip"
-    sudo unzip -qq trid_linux_64 -d /usr/local/bin 
-    sudo chmod +x /usr/local/bin/trid
+    unzip -qq trid_linux_64 -d /usr/local/bin
+    chmod +x /usr/local/bin/trid
     rm -r trid_linux_64.zip
     # Download and install the definitions
     cd $TMP_DIR
