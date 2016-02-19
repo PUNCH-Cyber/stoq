@@ -121,7 +121,7 @@ install_core() {
 # Tika
 install_tika() {
     echo "[stoQ] Installing tika..."
-    TIKA_VERSION=1.11
+    TIKA_VERSION=1.12
     TIKA_INSTALL_DIR=/usr/local/tika
     apt-get -yq install default-jdk
     cd $TMP_DIR
