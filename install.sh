@@ -121,13 +121,20 @@ install_core() {
 # Tika
 install_tika() {
     echo "[stoQ] Installing tika..."
-    TIKA_VERSION=1.12
+
+    TIKA_URL=$(curl https://tika.apache.org/download.html | sed -n 's/.*href="\(.*server.*\.jar\)">.*/\1/ip;T;q')
+    TIKA_DOWNLOAD=$(curl -s $TIKA_URL | sed -n 's/.*<strong>\(.*\)<\/strong>.*/\1/ip;T;q')
+    TIKA_VERSION=$(echo $TIKA_URL | awk 'BEGIN{FS="server-|.jar"} {print $2}')
     TIKA_INSTALL_DIR=/usr/local/tika
+
     apt-get -yq install default-jdk
+
     cd $TMP_DIR
-    wget http://mirror.vorboss.net/apache/tika/tika-server-$TIKA_VERSION.jar
+
+    wget $TIKA_DOWNLOAD
     wget https://people.apache.org/keys/group/tika.asc
     wget http://www.apache.org/dist/tika/tika-server-$TIKA_VERSION.jar.asc
+
     gpg --import tika.asc
     gpg --verify tika-server-$TIKA_VERSION.jar.asc
     if [ ! -d $TIKA_INSTALL_DIR ]; then
