@@ -804,12 +804,9 @@ class StoqWorkerPlugin(StoqPluginBase):
         if self.saveresults and self.output_connector:
             # Just to ensure we have loaded a connector for output
             self.load_connector(self.output_connector)
-            # If there is a template that is named after the output connector
-            # pass the templated results to the connector, otherwise pass the
-            # raw results
+
             if template_results:
-                if self.template.split(".")[0] == self.output_connector:
-                    self.connectors[self.output_connector].save(template_results)
+                self.connectors[self.output_connector].save(template_results)
             else:
                 # Attempt to save the results, and pass along the primary results
                 # as **kwargs, otherwise just pass along the results.
