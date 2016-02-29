@@ -48,13 +48,13 @@ from it's plural name (connectors) within the worker object by calling
 
     worker = stoq.load_plugin("yara", "worker")
     worker.load_connector("file")
-    payload = worker.connectors['file'].get_file(**{"path": "/tmp/bad.exe"})
+    payload = worker.connectors['file'].get_file(path="/tmp/bad.exe")
     results = worker.scan(payload)
 
 We may also retrieve a payload from a connector, such as MongoDB::
 
     worker.load_connector("mongodb")
-    payload = worker.connectors['mongodb'].get_file(**{"sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709"})
+    payload = worker.connectors['mongodb'].get_file(sha1="da39a3ee5e6b4b0d3255bfef95601890afd80709")
     results = worker.scan(payload)
 
 .. note:: Only certain connector plugins support ``.get_file(**kwargs)``. Refer
