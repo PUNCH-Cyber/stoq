@@ -754,7 +754,7 @@ class StoqWorkerPlugin(StoqPluginBase):
             # Track hashes of payloads so we don't handle duplicates.
             processed_sha1s = {}
 
-            while dispatch_payloads and self.stoq.max_recursion >= current_depth:
+            while dispatch_payloads and int(self.stoq.max_recursion) >= current_depth:
                 for dispatch_payload in dispatch_payloads:
                     # Skip over this payload if we've already processed it
                     current_hash = get_sha1(dispatch_payload[1]) 
