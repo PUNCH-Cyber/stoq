@@ -868,8 +868,9 @@ class StoqWorkerPlugin(StoqPluginBase):
                 # Iterate over the results from the plugin and append the
                 # yara rule metadata to it
                 for meta in content:
-                    meta[0].update(hit['meta'])
-                    results.append((meta[0], meta[1]))
+                    dispatch_result = hit['meta']
+                    dispatch_result['source_meta'] = meta[0]
+                    results.append((dispatch_result, meta[1]))
 
         # Let's make sure we clear this out do it doesn't eat up memory
         self.yara_dispatcher_hits = None
@@ -897,9 +898,8 @@ class StoqWorkerPlugin(StoqPluginBase):
             except:
                 continue
 
-            if 'save' in meta:
-                if meta['save'].lower() == "true" and self.archive_connector:
-                    hashes = self.save_payload(payload, self.archive_connector)
+            if meta.get('save').lower() == 'true' and self.archive_connector:
+                hashes = self.save_payload(payload, self.archive_connector)
 
             try:
                 meta.update(hashes)
