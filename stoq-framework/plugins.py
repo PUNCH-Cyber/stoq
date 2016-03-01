@@ -868,7 +868,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                 # Iterate over the results from the plugin and append the
                 # yara rule metadata to it
                 for meta in content:
-                    dispatch_result = hit['meta']
+                    dispatch_result = hit['meta'].copy()
                     dispatch_result['source_meta'] = meta[0]
                     results.append((dispatch_result, meta[1]))
 
