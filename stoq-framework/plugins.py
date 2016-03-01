@@ -747,38 +747,54 @@ class StoqWorkerPlugin(StoqPluginBase):
             # Our carver, extractor, and decoder plugins will return a list of
             # set()s. Let's make sure we handle the initial payload the same
             # way, so we can simplify the below routine.
-            dispatch_payloads = [(None, payload)]
+            dispatch_payloads = [({}, payload)]
+            dispatch_queue = []
 
             current_depth = 0
 
             # Track hashes of payloads so we don't handle duplicates.
-            processed_sha1s = {}
+            processed_hashes = {}
 
             while dispatch_payloads and int(self.stoq.max_recursion) >= current_depth:
-                for dispatch_payload in dispatch_payloads:
+                for index, dispatch_payload in enumerate(dispatch_payloads):
+
+                    dispatch_payloads.pop(index)
+
+                    current_hash = dispatch_payload[0].get('sha1', get_sha1(dispatch_payload[1]))
+
                     # Skip over this payload if we've already processed it
-                    current_hash = get_sha1(dispatch_payload[1]) 
-                    if current_hash in processed_sha1s:
+                    if current_hash in processed_hashes:
+                        self.stoq.log.info("Skipping duplicate hash: {}".format(current_hash))
                         continue
 
-                    processed_sha1s[current_hash] = True
+                    processed_hashes.setdefault(current_hash, True)
+                    # We are copy()ing processed hashes so we don't dispatch
+                    # payloads twice, but we still want to be able to send
+                    # dispatched payloads for additional processing
+                    temp_processed_hashes = processed_hashes.copy()
 
-                    dispatch_payloads = self.yara_dispatcher(dispatch_payload[1])
+                    # Send the payload to the yara dispatcher
+                    for yara_result in self.yara_dispatcher(dispatch_payload[1]):
+                        dispatch_result = self._parse_dispatch_results(yara_result, **kwargs)
 
-                    # Something was carved, let's gather the metadata
-                    if dispatch_payloads:
-                        dispatch_results = self._parse_dispatch_results(dispatch_payloads, **kwargs)
-                        if dispatch_results:
-                            # Iterate over the results, grab the sha1, and add
-                            # it to the list of processed hashes. Then, add the
-                            # dispatch results to the primary results
-                            for index, res in enumerate(dispatch_results):
-                                if res['sha1'] in processed_sha1s:
-                                    continue
-                                processed_sha1s[res['sha1']] = True
-                                res['payload_id'] = payload_id
-                                payload_id += 1
-                                results['results'].append(res)
+                        if dispatch_result['sha1'] in temp_processed_hashes:
+                            self.stoq.log.info("Skipping duplicate hash: {}".format(dispatch_result['sha1']))
+                            continue
+
+                        temp_processed_hashes.setdefault(dispatch_result['sha1'], True)
+
+                        dispatch_queue.append(yara_result)
+
+                        dispatch_result['payload_id'] = payload_id
+                        payload_id += 1
+
+                        if dispatch_result.get('save').lower() == 'true' and self.archive_connector:
+                            self.save_payload(yara_result[1], self.archive_connector)
+
+                        results['results'].append(dispatch_result)
+
+                dispatch_payloads = dispatch_queue.copy()
+                dispatch_queue = []
 
                 current_depth += 1
 
@@ -827,14 +843,12 @@ class StoqWorkerPlugin(StoqPluginBase):
         :param \*\*kwargs: addtional arguments that may be needed
         :type kwargs: dict or None
 
-        :returns: Metadata and content from plugin
-        :rtype: list of tuple or None
+        :returns: Set of metadata and content from plugin
+        :rtype: Generator
 
         """
 
         self.yara_dispatcher_hits = []
-
-        results = []
 
         self.yara_dispatcher_rules.match(data=payload, timeout=60,
                                          callback=self._dispatcher_callback)
@@ -854,62 +868,51 @@ class StoqWorkerPlugin(StoqPluginBase):
 
             if plugin_type == 'carver':
                 self.load_carver(plugin_name)
-                content = self.carvers[plugin_name].carve(payload, **plugin_kwargs)
+                try:
+                    content = self.carvers[plugin_name].carve(payload, **plugin_kwargs)
+                except:
+                    content = None
             elif plugin_type == 'extractor':
                 self.load_extractor(plugin_name)
-                content = self.extractors[plugin_name].extract(payload, **plugin_kwargs)
+                try:
+                    content = self.extractors[plugin_name].extract(payload, **plugin_kwargs)
+                except:
+                    content = None
             elif plugin_type == 'decoder':
                 self.load_decoder(plugin_name)
-                content = self.decoders[plugin_name].decode(payload, **plugin_kwargs)
+                try:
+                    content = self.decoders[plugin_name].decode(payload, **plugin_kwargs)
+                except:
+                    content = None
             else:
-                continue
+                content = None
 
             if content:
                 # Iterate over the results from the plugin and append the
                 # yara rule metadata to it
                 for meta in content:
                     dispatch_result = hit['meta'].copy()
+                    # Make sure we hash the extracted content
+                    dispatch_result.update(get_hashes(meta[1]))
+                    # Keep any metadata returned by the plugin as source_meta
                     dispatch_result['source_meta'] = meta[0]
-                    results.append((dispatch_result, meta[1]))
+                    yield (dispatch_result, meta[1])
 
-        # Let's make sure we clear this out do it doesn't eat up memory
+        # Cleanup
         self.yara_dispatcher_hits = None
-
-        if results:
-            return results
-        else:
-            return None
 
     def _dispatcher_callback(self, data):
         if data['matches']:
             self.yara_dispatcher_hits.append(data)
         yara.CALLBACK_CONTINUE
 
-    def _parse_dispatch_results(self, dispatch_tuple, **kwargs):
-        results = []
+    def _parse_dispatch_results(self, content, **kwargs):
+        meta = content[0]
+        meta['puuid'] = kwargs['uuid']
+        meta['uuid'] = self.stoq.get_uuid
+        meta['scan'] = self.scan(content[1])
 
-        for content in dispatch_tuple:
-            try:
-                meta = content[0]
-                payload = content[1]
-                meta['puuid'] = kwargs['uuid']
-                meta['uuid'] = self.stoq.get_uuid
-                meta['scan'] = self.scan(payload)
-            except:
-                continue
-
-            if meta.get('save').lower() == 'true' and self.archive_connector:
-                hashes = self.save_payload(payload, self.archive_connector)
-
-            try:
-                meta.update(hashes)
-            except:
-                meta.update(get_hashes(payload))
-
-            results.append(meta)
-
-        return results
-
+        return meta
 
 class StoqConnectorPlugin(StoqPluginBase):
     @property
