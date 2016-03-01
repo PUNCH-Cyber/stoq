@@ -175,5 +175,8 @@ def print_logo():
     """.format(__version__))
 
     sys.stdout.flush()
-    print(random.choice(logo))
+    try:
+        print(random.choice(logo))
+    except:
+        print(logo[3])
     sys.stdout.flush()
