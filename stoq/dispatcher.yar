@@ -50,6 +50,17 @@ rule ole_file
         $ole
 }
 
+rule ole_package_stream
+{
+    meta:
+        plugin = "carver:olepackagestream"
+        save = "True"
+    strings:
+        $ole = { 02 00 }
+    condition:
+        $ole at 4
+}
+
 rule rtf_file
 {
     meta:
