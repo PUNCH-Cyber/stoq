@@ -230,8 +230,8 @@ class StoqPluginManager:
         plugin = self.get_plugin(name, category)
 
         if not plugin:
-            self.stoq.log.warn("Plugin {}:{} failed to load".format(category, name))
-            return None
+            self.log.warn("Plugin {}:{} failed to load".format(category, name))
+            return False
 
         for sect in plugin.details.sections():
             # Let's skip over the sections that are required by our
