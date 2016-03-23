@@ -322,7 +322,7 @@ class Stoq(StoqPluginManager):
         return response.content
 
     def write(self, payload, filename=None, path=None,
-              binary=False, overwrite=False):
+              binary=False, overwrite=False, append=False):
         """
         Write content to disk
 
@@ -333,6 +333,7 @@ class Stoq(StoqPluginManager):
         :param bool binary: Define whether content is binary or not
         :param bool overwrite: Define whether output file should be
                           overwritten
+        :param bool append: Define whether output file should be appended to
 
         :returns: Full path of file that was written
         :rtype: str or False
@@ -352,6 +353,8 @@ class Stoq(StoqPluginManager):
 
         if overwrite:
             write_mode = "w"
+        elif append:
+            write_mode = "a"
 
         if binary:
             write_mode += "b"
