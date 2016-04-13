@@ -405,9 +405,7 @@ class StoqShell(cmd.Cmd):
                     path = self.stoq.write(content, binary=True,
                                         path=self.stoq.results_dir,
                                         filename=filename)
-                    if path:
-                        print("[*] Saving content to {}".format(path))
-                    else:
+                    if not path:
                         print("[!] {}/{} already exists.".format(self.stoq.results_dir, filename))
             else:
                 print("[!] No results. Did you run a plugin? Try 'run <category> <plugin>'")

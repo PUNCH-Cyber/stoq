@@ -71,7 +71,7 @@ from bs4 import UnicodeDammit
 from stoq.plugins import StoqPluginManager
 
 
-__version__ = "0.9.11"
+__version__ = "0.9.12"
 
 
 class Stoq(StoqPluginManager):
@@ -370,6 +370,8 @@ class Stoq(StoqPluginManager):
         except FileExistsError:
             self.log.debug("File already exists: {}".format(fullpath))
             return False
+
+        self.log.info("Saving file to {}".format(fullpath))
 
         return fullpath
 
