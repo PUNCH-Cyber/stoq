@@ -436,6 +436,8 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         """
 
+        procs = None
+
         try:
             # There are some conditions where a source plugin may not be loaded
             # yet. Verify we have one loaded, if needed.
