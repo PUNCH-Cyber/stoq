@@ -58,12 +58,13 @@ API
 """
 
 import os
+import json
 import uuid
 import logging
 import requests
 import datetime
 import configparser
-import demjson as json
+import demjson 
 import logging.handlers
 
 from bs4 import UnicodeDammit
@@ -71,7 +72,7 @@ from bs4 import UnicodeDammit
 from stoq.plugins import StoqPluginManager
 
 
-__version__ = "0.9.12"
+__version__ = "0.9.13"
 
 
 class Stoq(StoqPluginManager):
@@ -430,19 +431,26 @@ class Stoq(StoqPluginManager):
 
         return os.path.join(self.archive_base, '/'.join(list(sha1[:5])))
 
-    def dumps(self, data, compactly=True):
+    def dumps(self, data, compactly=None):
         """
         Wrapper for json library. Dump dict to a json string
 
         :param dict data: Python dict to convert to json
-        :param bool indent: Indent to prettify json results.
+        :param compactly: Deprecated
 
         :returns: Converted json string
         :rtype: str
 
         """
 
-        return json.encode(data, encode_bytes=str, compactly=compactly)
+        # We start with the default python json library to encode as
+        # it is *MUCH* faster than demjson. However, if we run into issues
+        # with being unable to serialize, we are going to use demjson
+        # since it handles such data much better.
+        try:
+            return json.dumps(data, indent=4)
+        except TypeError:
+            return demjson.encode(data, encode_bytes=str, compactly=False)
 
     def loads(self, data):
         """
@@ -456,9 +464,9 @@ class Stoq(StoqPluginManager):
         """
 
         try:
-            return json.decode(data.decode('utf-8'))
+            return json.loads(data.decode('utf-8'))
         except:
-            return json.decode(data)
+            return json.loads(data)
 
     def __set_requests_headers(self, headers=None):
         """
