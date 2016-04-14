@@ -83,7 +83,7 @@ rule exe_file
         $dos_stub = "This program cannot be run in DOS mode"
         $win32_stub = "This program must be run under Win32"
     condition:
-        ($MZ or $ZM) and ($dos_stub or $win32_stub) in (1..filesize)
+        ($MZ or $ZM) and ($dos_stub or $win32_stub)
 }
 
 rule zip_file
