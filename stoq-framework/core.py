@@ -72,7 +72,7 @@ from bs4 import UnicodeDammit
 from stoq.plugins import StoqPluginManager
 
 
-__version__ = "0.9.14"
+__version__ = "0.9.15"
 
 
 class Stoq(StoqPluginManager):
@@ -464,9 +464,9 @@ class Stoq(StoqPluginManager):
         """
 
         try:
-            return json.loads(data.decode('utf-8'))
+            return json.loads(data, object_hook=self.__sanitize_json)
         except:
-            return json.loads(data)
+            return json.loads(data.decode('utf-8'), object_hook=self.__sanitize_json)
 
     def __set_requests_headers(self, headers=None):
         """
@@ -494,4 +494,25 @@ class Stoq(StoqPluginManager):
                 headers[header] = value
 
         return headers
+
+    def __sanitize_json(self, obj):
+        """
+        Sanitize json so keys do not contain '.' or ' '. Required for
+        compaitibility with databases such as mongodb and elasticsearch
+
+        :param dict obj: dict object
+
+        :returns: Sanitized dict
+        :rtype: dict
+
+        """
+        for key in obj.keys():
+            new_key = key.replace(".","_")
+            new_key = new_key.replace(" ","_")
+            if isinstance(obj[key], dict):
+                obj[key] = self.__sanitize_json(obj[key])
+            if new_key != key:
+                obj[new_key] = obj[key]
+                del obj[key]
+        return obj
 
