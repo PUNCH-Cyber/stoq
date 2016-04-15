@@ -273,6 +273,7 @@ install_tika
 install_xor
 install_exif
 install_trid
+install_clamav
 install_rabbitmq
 
 # Cleanup
