@@ -502,7 +502,7 @@ class Stoq(StoqPluginManager):
 
         :param dict obj: dict object
 
-        :returns: Sanitized dict
+        :returns: Sanitized dict object
         :rtype: dict
 
         """
@@ -516,3 +516,78 @@ class Stoq(StoqPluginManager):
                 new_obj[new_key] = obj[key]
         return new_obj
 
+    def __normalize_json(self, obj):
+        """
+        Normalize json blobs:
+            - If a key's value is a dict:
+                - Make the value a list
+                - Iterate over sub keys and do the same
+            - If a key's value is a list:
+                - Iterate over the values to ensure they are a string
+            - If the key's value is anything else:
+                - Force the value to be a string
+
+        :param dict obj: dict object to normalize
+
+        :returns: Normalized dict object
+        :rtype: dict
+
+        """
+        # Original code open sourced by NIH
+        # Modified for use with stoQ
+
+        #######################
+        #
+        # Copyright (c) 2015 United States Government/National Institutes of Health
+        # Author: Aaron Gee-Clough
+        #
+        # Permission is hereby granted, free of charge, to any person obtaining a copy
+        # of this software and associated documentation files (the "Software"), to deal
+        # in the Software without restriction, including without limitation the rights
+        # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        # copies of the Software, and to permit persons to whom the Software is
+        # furnished to do so, subject to the following conditions:
+        #
+        # The above copyright notice and this permission notice shall be included in
+        # all copies or substantial portions of the Software.
+        #
+        # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+        # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+        # THE SOFTWARE.
+        #
+        #
+        #####################
+
+        conversion_types = (bytes, int, float, bool)
+
+        if isinstance(obj, list):
+            response = []
+            for entry in obj:
+                response.append(self.__normalize_json(entry))
+        elif isinstance(obj, dict):
+            response = {}
+            for key in obj:
+                if isinstance(obj[key], conversion_types):
+                    response[key] = str(obj[key])
+                elif isinstance(obj[key], list):
+                    response[key] = []
+                    for entry in obj[key]:
+                        response[key].append(self.__normalize_json(entry))
+                elif isinstance(obj[key], dict):
+                    response[key] = []
+                    response[key].append(self.__normalize_json(obj[key]))
+                elif obj[key] is None:
+                    response[key] = ""
+                else:
+                    response[key] = str(obj[key])
+        elif isinstance(obj, conversion_types):
+            response = str(obj)
+        elif obj is None:
+            response = ""
+        else:
+            response = str(obj)
+        return response
