@@ -72,7 +72,7 @@ from bs4 import UnicodeDammit
 from stoq.plugins import StoqPluginManager
 
 
-__version__ = "0.9.16"
+__version__ = "0.9.17"
 
 
 class Stoq(StoqPluginManager):
@@ -506,13 +506,13 @@ class Stoq(StoqPluginManager):
         :rtype: dict
 
         """
+        new_obj = {}
         for key in obj.keys():
             new_key = key.replace(".","_")
             new_key = new_key.replace(" ","_")
             if isinstance(obj[key], dict):
-                obj[key] = self.__sanitize_json(obj[key])
-            if new_key != key:
-                obj[new_key] = obj[key]
-                del obj[key]
-        return obj
+                new_obj[key] = self.__sanitize_json(obj[key])
+            else:
+                new_obj[new_key] = obj[key]
+        return new_obj
 
