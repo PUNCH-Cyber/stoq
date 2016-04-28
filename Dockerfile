@@ -172,6 +172,14 @@ RUN wget -O trid_linux_64.zip "http://mark0.net/download/trid_linux_64.zip" \
 
 RUN echo "[stoQ] Done installing trid"
 
+######################
+### Install ClamAV ###
+######################
+RUN echo "[stoQ] Installing clamav"
+RUN apt-get install -yq clamav clamav-daemon
+RUN service clamav-daemon start
+echo "[stoQ] Done installing clamav."
+
 ###########################
 ### Cleanup and Staging ###
 ###########################
