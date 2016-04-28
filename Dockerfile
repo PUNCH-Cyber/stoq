@@ -178,7 +178,7 @@ RUN echo "[stoQ] Done installing trid"
 RUN echo "[stoQ] Installing clamav"
 RUN apt-get install -yq clamav clamav-daemon
 RUN service clamav-daemon start
-echo "[stoQ] Done installing clamav."
+RUN echo "[stoQ] Done installing clamav."
 
 ###########################
 ### Cleanup and Staging ###
