@@ -1,7 +1,8 @@
 FROM ubuntu:14.04
 MAINTAINER Adam Trask ”adam@punchcyber.com”
 
-RUN apt-get -y install software-properties-common \
+RUN apt-get update \ 
+  && apt-get -y install software-properties-common \
   && apt-add-repository -y multiverse
 
 ENV LANG C.UTF-8
