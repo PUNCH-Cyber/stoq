@@ -25,7 +25,7 @@ Upon instantiation, default configuration options are defined
 within *__init__*. These are overridden if there is identical
 configuration option in *stoq.cfg*.
 
-The *StoqPluginManager* will also be instantiated as a child 
+The *StoqPluginManager* will also be instantiated as a child
 class automatically. This allows for the ability to globally
 access the API for plugins and easily grant the ability for
 plugins to load other plugins.
@@ -48,9 +48,9 @@ Write content to disk::
 
 .. note:: If no filename is given, ``Stoq.get_uuid`` will be called and a
           random filename will be defined automatically. Additionally, if
-          the filename already exists, the file will not be overwritten. 
+          the filename already exists, the file will not be overwritten.
           However, if ``Stoq.write()`` is called with ``overwrite=True``,
-          the file will be overwritten. If the content to be written is 
+          the file will be overwritten. If the content to be written is
           binary, one may add ``binary=True`` when calling ``Stoq.write()``.
 
 API
@@ -64,7 +64,7 @@ import logging
 import requests
 import datetime
 import configparser
-import demjson 
+import demjson
 import logging.handlers
 
 from bs4 import UnicodeDammit
@@ -72,11 +72,12 @@ from bs4 import UnicodeDammit
 from stoq.plugins import StoqPluginManager
 
 
-__version__ = "0.9.17"
+__version__ = "0.9.18"
 
 
 class Stoq(StoqPluginManager):
     """
+
     Core stoQ Framework Class
 
     """
@@ -140,8 +141,8 @@ class Stoq(StoqPluginManager):
         # Define the default maximum recursion depth for the dispatcher
         self.max_recursion = 3
 
-        # tuple() to match the root directory of where files can be ingested from.
-        # Need for get_file().
+        # tuple() to match the root directory of where files can be ingested
+        # from. Need for get_file().
         self.source_base_tuple = (self.base_dir)
 
         # Define what URL prefixes we accept
@@ -244,7 +245,6 @@ class Stoq(StoqPluginManager):
         :rtype: bytes or None
 
         """
-
 
         if source.startswith(self.url_prefix_tuple):
             # Set our default headers
@@ -377,7 +377,7 @@ class Stoq(StoqPluginManager):
         return fullpath
 
     def force_unicode(self, payload):
-        """ 
+        """
         Force a string to be properly encoded in unicode using BeautifulSoup4
 
         :param bytes payload: String to be forced into unicode
@@ -466,13 +466,14 @@ class Stoq(StoqPluginManager):
         try:
             return json.loads(data, object_hook=self.__sanitize_json)
         except:
-            return json.loads(data.decode('utf-8'), object_hook=self.__sanitize_json)
+            return json.loads(data.decode('utf-8'),
+                              object_hook=self.__sanitize_json)
 
     def __set_requests_headers(self, headers=None):
         """
         Set default requests headers.
 
-        :param dict headers: Dictionary containing any headers defined by 
+        :param dict headers: Dictionary containing any headers defined by
                              the plugin
 
         :returns: The same dictionary, plus any default headers that were not
@@ -508,8 +509,8 @@ class Stoq(StoqPluginManager):
         """
         new_obj = {}
         for key in obj.keys():
-            new_key = key.replace(".","_")
-            new_key = new_key.replace(" ","_")
+            new_key = key.replace(".", "_")
+            new_key = new_key.replace(" ", "_")
             if isinstance(obj[key], dict):
                 new_obj[key] = self.__sanitize_json(obj[key])
             else:
@@ -536,31 +537,31 @@ class Stoq(StoqPluginManager):
         # Original code open sourced by NIH
         # Modified for use with stoQ
 
-        #######################
-        #
-        # Copyright (c) 2015 United States Government/National Institutes of Health
-        # Author: Aaron Gee-Clough
-        #
-        # Permission is hereby granted, free of charge, to any person obtaining a copy
-        # of this software and associated documentation files (the "Software"), to deal
-        # in the Software without restriction, including without limitation the rights
-        # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-        # copies of the Software, and to permit persons to whom the Software is
-        # furnished to do so, subject to the following conditions:
-        #
-        # The above copyright notice and this permission notice shall be included in
-        # all copies or substantial portions of the Software.
-        #
-        # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-        # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-        # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-        # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-        # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-        # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-        # THE SOFTWARE.
-        #
-        #
-        #####################
+#######################
+#
+# Copyright (c) 2015 United States Government/National Institutes of Health
+# Author: Aaron Gee-Clough
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+#
+#####################
 
         conversion_types = (bytes, int, float, bool)
 

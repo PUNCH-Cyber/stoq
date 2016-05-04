@@ -81,7 +81,7 @@ API
 ===
 """
 
-import os 
+import os
 import re
 import multiprocessing
 
@@ -117,7 +117,8 @@ class StoqPluginManager:
                                   "source": StoqSourcePlugin,
                                   "extractor": StoqExtractorPlugin,
                                   "carver": StoqCarverPlugin,
-                                  "decoder": StoqDecoderPlugin }
+                                  "decoder": StoqDecoderPlugin
+                                  }
 
         self.manager = PluginManager()
         self.manager.setPluginInfoExtension("stoq")
@@ -449,8 +450,8 @@ class StoqWorkerPlugin(StoqPluginBase):
                 if self.sources[self.source_plugin].multiprocess:
                     self.mp_queues = multiprocessing.JoinableQueue()
                     procs = [multiprocessing.Process(target=self._multiprocess,
-                                                    args=(self.mp_queues,))
-                            for i in range(self.max_processes)]
+                                                     args=(self.mp_queues,))
+                             for i in range(self.max_processes)]
 
                     # Start our processes before we populate them
                     for proc in procs:
@@ -638,7 +639,9 @@ class StoqWorkerPlugin(StoqPluginBase):
         self.load_connector(connector)
 
         # Save our payload to the appropriate plugin
-        self.connectors[connector].save(payload, archive=True, **arc)
+        res = self.connectors[connector].save(payload, archive=True, **arc)
+
+        arc['conn_id'] = res
 
         return arc
 
@@ -648,7 +651,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         Process the payload with the worker plugin
 
         :param bytes payload: (optional) Payload to be processed
-        :param \*\*kwargs: addtional arguments that may be needed by the 
+        :param \*\*kwargs: addtional arguments that may be needed by the
                            worker plugin (i.e., username and password via HTTP)
         :type kwargs: dict or None
 
@@ -699,11 +702,11 @@ class StoqWorkerPlugin(StoqPluginBase):
                 # Make sure we save the filename in the worker results as well
                 worker_result['filename'] = kwargs['filename']
 
-            # If this worker wants us to save this payload to the archive, let's
-            # handle that now before anything else. Otherwise any subsequent
-            # plugins may not be able to retrieve the files. We are however going
-            # to skip saving the payload if our source is the same as the
-            # connector.
+            # If this worker wants us to save this payload to the archive,
+            # let's handle that now before anything else. Otherwise any
+            # subsequent plugins may not be able to retrieve the files. We are
+            # however going to skip saving the payload if our source is the
+            # same as the connector.
             if self.archive_connector and self.archive_connector != archive_type:
                 payload_hashes = self.save_payload(payload, self.archive_connector)
 
@@ -724,17 +727,28 @@ class StoqWorkerPlugin(StoqPluginBase):
         worker_result['plugin'] = self.name
         worker_result['uuid'] = kwargs['uuid']
 
-        # Preserve the original metadata that was submitted with this payload
-        worker_result['source_meta'] = kwargs.copy()
-        # We store these at the top level of the dict, let's not duplicate
-        # it in the metadata key as well.
-        worker_result['source_meta'].pop('uuid', None)
-        worker_result['source_meta'].pop('filename', None)
-        worker_result['source_meta'].pop('path', None)
-        worker_result['source_meta'].pop('archive', None)
-
         if payload:
             worker_result['size'] = len(payload)
+
+        # Preserve the original metadata that was submitted with this payload
+        worker_result['source_meta'] = kwargs.copy()
+
+        # Check to see if the keys are in the primary result dict, if so,
+        # we will remove them from the source_meta key, otherwise, we will
+        # leave it be. Meant to reduce duplication of data when chaining
+        # plugins.
+        for k, v in kwargs.items():
+            if k in worker_result:
+                if v == worker_result[k]:
+                    worker_result['source_meta'].pop(k, None)
+
+            # Sometimes when chaining plugins source_meta will be appended
+            # but the keys should be at the root of the results. Let's make
+            # sure we move them to the root rather than storing them in the
+            # source_meta
+            elif k in ('filename', 'puuid', 'magic', 'ssdeep', 'path'):
+                worker_result[k] = v
+                worker_result['source_meta'].pop(k, None)
 
         worker_result['payload_id'] = 0
 
@@ -826,11 +840,12 @@ class StoqWorkerPlugin(StoqPluginBase):
             if template_results:
                 self.connectors[self.output_connector].save(template_results)
             else:
-                # Attempt to save the results, and pass along the primary results
-                # as **kwargs, otherwise just pass along the results.
+                # Attempt to save the results, and pass along the primary
+                # results as **kwargs, otherwise just pass along the results.
                 try:
                     kwargs = {'sha1': results['results'][0]['sha1']}
-                    self.connectors[self.output_connector].save(results, **kwargs)
+                    self.connectors[self.output_connector].save(results,
+                                                                **kwargs)
                 except (KeyError, IndexError):
                     self.connectors[self.output_connector].save(results)
 
@@ -915,6 +930,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         meta['scan'] = self.scan(content[1])
 
         return meta
+
 
 class StoqConnectorPlugin(StoqPluginBase):
     @property
@@ -1224,4 +1240,3 @@ class StoqPluginInstaller:
 
         print("[+] Installing {} plugin into {}...".format(self.plugin_name,
                                                            self.plugin_root))
-
