@@ -104,8 +104,13 @@ deactivated. This method is not required, though it is recommended should
 
 For each of the above core methods, they should minimally call
 ``super().METHOD_NAME()`` right before they return. METHOD_NAME should be
-changed to the repsective method. This will allow the respective parent class
+changed to the respective method. This will allow the respective parent class
 execute any required code.
+
+For time-based events (periodic flushes of buffers, etc), every plugin will
+have a "heartbeat()" method called once every 5 seconds. Plugins that wish to
+take time-based actions should override that method & handle their own timing.
+
 
 Workers
 -------

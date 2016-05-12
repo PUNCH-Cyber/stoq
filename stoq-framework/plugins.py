@@ -84,6 +84,8 @@ API
 import os
 import re
 import multiprocessing
+import time
+from queue import Empty
 
 try:
     import yara
@@ -329,6 +331,8 @@ class StoqPluginBase:
         self.is_activated = False
         self.stoq.log.debug("Plugin Deactivated: {0},{1}".format(self.name,
                                                                  self.is_activated))
+    def heartbeat(self):
+        pass
 
 
 class StoqWorkerPlugin(StoqPluginBase):
@@ -481,12 +485,42 @@ class StoqWorkerPlugin(StoqPluginBase):
                     proc.join()
             return None
 
+    def heartbeat(self):
+        super().heartbeat()
+        for worker in self.workers:
+            worker.heartbeat()
+        for connector in self.connectors:
+            connector.heartbeat()
+        for source in self.sources:
+            source.heartbeat()
+        for reader in self.readers:
+            reader.heartbeat()
+        for extractor in self.extractors:
+            extractor.heartbeat()
+        for carver in self.carvers:
+            carver.heartbeat()
+        for decoder in self.decoders:
+            decoder.heartbeat()
+
+    def _checkHeartbeat(self, last_heartbeat):
+        now = time.time()
+        if (last_heartbeat - now) > 5:
+            self.heartbeat()
+            return now
+        else:
+            return last_heartbeat
+
     def _multiprocess(self, queue):
+        last_heartbeat = time.time()
         while True:
-            msg = queue.get()
-            if msg == 'stop':
-                return
-            self.start(**msg)
+            try:
+                msg = queue.get(timeout=1)
+                if msg == 'stop':
+                    return
+                self.start(**msg)
+                last_heartbeat = self._checkHeartbeat(last_heartbeat)
+            except Empty:
+                last_heartbeat = self._checkHeartbeat(last_heartbeat)
 
     def multiprocess_put(self, **kwargs):
         self.mp_queues.put(kwargs)
