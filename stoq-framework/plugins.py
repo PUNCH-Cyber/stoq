@@ -447,8 +447,8 @@ class StoqWorkerPlugin(StoqPluginBase):
 
             # See if we have loaded any source plugins.
             if self.sources:
+                self.mp_queues = multiprocessing.JoinableQueue()
                 if self.sources[self.source_plugin].multiprocess:
-                    self.mp_queues = multiprocessing.JoinableQueue()
                     procs = [multiprocessing.Process(target=self._multiprocess,
                                                      args=(self.mp_queues,))
                              for i in range(self.max_processes)]
@@ -456,15 +456,17 @@ class StoqWorkerPlugin(StoqPluginBase):
                     # Start our processes before we populate them
                     for proc in procs:
                         proc.start()
-
+                else:
+                    proc = multiprocessing.Process(target=self._multiprocess,
+                                                   args=(self.mp_queues,))
+                    proc.start()
+                    procs = [proc]
                 # Start processing the source plugin
                 self.sources[self.source_plugin].ingest()
 
-                if self.sources[self.source_plugin].multiprocess:
-                    # Make sure we exit out when we are all done
-                    for proc in procs:
-                        self.multiprocess_put(stop=True)
-
+                # Make sure we exit out when we are all done
+                for proc in procs:
+                    self.multiprocess_put(stop=True)
             else:
                 # Looks like we don't have any. Let's just call the worker
                 # directly. Useful when we have a work plugin that requires no
@@ -482,7 +484,7 @@ class StoqWorkerPlugin(StoqPluginBase):
     def _multiprocess(self, queue):
         while True:
             msg = queue.get()
-            if 'stop' in msg:
+            if msg == 'stop':
                 return
             self.start(**msg)
 

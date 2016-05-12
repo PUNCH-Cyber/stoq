@@ -321,7 +321,8 @@ In addition to the above requirements, the below methods are required for
     - ingest
 
 The ``ingest`` method does not require any arrtributes when called. *Source*
-plugins should be the method used to call ``worker.start``. This is the
+plugins should push data back to the worker by calling the
+``worker.multiprocess_put`` method. This is will pull data back to the
 main method for processing data in and our of the framework to include
 retrieving payloads, hashing, metadata generation, result handling, and saving
 of results.
@@ -343,7 +344,7 @@ of results.
         def ingest(self):
 
             path = "/tmp/bad.exe"
-            self.stoq.worker.start(path=path, archive='file')
+            self.stoq.worker.multiprocess_put(path=path, archive='file')
 
             return True
 
@@ -353,33 +354,10 @@ option in it's ``.stoq`` file under the [options] header. For example::
     [options]
     multiprocess = True
 
-If set to ``True``, source plugin will be able to publish to a ``multiprocess``
-queue. Objects may be added to the queue by calling 
-``self.stoq.worker.multiprocess_put()``. As an example, we can use the
-previous example with multiprocessing support.
-
-.. code:: python
-
-    from stoq.plugins import StoqSourcePlugin
-
-
-    class FileSource(StoqSourcePlugin):
-
-        def __init__(self):
-            super().__init__()
-
-        def activate(self, stoq):
-            self.stoq = stoq
-            super().activate()
-
-        def ingest(self):
-
-            paths = ["/tmp/bad.exe", "/tmp/bad1.exe", "/tmp/bad3.exe"]
-            for path in paths:
-                self.stoq.worker.multiprocess_put(path=path, archive='file')
-
-            return True
-
+If set to ``True``, the source plugin will be capable of being run with
+multiple instances simultaneously. Note: if ``multiprocess`` option is
+set to ``False`` the source will still be run in a Python process, but
+stoq will only run one instance of that process.
 
 Extractors
 ----------
