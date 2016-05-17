@@ -331,7 +331,7 @@ class StoqPluginBase:
         self.is_activated = False
         self.stoq.log.debug("Plugin Deactivated: {0},{1}".format(self.name,
                                                                  self.is_activated))
-    def heartbeat(self):
+    def heartbeat(self, force=False):
         pass
 
 
@@ -485,22 +485,22 @@ class StoqWorkerPlugin(StoqPluginBase):
                     proc.join()
             return None
 
-    def heartbeat(self):
+    def heartbeat(self, force=False):
         super().heartbeat()
         for worker in self.workers:
-            worker.heartbeat()
+            worker.heartbeat(force)
         for connector in self.connectors:
-            connector.heartbeat()
+            connector.heartbeat(force)
         for source in self.sources:
-            source.heartbeat()
+            source.heartbeat(force)
         for reader in self.readers:
-            reader.heartbeat()
+            reader.heartbeat(force)
         for extractor in self.extractors:
-            extractor.heartbeat()
+            extractor.heartbeat(force)
         for carver in self.carvers:
-            carver.heartbeat()
+            carver.heartbeat(force)
         for decoder in self.decoders:
-            decoder.heartbeat()
+            decoder.heartbeat(force)
 
     def _checkHeartbeat(self, last_heartbeat):
         now = time.time()
@@ -517,6 +517,8 @@ class StoqWorkerPlugin(StoqPluginBase):
                 msg = queue.get(timeout=1)
                 should_stop = msg.get("_stoq_multiprocess_eoq", False)
                 if should_stop:
+                    # send one last heartbeat to make sure work clears out
+                    self.heartbeat(force=True)
                     return
                 self.start(**msg)
                 last_heartbeat = self._checkHeartbeat(last_heartbeat)
