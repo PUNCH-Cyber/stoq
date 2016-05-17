@@ -470,7 +470,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
                 # Make sure we exit out when we are all done
                 for proc in procs:
-                    self.multiprocess_put(stop=True)
+                    self.multiprocess_put(_stoq_multiprocess_eoq=True)
             else:
                 # Looks like we don't have any. Let's just call the worker
                 # directly. Useful when we have a work plugin that requires no
@@ -515,7 +515,8 @@ class StoqWorkerPlugin(StoqPluginBase):
         while True:
             try:
                 msg = queue.get(timeout=1)
-                if msg == 'stop':
+                should_stop = msg.get("_stoq_multiprocess_eoq", False)
+                if should_stop:
                     return
                 self.start(**msg)
                 last_heartbeat = self._checkHeartbeat(last_heartbeat)
