@@ -485,45 +485,14 @@ class StoqWorkerPlugin(StoqPluginBase):
                     proc.join()
             return None
 
-    def heartbeat(self, force=False):
-        super().heartbeat()
-        for worker in self.workers:
-            worker.heartbeat(force)
-        for connector in self.connectors:
-            connector.heartbeat(force)
-        for source in self.sources:
-            source.heartbeat(force)
-        for reader in self.readers:
-            reader.heartbeat(force)
-        for extractor in self.extractors:
-            extractor.heartbeat(force)
-        for carver in self.carvers:
-            carver.heartbeat(force)
-        for decoder in self.decoders:
-            decoder.heartbeat(force)
-
-    def _checkHeartbeat(self, last_heartbeat):
-        now = time.time()
-        if (last_heartbeat - now) > 5:
-            self.heartbeat()
-            return now
-        else:
-            return last_heartbeat
 
     def _multiprocess(self, queue):
-        last_heartbeat = time.time()
         while True:
-            try:
-                msg = queue.get(timeout=1)
-                should_stop = msg.get("_stoq_multiprocess_eoq", False)
-                if should_stop:
-                    # send one last heartbeat to make sure work clears out
-                    self.heartbeat(force=True)
-                    return
+            msg = queue.get()
+            should_stop = msg.get("_stoq_multiprocess_eoq", False)
+            if should_stop:
+                return
                 self.start(**msg)
-                last_heartbeat = self._checkHeartbeat(last_heartbeat)
-            except Empty:
-                last_heartbeat = self._checkHeartbeat(last_heartbeat)
 
     def multiprocess_put(self, **kwargs):
         self.mp_queues.put(kwargs)
