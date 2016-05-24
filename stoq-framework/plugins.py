@@ -455,7 +455,7 @@ class StoqWorkerPlugin(StoqPluginBase):
             if hasattr(connObj, "wants_heartbeat") and connObj.wants_heartbeat:
                 connObj = self.connectors[connector]
                 thread = threading.Thread(target=connObj.heartbeat,
-                                          args=(connObj,),
+                                          args=(),
                                           daemon=True)
                 connObj.heartbeat_thread = thread
                 thread.start()
@@ -464,7 +464,7 @@ class StoqWorkerPlugin(StoqPluginBase):
             workerObj = self.workers[worker]
             if hasattr(workerObj, "wants_heartbeat") and workerObj.wants_heartbeat:
                 thread = threading.Thread(target=workerObj.heartbeat,
-                                          args=(workerObj,),
+                                          args=(),
                                           daemon=True)
                 workerObj.heartbeat_thread = thread
                 thread.start()
