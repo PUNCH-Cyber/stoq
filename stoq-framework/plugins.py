@@ -321,7 +321,6 @@ class StoqPluginBase:
 
     def __init__(self):
         self.is_activated = False
-        self.name = None
         super().__init__()
 
     def activate(self):
@@ -451,7 +450,8 @@ class StoqWorkerPlugin(StoqPluginBase):
                 self.yara_dispatcher_rules = yara.compile(file=rules)
 
         for connector in self.connectors:
-            if self.connectors[connector].wants_heartbeat:
+            connObj = self.connectors[connector]
+            if hasattr(connObj, "wants_heartbeat") and connObj.wants_heartbeat:
                 connObj = self.connectors[connector]
                 thread = threading.Thread(target=connObj.heartbeat,
                                           args=(connObj),
@@ -461,7 +461,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         for worker in self.workers:
             workerObj = self.workers[worker]
-            if hasattr(workerObj, "wants_heartbeat") and self.workers[worker].wants_heartbeat:
+            if hasattr(workerObj, "wants_heartbeat") and workerObj.wants_heartbeat:
                 thread = threading.Thread(target=workerObj.heartbeat,
                                           args=(workerObj),
                                           daemon=True)
