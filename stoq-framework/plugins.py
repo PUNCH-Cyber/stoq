@@ -241,7 +241,7 @@ class StoqPluginManager:
             # Let's skip over the sections that are required by our
             # plugin manager. No sense in trying to overwrite.
             if any([s in sect for s in ['Core', 'Documentation']]):
-                continue
+                next
 
             for opt in plugin.details.options(sect):
                 # define each configuration option as an object within
