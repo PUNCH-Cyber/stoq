@@ -478,7 +478,6 @@ class StoqWorkerPlugin(StoqPluginBase):
         """
         super().deactivate()
 
-    @property
     def run(self):
         """
         Run the plugin with a source plugin, or standalone
