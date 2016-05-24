@@ -1179,11 +1179,6 @@ class StoqPluginInstaller:
         self.stoq = stoq
         self.plugin_info = {}
 
-        self.plugin_module = None
-        self.plugin_name = None
-        self.plugin_category = None
-        self.plugin_root = None
-
         parser = self.argparse.ArgumentParser()
         installer_opts = parser.add_argument_group("Plugin Installer Options")
         installer_opts.add_argument("plugin", help="stoQ Plugin Archive")
