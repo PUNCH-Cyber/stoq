@@ -84,6 +84,7 @@ API
 import os
 import re
 import multiprocessing
+import threading
 
 try:
     import yara
