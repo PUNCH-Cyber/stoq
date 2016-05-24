@@ -87,7 +87,7 @@ if __name__ == '__main__':
         worker = stoq.load_plugin(options.command, 'worker')
         if not worker:
             exit(-1)
-        worker.run()
+        worker.run
 
 # Done!
 exit(0)

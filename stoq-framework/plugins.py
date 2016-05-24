@@ -84,13 +84,12 @@ API
 import os
 import re
 import multiprocessing
-import time
-from queue import Empty
 
 try:
     import yara
     yara_imported = True
 except ImportError:
+    yara = None
     yara_imported = False
 
 from yapsy.PluginManager import PluginManager
@@ -99,9 +98,11 @@ from yapsy.FilteredPluginManager import FilteredPluginManager
 from jinja2 import Environment, FileSystemLoader
 from jinja2.exceptions import TemplateNotFound
 
+# noinspection PyUnresolvedReferences
 from stoq.scan import get_hashes, get_ssdeep, get_magic, get_sha1
 
 
+# noinspection PyUnresolvedReferences
 class StoqPluginManager:
     """
 
@@ -139,7 +140,7 @@ class StoqPluginManager:
         """
         plugins = {}
         for category, category_class in self.plugin_categories.items():
-            class_str = re.search('(?<=<class \'stoq\.plugins\.)(.+)(?=.*\'>)',
+            class_str = re.search(r'(?<=<class \'stoq\.plugins\.)(.+)(?=.*\'>)',
                                   str(category_class)).group(0)
             plugins[class_str] = category
 
@@ -240,7 +241,7 @@ class StoqPluginManager:
             # Let's skip over the sections that are required by our
             # plugin manager. No sense in trying to overwrite.
             if any([s in sect for s in ['Core', 'Documentation']]):
-                next
+                continue
 
             for opt in plugin.details.options(sect):
                 # define each configuration option as an object within
@@ -320,6 +321,7 @@ class StoqPluginBase:
 
     def __init__(self):
         self.is_activated = False
+        self.name = None
         super().__init__()
 
     def activate(self):
@@ -331,15 +333,46 @@ class StoqPluginBase:
         self.is_activated = False
         self.stoq.log.debug("Plugin Deactivated: {0},{1}".format(self.name,
                                                                  self.is_activated))
+
     def heartbeat(self, force=False):
         pass
 
 
+# noinspection PyUnresolvedReferences,PyUnresolvedReferences
 class StoqWorkerPlugin(StoqPluginBase):
     """
     stoQ Worker Plugin Class
 
     """
+
+    def __init__(self):
+        super().__init__()
+
+        self.max_processes = 0
+
+        self.dispatch = None
+
+        self.output_connector = None
+
+        self.source_plugin = None
+
+        self.yara_dispatcher_rules = None
+
+        self.yara_dispatcher_hits = None
+
+        self.mp_queues = None
+
+        self.connector_queue = None
+
+        self.connector_feeder = None
+
+        self.workers = {}
+        self.connectors = {}
+        self.sources = {}
+        self.readers = {}
+        self.extractors = {}
+        self.carvers = {}
+        self.decoders = {}
 
     @property
     def min_version(self):
@@ -368,14 +401,6 @@ class StoqWorkerPlugin(StoqPluginBase):
             for k in options.__dict__:
                 if options.__dict__[k] is not None:
                     setattr(self, k, options.__dict__[k])
-
-        self.workers = {}
-        self.connectors = {}
-        self.sources = {}
-        self.readers = {}
-        self.extractors = {}
-        self.carvers = {}
-        self.decoders = {}
 
         if not self.max_processes:
             # Let's set the max_processes to 50% of total CPUs
@@ -425,6 +450,24 @@ class StoqWorkerPlugin(StoqPluginBase):
             with open(self.stoq.dispatch_rules) as rules:
                 self.yara_dispatcher_rules = yara.compile(file=rules)
 
+        for connector in self.connectors:
+            if self.connectors[connector].wants_heartbeat:
+                connObj = self.connectors[connector]
+                thread = threading.Thread(target=connObj.heartbeat,
+                                          args=(connObj),
+                                          daemon=True)
+                connObj.heartbeat_thread = thread
+                thread.start()
+
+        for worker in self.workers:
+            workerObj = self.workers[worker]
+            if hasattr(workerObj, "wants_heartbeat") and self.workers[worker].wants_heartbeat:
+                thread = threading.Thread(target=workerObj.heartbeat,
+                                          args=(workerObj),
+                                          daemon=True)
+                workerObj.heartbeat_thread = thread
+                thread.start()
+
         return self
 
     def deactivate(self):
@@ -432,9 +475,9 @@ class StoqWorkerPlugin(StoqPluginBase):
         Deactivate the plugin within the framework
 
         """
-
         super().deactivate()
 
+    @property
     def run(self):
         """
         Run the plugin with a source plugin, or standalone
@@ -455,7 +498,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                 if self.sources[self.source_plugin].multiprocess:
                     procs = [multiprocessing.Process(target=self._multiprocess,
                                                      args=(self.mp_queues,))
-                             for i in range(self.max_processes)]
+                             for _ in range(self.max_processes)]
 
                     # Start our processes before we populate them
                     for proc in procs:
@@ -469,7 +512,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                 self.sources[self.source_plugin].ingest()
 
                 # Make sure we exit out when we are all done
-                for proc in procs:
+                for _ in procs:
                     self.multiprocess_put(_stoq_multiprocess_eoq=True)
             else:
                 # Looks like we don't have any. Let's just call the worker
@@ -479,12 +522,28 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         except KeyboardInterrupt:
             self.stoq.log.info("Keyboard interrupt received..terminating processes")
+            # call all connector/decoder/etc deactivate methods, so that they can
+            # finish their work before we terminate.
+            for source in self.sources:
+                self.sources[source].deactivate()
+            for reader in self.readers:
+                self.readers[reader].deactivate()
+            for decoder in self.decoders:
+                self.decoders[decoder].deactivate()
+            for extractor in self.extractors:
+                self.extractors[extractor].deactivate()
+            for carver in self.carvers:
+                self.carvers[carver].deactivate()
+            for connector in self.connectors:
+                self.connectors[connector].deactivate()
+            for worker in self.workers:
+                self.workers[worker].deactivate()
+        finally:
             if procs:
                 for proc in procs:
                     proc.terminate()
                     proc.join()
             return None
-
 
     def _multiprocess(self, queue):
         while True:
@@ -492,7 +551,7 @@ class StoqWorkerPlugin(StoqPluginBase):
             should_stop = msg.get("_stoq_multiprocess_eoq", False)
             if should_stop:
                 return
-                self.start(**msg)
+            self.start(**msg)
 
     def multiprocess_put(self, **kwargs):
         self.mp_queues.put(kwargs)
@@ -671,8 +730,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         archive_type = False
         template_results = None
         payload_hashes = None
-        results = {}
-        results['results'] = []
+        results = {"results": []}
         worker_result = {}
 
         results['date'] = self.stoq.get_time
@@ -826,9 +884,8 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         # Parse output with a template
         if self.template:
+            template_path = "{}/templates".format(self.plugin_path)
             try:
-                template_path = "{}/templates".format(self.plugin_path)
-
                 tpl_env = Environment(loader=FileSystemLoader(template_path),
                                       trim_blocks=True, lstrip_blocks=True)
                 template_results = tpl_env.get_template(self.template).render(results=results)
@@ -1121,6 +1178,11 @@ class StoqPluginInstaller:
 
         self.stoq = stoq
         self.plugin_info = {}
+
+        self.plugin_module = None
+        self.plugin_name = None
+        self.plugin_category = None
+        self.plugin_root = None
 
         parser = self.argparse.ArgumentParser()
         installer_opts = parser.add_argument_group("Plugin Installer Options")

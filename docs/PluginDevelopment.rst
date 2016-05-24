@@ -99,17 +99,37 @@ framework to continue, otherwise |stoQ| will assume that the plugin activation
 has failed.
 
 Additionally, the ``deactivate`` method is called when/if the plugin is ever
-deactivated. This method is not required, though it is recommended should
-|stoQ| need to cleanup or deactivate the plugin for any reason.
+deactivated, including when |stoQ| shuts down. This method is not required,
+though it is recommended should the plugin have any actions that need to
+cleaning up or if |stoQ| needs to deactivate the plugin for any reason.
 
 For each of the above core methods, they should minimally call
 ``super().METHOD_NAME()`` right before they return. METHOD_NAME should be
 changed to the respective method. This will allow the respective parent class
 execute any required code.
 
-For time-based events (periodic flushes of buffers, etc), every plugin will
-have a "heartbeat()" method called once every 5 seconds. Plugins that wish to
-take time-based actions should override that method & handle their own timing.
+For time-based events (periodic flushes of buffers, etc), every plugin can
+define a ``wants_heartbeat`` property of the plugin. If that property is True,
+then a separate thread will be launched by stoQ to call the plugin's ``heartbeat``
+method. The ``heartbeat`` method will be called with the plugin object as its
+only argument (so ``heartbeat`` can be treated as a class method of the plugin).
+The ``heartbeat`` method will only be called once, and it is expected to loop
+to call whatever periodic actions the plugin wishes to take. For example:
+
+.. code:: python
+    def heartbeat(self):
+        while True:
+            time.sleep(1)
+            self._checkCommit()
+
+.. note:: Actions performed in the heartbeat must be multithread/multiprocess
+safe. If the actions in the heartbeat may change the values of properties
+that other plugin methods (like ``save``) may also change, it is the responsibility
+of the plugin to properly handle locking access to those objects, or find other
+methods of thread safety.
+
+.. note:: Also, at present only Worker and Connector plugins are checked to see
+if they need heartbeats. Others may be added in the future if the need arises.
 
 
 Workers
