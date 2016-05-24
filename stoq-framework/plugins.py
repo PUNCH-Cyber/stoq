@@ -453,7 +453,6 @@ class StoqWorkerPlugin(StoqPluginBase):
         for connector in self.connectors:
             connObj = self.connectors[connector]
             if hasattr(connObj, "wants_heartbeat") and connObj.wants_heartbeat:
-                connObj = self.connectors[connector]
                 thread = threading.Thread(target=connObj.heartbeat,
                                           args=(),
                                           daemon=True)
@@ -529,27 +528,29 @@ class StoqWorkerPlugin(StoqPluginBase):
         except KeyboardInterrupt:
             self.stoq.log.info("Keyboard interrupt received..terminating processes")
         finally:
-            # call all connector/decoder/etc deactivate methods, so that they can
-            # finish their work before we terminate.
-            for source in self.sources:
-                self.sources[source].deactivate()
-            for reader in self.readers:
-                self.readers[reader].deactivate()
-            for decoder in self.decoders:
-                self.decoders[decoder].deactivate()
-            for extractor in self.extractors:
-                self.extractors[extractor].deactivate()
-            for carver in self.carvers:
-                self.carvers[carver].deactivate()
-            for connector in self.connectors:
-                self.connectors[connector].deactivate()
-            for worker in self.workers:
-                self.workers[worker].deactivate()
             if procs:
                 for proc in procs:
                     proc.terminate()
                     proc.join()
             return None
+
+    def _deactivate_everything(self):
+        # call all connector/decoder/etc deactivate methods, so that they can
+        # finish their work before we terminate.
+        for source in self.sources:
+            self.sources[source].deactivate()
+        for reader in self.readers:
+            self.readers[reader].deactivate()
+        for decoder in self.decoders:
+            self.decoders[decoder].deactivate()
+        for extractor in self.extractors:
+            self.extractors[extractor].deactivate()
+        for carver in self.carvers:
+            self.carvers[carver].deactivate()
+        for connector in self.connectors:
+            self.connectors[connector].deactivate()
+        for worker in self.workers:
+            self.workers[worker].deactivate()
 
     def _multiprocess(self, queue):
         while True:
@@ -558,6 +559,7 @@ class StoqWorkerPlugin(StoqPluginBase):
             should_stop = msg.get("_stoq_multiprocess_eoq", False)
             if should_stop:
                 self.stoq.log.debug("Shutdown command received. Stopping.")
+                self._deactivate_everything()
                 return
             self.start(**msg)
 
@@ -908,6 +910,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         # worker plugin. An output_connector must also be defined.
         if self.saveresults and self.output_connector:
             # Just to ensure we have loaded a connector for output
+            # doesn't this re-load the connector, possibly replacing
             self.load_connector(self.output_connector)
 
             if template_results:
