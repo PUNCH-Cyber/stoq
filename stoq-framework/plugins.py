@@ -520,8 +520,15 @@ class StoqWorkerPlugin(StoqPluginBase):
                 # input.
                 self.start()
 
+            done = False
+            while not done:
+                alive = [proc.is_alive() for proc in procs]
+                if not any(alive):
+                    done = True
+
         except KeyboardInterrupt:
             self.stoq.log.info("Keyboard interrupt received..terminating processes")
+        finally:
             # call all connector/decoder/etc deactivate methods, so that they can
             # finish their work before we terminate.
             for source in self.sources:
@@ -538,7 +545,6 @@ class StoqWorkerPlugin(StoqPluginBase):
                 self.connectors[connector].deactivate()
             for worker in self.workers:
                 self.workers[worker].deactivate()
-        finally:
             if procs:
                 for proc in procs:
                     proc.terminate()
@@ -548,8 +554,10 @@ class StoqWorkerPlugin(StoqPluginBase):
     def _multiprocess(self, queue):
         while True:
             msg = queue.get()
+            self.stoq.log.debug("Received message from source: {}".format(msg))
             should_stop = msg.get("_stoq_multiprocess_eoq", False)
             if should_stop:
+                self.stoq.log.debug("Shutdown command received. Stopping.")
                 return
             self.start(**msg)
 
