@@ -105,7 +105,7 @@ def StoqArgs(parser):
                            help="Connector plugin used to archive files")
     conn_opts.add_argument("-S", "--split",
                            dest='combined_results',
-                           action='store_true',
+                           action='store_false',
                            help="Split results on a per plugin basis")
 
     source_opts = parser.add_argument_group('Ingest Options')
