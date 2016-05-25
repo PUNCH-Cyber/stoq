@@ -753,7 +753,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                 worker_result['source_meta'].pop(k, None)
 
         worker_result['payload_id'] = 0
-        results['plugins'].update({0: self.name})
+        results['plugins'].update({"0": self.name})
 
         # Keep track of our total count of payloads, in case yara dispatch
         # finds something
@@ -810,7 +810,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                             self.save_payload(yara_result[1], self.archive_connector)
 
                         results['results'].append(dispatch_result)
-                        results['plugins'].update({payload_id: dispatch_result['plugin']})
+                        results['plugins'].update({str(payload_id): dispatch_result['plugin']})
 
                         payload_id += 1
 
