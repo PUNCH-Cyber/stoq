@@ -656,15 +656,16 @@ class StoqWorkerPlugin(StoqPluginBase):
         :type kwargs: dict or None
 
         :returns: Tuple of JSON results and template rendered results
-        :rtype: dict and str
+        :rtype: dict and str or lists
 
         """
 
         archive_type = False
-        template_results = None
         payload_hashes = None
+        template_results = None
         results = {}
         results['results'] = []
+        results['plugins'] = {}
         worker_result = {}
 
         results['date'] = self.stoq.get_time
@@ -725,6 +726,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         worker_result['scan'] = self.scan(payload, **kwargs)
 
         worker_result['plugin'] = self.name
+
         worker_result['uuid'] = kwargs['uuid']
 
         if payload:
@@ -751,6 +753,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                 worker_result['source_meta'].pop(k, None)
 
         worker_result['payload_id'] = 0
+        results['plugins'].update({0: self.name})
 
         # Keep track of our total count of payloads, in case yara dispatch
         # finds something
@@ -802,12 +805,14 @@ class StoqWorkerPlugin(StoqPluginBase):
                         dispatch_queue.append(yara_result)
 
                         dispatch_result['payload_id'] = payload_id
-                        payload_id += 1
 
                         if dispatch_result.get('save').lower() == 'true' and self.archive_connector:
                             self.save_payload(yara_result[1], self.archive_connector)
 
                         results['results'].append(dispatch_result)
+                        results['plugins'].update({payload_id: dispatch_result['plugin']})
+
+                        payload_id += 1
 
                 dispatch_payloads = dispatch_queue.copy()
                 dispatch_queue = []
@@ -816,10 +821,81 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         results['payloads'] = payload_id
 
+        # If we want the results for all plugins to be returned in one
+        # big json blob, combined_results must be true.
+        if self.stoq.combined_results:
+            results, template_results = self._save_results(results)
+        else:
+            # Looks like we want to save each result individually, this
+            # gets complex.
+            split_results = []
+            split_template_results = []
+
+            # Make sure we save the top level key/values so we can append
+            # them to the new individual result dict
+            result_date = results['date']
+            result_payloads = results['payloads']
+            result_plugins = results['plugins']
+
+            for result in results['results']:
+                # Create the new individual results dict
+                plugin_result = {}
+                plugin_result['date'] = result_date
+                plugin_result['payloads'] = result_payloads
+                plugin_result['plugins'] = result_plugins
+                plugin_result['results'] = [result]
+
+                # Because this function returns the results, we are going
+                # to save the individual results as it is returned from
+                # the _save_results function
+                r, t = self._save_results(plugin_result)
+
+                # Append the results to the main results list. In many cases
+                # templates won't be utilized, so no sense in saving them if
+                # nothing is there.
+                split_results.append(r)
+                if t:
+                    split_template_results.append(t)
+
+            # Replace the original results with our newly created list of
+            # results.
+            results = split_results
+            if split_template_results:
+                template_results = split_template_results
+
+        return results, template_results
+
+    def _save_results(self, results):
+
+        template_results = None
+
+        # We need to identify the plugin that generate this result so we can
+        # save it to the appropriate index and also templatize the results, if
+        # needed.
+        plugin = results['results'][0].get('plugin', self.name)
+
+        # Some plugins will only be the plugin name itself. If it is a
+        # dispatched result, it will contain the plugin category as well as the
+        # plugin name.
+        if plugin.count(':') == 1:
+            plugin_cat, plugin_name = plugin.split(':')
+        else:
+            plugin_cat = "worker"
+            plugin_name = plugin
+
         # Parse output with a template
         if self.template:
             try:
-                template_path = "{}/templates".format(self.plugin_path)
+                # Figure out the plugin path from the results plugin object
+                if plugin_cat in self.stoq.plugin_categories:
+                    plugin_cat += "s"
+                    plugin_object = getattr(self, plugin_cat, None)
+                    if not plugin_object:
+                        plugin_path = self.plugin_path
+                    else:
+                        plugin_path = plugin_object[plugin_name].plugin_path
+
+                template_path = "{}/templates".format(plugin_path)
 
                 tpl_env = Environment(loader=FileSystemLoader(template_path),
                                       trim_blocks=True, lstrip_blocks=True)
@@ -838,16 +914,13 @@ class StoqWorkerPlugin(StoqPluginBase):
             self.load_connector(self.output_connector)
 
             if template_results:
-                self.connectors[self.output_connector].save(template_results)
+                self.connectors[self.output_connector].save(template_results,
+                                                            index=plugin_name)
             else:
-                # Attempt to save the results, and pass along the primary
-                # results as **kwargs, otherwise just pass along the results.
-                try:
-                    kwargs = {'sha1': results['results'][0]['sha1']}
-                    self.connectors[self.output_connector].save(results,
-                                                                **kwargs)
-                except (KeyError, IndexError):
-                    self.connectors[self.output_connector].save(results)
+                sha1 = results['results'][0].get('sha1', None)
+                self.connectors[self.output_connector].save(results,
+                                                            sha1=sha1,
+                                                            index=plugin_name)
 
         return results, template_results
 

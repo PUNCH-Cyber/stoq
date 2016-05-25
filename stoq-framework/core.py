@@ -72,7 +72,7 @@ from bs4 import UnicodeDammit
 from stoq.plugins import StoqPluginManager
 
 
-__version__ = "0.9.18"
+__version__ = "0.9.19"
 
 
 class Stoq(StoqPluginManager):
@@ -125,6 +125,9 @@ class Stoq(StoqPluginManager):
         self.useragent = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.1)"
 
         self.worker = None
+
+        # Should results be combined by default?
+        self.combined_results = True
 
         # Default logging options
         # Valid options: DEBUG, INFO, WARNING, ERROR, CRITICAL

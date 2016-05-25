@@ -103,6 +103,9 @@ def StoqArgs(parser):
                            dest='archive_connector',
                            default=False,
                            help="Connector plugin used to archive files")
+    conn_opts.add_argument("-S", "--combined",
+                           dest='combined_results',
+                           help="Save results as one json blob, or per plugin")
 
     source_opts = parser.add_argument_group('Ingest Options')
     source_opts.add_argument("-F", "--file",
