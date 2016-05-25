@@ -823,7 +823,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         # If we want the results for all plugins to be returned in one
         # big json blob, combined_results must be true.
-        if self.stoq.combined_results:
+        if self.combined_results:
             results, template_results = self._save_results(results)
         else:
             # Looks like we want to save each result individually, this

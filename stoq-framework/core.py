@@ -126,9 +126,6 @@ class Stoq(StoqPluginManager):
 
         self.worker = None
 
-        # Should results be combined by default?
-        self.combined_results = True
-
         # Default logging options
         # Valid options: DEBUG, INFO, WARNING, ERROR, CRITICAL
         self.log_level = "INFO"
