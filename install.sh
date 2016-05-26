@@ -21,10 +21,12 @@
 # Die if anything in this script fails to execute
 set -e
 
+PREFIX=/usr/local
+BIN_DIR=$PREFIX/bin
 STAGE_DIR=$PWD
 TMP_DIR=$STAGE_DIR/tmp
 PLUGIN_DIR=$STAGE_DIR/stoq-plugins-public
-STOQ_DIR=/usr/local/stoq
+STOQ_DIR=$PREFIX/stoq
 PYENV_DIR=$STOQ_DIR/.stoq-pyenv
 STOQ_USER=stoq
 STOQ_GROUP=stoq
@@ -39,9 +41,18 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-# Ensure this is a debian based operating system
-if [ ! -f /etc/debian_version ]; then
-    echo "ERROR: This installation should only be used on debian based operating systems. Exiting!" 1>&2
+# debian and red hat based operating systems supported
+if [ -f /etc/debian_version ]; then
+    OS=Debian
+elif [ -f /etc/redhat-release ]; then
+    VERSION=$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))
+    if [[ ! $VERSION =~ ^7 ]]; then
+        echo "ERROR: This installation only supports Red Hat 7 based operating systems." 1>&2
+        exit 1
+    fi
+    OS=RedHat
+else
+    echo "ERROR: This installation should only be used on debian or red hat based operating systems. Exiting!" 1>&2
     exit 1
 fi
 
@@ -58,21 +69,54 @@ fi
 install_prereqs() {
     echo "[stoQ] Installing prerequisites..."
     set +e
-    apt-add-repository -y multiverse
-    # Some older versions of ubuntu do not have this installed. Catch the
-    # error and install it.
-    if [ "$?" == "1" ]; then
-        set -e
-        apt-get -yq install software-properties-common
+
+    if [ "$OS" == "Debian" ]; then
         apt-add-repository -y multiverse
+        # Some older versions of ubuntu do not have this installed. Catch the
+        # error and install it.
+        if [ $? -ne 0 ]; then
+            set -e
+            apt-get -yq install software-properties-common
+            apt-add-repository -y multiverse
+        fi
+        set -e
+        apt-get -yq update
+        apt-get -yq install git-core wget unzip p7zip-full unace-nonfree p7zip-rar automake \
+                            build-essential cython autoconf python3 python3-dev python3-setuptools \
+                            libyaml-dev libffi-dev libfuzzy-dev libxml2-dev libxslt1-dev libz-dev \
+                            libssl-dev libmagic-dev
+
+        easy_install3 pip
+
+    elif [ "$OS" == "RedHat" ]; then
+        rpm -q epel-release
+        if [ $? -ne 0 ]; then
+            # In CentOS, EPEL is included in the extras repository.
+            # Extras should be enabled my default.
+            yum install --enablerepo=Extras epel-release
+            if [ $? -ne 0 ]; then
+                # If epel-release cannot be installed via yum
+                # install it manually via rpm
+                # XXX: Does this work on CentOS and RH both?
+                yum -y -q install wget
+                wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+                rpm -ivh epel-release-latest-7.noarch.rpm
+            fi
+        fi
+
+        # XXX: does file-devel take care of all necessray dependencies libmagic-dev provides on ubuntu?
+        # XXX: p7zip-rar unace-nonfree does not appear available via RPM
+        # XXX: build-essential equivalent?
+        yum -y -q group install 'Development Tools'
+        yum -y -q --enablerepo=*optional install file-devel
+        yum -y -q install git wget unzip p7zip Cython python34 python34-devel python34-setuptools \
+                          libyaml-devel libffi-devel libxml2-devel libxslt-devel openssl-devel file-devel \
+                          ssdeep-devel zlib-devel
+
+        easy_install-3.4 pip
+
     fi
-    set -e
-    apt-get -yq update
-    apt-get -yq install git-core wget unzip p7zip-full unace-nonfree p7zip-rar automake \
-                        build-essential cython autoconf python3 python3-dev python3-setuptools \
-                        libyaml-dev libffi-dev libfuzzy-dev libxml2-dev libxslt1-dev libz-dev \
-                        libssl-dev libmagic-dev
-    easy_install3 pip
+
     pip3 install virtualenv --quiet
     echo "[stoQ] Done installing prerequisites."
     echo "[stoQ] Setting up virtualenv..."
@@ -125,9 +169,13 @@ install_tika() {
     TIKA_URL=$(curl https://tika.apache.org/download.html | sed -n 's/.*href="\(.*server.*\.jar\)">.*/\1/ip;T;q')
     TIKA_DOWNLOAD=$(curl -s $TIKA_URL | sed -n 's/.*<strong>\(.*\)<\/strong>.*/\1/ip;T;q')
     TIKA_VERSION=$(echo $TIKA_URL | awk 'BEGIN{FS="server-|.jar"} {print $2}')
-    TIKA_INSTALL_DIR=/usr/local/tika
+    TIKA_INSTALL_DIR=$PREFIX/tika
 
-    apt-get -yq install default-jdk
+    if [ "$OS" == "Debian" ]; then
+        apt-get -yq install default-jdk
+    elif [ "$OS" == "RedHat" ]; then
+        yum -y -q install java-1.7.0-openjdk
+    fi
 
     cd $TMP_DIR
 
@@ -149,7 +197,13 @@ install_tika() {
 # Yara worker
 install_yara() {
     echo "[stoQ] Installing yara..."
-    apt-get -yq install bison flex libtool
+
+    if [ "$OS" == "Debian" ]; then
+        apt-get -yq install bison flex libtool
+    elif [ "$OS" == "RedHat" ]; then
+        yum -y -q install bison flex libtool
+    fi
+
     cd $TMP_DIR
     if [ -d $TMP_DIR/yara ]; then
         rm -rf $TMP_DIR/yara
@@ -160,7 +214,7 @@ install_yara() {
     ./bootstrap.sh
     # Sometimes bootstrap will fail the first time, but work the 2nd time.
     # Temp fix until the yara repo fixes the issue
-    if [ "$?" == "1" ]; then
+    if [ $? -ne 0 ]; then
         set -e
         ./bootstrap.sh
     fi
@@ -178,7 +232,7 @@ install_xor() {
     cd $TMP_DIR
     wget -O XORSearch.zip "https://didierstevens.com/files/software/XORSearch_V1_11_1.zip"
     unzip -qq XORSearch -d XORSearch
-    gcc -o /usr/local/bin/xorsearch XORSearch/XORSearch.c
+    gcc -o $BIN_DIR/xorsearch XORSearch/XORSearch.c
     rm -r XORSearch.zip
     cd $STOQ_DIR
     echo "[stoQ] Done installing xorsearch."
@@ -190,8 +244,8 @@ install_trid() {
     cd $TMP_DIR
     # Download and install TRiD
     wget -O trid_linux_64.zip "http://mark0.net/download/trid_linux_64.zip"
-    unzip -qq trid_linux_64 -d /usr/local/bin
-    chmod +x /usr/local/bin/trid
+    unzip -qq trid_linux_64 -d $BIN_DIR
+    chmod +x $BIN_DIR/trid
     rm -r trid_linux_64.zip
     # Download and install the definitions
     cd $TMP_DIR
@@ -208,6 +262,10 @@ install_exif() {
     # The default debian exiftool does not work properly. Let's just
     # directly from the source.
     # apt-get install -yq libimage-exiftool-perl
+    # XXX: Do we need to make sure this is installed on ubuntu
+    if [ "$OS" == "RedHat" ]; then
+        yum -y -q install perl-ExtUtils-MakeMaker
+    fi
     cd $TMP_DIR
     wget -O exif.tgz "http://www.sno.phy.queensu.ca/~phil/exiftool/Image-ExifTool-10.02.tar.gz"
     tar -xvf exif.tgz
@@ -224,10 +282,21 @@ install_exif() {
 # clamav worker
 install_clamav() {
     echo "[stoQ] Installing clamav"
-    apt-get install -yq clamav clamav-daemon
-    echo "[!] This takes really long, running in the background..."
-    freshclam &
-    service clamav-daemon start
+    # XXX: Should check to see if clam is already installed
+    if [ "$OS" == "Debian" ]; then
+        apt-get install -yq clamav clamav-daemon
+        echo "[!] This takes really long, running in the background..."
+        freshclam && service clamav-daemon start &
+    elif [ "$OS" == "RedHat" ]; then
+        yum -y -q install clamav clamav-scanner clamav-scanner-systemd clamav-update
+        sed -i -r -e 's/^Example$/#Example/' -e 's/^#(LocalSocket .*)$/\1/' /etc/clamd.d/scan.conf
+        sed -i -r -e 's/^Example$/#Example/' /etc/freshclam.conf
+        # XXX: Do we enable it? Is it done automatically on ubuntu?
+        systemctl enable clamd@scan
+        echo "[!] This takes really long, running in the background..."
+        freshclam && systemctl start clamd@scan &
+    fi
+
     echo "[stoQ] Done installing clamav."
 }
 
@@ -235,7 +304,15 @@ install_clamav() {
 # RabbitMQ worker
 install_rabbitmq() {
     echo "[stoQ] Installing RabbitMQ..."
-    apt-get -yq install rabbitmq-server
+
+    if [ "$OS" == "Debian" ]; then
+        apt-get -yq install rabbitmq-server
+    elif [ "$OS" == "RedHat" ]; then
+        yum -y -q install rabbitmq-server
+        chkconfig rabbitmq-server on
+        service rabbitmq-server start
+    fi
+
     rabbitmq-plugins enable rabbitmq_management
     set +e
     rabbitmqctl add_user stoq stoq-password
