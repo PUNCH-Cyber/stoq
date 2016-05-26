@@ -462,11 +462,12 @@ class StoqWorkerPlugin(StoqPluginBase):
             plugin_category = getattr(self, full_category_name, None)
             if plugin_category is not None:
                 for plugin in plugin_category:
-                    if hasattr(plugin, "wants_heartbeat") and plugin.wants_heartbeat:
-                        thread = threading.Thread(target=plugin.heartbeat,
+                    pluginObj = plugin_category[plugin]
+                    if hasattr(pluginObj, "wants_heartbeat") and pluginObj.wants_heartbeat:
+                        thread = threading.Thread(target=pluginObj.heartbeat,
                                                   args=(),
                                                   daemon=True)
-                        pluign.heartbeat_thread = thread
+                        pluginObj.heartbeat_thread = thread
                         thread.start()
 
     def deactivate(self):
@@ -541,7 +542,7 @@ class StoqWorkerPlugin(StoqPluginBase):
             plugin_category = getattr(self, full_category_name, None)
             if plugin_category is not None:
                 for plugin in plugin_category:
-                    plugin.deactivate()
+                    plugin_category[plugin].deactivate()
 
     def _multiprocess(self, queue):
         self._start_heartbeats()
