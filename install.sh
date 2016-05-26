@@ -15,7 +15,7 @@
 ###
 #
 # stoQ installation script. Only to be used with debian linux flavors.
-# 
+#
 ###
 
 # Die if anything in this script fails to execute
@@ -72,7 +72,7 @@ install_prereqs() {
                         build-essential cython autoconf python3 python3-dev python3-setuptools \
                         libyaml-dev libffi-dev libfuzzy-dev libxml2-dev libxslt1-dev libz-dev \
                         libssl-dev libmagic-dev
-    easy_install3 pip 
+    easy_install3 pip
     pip3 install virtualenv --quiet
     echo "[stoQ] Done installing prerequisites."
     echo "[stoQ] Setting up virtualenv..."
@@ -90,12 +90,12 @@ install_core() {
     set -e
     cd $STAGE_DIR
 
-    python setup.py install 
+    python setup.py install
     # hydra requires Cython to be installed, so we will install it separately
     pip install hydra
 
     if [ ! -d $PLUGIN_DIR ]; then
-        git clone https://github.com/PUNCH-Cyber/stoq-plugins-public.git 
+        git clone https://github.com/PUNCH-Cyber/stoq-plugins-public.git
     fi
 
     # Make sure we setup stoQ in the proper directory
@@ -176,9 +176,9 @@ install_yara() {
 install_xor() {
     echo "[stoQ] Installing xorsearch..."
     cd $TMP_DIR
-    wget -O XORSearch.zip "https://didierstevens.com/files/software/XORSearch_V1_11_1.zip" 
-    unzip -qq XORSearch -d XORSearch 
-    gcc -o /usr/local/bin/xorsearch XORSearch/XORSearch.c 
+    wget -O XORSearch.zip "https://didierstevens.com/files/software/XORSearch_V1_11_1.zip"
+    unzip -qq XORSearch -d XORSearch
+    gcc -o /usr/local/bin/xorsearch XORSearch/XORSearch.c
     rm -r XORSearch.zip
     cd $STOQ_DIR
     echo "[stoQ] Done installing xorsearch."
@@ -187,7 +187,6 @@ install_xor() {
 # TrID worker
 install_trid() {
     echo "[stoQ] Installing trid"
-    apt-get -yq install libc6-i386 lib32ncurses5
     cd $TMP_DIR
     # Download and install TRiD
     wget -O trid_linux_64.zip "http://mark0.net/download/trid_linux_64.zip"
@@ -236,12 +235,12 @@ install_clamav() {
 # RabbitMQ worker
 install_rabbitmq() {
     echo "[stoQ] Installing RabbitMQ..."
-    apt-get -yq install rabbitmq-server 
-    rabbitmq-plugins enable rabbitmq_management 
+    apt-get -yq install rabbitmq-server
+    rabbitmq-plugins enable rabbitmq_management
     set +e
-    rabbitmqctl add_user stoq stoq-password 
-    rabbitmqctl add_vhost stoq 
-    rabbitmqctl set_permissions -p stoq stoq ".*" ".*" ".*" 
+    rabbitmqctl add_user stoq stoq-password
+    rabbitmqctl add_vhost stoq
+    rabbitmqctl set_permissions -p stoq stoq ".*" ".*" ".*"
     set -e
     cd $STOQ_DIR
     echo "[stoQ] Done installing RabbitMQ."
@@ -278,4 +277,3 @@ install_rabbitmq
 
 # Cleanup
 cleanup
-
