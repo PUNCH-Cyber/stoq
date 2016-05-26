@@ -122,7 +122,7 @@ class StoqPluginManager:
                                   "extractor": StoqExtractorPlugin,
                                   "carver": StoqCarverPlugin,
                                   "decoder": StoqDecoderPlugin
-                                  }
+                                 }
 
         self.manager = PluginManager()
         self.manager.setPluginInfoExtension("stoq")
@@ -450,25 +450,24 @@ class StoqWorkerPlugin(StoqPluginBase):
             with open(self.stoq.dispatch_rules) as rules:
                 self.yara_dispatcher_rules = yara.compile(file=rules)
 
-        for connector in self.connectors:
-            connObj = self.connectors[connector]
-            if hasattr(connObj, "wants_heartbeat") and connObj.wants_heartbeat:
-                thread = threading.Thread(target=connObj.heartbeat,
-                                          args=(),
-                                          daemon=True)
-                connObj.heartbeat_thread = thread
-                thread.start()
-
-        for worker in self.workers:
-            workerObj = self.workers[worker]
-            if hasattr(workerObj, "wants_heartbeat") and workerObj.wants_heartbeat:
-                thread = threading.Thread(target=workerObj.heartbeat,
-                                          args=(),
-                                          daemon=True)
-                workerObj.heartbeat_thread = thread
-                thread.start()
-
         return self
+
+    def _start_heartbeats(self):
+        # check each plugin to see if they have asked for a heartbeat
+        # helper function. If the wants_heartbeat class variable exists
+        # and is true, start a thread that calls the class' "heartbeat"
+        # method.
+        for category in self.stoq.plugin_categories:
+            full_category_name = category + "s"
+            plugin_category = getattr(self, full_category_name, None)
+            if plugin_category is not None:
+                for plugin in plugin_category:
+                    if hasattr(plugin, "wants_heartbeat") and plugin.wants_heartbeat:
+                        thread = threading.Thread(target=plugin.heartbeat,
+                                                  args=(),
+                                                  daemon=True)
+                        pluign.heartbeat_thread = thread
+                        thread.start()
 
     def deactivate(self):
         """
@@ -535,24 +534,17 @@ class StoqWorkerPlugin(StoqPluginBase):
             return None
 
     def _deactivate_everything(self):
-        # call all connector/decoder/etc deactivate methods, so that they can
+        # call all plugin deactivate methods, so that they can
         # finish their work before we terminate.
-        for source in self.sources:
-            self.sources[source].deactivate()
-        for reader in self.readers:
-            self.readers[reader].deactivate()
-        for decoder in self.decoders:
-            self.decoders[decoder].deactivate()
-        for extractor in self.extractors:
-            self.extractors[extractor].deactivate()
-        for carver in self.carvers:
-            self.carvers[carver].deactivate()
-        for connector in self.connectors:
-            self.connectors[connector].deactivate()
-        for worker in self.workers:
-            self.workers[worker].deactivate()
+        for category in self.stoq.plugin_categories:
+            full_category_name = category + "s"
+            plugin_category = getattr(self, full_category_name, None)
+            if plugin_category is not None:
+                for plugin in plugin_category:
+                    plugin.deactivate()
 
     def _multiprocess(self, queue):
+        self._start_heartbeats()
         while True:
             msg = queue.get()
             self.stoq.log.debug("Received message from source: {}".format(msg))
