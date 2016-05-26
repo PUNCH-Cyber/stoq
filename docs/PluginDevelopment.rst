@@ -99,13 +99,38 @@ framework to continue, otherwise |stoQ| will assume that the plugin activation
 has failed.
 
 Additionally, the ``deactivate`` method is called when/if the plugin is ever
-deactivated. This method is not required, though it is recommended should
-|stoQ| need to cleanup or deactivate the plugin for any reason.
+deactivated, including when |stoQ| shuts down. This method is not required,
+though it is recommended should the plugin have any actions that need to
+cleaning up or if |stoQ| needs to deactivate the plugin for any reason.
 
 For each of the above core methods, they should minimally call
 ``super().METHOD_NAME()`` right before they return. METHOD_NAME should be
-changed to the repsective method. This will allow the respective parent class
+changed to the respective method. This will allow the respective parent class
 execute any required code.
+
+For time-based events (periodic flushes of buffers, etc), every plugin can
+define a ``wants_heartbeat`` property of the plugin. If that property is True,
+then a separate thread will be launched by stoQ to call the plugin's ``heartbeat``
+method. The ``heartbeat`` method will be called with the plugin object as its
+only argument (so ``heartbeat`` can be treated as a class method of the plugin).
+The ``heartbeat`` method will only be called once, and it is expected to loop
+to call whatever periodic actions the plugin wishes to take. For example:
+
+.. code:: python
+    def heartbeat(self):
+        while True:
+            time.sleep(1)
+            self._checkCommit()
+
+.. note:: Actions performed in the heartbeat must be multithread/multiprocess
+safe. If the actions in the heartbeat may change the values of properties
+that other plugin methods (like ``save``) may also change, it is the responsibility
+of the plugin to properly handle locking access to those objects, or find other
+methods of thread safety.
+
+.. note:: Also, at present only Worker and Connector plugins are checked to see
+if they need heartbeats. Others may be added in the future if the need arises.
+
 
 Workers
 -------
@@ -321,7 +346,8 @@ In addition to the above requirements, the below methods are required for
     - ingest
 
 The ``ingest`` method does not require any arrtributes when called. *Source*
-plugins should be the method used to call ``worker.start``. This is the
+plugins should push data back to the worker by calling the
+``worker.multiprocess_put`` method. This is will pull data back to the
 main method for processing data in and our of the framework to include
 retrieving payloads, hashing, metadata generation, result handling, and saving
 of results.
@@ -343,7 +369,7 @@ of results.
         def ingest(self):
 
             path = "/tmp/bad.exe"
-            self.stoq.worker.start(path=path, archive='file')
+            self.stoq.worker.multiprocess_put(path=path, archive='file')
 
             return True
 
@@ -353,33 +379,10 @@ option in it's ``.stoq`` file under the [options] header. For example::
     [options]
     multiprocess = True
 
-If set to ``True``, source plugin will be able to publish to a ``multiprocess``
-queue. Objects may be added to the queue by calling 
-``self.stoq.worker.multiprocess_put()``. As an example, we can use the
-previous example with multiprocessing support.
-
-.. code:: python
-
-    from stoq.plugins import StoqSourcePlugin
-
-
-    class FileSource(StoqSourcePlugin):
-
-        def __init__(self):
-            super().__init__()
-
-        def activate(self, stoq):
-            self.stoq = stoq
-            super().activate()
-
-        def ingest(self):
-
-            paths = ["/tmp/bad.exe", "/tmp/bad1.exe", "/tmp/bad3.exe"]
-            for path in paths:
-                self.stoq.worker.multiprocess_put(path=path, archive='file')
-
-            return True
-
+If set to ``True``, the source plugin will be capable of being run with
+multiple instances simultaneously. Note: if ``multiprocess`` option is
+set to ``False`` the source will still be run in a Python process, but
+stoq will only run one instance of that process.
 
 Extractors
 ----------

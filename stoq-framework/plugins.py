@@ -84,11 +84,13 @@ API
 import os
 import re
 import multiprocessing
+import threading
 
 try:
     import yara
     yara_imported = True
 except ImportError:
+    yara = None
     yara_imported = False
 
 from yapsy.PluginManager import PluginManager
@@ -118,7 +120,7 @@ class StoqPluginManager:
                                   "extractor": StoqExtractorPlugin,
                                   "carver": StoqCarverPlugin,
                                   "decoder": StoqDecoderPlugin
-                                  }
+                                 }
 
         self.manager = PluginManager()
         self.manager.setPluginInfoExtension("stoq")
@@ -137,7 +139,7 @@ class StoqPluginManager:
         """
         plugins = {}
         for category, category_class in self.plugin_categories.items():
-            class_str = re.search('(?<=<class \'stoq\.plugins\.)(.+)(?=.*\'>)',
+            class_str = re.search(r'(?<=<class \'stoq\.plugins\.)(.+)(?=.*\'>)',
                                   str(category_class)).group(0)
             plugins[class_str] = category
 
@@ -330,12 +332,43 @@ class StoqPluginBase:
         self.stoq.log.debug("Plugin Deactivated: {0},{1}".format(self.name,
                                                                  self.is_activated))
 
+    def heartbeat(self, force=False):
+        pass
 
 class StoqWorkerPlugin(StoqPluginBase):
     """
     stoQ Worker Plugin Class
 
     """
+
+    def __init__(self):
+        super().__init__()
+
+        self.max_processes = 0
+
+        self.dispatch = None
+
+        self.output_connector = None
+
+        self.source_plugin = None
+
+        self.yara_dispatcher_rules = None
+
+        self.yara_dispatcher_hits = None
+
+        self.mp_queues = None
+
+        self.connector_queue = None
+
+        self.connector_feeder = None
+
+        self.workers = {}
+        self.connectors = {}
+        self.sources = {}
+        self.readers = {}
+        self.extractors = {}
+        self.carvers = {}
+        self.decoders = {}
 
     @property
     def min_version(self):
@@ -364,14 +397,6 @@ class StoqWorkerPlugin(StoqPluginBase):
             for k in options.__dict__:
                 if options.__dict__[k] is not None:
                     setattr(self, k, options.__dict__[k])
-
-        self.workers = {}
-        self.connectors = {}
-        self.sources = {}
-        self.readers = {}
-        self.extractors = {}
-        self.carvers = {}
-        self.decoders = {}
 
         if not self.max_processes:
             # Let's set the max_processes to 50% of total CPUs
@@ -423,12 +448,29 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         return self
 
+    def _start_heartbeats(self):
+        # check each plugin to see if they have asked for a heartbeat
+        # helper function. If the wants_heartbeat class variable exists
+        # and is true, start a thread that calls the class' "heartbeat"
+        # method.
+        for category in self.stoq.plugin_categories:
+            full_category_name = category + "s"
+            plugin_category = getattr(self, full_category_name, None)
+            if plugin_category is not None:
+                for plugin in plugin_category:
+                    pluginObj = plugin_category[plugin]
+                    if hasattr(pluginObj, "wants_heartbeat") and pluginObj.wants_heartbeat:
+                        thread = threading.Thread(target=pluginObj.heartbeat,
+                                                  args=(),
+                                                  daemon=True)
+                        pluginObj.heartbeat_thread = thread
+                        thread.start()
+
     def deactivate(self):
         """
         Deactivate the plugin within the framework
 
         """
-
         super().deactivate()
 
     def run(self):
@@ -447,42 +489,66 @@ class StoqWorkerPlugin(StoqPluginBase):
 
             # See if we have loaded any source plugins.
             if self.sources:
+                self.mp_queues = multiprocessing.JoinableQueue()
                 if self.sources[self.source_plugin].multiprocess:
-                    self.mp_queues = multiprocessing.JoinableQueue()
                     procs = [multiprocessing.Process(target=self._multiprocess,
                                                      args=(self.mp_queues,))
-                             for i in range(self.max_processes)]
+                             for _ in range(self.max_processes)]
 
                     # Start our processes before we populate them
                     for proc in procs:
                         proc.start()
-
+                else:
+                    proc = multiprocessing.Process(target=self._multiprocess,
+                                                   args=(self.mp_queues,))
+                    proc.start()
+                    procs = [proc]
                 # Start processing the source plugin
                 self.sources[self.source_plugin].ingest()
 
-                if self.sources[self.source_plugin].multiprocess:
-                    # Make sure we exit out when we are all done
-                    for proc in procs:
-                        self.multiprocess_put(stop=True)
-
+                # Make sure we exit out when we are all done
+                for _ in procs:
+                    self.multiprocess_put(_stoq_multiprocess_eoq=True)
             else:
                 # Looks like we don't have any. Let's just call the worker
                 # directly. Useful when we have a work plugin that requires no
                 # input.
                 self.start()
 
+            done = False
+            while not done:
+                alive = [proc.is_alive() for proc in procs]
+                if not any(alive):
+                    done = True
+
         except KeyboardInterrupt:
             self.stoq.log.info("Keyboard interrupt received..terminating processes")
+        finally:
             if procs:
                 for proc in procs:
                     proc.terminate()
                     proc.join()
             return None
 
+    def _deactivate_everything(self):
+        # call all plugin deactivate methods, so that they can
+        # finish their work before we terminate.
+        for category in self.stoq.plugin_categories:
+            full_category_name = category + "s"
+            plugin_category = getattr(self, full_category_name, None)
+            if plugin_category is not None:
+                for plugin in plugin_category:
+                    plugin_category[plugin].deactivate()
+
     def _multiprocess(self, queue):
+        self._start_heartbeats()
         while True:
             msg = queue.get()
-            if 'stop' in msg:
+            self.stoq.log.debug("Received message from source: {}".format(msg))
+            should_stop = msg.get("_stoq_multiprocess_eoq", False)
+            if should_stop:
+                self.stoq.log.debug("Shutdown command received. Stopping.")
+                self._deactivate_everything()
                 return
             self.start(**msg)
 
