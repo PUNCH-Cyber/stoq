@@ -431,7 +431,7 @@ class Stoq(StoqPluginManager):
 
         return os.path.join(self.archive_base, '/'.join(list(sha1[:5])))
 
-    def dumps(self, data, compactly=None):
+    def dumps(self, data, compactly=False):
         """
         Wrapper for json library. Dump dict to a json string
 
@@ -447,6 +447,7 @@ class Stoq(StoqPluginManager):
         # it is *MUCH* faster than demjson. However, if we run into issues
         # with being unable to serialize, we are going to use demjson
         # since it handles such data much better.
+
         try:
             if compactly is True:
                 indent = None
@@ -454,7 +455,7 @@ class Stoq(StoqPluginManager):
                 indent = 4
             return json.dumps(data, indent=indent)
         except TypeError:
-            return demjson.encode(data, encode_bytes=str, compactly=False)
+            return demjson.encode(data, encode_bytes=str, compactly=compactly)
 
     def loads(self, data):
         """
