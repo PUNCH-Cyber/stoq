@@ -99,11 +99,9 @@ from yapsy.FilteredPluginManager import FilteredPluginManager
 from jinja2 import Environment, FileSystemLoader
 from jinja2.exceptions import TemplateNotFound
 
-# noinspection PyUnresolvedReferences
 from stoq.scan import get_hashes, get_ssdeep, get_magic, get_sha1
 
 
-# noinspection PyUnresolvedReferences
 class StoqPluginManager:
     """
 
@@ -337,8 +335,6 @@ class StoqPluginBase:
     def heartbeat(self, force=False):
         pass
 
-
-# noinspection PyUnresolvedReferences,PyUnresolvedReferences
 class StoqWorkerPlugin(StoqPluginBase):
     """
     stoQ Worker Plugin Class
@@ -726,14 +722,16 @@ class StoqWorkerPlugin(StoqPluginBase):
         :type kwargs: dict or None
 
         :returns: Tuple of JSON results and template rendered results
-        :rtype: dict and str
+        :rtype: dict and str or lists
 
         """
 
         archive_type = False
-        template_results = None
         payload_hashes = None
-        results = {"results": []}
+        template_results = None
+        results = {}
+        results['results'] = []
+        results['plugins'] = {}
         worker_result = {}
 
         results['date'] = self.stoq.get_time
@@ -794,6 +792,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         worker_result['scan'] = self.scan(payload, **kwargs)
 
         worker_result['plugin'] = self.name
+
         worker_result['uuid'] = kwargs['uuid']
 
         if payload:
@@ -820,6 +819,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                 worker_result['source_meta'].pop(k, None)
 
         worker_result['payload_id'] = 0
+        results['plugins'].update({"0": self.name})
 
         # Keep track of our total count of payloads, in case yara dispatch
         # finds something
@@ -871,12 +871,14 @@ class StoqWorkerPlugin(StoqPluginBase):
                         dispatch_queue.append(yara_result)
 
                         dispatch_result['payload_id'] = payload_id
-                        payload_id += 1
 
                         if dispatch_result.get('save').lower() == 'true' and self.archive_connector:
                             self.save_payload(yara_result[1], self.archive_connector)
 
                         results['results'].append(dispatch_result)
+                        results['plugins'].update({str(payload_id): dispatch_result['plugin']})
+
+                        payload_id += 1
 
                 dispatch_payloads = dispatch_queue.copy()
                 dispatch_queue = []
@@ -885,10 +887,77 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         results['payloads'] = payload_id
 
+        # If we want the results for all plugins to be returned in one
+        # big json blob, combined_results must be true.
+        if self.combined_results:
+            results, template_results = self._save_results(results)
+        else:
+            # Looks like we want to save each result individually, this
+            # gets complex.
+            split_results = []
+            split_template_results = []
+
+            # Make sure we save the top level key/values so we can append
+            # them to the new individual result dict
+            result_date = results['date']
+            result_payloads = results['payloads']
+            result_plugins = results['plugins']
+
+            for result in results['results']:
+                # Create the new individual results dict
+                plugin_result = {}
+                plugin_result['date'] = result_date
+                plugin_result['payloads'] = result_payloads
+                plugin_result['plugins'] = result_plugins
+                plugin_result['results'] = [result]
+
+                # Because this function returns the results, we are going
+                # to save the individual results as it is returned from
+                # the _save_results function
+                r, t = self._save_results(plugin_result)
+
+                # Append the results to the main results list. In many cases
+                # templates won't be utilized, so no sense in saving them if
+                # nothing is there.
+                split_results.append(r)
+                if t:
+                    split_template_results.append(t)
+
+            # Replace the original results with our newly created list of
+            # results.
+            results = split_results
+            if split_template_results:
+                template_results = split_template_results
+
+        return results, template_results
+
+    def _save_results(self, results):
+
+        template_results = None
+
+        plugin = results['results'][0].get('plugin', self.name)
+
+        # Some plugins will only be the plugin name itself. If it is a
+        # dispatched result, it will contain the plugin category as well as the
+        # plugin name.
+        if plugin.count(':') == 1:
+            plugin_cat, plugin_name = plugin.split(':')
+            index = self.name
+        else:
+            plugin_name = plugin
+            index = plugin_name
+
         # Parse output with a template
         if self.template:
-            template_path = "{}/templates".format(self.plugin_path)
             try:
+                # Figure out the plugin path from the results plugin object
+                if plugin in self.workers:
+                    plugin_path = self.workers[plugin_name].plugin_path
+                else:
+                    plugin_path = self.plugin_path
+
+                template_path = "{}/templates".format(plugin_path)
+
                 tpl_env = Environment(loader=FileSystemLoader(template_path),
                                       trim_blocks=True, lstrip_blocks=True)
                 template_results = tpl_env.get_template(self.template).render(results=results)
@@ -903,20 +972,16 @@ class StoqWorkerPlugin(StoqPluginBase):
         # worker plugin. An output_connector must also be defined.
         if self.saveresults and self.output_connector:
             # Just to ensure we have loaded a connector for output
-            # doesn't this re-load the connector, possibly replacing
             self.load_connector(self.output_connector)
 
             if template_results:
-                self.connectors[self.output_connector].save(template_results)
+                self.connectors[self.output_connector].save(template_results,
+                                                            index=index)
             else:
-                # Attempt to save the results, and pass along the primary
-                # results as **kwargs, otherwise just pass along the results.
-                try:
-                    kwargs = {'sha1': results['results'][0]['sha1']}
-                    self.connectors[self.output_connector].save(results,
-                                                                **kwargs)
-                except (KeyError, IndexError):
-                    self.connectors[self.output_connector].save(results)
+                sha1 = results['results'][0].get('sha1', None)
+                self.connectors[self.output_connector].save(results,
+                                                            sha1=sha1,
+                                                            index=index)
 
         return results, template_results
 

@@ -72,7 +72,7 @@ from bs4 import UnicodeDammit
 from stoq.plugins import StoqPluginManager
 
 
-__version__ = "0.9.18"
+__version__ = "0.9.21"
 
 
 class Stoq(StoqPluginManager):
@@ -342,7 +342,7 @@ class Stoq(StoqPluginManager):
         """
 
         if not filename:
-            filename = self.get_uuid
+            filename = "{}.stoq".format(self.get_uuid)
 
         # Create our full path to file and make sure it's safe
         # This method is x4 faster than os.path.join
