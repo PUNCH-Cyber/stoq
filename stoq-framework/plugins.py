@@ -869,9 +869,6 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         template_results = None
 
-        # We need to identify the plugin that generate this result so we can
-        # save it to the appropriate index and also templatize the results, if
-        # needed.
         plugin = results['results'][0].get('plugin', self.name)
 
         # Some plugins will only be the plugin name itself. If it is a
@@ -879,21 +876,19 @@ class StoqWorkerPlugin(StoqPluginBase):
         # plugin name.
         if plugin.count(':') == 1:
             plugin_cat, plugin_name = plugin.split(':')
+            index = self.name
         else:
-            plugin_cat = "worker"
             plugin_name = plugin
+            index = plugin_name
 
         # Parse output with a template
         if self.template:
             try:
                 # Figure out the plugin path from the results plugin object
-                if plugin_cat in self.stoq.plugin_categories:
-                    plugin_cat += "s"
-                    plugin_object = getattr(self, plugin_cat, None)
-                    if not plugin_object:
-                        plugin_path = self.plugin_path
-                    else:
-                        plugin_path = plugin_object[plugin_name].plugin_path
+                if plugin in self.workers:
+                    plugin_path = self.workers[plugin_name].plugin_path
+                else:
+                    plugin_path = self.plugin_path
 
                 template_path = "{}/templates".format(plugin_path)
 
@@ -915,12 +910,12 @@ class StoqWorkerPlugin(StoqPluginBase):
 
             if template_results:
                 self.connectors[self.output_connector].save(template_results,
-                                                            index=plugin_name)
+                                                            index=index)
             else:
                 sha1 = results['results'][0].get('sha1', None)
                 self.connectors[self.output_connector].save(results,
                                                             sha1=sha1,
-                                                            index=plugin_name)
+                                                            index=index)
 
         return results, template_results
 
