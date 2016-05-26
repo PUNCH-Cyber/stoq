@@ -104,9 +104,7 @@ install_prereqs() {
             fi
         fi
 
-        # XXX: does file-devel take care of all necessray dependencies libmagic-dev provides on ubuntu?
         # XXX: p7zip-rar unace-nonfree does not appear available via RPM
-        # XXX: build-essential equivalent?
         yum -y -q group install 'Development Tools'
         yum -y -q --enablerepo=*optional install file-devel
         yum -y -q install git wget unzip p7zip Cython python34 python34-devel python34-setuptools \
@@ -262,7 +260,7 @@ install_exif() {
     # The default debian exiftool does not work properly. Let's just
     # directly from the source.
     # apt-get install -yq libimage-exiftool-perl
-    # XXX: Do we need to make sure this is installed on ubuntu
+    # XXX: Do we need to make sure this is installed on ubuntu?
     if [ "$OS" == "RedHat" ]; then
         yum -y -q install perl-ExtUtils-MakeMaker
     fi
