@@ -26,5 +26,5 @@ setup(
                       'jinja2',
                       'Cython',
                       'yara-python'],
-    dependency_links=['https://github.com/plusvic/yara-python/archive/v3.4.0.zip#egg=yara-python']
+    dependency_links=['https://github.com/plusvic/yara-python.git#egg=master']
 )
