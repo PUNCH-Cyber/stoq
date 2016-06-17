@@ -72,7 +72,7 @@ from bs4 import UnicodeDammit
 from stoq.plugins import StoqPluginManager
 
 
-__version__ = "0.9.21"
+__version__ = "0.9.22"
 
 
 class Stoq(StoqPluginManager):
@@ -431,12 +431,12 @@ class Stoq(StoqPluginManager):
 
         return os.path.join(self.archive_base, '/'.join(list(sha1[:5])))
 
-    def dumps(self, data, compactly=None):
+    def dumps(self, data, compactly=False):
         """
         Wrapper for json library. Dump dict to a json string
 
         :param dict data: Python dict to convert to json
-        :param compactly: Deprecated
+        :param compactly: set to True to return unindented JSON (no newlines between key/values),
 
         :returns: Converted json string
         :rtype: str
@@ -447,10 +447,15 @@ class Stoq(StoqPluginManager):
         # it is *MUCH* faster than demjson. However, if we run into issues
         # with being unable to serialize, we are going to use demjson
         # since it handles such data much better.
+
         try:
-            return json.dumps(data, indent=4)
+            if compactly is True:
+                indent = None
+            else:
+                indent = 4
+            return json.dumps(data, indent=indent)
         except TypeError:
-            return demjson.encode(data, encode_bytes=str, compactly=False)
+            return demjson.encode(data, encode_bytes=str, compactly=compactly)
 
     def loads(self, data):
         """
