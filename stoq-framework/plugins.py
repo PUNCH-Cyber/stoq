@@ -737,8 +737,10 @@ class StoqWorkerPlugin(StoqPluginBase):
         results['date'] = self.stoq.get_time
 
         # If we don't have a uuid, let's generate one
-        if 'uuid' not in kwargs:
-            kwargs['uuid'] = self.stoq.get_uuid
+        kwargs['uuid'] = kwargs.get('uuid', self.stoq.get_uuid)
+
+        # Set the Originating uuid to that of the first payload submitted
+        kwargs['ouuid'] = kwargs.get('ouuid', kwargs['uuid'])
 
         # If we have no payload, let's try to find one to process
         if not payload and 'archive' in kwargs:
@@ -814,7 +816,7 @@ class StoqWorkerPlugin(StoqPluginBase):
             # but the keys should be at the root of the results. Let's make
             # sure we move them to the root rather than storing them in the
             # source_meta
-            elif k in ('filename', 'puuid', 'magic', 'ssdeep', 'path'):
+            elif k in ('filename', 'puuid', 'magic', 'ssdeep', 'path', 'ouuid'):
                 worker_result[k] = v
                 worker_result['source_meta'].pop(k, None)
 
