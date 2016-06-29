@@ -22,8 +22,9 @@ stoQ plugins are available separately in the [plugin repository](https://github.
 
 ### Installation Script
 
-If using Ubuntu, installation of the core framework and plugins can be
-installed utilzing the installation script provided with the framework.::
+If using Ubuntu, Redhat, or CentOS, installation of the core framework and
+plugins can be installed utilzing the installation script provided with the
+framework.::
 
     git clone https://github.com/PUNCH-Cyber/stoq.git
     cd stoq/
@@ -33,7 +34,7 @@ installed utilzing the installation script provided with the framework.::
        if the required packages are available it should work without issue.*
 
 
-### Detailed Installation
+### Detailed Ubuntu Installation
 
 Install the core requirements via apt-get and pip::
 
@@ -85,7 +86,7 @@ plugin repository::
 
 Now, we can install the basic plugins that are commonly used within *stoQ*::
 
-    cd /usr/local/stoq 
+    cd /usr/local/stoq
     stoq-cli.py install /tmp/stoq-plugins-public/connector/file
     stoq-cli.py install /tmp/stoq-plugins-public/connector/stdout
     stoq-cli.py install /tmp/stoq-plugins-public/connector/mongodb
@@ -137,13 +138,13 @@ Now, we can install the basic plugins that are commonly used within *stoQ*::
 *stoQ* can easily be added to supervisord for running as a system service in
 daemon mode. In our example, let's say that we want to use the yara and exif
 plugins to monitor RabbitMQ and save any results into MongoDB. We've installed
-*stoQ* into /usr/local/stoq and our python virtual environment is in 
+*stoQ* into /usr/local/stoq and our python virtual environment is in
 ```/usr/local/stoq/.stoq-pyenv```. First, let's install the supervisor Ubuntu package::
 
     sudo apt-get install supervisor
 
 
-Now, let's create a new file in ```/etc/supervisor/conf.d``` named ```stoq.conf``` 
+Now, let's create a new file in ```/etc/supervisor/conf.d``` named ```stoq.conf```
 with the below content::
 
     [program:exif]
@@ -210,4 +211,3 @@ Switch to the ```stoq``` user::
 Your newly installed *stoQ* instance is now available in ``/usr/local/stoq``.
 
 All done!
-
