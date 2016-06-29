@@ -22,8 +22,8 @@ stoQ plugins are available separately in the [plugin repository](https://github.
 
 ### Installation Script
 
-If using Ubuntu, Redhat, or CentOS, installation of the core framework and
-plugins can be installed utilzing the installation script provided with the
+If using Ubuntu, Redhat 7, or CentOS, installation of the core framework and
+plugins can be installed utilizing the installation script provided with the
 framework.::
 
     git clone https://github.com/PUNCH-Cyber/stoq.git

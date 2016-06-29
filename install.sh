@@ -14,7 +14,8 @@
 #   limitations under the License.
 ###
 #
-# stoQ installation script. Only to be used with debian linux flavors.
+# stoQ installation script.
+# Supports: Ubuntu, Redhat 7, and CentOS
 #
 ###
 
