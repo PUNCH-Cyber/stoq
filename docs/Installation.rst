@@ -50,10 +50,17 @@ Install the latest version of yara from https://plusvic.github.io/yara/
 Once the virtualenv has been activated and yara is installed, we can install
 the core |stoQ| requirements::
 
+    pip install yara-python
     python setup.py install
     pip install hydra
 
+.. note:: Sometimes yara-python will fail to install on certain versions of Ubuntu
+          when being install from the setup.py script. Because of this, we will
+          install yara-python manually first.
+
 .. note:: hydra requires Cython to be installed, so we will install it separately.
+          Thanks to the way setuptools handles ordering of packages, this is
+          required.
 
 Make a directory to store all of |stoQ| and then copy the required files::
 

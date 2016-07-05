@@ -62,8 +62,15 @@ the core *stoQ* requirements::
 
     # We have to install cython first, because setuptools will fail to find
     # dependencies
-    pip install cython
+
+    # Let's install yara-python because in some cases it will simply fail to
+    # install. Go setuptools!
+    pip install yara-python
+
     python setup.py install
+
+    # Now, because of issues with setuptools, let's install hydra
+    pip install hydra
 
 Make a directory to store all of *stoQ* and then copy the required files::
 

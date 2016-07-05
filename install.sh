@@ -69,9 +69,9 @@ fi
 # pre-reqs
 install_prereqs() {
     echo "[stoQ] Installing prerequisites..."
-    set +e
 
     if [ "$OS" == "Debian" ]; then
+        set +e
         apt-add-repository -y multiverse
         # Some older versions of ubuntu do not have this installed. Catch the
         # error and install it.
@@ -82,7 +82,7 @@ install_prereqs() {
         fi
         set -e
         apt-get -yq update
-        apt-get -yq install git-core wget unzip p7zip-full unace-nonfree p7zip-rar automake \
+        apt-get -yq install git-core curl wget unzip p7zip-full unace-nonfree p7zip-rar automake \
                             build-essential cython autoconf python3 python3-dev python3-setuptools \
                             libyaml-dev libffi-dev libfuzzy-dev libxml2-dev libxslt1-dev libz-dev \
                             libssl-dev libmagic-dev
@@ -133,8 +133,21 @@ install_core() {
     set -e
     cd $STAGE_DIR
 
+    # Sometimes yara-python fails to install on Ubuntu 16.04 LTS boxes. Why?
+    # Because setuptools is the worst thing about python.
+    set +e
+    python -c "import yara"
+    if [ $? -ne 0 ]; then
+        set -e
+        pip install yara-python
+    fi
+
     python setup.py install
-    # hydra requires Cython to be installed, so we will install it separately
+
+    # hydra requires Cython to be installed, so we will install it separately.
+    # Why? Because setuptools wants to install in its own order and hydra will
+    # always install before Cython. Yep, that's right. Setuptools is the worst
+    # thing about python.
     pip install hydra
 
     if [ ! -d $PLUGIN_DIR ]; then

@@ -7,7 +7,7 @@ os.environ['BUILD_LIB'] = '1'
 
 setup(
     name="stoq",
-    version="0.9.23",
+    version="0.9.24",
     author="Marcus LaFerrera",
     author_email="marcus@punchcyber.com",
     description="A framework for simplifying analysis.",
@@ -26,5 +26,4 @@ setup(
                       'jinja2',
                       'Cython',
                       'yara-python'],
-    dependency_links=['https://github.com/plusvic/yara-python.git#egg=master']
 )
