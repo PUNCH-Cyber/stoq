@@ -813,7 +813,7 @@ class StoqWorkerPlugin(StoqPluginBase):
             # but the keys should be at the root of the results. Let's make
             # sure we move them to the root rather than storing them in the
             # source_meta
-            elif k in ('filename', 'puuid', 'magic', 'ssdeep', 'path', 'ouuid', 'size'):
+            elif k in ('filename', 'puuid', 'magic', 'ssdeep', 'path', 'size'):
                 worker_result[k] = v
                 worker_result['source_meta'].pop(k, None)
 
@@ -1044,8 +1044,17 @@ class StoqWorkerPlugin(StoqPluginBase):
                     dispatch_result = hit['meta'].copy()
                     # Make sure we hash the extracted content
                     dispatch_result.update(get_hashes(meta[1]))
-                    # Keep any metadata returned by the plugin as source_meta
-                    dispatch_result['source_meta'] = meta[0]
+
+                    dispatch_result['source_meta'] = {}
+
+                    # Keep any metadata returned by the plugin as source_meta,
+                    # but move some keys to the top lvel of the result.
+                    for k, v in meta[0].items():
+                        if k in ('filename', 'puuid', 'magic', 'ssdeep', 'path', 'size'):
+                            dispatch_result[k] = v
+                        else:
+                            dispatch_result['source_meta'][k] = v
+
                     yield (dispatch_result, meta[1])
 
         # Cleanup
