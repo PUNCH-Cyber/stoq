@@ -1067,6 +1067,8 @@ class StoqWorkerPlugin(StoqPluginBase):
 
     def _parse_dispatch_results(self, content, **kwargs):
         meta = content[0]
+        meta['dispatcher'] = meta['plugin']
+        meta['plugin'] = self.name
         meta['puuid'] = kwargs['uuid']
         meta['uuid'] = self.stoq.get_uuid
         meta['scan'] = self.scan(content[1])
