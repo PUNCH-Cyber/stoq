@@ -164,12 +164,14 @@ def get_magic(payload, mime=True):
     """
     try:
         magic_scan = magic.Magic(mime=mime)
+
         # Limit the buffer for 1000 bytes, otheriwse magic will fail
-        magic_type = magic_scan.from_buffer(payload[0:1000])
-        if magic_type:
-            magic_result = magic_type.decode("utf-8")
-        else:
-            magic_result = None
+        magic_result = magic_scan.from_buffer(payload[0:1000])
+
+        # In some cases there may be encoded content within the results. If so,
+        # let's make sure we decode it so it is handled properly.
+        if hasattr('decode', magic_result):
+            magic_result = magic_result.decode("utf-8")
     except:
         magic_result = None
 
@@ -220,4 +222,3 @@ def bytes_frequency(payload, min_length=1, max_length=3, min_count=10):
             if count >= min_count:
                 yield (byte_value, count,
                        float("{:.2f}".format(100 * float(count) / float(payload_size))))
-
