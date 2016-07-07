@@ -884,7 +884,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                             self.save_payload(yara_result[1], self.archive_connector)
 
                         results['results'].append(dispatch_result)
-                        results['plugins'].update({str(payload_id): dispatch_result['plugin']})
+                        results['plugins'].update({str(payload_id): dispatch_result['dispatcher']})
 
                         payload_id += 1
 
