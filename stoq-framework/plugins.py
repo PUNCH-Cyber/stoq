@@ -842,7 +842,6 @@ class StoqWorkerPlugin(StoqPluginBase):
             # set()s. Let's make sure we handle the initial payload the same
             # way, so we can simplify the below routine.
             dispatch_payloads = [({}, payload)]
-            dispatch_queue = []
 
             current_depth = 0
 
@@ -888,9 +887,6 @@ class StoqWorkerPlugin(StoqPluginBase):
                         results['plugins'].update({str(payload_id): dispatch_result['plugin']})
 
                         payload_id += 1
-
-                dispatch_payloads = dispatch_queue.copy()
-                dispatch_queue = []
 
                 current_depth += 1
 
