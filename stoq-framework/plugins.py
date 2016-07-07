@@ -1389,4 +1389,4 @@ class StoqPluginInstaller:
                                         self.plugin_category)
 
         print("[+] Installing {} plugin into {}...".format(self.plugin_name,
-                                                           :self.plugin_root))
+                                                           self.plugin_root))
