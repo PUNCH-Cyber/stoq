@@ -139,7 +139,7 @@ install_core() {
     python -c "import yara"
     if [ $? -ne 0 ]; then
         set -e
-        pip install yara-python
+        pip install git+https://github.com/VirusTotal/yara-python
     fi
 
     python setup.py install
