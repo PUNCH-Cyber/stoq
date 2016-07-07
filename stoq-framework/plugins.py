@@ -915,7 +915,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                 plugin_result['payloads'] = result_payloads
                 plugin_result['plugins'] = result_plugins
                 plugin_result['results'] = [result]
-:
+
                 # Because this function returns the results, we are going
                 # to save the individual results as it is returned from
                 # the _save_results function
