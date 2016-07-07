@@ -83,8 +83,9 @@ API
 
 import os
 import re
-import multiprocessing
+import time
 import threading
+import multiprocessing
 
 try:
     import yara
@@ -553,6 +554,15 @@ class StoqWorkerPlugin(StoqPluginBase):
             self.start(**msg)
 
     def multiprocess_put(self, **kwargs):
+        # Ensure that the max_queue size is not reached. If so, let's wait 1
+        # second. The reasoning for this is when using a queueing system, such
+        # as RabbitMQ or Kafka, they will keep adding to the multiprocessing
+        # queue until the queue has emptied, or, until the system resources
+        # have been exhausted. If the latter, stoQ will silently die.
+        while self.mp_queues.qsize() >= self.stoq.max_queue:
+            self.stoq.log.debug("Queue maximum size ({}) reached. Sleeping...".format(self.stoq.max_queue))
+            time.sleep(1)
+
         self.mp_queues.put(kwargs)
 
     def scan(self):

@@ -72,7 +72,7 @@ from bs4 import UnicodeDammit
 from stoq.plugins import StoqPluginManager
 
 
-__version__ = "0.9.25"
+__version__ = "0.9.26"
 
 
 class Stoq(StoqPluginManager):
@@ -140,6 +140,9 @@ class Stoq(StoqPluginManager):
 
         # Define the default maximum recursion depth for the dispatcher
         self.max_recursion = 3
+
+        # Maximum queue size for multiprocessing support
+        self.max_queue = 100
 
         # tuple() to match the root directory of where files can be ingested
         # from. Need for get_file().
