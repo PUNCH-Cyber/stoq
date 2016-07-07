@@ -876,7 +876,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
                         temp_processed_hashes.setdefault(dispatch_result['sha1'], True)
 
-                        dispatch_queue.append(yara_result)
+                        dispatch_payloads.append(yara_result)
 
                         dispatch_result['payload_id'] = payload_id
 
@@ -915,7 +915,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                 plugin_result['payloads'] = result_payloads
                 plugin_result['plugins'] = result_plugins
                 plugin_result['results'] = [result]
-
+:
                 # Because this function returns the results, we are going
                 # to save the individual results as it is returned from
                 # the _save_results function
@@ -1389,4 +1389,4 @@ class StoqPluginInstaller:
                                         self.plugin_category)
 
         print("[+] Installing {} plugin into {}...".format(self.plugin_name,
-                                                           self.plugin_root))
+                                                           :self.plugin_root))
