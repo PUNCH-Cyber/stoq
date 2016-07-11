@@ -551,7 +551,20 @@ class StoqWorkerPlugin(StoqPluginBase):
                 self.stoq.log.debug("Shutdown command received. Stopping.")
                 self._deactivate_everything()
                 return
-            self.start(**msg)
+            try:
+                self.start(**msg)
+            except Exception as e:
+                # Something went wrong. If the source plugin supports
+                # publishing, let's go ahead and push the error to it.
+                # Otherwise, let's just log to the stoQ log
+                msg['err'] = str(e)
+
+                if hasattr('publish', self.sources[self.source_plugin]):
+                    self.publish_connect()
+                    self.publish(msg, self.stoq.worker.name, err=True)
+                    self.publish_release()
+
+                self.stoq.log.error(msg)
 
     def multiprocess_put(self, **kwargs):
         # Ensure that the max_queue size is not reached. If so, let's wait 1
