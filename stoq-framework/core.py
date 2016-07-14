@@ -72,7 +72,7 @@ from bs4 import UnicodeDammit
 from stoq.plugins import StoqPluginManager
 
 
-__version__ = "0.9.28"
+__version__ = "0.9.29"
 
 
 class Stoq(StoqPluginManager):
@@ -137,6 +137,10 @@ class Stoq(StoqPluginManager):
 
         # Default source plugin to be used for input
         self.default_source = "filedir"
+
+        # The default suffix to append to a filename if
+        # a filename is not provided.
+        self.filename_suffix = "stoq"
 
         # Define the default maximum recursion depth for the dispatcher
         self.max_recursion = 3
@@ -345,7 +349,7 @@ class Stoq(StoqPluginManager):
         """
 
         if not filename:
-            filename = "{}.stoq".format(self.get_uuid)
+            filename = "{}.{}".format(self.get_uuid, self.filename_suffix)
 
         # Create our full path to file and make sure it's safe
         # This method is x4 faster than os.path.join
