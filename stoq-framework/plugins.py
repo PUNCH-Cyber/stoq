@@ -559,7 +559,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                 # Otherwise, let's just log to the stoQ log
                 msg['err'] = str(e)
 
-                if hasattr('publish', self.sources[self.source_plugin]):
+                if hasattr('publish', str(self.sources[self.source_plugin])):
                     self.publish_connect()
                     self.publish(msg, self.stoq.worker.name, err=True)
                     self.publish_release()
