@@ -170,7 +170,7 @@ def get_magic(payload, mime=True):
 
         # In some cases there may be encoded content within the results. If so,
         # let's make sure we decode it so it is handled properly.
-        if hasattr('decode', magic_result):
+        if hasattr(magic_result, 'decode'):
             magic_result = magic_result.decode("utf-8")
     except:
         magic_result = None
