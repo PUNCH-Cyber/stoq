@@ -24,7 +24,7 @@ setup(
                       'yapsy',
                       'demjson',
                       'jinja2',
+                      'hydra',
                       'Cython',
                       'yara-python'],
-    dependency_links=['https://github.com/plusvic/yara-python.git#egg=master']
 )

@@ -139,16 +139,10 @@ install_core() {
     python -c "import yara"
     if [ $? -ne 0 ]; then
         set -e
-        pip install git+https://github.com/VirusTotal/yara-python
+        pip install yara-python
     fi
 
     python setup.py install
-
-    # hydra requires Cython to be installed, so we will install it separately.
-    # Why? Because setuptools wants to install in its own order and hydra will
-    # always install before Cython. Yep, that's right. Setuptools is the worst
-    # thing about python.
-    pip install hydra
 
     if [ ! -d $PLUGIN_DIR ]; then
         git clone https://github.com/PUNCH-Cyber/stoq-plugins-public.git
