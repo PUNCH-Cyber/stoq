@@ -49,7 +49,7 @@ if __name__ == '__main__':
         - Monitor a directory for newly created files in the new_files
           directory, send them to workers, and archive the file into MongoDB:
 
-        $ %(prog)s publisher -I dirmon -F new_files/ -w yara -w trid -w exif -A mongodb 
+        $ %(prog)s publisher -I dirmon -F new_files/ -w yara -w trid -w exif -A mongodb
 
         - Start workers, ingest from RabbitMQ, and save results to file:
 
@@ -60,6 +60,10 @@ if __name__ == '__main__':
         - Install a plugin from a directory
 
         $ %(prog)s install path/to/plugin_directory
+
+        - Display worker specific command line arguments
+
+        $ %(prog)s yara -h
 
     ''')
 
