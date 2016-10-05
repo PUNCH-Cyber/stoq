@@ -331,14 +331,15 @@ class StoqPluginBase:
         logname = "stoq.{}.{}".format(self.category, self.name)
         self.log = logging.getLogger(logname)
 
-        self.log.debug("Plugin Activated: {0},{1}".format(self.name, self.is_activated))
+        self.log.debug("{} Plugin Activated: {}".format(self.name, self.is_activated))
 
     def deactivate(self):
         self.is_activated = False
-        self.log.debug("Plugin Deactivated: {0},{1}".format(self.name, self.is_activated))
+        self.log.debug("{} Plugin Deactivated: {}".format(self.name, self.is_activated))
 
     def heartbeat(self, force=False):
         pass
+
 
 class StoqWorkerPlugin(StoqPluginBase):
     """
@@ -394,6 +395,11 @@ class StoqWorkerPlugin(StoqPluginBase):
             for k in options.__dict__:
                 if options.__dict__[k] is not None:
                     setattr(self, k, options.__dict__[k])
+
+        # Ensure the log level is set appropriately
+        if self.log_level:
+            self.stoq.log_level = self.log_level
+            self.stoq.log.setLevel(self.log_level)
 
         if not self.max_processes:
             # Let's set the max_processes to 50% of total CPUs
@@ -849,6 +855,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         # If we want to use the dispatcher, let's do that now
         if self.dispatch:
+            self.log.debug("Dispatch: Beginning dispatching of payload...")
             # Our carver, extractor, and decoder plugins will return a list of
             # set()s. Let's make sure we handle the initial payload the same
             # way, so we can simplify the below routine.
@@ -860,11 +867,13 @@ class StoqWorkerPlugin(StoqPluginBase):
             processed_hashes = {}
 
             while dispatch_payloads and int(self.stoq.max_recursion) >= current_depth:
+                self.log.debug("Dispatch: Count of payloads to dispatch: {}".format(len(dispatch_payloads)))
                 for index, dispatch_payload in enumerate(dispatch_payloads):
 
                     dispatch_payloads.pop(index)
 
                     current_hash = dispatch_payload[0].get('sha1', get_sha1(dispatch_payload[1]))
+                    self.log.debug("Dispatch: Current dispatch sha1: ".format(current_hash))
 
                     # Skip over this payload if we've already processed it
                     if current_hash in processed_hashes:
@@ -948,6 +957,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         return results, template_results
 
     def _save_results(self, results):
+        self.log.debug("Save: Attempting to save results")
 
         template_results = None
 
@@ -965,6 +975,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         # Parse output with a template
         if self.template:
+            self.log.debug("Template: Attempted to templatized the results")
             try:
                 # Figure out the plugin path from the results plugin object
                 if plugin in self.workers:
@@ -998,6 +1009,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                                                             sha1=sha1,
                                                             index=index)
 
+        self.log.debug("Save: Results saved")
         return results, template_results
 
     def yara_dispatcher(self, payload, **kwargs):
@@ -1016,8 +1028,10 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         self.yara_dispatcher_hits = []
 
+        self.log.debug("Dispatch: Scanning payload with yara")
         self.yara_dispatcher_rules.match(data=payload, timeout=60,
                                          callback=self._dispatcher_callback)
+        self.log.debug("Dispatch: Yara hits = {}".format(len(self.yara_dispatcher_hits)))
 
         for hit in self.yara_dispatcher_hits:
             if 'meta' in hit:
@@ -1031,6 +1045,8 @@ class StoqWorkerPlugin(StoqPluginBase):
             if plugin_type not in self.stoq.plugin_categories:
                 self.log.error("{} is not a valid plugin type".format(plugin_type))
                 continue
+
+            self.log.debug("Dispatch: Sending payload to {}:{}".format(plugin_type, plugin_name))
 
             if plugin_type == 'carver':
                 self.load_carver(plugin_name)
@@ -1054,6 +1070,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                 content = None
 
             if content:
+                self.log.debug("Dispatch: {} extracted items".format(len(content)))
                 # Iterate over the results from the plugin and append the
                 # yara rule metadata to it
                 for meta in content:
