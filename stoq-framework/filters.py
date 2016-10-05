@@ -36,7 +36,8 @@ class StoqBloomFilter(object):
         Identify whether an item exists within filter or not
 
         :param bytes item: Item to query the bloom filter with
-        :param bool add_missing: If set to True, the item will be added tothe bloom filter if it doesn't exist
+        :param bool add_missing: If set to True, the item will be added to the
+                                 bloom filter if it doesn't exist
 
         :returns: True if item exists, False if not.
         :rtype: bool
@@ -58,7 +59,8 @@ class StoqBloomFilter(object):
         :param float falsepos_rate: Maximum false positive probability
 
         """
-        self.current_filter = WritingBloomFilter(int(size), float(falsepos_rate),
+        self.current_filter = WritingBloomFilter(int(size),
+                                                 float(falsepos_rate),
                                                  filename=filepath)
 
     def import_filter(self, filepath):
@@ -98,4 +100,3 @@ class StoqBloomFilter(object):
         else:
             # If no positive interval set, sync once
             self.current_filter.fdatasync()
-

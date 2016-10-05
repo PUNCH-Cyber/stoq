@@ -84,6 +84,7 @@ API
 import os
 import re
 import time
+import logging
 import threading
 import multiprocessing
 
@@ -325,13 +326,16 @@ class StoqPluginBase:
 
     def activate(self):
         self.is_activated = True
-        self.stoq.log.debug("Plugin Activated: {0},{1}".format(self.name,
-                                                               self.is_activated))
+
+        # Instantiate the logging handler for this plugin
+        logname = "stoq.{}.{}".format(self.category, self.name)
+        self.log = logging.getLogger(logname)
+
+        self.log.debug("Plugin Activated: {0},{1}".format(self.name, self.is_activated))
 
     def deactivate(self):
         self.is_activated = False
-        self.stoq.log.debug("Plugin Deactivated: {0},{1}".format(self.name,
-                                                                 self.is_activated))
+        self.log.debug("Plugin Deactivated: {0},{1}".format(self.name, self.is_activated))
 
     def heartbeat(self, force=False):
         pass
@@ -346,21 +350,13 @@ class StoqWorkerPlugin(StoqPluginBase):
         super().__init__()
 
         self.max_processes = 0
-
         self.dispatch = None
-
         self.output_connector = None
-
         self.source_plugin = None
-
         self.yara_dispatcher_rules = None
-
         self.yara_dispatcher_hits = None
-
         self.mp_queues = None
-
         self.connector_queue = None
-
         self.connector_feeder = None
 
         self.workers = {}
@@ -480,7 +476,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         """
 
-        procs = None
+        procs = []
 
         try:
             # There are some conditions where a source plugin may not be loaded
@@ -523,7 +519,9 @@ class StoqWorkerPlugin(StoqPluginBase):
                     done = True
 
         except KeyboardInterrupt:
-            self.stoq.log.info("Keyboard interrupt received..terminating processes")
+            self.log.info("Keyboard interrupt received..terminating processes")
+        except Exception as err:
+            self.log.critical(err, exc_info=True)
         finally:
             if procs:
                 for proc in procs:
@@ -545,10 +543,10 @@ class StoqWorkerPlugin(StoqPluginBase):
         self._start_heartbeats()
         while True:
             msg = queue.get()
-            self.stoq.log.debug("Received message from source: {}".format(msg))
+            self.log.debug("Received message from source: {}".format(msg))
             should_stop = msg.get("_stoq_multiprocess_eoq", False)
             if should_stop:
-                self.stoq.log.debug("Shutdown command received. Stopping.")
+                self.log.debug("Shutdown command received. Stopping.")
                 self._deactivate_everything()
                 return
             try:
@@ -564,7 +562,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                     self.publish(msg, self.stoq.worker.name, err=True)
                     self.publish_release()
 
-                self.stoq.log.error(msg)
+                self.log.error(msg)
 
     def multiprocess_put(self, **kwargs):
         # Ensure that the max_queue size is not reached. If so, let's wait 1
@@ -573,7 +571,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         # queue until the queue has emptied, or, until the system resources
         # have been exhausted. If the latter, stoQ will silently die.
         while self.mp_queues.qsize() >= self.stoq.max_queue:
-            self.stoq.log.debug("Queue maximum size ({}) reached. Sleeping...".format(self.stoq.max_queue))
+            self.log.debug("Queue maximum size ({}) reached. Sleeping...".format(self.stoq.max_queue))
             time.sleep(1)
 
         self.mp_queues.put(kwargs)
@@ -775,7 +773,7 @@ class StoqWorkerPlugin(StoqPluginBase):
             if hasattr(self.connectors[archive_type], 'get_file'):
                 payload = self.connectors[archive_type].get_file(**kwargs)
             else:
-                self.stoq.log.warn("Connector unable to get file..skipping")
+                self.log.warn("Connector unable to get file..skipping")
                 return False
 
         if payload:
@@ -870,7 +868,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
                     # Skip over this payload if we've already processed it
                     if current_hash in processed_hashes:
-                        self.stoq.log.info("Skipping duplicate hash: {}".format(current_hash))
+                        self.log.info("Skipping duplicate hash: {}".format(current_hash))
                         continue
 
                     processed_hashes.setdefault(current_hash, True)
@@ -884,7 +882,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                         dispatch_result = self._parse_dispatch_results(yara_result, **kwargs)
 
                         if dispatch_result['sha1'] in temp_processed_hashes:
-                            self.stoq.log.info("Skipping duplicate hash: {}".format(dispatch_result['sha1']))
+                            self.log.info("Skipping duplicate hash: {}".format(dispatch_result['sha1']))
                             continue
 
                         temp_processed_hashes.setdefault(dispatch_result['sha1'], True)
@@ -980,10 +978,9 @@ class StoqWorkerPlugin(StoqPluginBase):
                                       trim_blocks=True, lstrip_blocks=True)
                 template_results = tpl_env.get_template(self.template).render(results=results)
             except TemplateNotFound:
-                self.stoq.log.error("Unable to load template. Does {}/{} "
-                                    "exist?".format(template_path, self.template))
+                self.log.error("Unable to load template. Does {}/{} exist?".format(template_path, self.template))
             except Exception as err:
-                self.stoq.log.error(str(err))
+                self.log.error(str(err))
 
         # If we are saving the results from the worker, let's take care of
         # it. This is defined in the .stoq configuration file for the
@@ -1032,7 +1029,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
             # Make sure this is a valid plugin category
             if plugin_type not in self.stoq.plugin_categories:
-                self.stoq.log.error("{} is not a valid plugin type".format(plugin_type))
+                self.log.error("{} is not a valid plugin type".format(plugin_type))
                 continue
 
             if plugin_type == 'carver':

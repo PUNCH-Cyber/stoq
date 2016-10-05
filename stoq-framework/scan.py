@@ -182,7 +182,7 @@ def bytes_frequency(payload, min_length=1, max_length=3, min_count=10):
     """
     Determine the frequency of bytes or series of bytes in a payload
 
-    :param bytes pyaload: Payload to be analyzed
+    :param bytes payload: Payload to be analyzed
     :param int min_length: Minimum length of continuous bytes
     :param int max_length: Maximum length of continuous bytes
     :param int min_count: Minimum count of instances of a specific byte or

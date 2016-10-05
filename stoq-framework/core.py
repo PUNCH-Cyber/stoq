@@ -72,7 +72,7 @@ from bs4 import UnicodeDammit
 from stoq.plugins import StoqPluginManager
 
 
-__version__ = "0.9.29"
+__version__ = "0.9.30"
 
 
 class Stoq(StoqPluginManager):
@@ -200,8 +200,8 @@ class Stoq(StoqPluginManager):
         # Let's attempt to make the log directory if it doesn't exist
         os.makedirs(self.log_dir, exist_ok=True)
 
-        # Define out loggername as our current worker's name
-        self.log = logging.getLogger()
+        # Instantiate a logger
+        self.log = logging.getLogger("stoq")
 
         # Set the default logging level
         self.log.setLevel(self.log_level)
@@ -220,11 +220,11 @@ class Stoq(StoqPluginManager):
         stderr_handler = logging.StreamHandler()
 
         # Define the format of the log file
-        log_format = logging.Formatter("%(asctime)s %(levelname)s %(name)s: "
+        log_format = logging.Formatter("%(asctime)s %(levelname)s %(name)s:%(filename)s:%(funcName)s:%(lineno)s: "
                                        "%(message)s",
                                        datefmt='%Y-%m-%d %H:%M:%S')
 
-        stderr_log_format = logging.Formatter("[*] %(name)s: %(message)s")
+        stderr_log_format = logging.Formatter("[%(levelname)s] %(name)s: %(message)s")
 
         file_handler.setFormatter(log_format)
         stderr_handler.setFormatter(stderr_log_format)
@@ -260,7 +260,11 @@ class Stoq(StoqPluginManager):
                                     verify=verify, headers=headers)
 
             # Raise an exception if it was not successful
-            response.raise_for_status()
+            try:
+                response.raise_for_status()
+            except Exception as err:
+                self.log.warn(err)
+
             return response.content
 
         else:
@@ -302,7 +306,11 @@ class Stoq(StoqPluginManager):
         response = requests.put(url, data, params=params,
                                 auth=auth, headers=headers)
 
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except Exception as err:
+            self.log.warn(err)
+
         return response.content
 
     def post_file(self, url, params=None, files=None, data=None, auth=None, **kwargs):
@@ -326,7 +334,11 @@ class Stoq(StoqPluginManager):
         response = requests.post(url, data, params=params, files=files,
                                  auth=auth, headers=headers)
 
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except Exception as err:
+            self.log.warn(err)
+
         return response.content
 
     def write(self, payload, filename=None, path=None,
