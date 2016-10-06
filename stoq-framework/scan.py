@@ -38,6 +38,14 @@ import magic
 import hashlib
 import ssdeep
 
+# This is silly. python-magic is the preferred library as it is maintained.
+# But, sometimes filemagic is used by other libraries. Let's determine which
+# one is installed so we can call it properly.
+if hasattr(magic.Magic, "from_buffer"):
+    USE_PYTHON_MAGIC = True
+else:
+    USE_PYTHON_MAGIC = False
+
 
 def get_hashes(payload):
     """
@@ -163,15 +171,25 @@ def get_magic(payload, mime=True):
 
     """
     try:
-        magic_scan = magic.Magic(mime=mime)
+        if USE_PYTHON_MAGIC:
+            magic_scan = magic.Magic(mime=mime)
 
-        # Limit the buffer for 1000 bytes, otheriwse magic will fail
-        magic_result = magic_scan.from_buffer(payload[0:1000])
+            # Limit the buffer for 1000 bytes, otheriwse magic will fail
+            magic_result = magic_scan.from_buffer(payload[0:1000])
+        else:
+            if mime:
+                flags = magic.MAGIC_MIME_TYPE
+            else:
+                flags = None
+
+            with magic.Magic(flags=flags) as m:
+                magic_result = m.id_buffer(payload[0:1000])
 
         # In some cases there may be encoded content within the results. If so,
         # let's make sure we decode it so it is handled properly.
         if hasattr(magic_result, 'decode'):
             magic_result = magic_result.decode("utf-8")
+
     except:
         magic_result = None
 
