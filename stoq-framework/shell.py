@@ -177,9 +177,10 @@ Update a configuration setting::
     stoq.log_level -> DEBUG
 
 
-Save results, to include any payloads that may have been carved/extracted/decoded.
-If mutiple results have been processed, the integert will be incremented and 
-correspond to the payload id viewable in the ``results`` command::
+Save results, to include any payloads that may have been
+carved/extracted/decoded. If mutiple results have been processed, the integer
+will be incremented and correspond to the payload id viewable in the
+``results`` command::
 
     [stoQ] > save
     [*] Saving content to /usr/local/stoq/results/results-0-bad.exe
@@ -203,7 +204,7 @@ import os
 import cmd
 import time
 
-from stoq.scan import get_hashes, get_magic 
+from stoq.scan import get_hashes, get_magic
 
 
 class StoqShell(cmd.Cmd):
@@ -217,7 +218,7 @@ class StoqShell(cmd.Cmd):
         self.payload = ""
 
     def set_prompt(self, msg=""):
-        self.prompt = "{}{} > ".format(self.default_prompt,  msg)
+        self.prompt = "{}{} > ".format(self.default_prompt, msg)
 
     def do_usage(self, input):
         """
@@ -403,8 +404,8 @@ class StoqShell(cmd.Cmd):
                 for idx, content in enumerate(results):
                     filename = "results-{}-{}.{}".format(idx, self.filename, epoch)
                     path = self.stoq.write(content, binary=True,
-                                        path=self.stoq.results_dir,
-                                        filename=filename)
+                                           path=self.stoq.results_dir,
+                                           filename=filename)
                     if not path:
                         print("[!] {}/{} already exists.".format(self.stoq.results_dir, filename))
             else:
@@ -457,7 +458,7 @@ class StoqShell(cmd.Cmd):
         """
 
         try:
-           if len(input) == 0:
+            if len(input) == 0:
                 options = {}
                 options['stoq'] = self.stoq.__dict__
 
@@ -478,7 +479,7 @@ class StoqShell(cmd.Cmd):
                             if type(sub_value) in (list, tuple):
                                 sub_value = ", ".join(sub_value)
                             print("{}.{} = {}".format(key, sub_key, str(sub_value)))
-           else:
+            else:
                 args = input.split(" ")
                 setting = args[0].split(".")
                 value = " ".join(args[1:])
@@ -534,4 +535,3 @@ class StoqShell(cmd.Cmd):
     def do_EOF(self, input):
         print("\nExiting...")
         exit(0)
-
