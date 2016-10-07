@@ -455,7 +455,8 @@ class Stoq(StoqPluginManager):
         Wrapper for json library. Dump dict to a json string
 
         :param dict data: Python dict to convert to json
-        :param compactly: set to True to return unindented JSON (no newlines between key/values),
+        :param compactly: set to True to return unindented JSON (no newlines
+                          between key/values),
 
         :returns: Converted json string
         :rtype: str
