@@ -1,4 +1,4 @@
-#   Copyright 2014-2015 PUNCH Cyber Analytics Group
+#   Copyright 2014-2016 PUNCH Cyber Analytics Group
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ from bs4 import UnicodeDammit
 from stoq.plugins import StoqPluginManager
 
 
-__version__ = "0.9.32"
+__version__ = "0.9.33"
 
 
 class Stoq(StoqPluginManager):
@@ -253,6 +253,8 @@ class Stoq(StoqPluginManager):
 
         """
 
+        self.log.debug("Retrieving file from {}".format(source))
+
         if source.startswith(self.url_prefix_tuple):
             # Set our default headers
             headers = self.__set_requests_headers(**kwargs)
@@ -265,7 +267,9 @@ class Stoq(StoqPluginManager):
             except Exception as err:
                 self.log.warn(err)
 
-            return response.content
+            content = response.content
+            self.log.debug("{} ({} bytes) retrieved".format(source, len(content)))
+            return content
 
         else:
             # Ensure we have an absolute path for security reasons
@@ -277,7 +281,9 @@ class Stoq(StoqPluginManager):
                     # Looking good, read file
                     try:
                         with open(abspath, "rb") as f:
-                            return f.read()
+                            content = f.read()
+                            self.log.debug("{} ({} bytes) retrieved".format(abspath, len(content)))
+                            return content
                     except PermissionError as err:
                         self.log.warn("{}".format(err))
             else:
@@ -301,6 +307,8 @@ class Stoq(StoqPluginManager):
 
         """
 
+        self.log.debug("PUT payload ({} bytes) to {}. params={}".format(len(data), url, params))
+
         # Set our default headers
         headers = self.__set_requests_headers(**kwargs)
         response = requests.put(url, data, params=params,
@@ -311,7 +319,11 @@ class Stoq(StoqPluginManager):
         except Exception as err:
             self.log.warn(err)
 
-        return response.content
+        content = response.content
+
+        self.log.debug("{} ({} bytes) received".format(url, len(content)))
+
+        return content
 
     def post_file(self, url, params=None, files=None, data=None, auth=None, **kwargs):
         """
@@ -329,6 +341,8 @@ class Stoq(StoqPluginManager):
 
         """
 
+        self.log.debug("POST payload ({} bytes) to {}. params={}".format(len(data), url, params))
+
         # Set our default headers
         headers = self.__set_requests_headers(**kwargs)
         response = requests.post(url, data, params=params, files=files,
@@ -339,7 +353,11 @@ class Stoq(StoqPluginManager):
         except Exception as err:
             self.log.warn(err)
 
-        return response.content
+        content = response.content
+
+        self.log.debug("{} ({} bytes) received".format(url, len(content)))
+
+        return content
 
     def write(self, payload, filename=None, path=None,
               binary=False, overwrite=False, append=False):
@@ -368,6 +386,8 @@ class Stoq(StoqPluginManager):
         fullpath = "{}/{}".format(path, filename)
         fullpath = os.path.abspath(fullpath)
 
+        self.log.debug("Attempting to save file to {} ({} bytes)".format(fullpath, len(payload)))
+
         # Default write mode, do not overwrite
         write_mode = "x"
 
@@ -381,6 +401,7 @@ class Stoq(StoqPluginManager):
 
         # Check to see if the directory exists, if not, create it
         if not os.path.exists(path):
+            self.log.debug("Creating directory {}".format(path))
             os.makedirs(path)
 
         # Finally ready to write
@@ -519,6 +540,7 @@ class Stoq(StoqPluginManager):
             if header not in headers:
                 headers[header] = value
 
+        self.log.debug("HTTP Headers: {}".format(headers))
         return headers
 
     def __sanitize_json(self, obj):
@@ -532,6 +554,7 @@ class Stoq(StoqPluginManager):
         :rtype: dict
 
         """
+        self.log.debug("Sanitizing JSON")
         new_obj = {}
         for key in obj.keys():
             new_key = key.replace(".", "_")
@@ -587,6 +610,8 @@ class Stoq(StoqPluginManager):
 #
 #
 #####################
+
+        self.log.debug("Normalizing JSON")
 
         conversion_types = (bytes, int, float, bool)
 

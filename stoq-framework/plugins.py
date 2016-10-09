@@ -1,4 +1,4 @@
-#   Copyright 2014-2015 PUNCH Cyber Analytics Group
+#   Copyright 2014-2016 PUNCH Cyber Analytics Group
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -232,6 +232,7 @@ class StoqPluginManager:
         self.manager.loadPlugins()
 
         # Initialize our plugin
+        self.log.debug("Attempting to load plugin {}:{}".format(category, name))
         plugin = self.get_plugin(name, category)
 
         if not plugin:
@@ -273,6 +274,8 @@ class StoqPluginManager:
 
         setattr(plugin.plugin_object, 'category', category)
         plugin_path = "{}/{}/{}".format(self.plugin_dir, category, name)
+        plugin_path = os.path.abspath(plugin_path)
+        self.log.debug("{}:{} plugin path set to {}".format(category, name, plugin_path))
         setattr(plugin.plugin_object, 'plugin_path', plugin_path)
 
         # Make sure we attempt to activate the plugin after we setattr
@@ -331,11 +334,11 @@ class StoqPluginBase:
         logname = "stoq.{}.{}".format(self.category, self.name)
         self.log = logging.getLogger(logname)
 
-        self.log.debug("{} Plugin Activated: {}".format(self.name, self.is_activated))
+        self.log.debug("{} Plugin Activated".format(self.name))
 
     def deactivate(self):
         self.is_activated = False
-        self.log.debug("{} Plugin Deactivated: {}".format(self.name, self.is_activated))
+        self.log.debug("{} Plugin Deactivated".format(self.name))
 
     def heartbeat(self, force=False):
         pass
@@ -428,11 +431,13 @@ class StoqWorkerPlugin(StoqPluginBase):
             if not self.output_connector:
                 self.output_connector = self.stoq.default_connector
             self.load_connector(self.output_connector)
+            self.log.debug("Using {} as default connector for results".format(self.output_connector))
 
         # If the worker wants to archive files, let's load that connector
         # now
         if self.archive_connector:
             self.load_connector(self.archive_connector)
+            self.log.debug("Using {} as default archive connector".format(self.archive_connector))
 
         # Check to see if a source plugin requirement was defined at the
         # command line. This is useful for plugins that don't need any
@@ -444,8 +449,10 @@ class StoqWorkerPlugin(StoqPluginBase):
             if not self.source_plugin:
                 self.source_plugin = self.stoq.default_source
             self.load_source(self.source_plugin)
+            self.log.debug("Using {} as default source".format(self.source_plugin))
 
         if self.dispatch:
+            self.log.debug("Loading yara rules for dispatching")
             with open(self.stoq.dispatch_rules) as rules:
                 self.yara_dispatcher_rules = yara.compile(file=rules)
 
@@ -494,10 +501,12 @@ class StoqWorkerPlugin(StoqPluginBase):
             if self.sources:
                 self.mp_queues = multiprocessing.JoinableQueue()
                 if self.sources[self.source_plugin].multiprocess:
+                    self.log.debug("Plugin supports multiprocessing, instantiating processes")
                     procs = [multiprocessing.Process(target=self._multiprocess,
                                                      args=(self.mp_queues,))
                              for _ in range(self.max_processes)]
 
+                    self.log.debug("{} processes instantiated".format(len(procs)))
                     # Start our processes before we populate them
                     for proc in procs:
                         proc.start()
@@ -731,6 +740,8 @@ class StoqWorkerPlugin(StoqPluginBase):
         # Make sure our connector is loaded
         self.load_connector(connector)
 
+        self.log.debug("Saving content ({} bytes) with {} plugin".format(len(payload), connector))
+
         # Save our payload to the appropriate plugin
         res = self.connectors[connector].save(payload, archive=True, **arc)
 
@@ -777,6 +788,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
             self.load_connector(archive_type)
             if hasattr(self.connectors[archive_type], 'get_file'):
+                self.log.debug("Attempting to retrieve payload using {}".format(archive_type))
                 payload = self.connectors[archive_type].get_file(**kwargs)
             else:
                 self.log.warn("Connector unable to get file..skipping")
@@ -814,6 +826,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                 else:
                     worker_result.update(get_hashes(payload))
 
+        self.log.debug("Scan: Scanning payload")
         # Send our payload to the worker, and store the results
         worker_result['scan'] = self.scan(payload, **kwargs)
 
@@ -975,7 +988,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         # Parse output with a template
         if self.template:
-            self.log.debug("Template: Attempted to templatized the results")
+            self.log.debug("Template: Attempted to templatize results")
             try:
                 # Figure out the plugin path from the results plugin object
                 if plugin in self.workers:
@@ -1223,6 +1236,7 @@ class StoqCarverPlugin(StoqPluginBase):
 
         """
 
+        self.log.debug("Carve: Attempting to carve payload")
         try:
             payload = payload.read()
         except:
@@ -1236,6 +1250,7 @@ class StoqCarverPlugin(StoqPluginBase):
             flags = re.M|re.S
 
         for buff in re.finditer(regex, payload, flags):
+            self.log.debug("Carve: Payload carve at offset {} - {}".format(buff.start(), buff.end()))
             yield buff.start(), buff.end()
 
 
@@ -1267,6 +1282,7 @@ class StoqDecoderPlugin(StoqPluginBase):
         :rtype: bytearray
 
         """
+        self.log.debug("Converting payload ({} bytes) to a bytearray".format(len(payload)))
         if isinstance(payload, bytearray):
             pass
         elif isinstance(payload, bytes):
@@ -1310,12 +1326,12 @@ class StoqPluginInstaller:
         self.upgrade_plugin = options.upgrade
 
     def install(self):
-        print("[+] Looking for plugin in {}...".format(self.plugin))
+        self.stoq.log.info("Looking for plugin in {}...".format(self.plugin))
         try:
             if os.path.isdir(self.plugin):
                 self.setup_from_dir()
             else:
-                print("[!] Unable to install plugin. Is this a valid plugin?")
+                self.stoq.log.critical("Unable to install plugin. Is this a valid plugin?")
                 exit(-1)
 
             try:
@@ -1334,21 +1350,21 @@ class StoqPluginInstaller:
                     self.pip.main(['install', '--quiet', '-r', requirements])
 
             except Exception as err:
-                print("[!] Error installing requirements: {}".format(str(err)))
+                self.stoq.log.critical("Error installing requirements: {}".format(str(err)))
                 exit(-1)
 
         except FileNotFoundError as err:
-            print(str(err))
+            self.stoq.log.critical(err)
             exit(-1)
 
-        print("[+] Install complete.")
+        self.stoq.log.info("Install complete.")
 
     def setup_from_dir(self):
         # Find the stoQ configuration file
         config_file = self.glob.glob("{}/*/*.stoq".format(self.plugin))
 
         if len(config_file) > 1:
-            print("[!] More than one stoQ configuration file found. Exiting.")
+            self.stoq.log.critical("More than one stoQ configuration file found. Exiting.")
             exit(-1)
 
         if os.path.isfile(config_file[0]):
@@ -1356,7 +1372,7 @@ class StoqPluginInstaller:
             with open(config_file[0], "rb") as config_content:
                 self.parse_config(config_content.read())
         else:
-            print("[!] Is this a valid configuration file? Exiting.")
+            self.stoq.log.critical("Is this a valid configuration file? Exiting.")
             exit(-1)
 
         # Find the module name and set the plugin options
@@ -1387,8 +1403,7 @@ class StoqPluginInstaller:
             self.plugin_info['DESCRIPTION'] = config['Documentation']['Description']
 
         except Exception as err:
-            print(str(err))
-            print("[!] Is this a valid stoQ configuration file? Exiting...")
+            self.stoq.log.critical("Is this a valid stoQ configuration file? {}".format(err))
             exit(-1)
 
     def save_plugin_info(self):
@@ -1407,13 +1422,11 @@ class StoqPluginInstaller:
                                     plugin_stream.decode('utf-8')).group()
             self.plugin_category = self.stoq.__plugindict__[plugin_type]
         except Exception as err:
-            print(str(err))
-            print("Unable to determine the category. Is this a valid plugin?")
+            self.stoq.log.critical("Unable to determine the category. Is this a valid plugin? {}".format(err))
             exit(-1)
 
     def set_plugin_path(self):
         self.plugin_root = os.path.join(self.stoq.plugin_dir,
                                         self.plugin_category)
 
-        print("[+] Installing {} plugin into {}...".format(self.plugin_name,
-                                                           self.plugin_root))
+        self.stoq.log.info("Installing {} plugin into {}...".format(self.plugin_name, self.plugin_root))
