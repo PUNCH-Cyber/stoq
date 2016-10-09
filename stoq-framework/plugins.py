@@ -730,6 +730,9 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         """
 
+        if self.log_level == 'DEBUG':
+            time.process_time()
+
         arc = get_hashes(payload)
 
         # Let's make sure we add some additional metadata so we don't need
@@ -747,6 +750,10 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         arc['conn_id'] = res
 
+        if self.log_level == 'DEBUG':
+            etime = time.process_time()
+            self.log.debug("Content saved in {:.2f}s".format(etime))
+
         return arc
 
     # Handle our worker and process the results
@@ -763,6 +770,9 @@ class StoqWorkerPlugin(StoqPluginBase):
         :rtype: dict and str or lists
 
         """
+
+        if self.log_level == 'DEBUG':
+            time.process_time()
 
         archive_type = False
         payload_hashes = None
@@ -966,6 +976,10 @@ class StoqWorkerPlugin(StoqPluginBase):
             results = split_results
             if split_template_results:
                 template_results = split_template_results
+
+        if self.log_level == 'DEBUG':
+            etime = time.process_time()
+            self.log.debug("Processed payload in {:.2f}s".format(etime))
 
         return results, template_results
 
