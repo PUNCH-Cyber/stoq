@@ -84,6 +84,7 @@ API
 import os
 import re
 import time
+import signal
 import logging
 import threading
 import multiprocessing
@@ -101,6 +102,8 @@ from yapsy.FilteredPluginManager import FilteredPluginManager
 from jinja2 import Environment, FileSystemLoader
 from jinja2.exceptions import TemplateNotFound
 
+from stoq import signal_handler
+from stoq.exceptions import SigtermCaught
 from stoq.scan import get_hashes, get_ssdeep, get_magic, get_sha1
 
 
@@ -492,6 +495,9 @@ class StoqWorkerPlugin(StoqPluginBase):
         procs = []
 
         try:
+            # Catch a SIGTERM to ensure graceful shutdown
+            signal.signal(signal.SIGTERM, signal_handler)
+
             # There are some conditions where a source plugin may not be loaded
             # yet. Verify we have one loaded, if needed.
             if self.source_plugin:
@@ -534,10 +540,13 @@ class StoqWorkerPlugin(StoqPluginBase):
                     done = True
 
         except KeyboardInterrupt:
-            self.log.info("Keyboard interrupt received..terminating processes")
+            self.log.warn("Keyboard interrupt received..attempting graceful shutdown")
+        except SigtermCaught:
+            self.log.warn("SIGTERM Caught..attempting graceful shutdown")
         except Exception as err:
             self.log.critical(err, exc_info=True)
         finally:
+            self.log.debug("Cleaning up multiprocess queue")
             if procs:
                 for proc in procs:
                     proc.terminate()
