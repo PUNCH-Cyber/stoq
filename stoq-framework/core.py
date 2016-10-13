@@ -60,6 +60,7 @@ API
 import os
 import json
 import uuid
+import fcntl
 import logging
 import requests
 import datetime
@@ -72,7 +73,7 @@ from bs4 import UnicodeDammit
 from stoq.plugins import StoqPluginManager
 
 
-__version__ = "0.9.33"
+__version__ = "0.9.34"
 
 
 class Stoq(StoqPluginManager):
@@ -407,7 +408,9 @@ class Stoq(StoqPluginManager):
         # Finally ready to write
         try:
             with open(fullpath, write_mode) as outfile:
+                fcntl.flock(outfile, fcntl.LOCK_EX)
                 outfile.write(payload)
+                fcntl.flock(outfile, fcntl.LOCK_UN)
 
             self.log.info("Saving file to {}".format(fullpath))
 

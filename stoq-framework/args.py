@@ -113,6 +113,10 @@ def StoqArgs(parser):
                              dest='path',
                              default=False,
                              help="Filename or directory to use for ingesting")
+    source_opts.add_argument("-O", "--outfile",
+                             dest='outfile',
+                             default=False,
+                             help="Filename to save reults to (if applicable)")
     source_opts.add_argument("-I", "--ingest",
                              dest='source_plugin',
                              default=False,

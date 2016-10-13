@@ -983,7 +983,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         return results, template_results
 
-    def _save_results(self, results):
+    def _save_results(self, results, **kwargs):
         self.log.debug("Save: Attempting to save results")
 
         template_results = None
@@ -1027,14 +1027,21 @@ class StoqWorkerPlugin(StoqPluginBase):
             # Just to ensure we have loaded a connector for output
             self.load_connector(self.output_connector)
 
+            if self.outfile:
+                path = os.path.dirname(os.path.abspath(self.outfile))
+                fn = os.path.basename(self.outfile)
+                kwargs.update({'path': path, 'filename': fn, 'append': True})
+
             if template_results:
                 self.connectors[self.output_connector].save(template_results,
-                                                            index=index)
+                                                            index=index,
+                                                            **kwargs)
             else:
                 sha1 = results['results'][0].get('sha1', None)
                 self.connectors[self.output_connector].save(results,
                                                             sha1=sha1,
-                                                            index=index)
+                                                            index=index,
+                                                            **kwargs)
 
         self.log.debug("Save: Results saved")
         return results, template_results
