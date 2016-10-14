@@ -32,7 +32,7 @@ plugins handle the messaging and queueing of objects that the worker should
 handle. For instance, monitoring a directory for new files or AMQP.
 **Extractor** plugins handle various tasks such as decompressing zip files and
 deflating pdf streams. **Carver** plugins are used to carve content out of
-payloads (e.g., SWF streams out of DOC files, PE out of RTF, etc...). 
+payloads (e.g., SWF streams out of DOC files, PE out of RTF, etc...).
 **Decoder** plugins provide the capability to automatically decode a payload,
 such as XOR, ROR, and base64.
 
@@ -44,7 +44,7 @@ Each plugin has it's own configuration file ending in *.stoq*. Upon
 initialization of the plugin, the configuration options within the file will be
 loaded and made available to the worker object.
 
-At a minimum, the below configuration options are required for all plugins. 
+At a minimum, the below configuration options are required for all plugins.
 
 .. code:: yaml
 
@@ -71,9 +71,15 @@ example, if we have defined our plugin object as ``plugin``, we can access the
     [options]
     hashpayload = True
     saveresults = True
+    max_tlp = red
 
 .. note:: *Worker* plugins require the ``hashpayload`` and ``saveresults``
           configuration options. No other plugins have additional requirements.
+
+.. note:: *Worker* plugin supports a ``max_tlp`` option, which will limit
+          it's ability to scan a payload based on the TLP level of the
+          payload itself. Valid options are red, amber, green, and white. More
+          information on TLP levels can be found at https://www.us-cert.gov/tlp
 
 Plugin Development
 ==================
@@ -138,7 +144,7 @@ Workers
 In addition to the above requirements, the below method is required for
 *Worker* plugins:
 
-    - scan 
+    - scan
 
 The ``scan`` method is called when ``stoq-cli.py`` has a payload available for
 processing. ``scan`` requires two attributes, ``payload`` and ``**kwargs``.
@@ -172,7 +178,7 @@ Below is an example of a basic worker plugin.
         # and must return True in order for the framework to continue
         def activate(self, stoq):
 
-            # Ensure the stoQ class is available throughout the 
+            # Ensure the stoQ class is available throughout the
             # plugin
             self.stoq = stoq
 
@@ -237,7 +243,7 @@ Optionally, the below methods can be provided.
 
 ``connect`` should be called when a connection, or reconnection, to the
 connector database is required. Ideally, logic should be placed in ``save``
-that will call ``connect`` to verify a live connection still exists. 
+that will call ``connect`` to verify a live connection still exists.
 
 ``disconnect`` is called when the connector should cleanly disconnect from the
 database.
@@ -506,7 +512,7 @@ requirements must be met for the plugin package.
       the |stoQ| plugin.
 
     - Optionally, a MANIFEST.in file can be included to define which files within the package
-      should be copied to the installation path. 
+      should be copied to the installation path.
 
 .. note:: The plugin's configuration file will not be copied by default, this
           file should either be defined here or within ``package_data`` in
@@ -525,7 +531,7 @@ As an example, a |stoQ| plugin archive should have the following structure::
 
 The |stoQ| installation process will extract plugin options from it's ``.stoq``
 configuration file. As such, the plugin's ``setup.py`` file should be fairly
-simple. The below ``setup.py`` should suffice for most plugins.:: 
+simple. The below ``setup.py`` should suffice for most plugins.::
 
     from setuptools import setup, find_packages
 
@@ -609,10 +615,9 @@ it was found, we loaded it and searched for the Name and Module configuration
 options within the file. That allowed us to discover the plugin name along with
 the plugins .py filename. |stoQ| then discovered the plugin class to determine
 the full path where the plugin should be installed to. It then called pip to
-complete the installation. 
+complete the installation.
 
 If a file or directory exists, it will not be overwritten. Instead, a warning
 message will be displayed letting the user know that the plugin will not be
 installed.  In order to successfully install the plugin, the file or directory
 must be removed, renamed, or --upgrade be called at the command line.
-

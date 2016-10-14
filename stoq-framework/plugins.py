@@ -54,7 +54,8 @@ from it's plural name (connectors) within the worker object by calling
 We may also retrieve a payload from a connector, such as MongoDB::
 
     worker.load_connector("mongodb")
-    payload = worker.connectors['mongodb'].get_file(sha1="da39a3ee5e6b4b0d3255bfef95601890afd80709")
+    file_hash = "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+    payload = worker.connectors['mongodb'].get_file(sha1=file_hash)
     results = worker.scan(payload)
 
 .. note:: Only certain connector plugins support ``.get_file(**kwargs)``. Refer
