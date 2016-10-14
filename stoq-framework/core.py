@@ -213,7 +213,7 @@ class Stoq(StoqPluginManager):
         self.log = logging.getLogger("stoq")
 
         # Set the default logging level
-        self.log.setLevel(self.log_level)
+        self.log.setLevel(self.log_level.upper())
 
         # Define the log filename and path
         log_file = "stoq.log"
