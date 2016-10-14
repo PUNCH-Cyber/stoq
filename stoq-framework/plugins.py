@@ -407,8 +407,8 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         # Ensure the log level is set appropriately
         if self.log_level:
-            self.stoq.log_level = self.log_level
-            self.stoq.log.setLevel(self.log_level)
+            self.stoq.log_level = self.log_level.upper()
+            self.stoq.log.setLevel(self.stoq.log_level)
 
         # Set the default TLP for each sample
         if self.default_tlp:
