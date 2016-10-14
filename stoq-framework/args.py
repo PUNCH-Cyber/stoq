@@ -131,5 +131,9 @@ def StoqArgs(parser):
                              default=False,
                              action='store_true',
                              help="Use yara to automatically dispatch payloads")
+    source_opts.add_argument("-P", "--tlp",
+                             dest='default_tlp',
+                             default=False,
+                             help="TLP to tag each payload with")
 
     return parser

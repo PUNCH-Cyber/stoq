@@ -333,6 +333,9 @@ class StoqPluginBase:
     def activate(self):
         self.is_activated = True
 
+        if hasattr(self, 'max_tlp'):
+            self.max_tlp = self.max_tlp.lower()
+
         # Instantiate the logging handler for this plugin
         logname = "stoq.{}.{}".format(self.category, self.name)
         self.log = logging.getLogger(logname)
@@ -406,6 +409,10 @@ class StoqWorkerPlugin(StoqPluginBase):
         if self.log_level:
             self.stoq.log_level = self.log_level
             self.stoq.log.setLevel(self.log_level)
+
+        # Set the default TLP for each sample
+        if self.default_tlp:
+            self.stoq.default_tlp = self.default_tlp
 
         if not self.max_processes:
             # Let's set the max_processes to 50% of total CPUs
@@ -780,6 +787,22 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         """
 
+        tlp = kwargs.get('tlp', self.stoq.default_tlp).lower()
+        # Default to TLP:WHITE
+        payload_tlp = self.stoq.tlps.get(tlp, 3)
+        self.log.debug("Payload is TLP:{}".format(tlp))
+
+        if hasattr(self, 'max_tlp'):
+            # Default to TLP:RED
+            max_tlp = self.stoq.tlps.get(self.max_tlp, 0)
+            self.log.debug("Maximum for plugin is TLP:{}".format(self.max_tlp))
+
+            # If the payload's TLP is less than the maximum allowed TLP for
+            # this plugin we will skip it.
+            if payload_tlp < max_tlp:
+                self.log.info("Payload (TLP:{}) not approved for this plugin (TLP:{})".format(tlp, self.max_tlp))
+                return None
+
         if self.log_level == 'DEBUG':
             time.process_time()
 
@@ -877,6 +900,8 @@ class StoqWorkerPlugin(StoqPluginBase):
                 worker_result['source_meta'].pop(k, None)
 
         worker_result['payload_id'] = 0
+
+        results['tlp'] = tlp
         results['plugins'].update({"0": self.name})
 
         # Keep track of our total count of payloads, in case yara dispatch

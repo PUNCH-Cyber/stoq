@@ -163,6 +163,14 @@ class Stoq(StoqPluginManager):
         # Initialize the logger
         self.logger_init()
 
+        # Default TLP for each payload processed
+        self.default_tlp = "white"
+        self.tlps = {'red': 0,
+                    'amber': 1,
+                    'green': 2,
+                    'white': 3
+                     }
+
         # Ensure our plugin manager is initiated
         StoqPluginManager.__init__(self)
 
