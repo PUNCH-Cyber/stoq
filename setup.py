@@ -7,7 +7,7 @@ os.environ['BUILD_LIB'] = '1'
 
 setup(
     name="stoq",
-    version="0.9.36",
+    version="0.9.37",
     author="Marcus LaFerrera",
     author_email="marcus@punchcyber.com",
     description="A framework for simplifying analysis.",

@@ -84,7 +84,8 @@ def StoqArgs(parser):
     stoq_opts.add_argument("-L", "--loglevel",
                            dest='log_level',
                            default=False,
-                           help="Log level: DEBUG, INFO, WARNING, ERROR, or CRITICAL")
+                           choices=['debug', 'info', 'warning', 'error' 'critical'],
+                           help="Log level")
     stoq_opts.add_argument("-T", "--template",
                            dest='template',
                            default=False,
@@ -92,6 +93,7 @@ def StoqArgs(parser):
     stoq_opts.add_argument("-M", "--max-processes",
                            dest='max_processes',
                            default=False,
+                           type=int,
                            help="Max number of processes (if supported by source plugin)")
 
     conn_opts = parser.add_argument_group('Connector Options')
@@ -131,9 +133,16 @@ def StoqArgs(parser):
                              default=False,
                              action='store_true',
                              help="Use yara to automatically dispatch payloads")
-    source_opts.add_argument("-P", "--tlp",
+    source_opts.add_argument("--tlp",
                              dest='default_tlp',
                              default=False,
-                             help="TLP to tag each payload with")
+                             choices=['white', 'green', 'amber', 'red'],
+                             help="TLP level to tag each payload with")
+    source_opts.add_argument("--metadata",
+                             dest='ingest_metadata',
+                             default=False,
+                             nargs='*',
+                             metavar=('key:value'),
+                             help="Metadata to add to the results (i.e., tag:APT1 submitter:stoq)")
 
     return parser

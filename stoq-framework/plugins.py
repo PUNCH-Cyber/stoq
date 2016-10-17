@@ -467,6 +467,20 @@ class StoqWorkerPlugin(StoqPluginBase):
             with open(self.stoq.dispatch_rules) as rules:
                 self.yara_dispatcher_rules = yara.compile(file=rules)
 
+        if self.ingest_metadata:
+            try:
+                ingest_metadata = {}
+                for md in self.ingest_metadata:
+                    k, v = md.split(":")
+                    if k in ingest_metadata:
+                        self.log.debug("Duplicate metadata key found {}, skipping".format(k))
+                        continue
+                    ingest_metadata[k] = v
+                self.ingest_metadata = ingest_metadata
+                self.log.debug("Ingest time metadata: {}".format(self.ingest_metadata))
+            except Exception as err:
+                self.log.warn("Unable to parse ingest metadata, skipping: {}".format(err))
+
         return self
 
     def _start_heartbeats(self):
@@ -882,6 +896,13 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         # Preserve the original metadata that was submitted with this payload
         worker_result['source_meta'] = kwargs.copy()
+
+        if self.ingest_metadata:
+            for k, v in self.ingest_metadata.items():
+                if k not in worker_result['source_meta']:
+                    worker_result['source_meta'].update({k: v})
+                else:
+                    self.log.debug("Dupliate metadata key found {}, skipping".format(k))
 
         # Check to see if the keys are in the primary result dict, if so,
         # we will remove them from the source_meta key, otherwise, we will

@@ -73,7 +73,7 @@ from bs4 import UnicodeDammit
 from stoq.plugins import StoqPluginManager
 
 
-__version__ = "0.9.36"
+__version__ = "0.9.37"
 
 
 class Stoq(StoqPluginManager):
@@ -128,7 +128,7 @@ class Stoq(StoqPluginManager):
         self.worker = None
 
         # Default logging options
-        # Valid options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+        # Valid options: DEBUG, INFO, WARN, ERROR, CRITICAL
         self.log_level = "INFO"
         self.log_maxbytes = 1500000
         self.log_backup_count = 5
