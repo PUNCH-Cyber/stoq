@@ -120,22 +120,23 @@ then a separate thread will be launched by stoQ to call the plugin's ``heartbeat
 method. The ``heartbeat`` method will be called with the plugin object as its
 only argument (so ``heartbeat`` can be treated as a class method of the plugin).
 The ``heartbeat`` method will only be called once, and it is expected to loop
-to call whatever periodic actions the plugin wishes to take. For example:
+to call whatever periodic actions the plugin wishes to take. For example
 
 .. code:: python
+
     def heartbeat(self):
         while True:
             time.sleep(1)
             self._checkCommit()
 
 .. note:: Actions performed in the heartbeat must be multithread/multiprocess
-safe. If the actions in the heartbeat may change the values of properties
-that other plugin methods (like ``save``) may also change, it is the responsibility
-of the plugin to properly handle locking access to those objects, or find other
-methods of thread safety.
+          safe. If the actions in the heartbeat may change the values of properties
+          that other plugin methods (like ``save``) may also change, it is the responsibility
+          of the plugin to properly handle locking access to those objects, or find other
+          methods of thread safety.
 
 .. note:: Also, at present only Worker and Connector plugins are checked to see
-if they need heartbeats. Others may be added in the future if the need arises.
+          if they need heartbeats. Others may be added in the future if the need arises.
 
 
 Workers

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     
-    <title>Dispatcher &mdash; stoQ 0.9.37 documentation</title>
+    <title>Dispatcher &mdash; stoQ 0.10.1 documentation</title>
     <meta name="description" content="">
     <meta name="author" content="">
 
@@ -32,7 +32,7 @@
 <script type="text/javascript">
   var DOCUMENTATION_OPTIONS = {
             URL_ROOT:    './',
-            VERSION:     '0.9.37',
+            VERSION:     '0.10.1',
             COLLAPSE_INDEX: false,
             FILE_SUFFIX: '.html',
             HAS_SOURCE:  true
@@ -48,7 +48,7 @@
 </script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="stoQ 0.9.37 documentation" href="index.html" />
+    <link rel="top" title="stoQ 0.10.1 documentation" href="index.html" />
     <link rel="next" title="Stoq" href="Stoq.html" />
     <link rel="prev" title="Plugin Development" href="PluginDevelopment.html" /> 
   </head>
@@ -62,7 +62,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="index.html">stoQ 0.9.37 documentation</a>
+          <a class="navbar-brand" href="index.html">stoQ 0.10.1 documentation</a>
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
@@ -200,7 +200,7 @@ plugin category and plugin namei (e.g., <code class="docutils literal"><span cla
 be loaded if the <em>yara</em> rule hits. The <code class="docutils literal"><span class="pre">save</span></code> key identifies whether
 content that is extracted or carved from the payload should be saved.
 Additionally, all of the meta values are passed to the specified plugin
-as <a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs.</p>
+as **kwargs.</p>
 <p>As an example, a <strong>stoQ</strong> dispatcher plugin that would identify RTF documents
 and then send the document to the RTF carver plugin would be written as:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>rule rtf_file
@@ -217,9 +217,11 @@ and then send the document to the RTF carver plugin would be written as:</p>
 </div>
 <p>Results from the specified plugin are returned as a <code class="docutils literal"><span class="pre">list()</span></code> of <code class="docutils literal"><span class="pre">sets()</span></code>.
 Each unique object, or <code class="docutils literal"><span class="pre">payload</span></code>, that is extracted from the primary payload
-is assigned an incremental <code class="docutils literal"><span class="pre">payload</span></code> and a unique <code class="docutils literal"><span class="pre">uuid</span></code>. In addition, the
-<code class="docutils literal"><span class="pre">puuid</span></code> is added to the results to identify the parent uuid the stream was
-extracted from. The results from the dispatcher are then appended to the
+is assigned an incremental <code class="docutils literal"><span class="pre">payload</span></code> and a unique <code class="docutils literal"><span class="pre">uuid</span></code>. In version of
+<strong>stoQ</strong> prior to 0.9.38, a <code class="docutils literal"><span class="pre">puuid</span></code> key is also added to the results in order to
+identify the parent uuid the stream was extracted from. In <strong>stoQ</strong> version 0.9.38
+and later, <code class="docutils literal"><span class="pre">uuid</span></code> is appended to a list for better tracking of parent
+child relationships. The results from the dispatcher are then appended to the
 primary results <code class="docutils literal"><span class="pre">dict()</span></code> and the key <code class="docutils literal"><span class="pre">payloads</span></code> is added with the total
 count of streams processed, to include the original payload.</p>
 </div>
@@ -249,7 +251,7 @@ count of streams processed, to include the original payload.</p>
 <div id="navbar-related" class=" related navbar navbar-default" role="navigation" aria-label="related navigation">
   <div class="navbar-inner">
     <ul class="nav navbar-nav ">
-        <li><a href="index.html">stoQ 0.9.37 documentation</a></li>
+        <li><a href="index.html">stoQ 0.10.1 documentation</a></li>
     </ul>
 <ul class="nav navbar-nav pull-right hidden-xs hidden-sm">
       
