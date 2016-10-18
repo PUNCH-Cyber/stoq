@@ -16,27 +16,28 @@ stoQ plugins are available separately in the [plugin repository](https://github.
 
 ## Installation and Usage
 
- - Requires python 3.3 or greater
- - Additional documentation can be found at [docs](http://stoq.punchcyber.com/docs/).
+ - Requires python >= 3.4
+ - Additional documentation can be found in the [docs](http://stoq.punchcyber.com/docs/).
 
 
 ### Installation Script
 
 If using Ubuntu, Redhat 7, or CentOS, installation of the core framework and
 plugins can be installed utilizing the installation script provided with the
-framework.::
+framework
 
     git clone https://github.com/PUNCH-Cyber/stoq.git
     cd stoq/
     ./install.sh
 
-*Note: stoQ has not been tested on other operating systems, however,
-       if the required packages are available it should work without issue.*
+> Note:
+  - stoQ has not been tested on other operating systems, however,
+  if the required packages are available it should work without issue.
 
 
 ### Detailed Ubuntu Installation
 
-Install the core requirements via apt-get and pip::
+Install the core requirements via apt-get and pip
 
     sudo apt-add-repository -y multiverse
     sudo apt-get install automake build-essential cython autoconf  \
@@ -49,37 +50,33 @@ Install the core requirements via apt-get and pip::
 
 It is recommended to install *stoQ* within a virtualenv. This is however
 completely optional.  In order to setup the virtualenv, the following should be
-completed::
+completed
 
     sudo pip3 install virtualenv
     virtualenv /usr/local/stoq/.stoq-pyenv
     source /usr/local/stoq/.stoq-pyenv/bin/activate
 
-Install the latest version of yara from https://plusvic.github.io/yara/
+Install the latest version of yara from https://virustotal.github.io/yara/
+
+> Note:
+  - stoQ will install yara-python from pip, however, there is at least one
+  issue (https://github.com/VirusTotal/yara-python/issues/28) that may
+  cause your ruleset to fail. It is recommend that yara-python be
+  install manually using the ```--dynamic-linking``` option.
 
 Once the virtualenv has been activated and yara is installed, we can install
-the core *stoQ* requirements::
-
-    # We have to install cython first, because setuptools will fail to find
-    # dependencies
-
-    # Let's install yara-python because in some cases it will simply fail to
-    # install. Go setuptools!
-    pip install yara-python
+the core *stoQ* requirements
 
     python setup.py install
 
-    # Now, because of issues with setuptools, let's install hydra
-    pip install hydra
-
-Make a directory to store all of *stoQ* and then copy the required files::
+Make a directory to store all of *stoQ* and then copy the required files
 
     mkdir /usr/local/stoq
     cp -R stoq/* /usr/local/stoq/
 
 *stoQ* does not require any special permissions to run. For security reasons,
 it is recommended that *stoQ* is run as a non-privileged user. To create a
-*stoQ* user, run::
+*stoQ* user, run
 
      sudo groupadd -r stoq
      sudo useradd -r -c stoQ -g stoq -d /usr/local/stoq stoq
@@ -87,57 +84,28 @@ it is recommended that *stoQ* is run as a non-privileged user. To create a
 
 The core framework for *stoQ* should now be installed. We can use *stoQ*'s plugin
 installation feature to handle this. First, we will need to clone *stoQ*'s public
-plugin repository::
+plugin repository
 
     git clone https://github.com/PUNCH-Cyber/stoq-plugins-public.git /tmp/stoq-plugins-public
 
-Now, we can install the basic plugins that are commonly used within *stoQ*::
+Plugins can be installed manually using ```stoq-cli.py install /path/to/plugin```,
+or, we can install all of the publicly available plugins using a simple script
 
+    #!/bin/bash
     cd /usr/local/stoq
-    stoq-cli.py install /tmp/stoq-plugins-public/connector/file
-    stoq-cli.py install /tmp/stoq-plugins-public/connector/stdout
-    stoq-cli.py install /tmp/stoq-plugins-public/connector/mongodb
-    stoq-cli.py install /tmp/stoq-plugins-public/connector/elasticsearch
-    stoq-cli.py install /tmp/stoq-plugins-public/connector/emailer
-    stoq-cli.py install /tmp/stoq-plugins-public/connector/queue
-    stoq-cli.py install /tmp/stoq-plugins-public/decoder/b64
-    stoq-cli.py install /tmp/stoq-plugins-public/decoder/b85
-    stoq-cli.py install /tmp/stoq-plugins-public/decoder/bitrot
-    stoq-cli.py install /tmp/stoq-plugins-public/decoder/rot47
-    stoq-cli.py install /tmp/stoq-plugins-public/decoder/xor
-    stoq-cli.py install /tmp/stoq-plugins-public/extractor/gpg
-    stoq-cli.py install /tmp/stoq-plugins-public/extractor/decompress
-    stoq-cli.py install /tmp/stoq-plugins-public/carver/ole
-    stoq-cli.py install /tmp/stoq-plugins-public/carver/rtf
-    stoq-cli.py install /tmp/stoq-plugins-public/carver/pe
-    stoq-cli.py install /tmp/stoq-plugins-public/carver/swf
-    stoq-cli.py install /tmp/stoq-plugins-public/carver/xdp
-    stoq-cli.py install /tmp/stoq-plugins-public/source/dirmon
-    stoq-cli.py install /tmp/stoq-plugins-public/source/filedir
-    stoq-cli.py install /tmp/stoq-plugins-public/reader/iocregex
-    stoq-cli.py install /tmp/stoq-plugins-public/reader/pdftext
-    stoq-cli.py install /tmp/stoq-plugins-public/reader/tika
-    stoq-cli.py install /tmp/stoq-plugins-public/worker/publisher
-    stoq-cli.py install /tmp/stoq-plugins-public/worker/yara
-    stoq-cli.py install /tmp/stoq-plugins-public/worker/iocextract
-    stoq-cli.py install /tmp/stoq-plugins-public/worker/peinfo
-    stoq-cli.py install /tmp/stoq-plugins-public/worker/xorsearch
-    stoq-cli.py install /tmp/stoq-plugins-public/worker/exif
-    stoq-cli.py install /tmp/stoq-plugins-public/worker/clamav
-    stoq-cli.py install /tmp/stoq-plugins-public/worker/vtmis
-    stoq-cli.py install /tmp/stoq-plugins-public/worker/censys
-    stoq-cli.py install /tmp/stoq-plugins-public/worker/threatcrowd
-    stoq-cli.py install /tmp/stoq-plugins-public/worker/passivetotal
-    stoq-cli.py install /tmp/stoq-plugins-public/worker/totalhash
+    for category in connector decoder extractor carver source reader worker;
+    do
+        for plugin in `ls /tmp/stoq-plugins-public/$category`;
+        do
+            ./stoq-cli.py install /tmp/stoq-plugins-public/$category/$plugin
+        done
+    done
 
-
-*Note: xorsearch requires XORsearch to be installed (http://blog.didierstevens.com/programs/xorsearch)*
-
-*Note: exif requires ExifTool to be installed (http://www.sno.phy.queensu.ca/~phil/exiftool)*
-
-*Note: tika requires that Apache Tika be installed (https://tika.apache.org/download.html)*
-
-*Note: clamav requires that a ClamAV daemon be installed (http://www.clamav.net/)*
+> Note:
+ - xorsearch requires XORsearch to be installed (http://blog.didierstevens.com/programs/xorsearch)
+ - exif requires ExifTool to be installed (http://www.sno.phy.queensu.ca/~phil/exiftool)
+ - tika requires that Apache Tika be installed (https://tika.apache.org/download.html)
+ - clamav requires that a ClamAV daemon be installed (http://www.clamav.net/)
 
 
 ## Supervisord
@@ -146,13 +114,13 @@ Now, we can install the basic plugins that are commonly used within *stoQ*::
 daemon mode. In our example, let's say that we want to use the yara and exif
 plugins to monitor RabbitMQ and save any results into MongoDB. We've installed
 *stoQ* into /usr/local/stoq and our python virtual environment is in
-```/usr/local/stoq/.stoq-pyenv```. First, let's install the supervisor Ubuntu package::
+```/usr/local/stoq/.stoq-pyenv```. First, let's install the supervisor Ubuntu package
 
     sudo apt-get install supervisor
 
 
 Now, let's create a new file in ```/etc/supervisor/conf.d``` named ```stoq.conf```
-with the below content::
+with the below content
 
     [program:exif]
     command=/usr/local/stoq/.stoq-pyenv/bin/python stoq-cli.py %(program_name)s -I rabbitmq -C mongodb
@@ -175,10 +143,14 @@ with the below content::
     user=stoq
 
 
-Then, simply restart supervisord::
+Then, simply restart supervisord
 
     supervisorctl reload
 
+
+> Note:
+  - If supervisorctl fails, ensure that the supervisor service is running
+  ```service supervisor start```
 
 You should now have two *stoQ* workers running, monitoring their RabbitMQ queue,
 and saving their results into your MongoDB instance.
@@ -191,7 +163,7 @@ to setup a simple instance.
 First, install Vagrant from https://www.vagrantup.com/downloads, then, install
 VirtualBox from https://www.virtualbox.org/wiki/Downloads.
 
-Once the prerequisits are installed, download the Ubuntu box::
+Once the prerequisites are installed, download the Ubuntu box::
 
     vagrant box add ubuntu/trusty64
 

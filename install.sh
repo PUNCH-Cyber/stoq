@@ -139,7 +139,7 @@ install_core() {
     python -c "import yara"
     if [ $? -ne 0 ]; then
         set -e
-        pip install yara-python
+        install_yara_python
     fi
 
     python setup.py install
@@ -225,11 +225,30 @@ install_yara() {
         ./bootstrap.sh
     fi
     set -e
-    ./configure --with-crypto --enable-magic
+    ./configure --with-crypto --enable-magic --enable-dotnet
     make
     make install
+
+    install_yara_python
     cd $STOQ_DIR
     echo "[stoQ] Done installing yara."
+}
+
+install_yara_python() {
+    echo "[stoQ] Installing yara-python..."
+
+    cd $TMP_DIR
+    if [ -d $TMP_DIR/yara-python ]; then
+        rm -rf $TMP_DIR/yara-python
+    fi
+    git clone https://github.com/VirusTotal/yara-python
+    cd yara-python
+    # We have to install yara-python this way, because of a bug.
+    # https://github.com/VirusTotal/yara-python/issues/28
+    python3 setup.py build --dynamic-linking
+    python3 setup.py install
+    cd $STOQ_DIR
+    echo "[stoQ] Done installing yara-python."
 }
 
 # XOR worker
