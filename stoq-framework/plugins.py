@@ -608,7 +608,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                     self.publish(msg, self.stoq.worker.name, err=True)
                     self.publish_release()
 
-                self.log.error(msg)
+                self.log.error(msg, exc_info=True)
 
     def multiprocess_put(self, **kwargs):
         # Ensure that the max_queue size is not reached. If so, let's wait 1
@@ -793,9 +793,10 @@ class StoqWorkerPlugin(StoqPluginBase):
         Process the payload with the worker plugin
 
         :param bytes payload: (optional) Payload to be processed
-        :param \*\*kwargs: addtional arguments that may be needed by the
-                           worker plugin (i.e., username and password via HTTP)
-        :type kwargs: dict or None
+        :param str archive: Connector plugin to use as a source for the payload
+        :param str/list uuid: UUID for this result, and any parent results
+        :param str filename: File name, if available, for the payload
+        :param str path: Path the file is being ingested from
 
         :returns: Tuple of JSON results and template rendered results
         :rtype: dict and str or lists
@@ -832,7 +833,13 @@ class StoqWorkerPlugin(StoqPluginBase):
         results['date'] = self.stoq.get_time
 
         # If we don't have a uuid, let's generate one
-        kwargs['uuid'] = kwargs.get('uuid', self.stoq.get_uuid)
+        uid = kwargs.get('uuid', self.stoq.get_uuid)
+        if type(uid) == list:
+            self.log.debug("Appending UUID {} to {}".format(uid, kwargs['uuid']))
+            kwargs['uuid'].append(uid)
+        else:
+            self.log.debug("Adding UUID {}".format(uid))
+            kwargs['uuid'] = [uid]
 
         # If we have no payload, let's try to find one to process
         if not payload and 'archive' in kwargs:
@@ -889,7 +896,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         worker_result['plugin'] = self.name
 
-        worker_result['uuid'] = kwargs['uuid']
+        worker_result['uuid'] = kwargs['uuid'].copy()
 
         if payload:
             worker_result['size'] = len(payload)
@@ -902,7 +909,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                 if k not in worker_result['source_meta']:
                     worker_result['source_meta'].update({k: v})
                 else:
-                    self.log.debug("Dupliate metadata key found {}, skipping".format(k))
+                    self.log.debug("Duplicate metadata key found {}, skipping".format(k))
 
         # Check to see if the keys are in the primary result dict, if so,
         # we will remove them from the source_meta key, otherwise, we will
@@ -917,7 +924,7 @@ class StoqWorkerPlugin(StoqPluginBase):
             # but the keys should be at the root of the results. Let's make
             # sure we move them to the root rather than storing them in the
             # source_meta
-            elif k in ('filename', 'puuid', 'magic', 'ssdeep', 'path', 'size'):
+            elif k in ('filename', 'magic', 'ssdeep', 'path', 'size'):
                 worker_result[k] = v
                 worker_result['source_meta'].pop(k, None)
 
@@ -945,18 +952,27 @@ class StoqWorkerPlugin(StoqPluginBase):
             # Track hashes of payloads so we don't handle duplicates.
             processed_hashes = {}
 
-            while dispatch_payloads and int(self.stoq.max_recursion) >= current_depth:
+            while dispatch_payloads:
                 self.log.debug("Dispatch: Count of payloads to dispatch: {}".format(len(dispatch_payloads)))
                 for index, dispatch_payload in enumerate(dispatch_payloads):
 
                     dispatch_payloads.pop(index)
 
                     current_hash = dispatch_payload[0].get('sha1', get_sha1(dispatch_payload[1]))
-                    self.log.debug("Dispatch: Current dispatch sha1: ".format(current_hash))
+                    # get the current parent uuid, so we can ensure any dispatched children are
+                    # appended to the approriate list
+                    dispatch_kwargs = kwargs.copy()
+                    dispatch_kwargs['uuid'] = dispatch_payload[0].get('uuid', worker_result['uuid'])
+
+                    if len(dispatch_kwargs['uuid']) >= int(self.stoq.max_recursion):
+                        self.log.debug("Dispatch: Maximum recursion depth of {} reached".format(self.stoq.max_recursion))
+                        continue
+
+                    self.log.debug("Dispatch: Current dispatch hash {}".format(current_hash))
 
                     # Skip over this payload if we've already processed it
                     if current_hash in processed_hashes:
-                        self.log.info("Skipping duplicate hash: {}".format(current_hash))
+                        self.log.info("Dispatch: Skipping duplicate hash {}".format(current_hash))
                         continue
 
                     processed_hashes.setdefault(current_hash, True)
@@ -967,10 +983,10 @@ class StoqWorkerPlugin(StoqPluginBase):
 
                     # Send the payload to the yara dispatcher
                     for yara_result in self.yara_dispatcher(dispatch_payload[1]):
-                        dispatch_result = self._parse_dispatch_results(yara_result, **kwargs)
+                        dispatch_result = self._parse_dispatch_results(yara_result, **dispatch_kwargs)
 
                         if dispatch_result['sha1'] in temp_processed_hashes:
-                            self.log.info("Skipping duplicate hash: {}".format(dispatch_result['sha1']))
+                            self.log.info("Dispatch: Skipping duplicate hash: {}".format(dispatch_result['sha1']))
                             continue
 
                         temp_processed_hashes.setdefault(dispatch_result['sha1'], True)
@@ -1058,7 +1074,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         # Parse output with a template
         if self.template:
-            self.log.debug("Template: Attempted to templatize results")
+            self.log.debug("Template: Attempting to templatize results")
             try:
                 # Figure out the plugin path from the results plugin object
                 if plugin in self.workers:
@@ -1108,8 +1124,6 @@ class StoqWorkerPlugin(StoqPluginBase):
         or carve content from a payload
 
         :param bytes payload: Payload to be processed
-        :param \*\*kwargs: addtional arguments that may be needed
-        :type kwargs: dict or None
 
         :returns: Set of metadata and content from plugin
         :rtype: Generator
@@ -1138,25 +1152,21 @@ class StoqWorkerPlugin(StoqPluginBase):
 
             self.log.debug("Dispatch: Sending payload to {}:{}".format(plugin_type, plugin_name))
 
-            if plugin_type == 'carver':
-                self.load_carver(plugin_name)
-                try:
+            try:
+                if plugin_type == 'carver':
+                    self.load_carver(plugin_name)
                     content = self.carvers[plugin_name].carve(payload, **plugin_kwargs)
-                except:
-                    content = None
-            elif plugin_type == 'extractor':
-                self.load_extractor(plugin_name)
-                try:
+                elif plugin_type == 'extractor':
+                    self.load_extractor(plugin_name)
                     content = self.extractors[plugin_name].extract(payload, **plugin_kwargs)
-                except:
-                    content = None
-            elif plugin_type == 'decoder':
-                self.load_decoder(plugin_name)
-                try:
+                elif plugin_type == 'decoder':
+                    self.load_decoder(plugin_name)
                     content = self.decoders[plugin_name].decode(payload, **plugin_kwargs)
-                except:
+                else:
                     content = None
-            else:
+            except Exception:
+                self.log.error("Unable to handle dispatched payload with "
+                                "{}:{}".format(plugin_type, plugin_name), exc_info=True)
                 content = None
 
             if content:
@@ -1173,7 +1183,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                     # Keep any metadata returned by the plugin as source_meta,
                     # but move some keys to the top lvel of the result.
                     for k, v in meta[0].items():
-                        if k in ('filename', 'puuid', 'magic', 'ssdeep', 'path', 'size'):
+                        if k in ('filename', 'magic', 'ssdeep', 'path', 'size'):
                             dispatch_result[k] = v
                         else:
                             dispatch_result['source_meta'][k] = v
@@ -1192,8 +1202,10 @@ class StoqWorkerPlugin(StoqPluginBase):
         meta = content[0]
         meta['dispatcher'] = meta['plugin']
         meta['plugin'] = self.name
-        meta['puuid'] = kwargs['uuid']
-        meta['uuid'] = self.stoq.get_uuid
+        # Make sure we append our new uuid to the uuid list, so we can track
+        # parents and children
+        meta['uuid'] = kwargs['uuid'].copy()
+        meta['uuid'].append(self.stoq.get_uuid)
         meta['scan'] = self.scan(content[1])
 
         return meta

@@ -171,7 +171,7 @@ To view a complete listing of available plugins simply call ``stoq-cli.py`` with
 
 
 Now that we have a complete listing of available worker and connector plugins,
-we can begin processing data. Let's say that we have a file named *bad.exe* that we want to 
+we can begin processing data. Let's say that we have a file named *bad.exe* that we want to
 process with the *yara* worker plugin. We also want the results to be displayed to our console.
 We can simply run |stoQ| with the following command line arguments::
 
@@ -209,7 +209,7 @@ We can simply run |stoQ| with the following command line arguments::
             "sha256" : "458f1bb61b7ef167467228141ad44295f3425fbeb6303e9d31607097d6869932",
             "sha512" : "c5dbd244d186546846c25a393edeafdd6604e2a2e04e021a21d0524f7b02d3ecb85c12dba252a11a3bb01c20fb736ca6153e055eef2cf1bc2f15fea667f2fce4",
             "size" : 55208,
-            "uuid" : "da8215ed-89ca-43db-8c96-a8b8231f6a5e"
+            "uuid" : ["da8215ed-89ca-43db-8c96-a8b8231f6a5e"]
         } ]
     }
 
@@ -262,4 +262,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
