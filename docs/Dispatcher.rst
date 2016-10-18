@@ -14,12 +14,14 @@ certain characteristics and then automatically routing to specific plugins
 based on the results. Currently two plugin categories are supported for
 use with dispatching, *extractor* and *carver*.
 
+
 Usage
 =====
 
 If dispatching is desired, simply start the worker with the ``-D`` command
 line argument. Ensure that your *dispatcher.yar* file contains the appropriate
 rules to properly route the payloads.
+
 
 Writing a Dispatcher Rule
 -------------------------
@@ -33,7 +35,7 @@ plugin category and plugin namei (e.g., ``plugin = "carver:rtf"``) that should
 be loaded if the *yara* rule hits. The ``save`` key identifies whether
 content that is extracted or carved from the payload should be saved.
 Additionally, all of the meta values are passed to the specified plugin
-as **kwargs.
+as \*\*kwargs.
 
 As an example, a |stoQ| dispatcher plugin that would identify RTF documents
 and then send the document to the RTF carver plugin would be written as::
