@@ -95,6 +95,11 @@ def StoqArgs(parser):
                            default=False,
                            type=int,
                            help="Max number of processes (if supported by source plugin)")
+    stoq_opts.add_argument("-R", "--max_recursion",
+                           dest='max_recursion',
+                           default=False,
+                           type=int,
+                           help="Max level for recursion into dispatched payloads")
 
     conn_opts = parser.add_argument_group('Connector Options')
     conn_opts.add_argument("-C", "--connector",

@@ -415,6 +415,10 @@ class StoqWorkerPlugin(StoqPluginBase):
         if self.default_tlp:
             self.stoq.default_tlp = self.default_tlp
 
+        # Set the maximum recursion level when dispatching
+        if self.max_recursion:
+            self.stoq.max_recursion = self.max_recursion
+
         if not self.max_processes:
             # Let's set the max_processes to 50% of total CPUs
             self.max_processes = int(multiprocessing.cpu_count() / 2)
@@ -833,13 +837,12 @@ class StoqWorkerPlugin(StoqPluginBase):
         results['date'] = self.stoq.get_time
 
         # If we don't have a uuid, let's generate one
-        uid = kwargs.get('uuid', self.stoq.get_uuid)
-        if type(uid) == list:
-            self.log.debug("Appending UUID {} to {}".format(uid, kwargs['uuid']))
-            kwargs['uuid'].extend(uid)
-        else:
+        uid = kwargs.get('uuid', None)
+        if type(uid) == str:
             self.log.debug("Adding UUID {}".format(uid))
             kwargs['uuid'] = [uid]
+        elif not uid:
+            kwargs['uuid'] = [self.stoq.get_uuid]
 
         # If we have no payload, let's try to find one to process
         if not payload and 'archive' in kwargs:
@@ -947,8 +950,6 @@ class StoqWorkerPlugin(StoqPluginBase):
             # way, so we can simplify the below routine.
             dispatch_payloads = [({}, payload)]
 
-            current_depth = 0
-
             # Track hashes of payloads so we don't handle duplicates.
             processed_hashes = {}
 
@@ -964,7 +965,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                     dispatch_kwargs = kwargs.copy()
                     dispatch_kwargs['uuid'] = dispatch_payload[0].get('uuid', worker_result['uuid'])
 
-                    if len(dispatch_kwargs['uuid']) >= int(self.stoq.max_recursion):
+                    if len(dispatch_kwargs['uuid']) > int(self.stoq.max_recursion):
                         self.log.debug("Dispatch: Maximum recursion depth of {} reached".format(self.stoq.max_recursion))
                         continue
 
@@ -1002,8 +1003,6 @@ class StoqWorkerPlugin(StoqPluginBase):
                         results['plugins'].update({str(payload_id): dispatch_result['dispatcher']})
 
                         payload_id += 1
-
-                current_depth += 1
 
         results['payloads'] = payload_id
 
