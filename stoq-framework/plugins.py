@@ -836,7 +836,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         uid = kwargs.get('uuid', self.stoq.get_uuid)
         if type(uid) == list:
             self.log.debug("Appending UUID {} to {}".format(uid, kwargs['uuid']))
-            kwargs['uuid'].append(uid)
+            kwargs['uuid'].extend(uid)
         else:
             self.log.debug("Adding UUID {}".format(uid))
             kwargs['uuid'] = [uid]
