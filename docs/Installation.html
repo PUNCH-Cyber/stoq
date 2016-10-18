@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     
-    <title>Installing &mdash; stoQ 0.9.7 documentation</title>
+    <title>Installing &mdash; stoQ 0.9.37 documentation</title>
     <meta name="description" content="">
     <meta name="author" content="">
 
@@ -32,7 +32,7 @@
 <script type="text/javascript">
   var DOCUMENTATION_OPTIONS = {
             URL_ROOT:    './',
-            VERSION:     '0.9.7',
+            VERSION:     '0.9.37',
             COLLAPSE_INDEX: false,
             FILE_SUFFIX: '.html',
             HAS_SOURCE:  true
@@ -46,7 +46,9 @@
 <script type="text/javascript" src="_static/js/basicstrap.js"></script>
 <script type="text/javascript">
 </script>
-    <link rel="top" title="stoQ 0.9.7 documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="stoQ 0.9.37 documentation" href="index.html" />
     <link rel="next" title="Plugin Development" href="PluginDevelopment.html" />
     <link rel="prev" title="stoQ: Analysis. Simplified." href="index.html" /> 
   </head>
@@ -60,7 +62,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="index.html">stoQ 0.9.7 documentation</a>
+          <a class="navbar-brand" href="index.html">stoQ 0.9.37 documentation</a>
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
@@ -70,16 +72,15 @@
                 <ul>
 <li><a class="reference internal" href="#">Installing</a><ul>
 <li><a class="reference internal" href="#installation-script">Installation Script</a></li>
-<li><a class="reference internal" href="#detailed-installation">Detailed Installation</a><ul>
+<li><a class="reference internal" href="#detailed-ubuntu-installation">Detailed Ubuntu Installation</a><ul>
 <li><a class="reference internal" href="#core-requirements">Core Requirements</a></li>
-<li><a class="reference internal" href="#additional-plugins">Additional Plugins</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#supervisord">Supervisord</a><ul>
-<li><a class="reference internal" href="#id1">Additional Plugins</a></li>
+<li><a class="reference internal" href="#additional-plugins">Additional Plugins</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id2">Supervisord</a></li>
+<li><a class="reference internal" href="#id1">Supervisord</a></li>
 <li><a class="reference internal" href="#vagrant">Vagrant</a></li>
 </ul>
 </li>
@@ -130,16 +131,15 @@
   <ul>
 <li><a class="reference internal" href="#">Installing</a><ul>
 <li><a class="reference internal" href="#installation-script">Installation Script</a></li>
-<li><a class="reference internal" href="#detailed-installation">Detailed Installation</a><ul>
+<li><a class="reference internal" href="#detailed-ubuntu-installation">Detailed Ubuntu Installation</a><ul>
 <li><a class="reference internal" href="#core-requirements">Core Requirements</a></li>
-<li><a class="reference internal" href="#additional-plugins">Additional Plugins</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#supervisord">Supervisord</a><ul>
-<li><a class="reference internal" href="#id1">Additional Plugins</a></li>
+<li><a class="reference internal" href="#additional-plugins">Additional Plugins</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id2">Supervisord</a></li>
+<li><a class="reference internal" href="#id1">Supervisord</a></li>
 <li><a class="reference internal" href="#vagrant">Vagrant</a></li>
 </ul>
 </li>
@@ -188,11 +188,12 @@
 <h1>Installing<a class="headerlink" href="#installing" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="installation-script">
 <h2>Installation Script<a class="headerlink" href="#installation-script" title="Permalink to this headline">¶</a></h2>
-<p>If using Ubuntu, installation of the core framework and plugins can be
-installed utilzing the installation script provided with the framework.:</p>
-<div class="highlight-python"><div class="highlight"><pre>git clone https://github.com/PUNCH-Cyber/stoq.git
-cd stoq/
-./install.sh
+<p>If using Ubuntu, Redhat 7, or CentOS, installation of the core framework and
+plugins can be installed utilizing the installation script provided with the
+framework.:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">PUNCH</span><span class="o">-</span><span class="n">Cyber</span><span class="o">/</span><span class="n">stoq</span><span class="o">.</span><span class="n">git</span>
+<span class="n">cd</span> <span class="n">stoq</span><span class="o">/</span>
+<span class="o">./</span><span class="n">install</span><span class="o">.</span><span class="n">sh</span>
 </pre></div>
 </div>
 <div class="admonition note">
@@ -201,97 +202,72 @@ cd stoq/
 if the required packages are available it should work without issue.</p>
 </div>
 </div>
-<div class="section" id="detailed-installation">
-<h2>Detailed Installation<a class="headerlink" href="#detailed-installation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="detailed-ubuntu-installation">
+<h2>Detailed Ubuntu Installation<a class="headerlink" href="#detailed-ubuntu-installation" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="core-requirements">
 <h3>Core Requirements<a class="headerlink" href="#core-requirements" title="Permalink to this headline">¶</a></h3>
 <p>Install the core requirements via apt-get and pip:</p>
-<div class="highlight-python"><div class="highlight"><pre>apt-add-repository -y multiverse
-sudo apt-get install automake build-essential cython autoconf  \
-                     python3 python3-dev python3-setuptools \
-                     libyaml-dev libffi-dev libfuzzy-dev \
-                     libxml2-dev libxslt1-dev libz-dev p7zip-full \
-                     p7zip-rar unace-nonfree libssl-dev libmagic-dev
-sudo easy_install3 pip
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">apt</span><span class="o">-</span><span class="n">add</span><span class="o">-</span><span class="n">repository</span> <span class="o">-</span><span class="n">y</span> <span class="n">multiverse</span>
+<span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">automake</span> <span class="n">build</span><span class="o">-</span><span class="n">essential</span> <span class="n">cython</span> <span class="n">autoconf</span>  \
+                     <span class="n">python3</span> <span class="n">python3</span><span class="o">-</span><span class="n">dev</span> <span class="n">python3</span><span class="o">-</span><span class="n">setuptools</span> \
+                     <span class="n">libyaml</span><span class="o">-</span><span class="n">dev</span> <span class="n">libffi</span><span class="o">-</span><span class="n">dev</span> <span class="n">libfuzzy</span><span class="o">-</span><span class="n">dev</span> \
+                     <span class="n">libxml2</span><span class="o">-</span><span class="n">dev</span> <span class="n">libxslt1</span><span class="o">-</span><span class="n">dev</span> <span class="n">libz</span><span class="o">-</span><span class="n">dev</span> <span class="n">p7zip</span><span class="o">-</span><span class="n">full</span> \
+                     <span class="n">p7zip</span><span class="o">-</span><span class="n">rar</span> <span class="n">unace</span><span class="o">-</span><span class="n">nonfree</span> <span class="n">libssl</span><span class="o">-</span><span class="n">dev</span> <span class="n">libmagic</span><span class="o">-</span><span class="n">dev</span>
+<span class="n">sudo</span> <span class="n">easy_install3</span> <span class="n">pip</span>
 </pre></div>
 </div>
 <p>It is recommended to install <strong>stoQ</strong> within a virtualenv. This is however
 completely optional.  In order to setup the virtualenv, the following should be
 completed:</p>
-<div class="highlight-python"><div class="highlight"><pre>sudo pip3 install virtualenv
-virtualenv /usr/local/stoq/.stoq-pyenv
-source /usr/local/stoq/.stoq-pyenv/bin/activate
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">pip3</span> <span class="n">install</span> <span class="n">virtualenv</span>
+<span class="n">virtualenv</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span><span class="o">/.</span><span class="n">stoq</span><span class="o">-</span><span class="n">pyenv</span>
+<span class="n">source</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span><span class="o">/.</span><span class="n">stoq</span><span class="o">-</span><span class="n">pyenv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
 </pre></div>
 </div>
 <p>Install the latest version of yara from <a class="reference external" href="https://plusvic.github.io/yara/">https://plusvic.github.io/yara/</a></p>
 <p>Once the virtualenv has been activated and yara is installed, we can install
 the core <strong>stoQ</strong> requirements:</p>
-<div class="highlight-python"><div class="highlight"><pre>pip install cython
-python setup.py install
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">cython must be installed first, otherwise setuptools will fail to
-find dependencies</p>
+<p class="last">stoQ will install yara-python from pip, however, there is at least one
+issue (<a class="reference external" href="https://github.com/VirusTotal/yara-python/issues/28">https://github.com/VirusTotal/yara-python/issues/28</a>) that may
+cause your ruleset to fail. It is recommend that yara-python be
+install manually using the <code class="docutils literal"><span class="pre">`--dynamic-linking`</span></code> option.</p>
 </div>
 <p>Make a directory to store all of <strong>stoQ</strong> and then copy the required files:</p>
-<div class="highlight-python"><div class="highlight"><pre>mkdir /usr/local/stoq
-cp -R stoq/* /usr/local/stoq/
-chmod +x /usr/local/stoq/stoq-cli.py
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span>
+<span class="n">cp</span> <span class="o">-</span><span class="n">R</span> <span class="n">stoq</span><span class="o">/*</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span><span class="o">/</span>
+<span class="n">chmod</span> <span class="o">+</span><span class="n">x</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span><span class="o">/</span><span class="n">stoq</span><span class="o">-</span><span class="n">cli</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
 <p><strong>stoQ</strong> does not require any special permissions to run. For security reasons,
 it is recommended that <strong>stoQ</strong> is run as a non-privileged user. To create a
 <strong>stoQ</strong> user, run:</p>
-<div class="highlight-python"><div class="highlight"><pre>sudo groupadd -r stoq
-sudo useradd -r -c stoQ -g stoq -d /usr/local/stoq stoq
-chown -R stoq:stoq /usr/local/stoq
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">groupadd</span> <span class="o">-</span><span class="n">r</span> <span class="n">stoq</span>
+<span class="n">sudo</span> <span class="n">useradd</span> <span class="o">-</span><span class="n">r</span> <span class="o">-</span><span class="n">c</span> <span class="n">stoQ</span> <span class="o">-</span><span class="n">g</span> <span class="n">stoq</span> <span class="o">-</span><span class="n">d</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span> <span class="n">stoq</span>
+<span class="n">chown</span> <span class="o">-</span><span class="n">R</span> <span class="n">stoq</span><span class="p">:</span><span class="n">stoq</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span>
 </pre></div>
 </div>
 <p>The core framework for <strong>stoQ</strong> should now be installed. We can use <strong>stoQ</strong>&#8216;s plugin
 installation feature to handle this. First, we will need to clone <strong>stoQ</strong>&#8216;s public
 plugin repository:</p>
-<div class="highlight-python"><div class="highlight"><pre>git clone https://github.com/PUNCH-Cyber/stoq-plugins-public.git /tmp/stoq-plugins-public
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">PUNCH</span><span class="o">-</span><span class="n">Cyber</span><span class="o">/</span><span class="n">stoq</span><span class="o">-</span><span class="n">plugins</span><span class="o">-</span><span class="n">public</span><span class="o">.</span><span class="n">git</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">stoq</span><span class="o">-</span><span class="n">plugins</span><span class="o">-</span><span class="n">public</span>
 </pre></div>
 </div>
-<p>Now, we can install the basic plugins that are commonly used within <strong>stoQ</strong>:</p>
-<div class="highlight-python"><div class="highlight"><pre>cd /usr/local/stoq
-stoq-cli.py install /tmp/stoq-plugins-public/connector/file
-stoq-cli.py install /tmp/stoq-plugins-public/connector/stdout
-stoq-cli.py install /tmp/stoq-plugins-public/connector/mongodb
-stoq-cli.py install /tmp/stoq-plugins-public/connector/elasticsearch
-stoq-cli.py install /tmp/stoq-plugins-public/connector/emailer
-stoq-cli.py install /tmp/stoq-plugins-public/connector/queue
-stoq-cli.py install /tmp/stoq-plugins-public/decoder/b64
-stoq-cli.py install /tmp/stoq-plugins-public/decoder/b85
-stoq-cli.py install /tmp/stoq-plugins-public/decoder/bitrot
-stoq-cli.py install /tmp/stoq-plugins-public/decoder/rot47
-stoq-cli.py install /tmp/stoq-plugins-public/decoder/xor
-stoq-cli.py install /tmp/stoq-plugins-public/extractor/gpg
-stoq-cli.py install /tmp/stoq-plugins-public/extractor/decompress
-stoq-cli.py install /tmp/stoq-plugins-public/carver/ole
-stoq-cli.py install /tmp/stoq-plugins-public/carver/rtf
-stoq-cli.py install /tmp/stoq-plugins-public/carver/pe
-stoq-cli.py install /tmp/stoq-plugins-public/carver/swf
-stoq-cli.py install /tmp/stoq-plugins-public/carver/xdp
-stoq-cli.py install /tmp/stoq-plugins-public/source/dirmon
-stoq-cli.py install /tmp/stoq-plugins-public/source/filedir
-stoq-cli.py install /tmp/stoq-plugins-public/reader/iocregex
-stoq-cli.py install /tmp/stoq-plugins-public/reader/pdftext
-stoq-cli.py install /tmp/stoq-plugins-public/worker/publisher
-stoq-cli.py install /tmp/stoq-plugins-public/worker/yara
-stoq-cli.py install /tmp/stoq-plugins-public/worker/iocextract
-stoq-cli.py install /tmp/stoq-plugins-public/worker/peinfo
-stoq-cli.py install /tmp/stoq-plugins-public/worker/xorsearch
-stoq-cli.py install /tmp/stoq-plugins-public/worker/exif
-stoq-cli.py install /tmp/stoq-plugins-public/worker/tika
-stoq-cli.py install /tmp/stoq-plugins-public/worker/clamav
-stoq-cli.py install /tmp/stoq-plugins-public/worker/vtmis
-stoq-cli.py install /tmp/stoq-plugins-public/worker/censys
-stoq-cli.py install /tmp/stoq-plugins-public/worker/threatcrowd
-stoq-cli.py install /tmp/stoq-plugins-public/worker/passivetotal
-stoq-cli.py install /tmp/stoq-plugins-public/worker/totalhash
+<p>Plugins can be installed manually using <code class="docutils literal"><span class="pre">`stoq-cli.py</span> <span class="pre">install</span> <span class="pre">/path/to/plugin`</span></code>,
+or, we can install all of the publicly available plugins using a simple script:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>#!/bin/bash
+cd /usr/local/stoq
+for category in connector decoder extractor carver source reader worker;
+do
+    for plugin in `ls /tmp/stoq-plugins-public/$category`;
+    do
+        ./stoq-cli.py install /tmp/stoq-plugins-public/$category/$plugin
+    done
+done
 </pre></div>
 </div>
 <div class="admonition note">
@@ -324,11 +300,6 @@ stoq-cli.py install /tmp/stoq-plugins-public/worker/totalhash
 </ul>
 </div>
 </div>
-<div class="section" id="additional-plugins">
-<h3>Additional Plugins<a class="headerlink" href="#additional-plugins" title="Permalink to this headline">¶</a></h3>
-<p>There are several other plugins that are available in the <em>stoQ</em> public
-plugin repository at <a class="reference external" href="https://github.com/PUNCH-Cyber/stoq-plugins-public">https://github.com/PUNCH-Cyber/stoq-plugins-public</a></p>
-</div>
 </div>
 <div class="section" id="supervisord">
 <h2>Supervisord<a class="headerlink" href="#supervisord" title="Permalink to this headline">¶</a></h2>
@@ -337,52 +308,57 @@ daemon mode. In our example, let&#8217;s say that we want to use the yara and ex
 plugins to monitor RabbitMQ and save any results into MongoDB. We&#8217;ve installed
 <strong>stoQ</strong> into /usr/local/stoq and our python virtual environment is in
 <code class="docutils literal"><span class="pre">`/usr/local/stoq/env`</span></code>. First, let&#8217;s install the supervisor Ubuntu package:</p>
-<div class="highlight-python"><div class="highlight"><pre>sudo apt-get install supervisor
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">supervisor</span>
 </pre></div>
 </div>
 <p>Now, let&#8217;s create a new file in <code class="docutils literal"><span class="pre">`/etc/supervisor/conf.d`</span></code> named <code class="docutils literal"><span class="pre">`stoq.conf`</span></code></p>
-<div class="section" id="id1">
-<h3>Additional Plugins<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="additional-plugins">
+<h3>Additional Plugins<a class="headerlink" href="#additional-plugins" title="Permalink to this headline">¶</a></h3>
 <p>There are several other plugins that are available in the <em>stoQ</em> public
 plugin repository at <a class="reference external" href="https://github.com/PUNCH-Cyber/stoq-plugins-public">https://github.com/PUNCH-Cyber/stoq-plugins-public</a></p>
 </div>
 </div>
-<div class="section" id="id2">
-<h2>Supervisord<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id1">
+<h2>Supervisord<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <p><strong>stoQ</strong> can easily be added to supervisord for running as a system service in
 daemon mode. In our example, let&#8217;s say that we want to use the yara and exif
 plugins to monitor RabbitMQ and save any results into MongoDB. We&#8217;ve installed
 <strong>stoQ</strong> into /usr/local/stoq and our python virtual environment is in
 <code class="docutils literal"><span class="pre">`/usr/local/stoq/env`</span></code>. First, let&#8217;s install the supervisor Ubuntu package:</p>
-<div class="highlight-python"><div class="highlight"><pre>sudo apt-get install supervisor
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">supervisor</span>
 </pre></div>
 </div>
 <p>Now, let&#8217;s create a new file in <code class="docutils literal"><span class="pre">`/etc/supervisor/conf.d`</span></code> named <code class="docutils literal"><span class="pre">`stoq.conf`</span></code>
 with the below content:</p>
-<div class="highlight-python"><div class="highlight"><pre>[program:exif]
-command=/usr/local/stoq/.stoq-pyenv/bin/python stoq-cli.py %(program_name)s -I rabbitmq -C mongodb
-process_name=%(program_name)s_%(process_num)02d
-directory=/usr/local/stoq
-autostart=true
-autorestart=true
-startretries=3
-numprocs=1
-user=stoq
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">program</span><span class="p">:</span><span class="n">exif</span><span class="p">]</span>
+<span class="n">command</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span><span class="o">/.</span><span class="n">stoq</span><span class="o">-</span><span class="n">pyenv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">python</span> <span class="n">stoq</span><span class="o">-</span><span class="n">cli</span><span class="o">.</span><span class="n">py</span> <span class="o">%</span><span class="p">(</span><span class="n">program_name</span><span class="p">)</span><span class="n">s</span> <span class="o">-</span><span class="n">I</span> <span class="n">rabbitmq</span> <span class="o">-</span><span class="n">C</span> <span class="n">mongodb</span>
+<span class="n">process_name</span><span class="o">=%</span><span class="p">(</span><span class="n">program_name</span><span class="p">)</span><span class="n">s_</span><span class="o">%</span><span class="p">(</span><span class="n">process_num</span><span class="p">)</span><span class="mi">02</span><span class="n">d</span>
+<span class="n">directory</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span>
+<span class="n">autostart</span><span class="o">=</span><span class="n">true</span>
+<span class="n">autorestart</span><span class="o">=</span><span class="n">true</span>
+<span class="n">startretries</span><span class="o">=</span><span class="mi">3</span>
+<span class="n">numprocs</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">user</span><span class="o">=</span><span class="n">stoq</span>
 
-[program:yara]
-command=/usr/local/stoq/.stoq-pyenv/bin/python stoq-cli.py %(program_name)s -I rabbitmq -C mongodb
-process_name=%(program_name)s_%(process_num)02d
-directory=/usr/local/stoq
-autostart=true
-autorestart=true
-startretries=3
-numprocs=1
-user=stoq
+<span class="p">[</span><span class="n">program</span><span class="p">:</span><span class="n">yara</span><span class="p">]</span>
+<span class="n">command</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span><span class="o">/.</span><span class="n">stoq</span><span class="o">-</span><span class="n">pyenv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">python</span> <span class="n">stoq</span><span class="o">-</span><span class="n">cli</span><span class="o">.</span><span class="n">py</span> <span class="o">%</span><span class="p">(</span><span class="n">program_name</span><span class="p">)</span><span class="n">s</span> <span class="o">-</span><span class="n">I</span> <span class="n">rabbitmq</span> <span class="o">-</span><span class="n">C</span> <span class="n">mongodb</span>
+<span class="n">process_name</span><span class="o">=%</span><span class="p">(</span><span class="n">program_name</span><span class="p">)</span><span class="n">s_</span><span class="o">%</span><span class="p">(</span><span class="n">process_num</span><span class="p">)</span><span class="mi">02</span><span class="n">d</span>
+<span class="n">directory</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span>
+<span class="n">autostart</span><span class="o">=</span><span class="n">true</span>
+<span class="n">autorestart</span><span class="o">=</span><span class="n">true</span>
+<span class="n">startretries</span><span class="o">=</span><span class="mi">3</span>
+<span class="n">numprocs</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">user</span><span class="o">=</span><span class="n">stoq</span>
 </pre></div>
 </div>
 <p>Then, simply restart supervisord:</p>
-<div class="highlight-python"><div class="highlight"><pre>supervisorctl reload
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">supervisorctl</span> <span class="n">reload</span>
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If supervisorctl fails, ensure that the supervisor service is running
+<code class="docutils literal"><span class="pre">`service</span> <span class="pre">supervisor</span> <span class="pre">start`</span></code></p>
 </div>
 <p>You should now have two <strong>stoQ</strong> workers running, monitoring their RabbitMQ queue,
 and saving their results into your MongoDB instance.</p>
@@ -393,24 +369,24 @@ and saving their results into your MongoDB instance.</p>
 to setup a simple instance.</p>
 <p>First, install Vagrant from <a class="reference external" href="https://www.vagrantup.com/downloads">https://www.vagrantup.com/downloads</a>, then, install
 VirtualBox from <a class="reference external" href="https://www.virtualbox.org/wiki/Downloads">https://www.virtualbox.org/wiki/Downloads</a>.</p>
-<p>Once the prerequisits are installed, download the Ubuntu box:</p>
-<div class="highlight-python"><div class="highlight"><pre>vagrant box add ubuntu/trusty64
+<p>Once the prerequisites are installed, download the Ubuntu box:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">vagrant</span> <span class="n">box</span> <span class="n">add</span> <span class="n">ubuntu</span><span class="o">/</span><span class="n">trusty64</span>
 </pre></div>
 </div>
 <p>Next, create a new directory named <code class="docutils literal"><span class="pre">`stoq`</span></code> and save the Vagrantfile in it:</p>
-<div class="highlight-python"><div class="highlight"><pre>wget -O Vagrantfile https://raw.githubusercontent.com/PUNCH-Cyber/stoq/master/Vagrantfile
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">wget</span> <span class="o">-</span><span class="n">O</span> <span class="n">Vagrantfile</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">PUNCH</span><span class="o">-</span><span class="n">Cyber</span><span class="o">/</span><span class="n">stoq</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">Vagrantfile</span>
 </pre></div>
 </div>
 <p>Now, let&#8217;s bring up the Vagrant box:</p>
-<div class="highlight-python"><div class="highlight"><pre>vagrant up
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">vagrant</span> <span class="n">up</span>
 </pre></div>
 </div>
 <p>Log into the new box:</p>
-<div class="highlight-python"><div class="highlight"><pre>vagrant ssh
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">vagrant</span> <span class="n">ssh</span>
 </pre></div>
 </div>
 <p>Switch to the <code class="docutils literal"><span class="pre">stoq</span></code> user:</p>
-<div class="highlight-python"><div class="highlight"><pre>sudo su - stoq
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">su</span> <span class="o">-</span> <span class="n">stoq</span>
 </pre></div>
 </div>
 <p>Your newly installed <strong>stoQ</strong> instance is now available in <code class="docutils literal"><span class="pre">/usr/local/stoq</span></code>.</p>
@@ -433,7 +409,7 @@ VirtualBox from <a class="reference external" href="https://www.virtualbox.org/w
 <div id="navbar-related" class=" related navbar navbar-default" role="navigation" aria-label="related navigation">
   <div class="navbar-inner">
     <ul class="nav navbar-nav ">
-        <li><a href="index.html">stoQ 0.9.7 documentation</a></li>
+        <li><a href="index.html">stoQ 0.9.37 documentation</a></li>
     </ul>
 <ul class="nav navbar-nav pull-right hidden-xs hidden-sm">
       
@@ -450,8 +426,8 @@ VirtualBox from <a class="reference external" href="https://www.virtualbox.org/w
 
       <!-- footer -->
       <footer role="contentinfo">
-          &copy; Copyright 2014-2015, PUNCH Cyber Analytics Group.
-        Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+          &copy; Copyright 2014-2016, PUNCH Cyber Analytics Group.
+        Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.4.8.
       </footer>
       <!-- /footer -->
 

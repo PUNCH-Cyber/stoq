@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     
-    <title>stoQ: Analysis. Simplified. &mdash; stoQ 0.9.7 documentation</title>
+    <title>stoQ: Analysis. Simplified. &mdash; stoQ 0.9.37 documentation</title>
     <meta name="description" content="">
     <meta name="author" content="">
 
@@ -32,7 +32,7 @@
 <script type="text/javascript">
   var DOCUMENTATION_OPTIONS = {
             URL_ROOT:    './',
-            VERSION:     '0.9.7',
+            VERSION:     '0.9.37',
             COLLAPSE_INDEX: false,
             FILE_SUFFIX: '.html',
             HAS_SOURCE:  true
@@ -46,7 +46,9 @@
 <script type="text/javascript" src="_static/js/basicstrap.js"></script>
 <script type="text/javascript">
 </script>
-    <link rel="top" title="stoQ 0.9.7 documentation" href="#" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="stoQ 0.9.37 documentation" href="#" />
     <link rel="next" title="Installing" href="Installation.html" /> 
   </head>
   <body role="document">
@@ -59,7 +61,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">stoQ 0.9.7 documentation</a>
+          <a class="navbar-brand" href="#">stoQ 0.9.37 documentation</a>
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
@@ -208,7 +210,7 @@ designed to allow a user to interact with <strong>stoQ</strong> and <strong>stoQ
 a much more granular level than via the command line.</p>
 <p>To enter the interactive shell, simply run <strong>stoQ</strong> with the <code class="docutils literal"><span class="pre">shell</span></code>
 argument.:</p>
-<div class="highlight-python"><div class="highlight"><pre>bash$ ./stoq-cli.py shell
+<div class="highlight-default"><div class="highlight"><pre><span></span>bash$ ./stoq-cli.py shell
 
     _______ _________ _______  _______
     (  ____ \__   __/(  ___  )(  ___  )
@@ -220,13 +222,13 @@ argument.:</p>
     \_______)   )_(   (_______)(____\/_)
 
             Analysis. Simplified.
-
+                  v0.9.7
 
 [stoQ] &gt;
 </pre></div>
 </div>
 <p>Once in the interactive shell, you can run the <code class="docutils literal"><span class="pre">help</span></code> command for a
-complete listing of available commands. Please view the <a class="reference internal" href="Shell.html"><em>StoqShell</em></a> documentation
+complete listing of available commands. Please view the <a class="reference internal" href="Shell.html"><span class="doc">StoqShell</span></a> documentation
 for a more exhaustive list of directions.</p>
 </div>
 <div class="section" id="basic-usage-via-command-line">
@@ -234,7 +236,7 @@ for a more exhaustive list of directions.</p>
 <p>In order to use <strong>stoQ</strong> via the command line, at least two options must be
 defined. The worker plugin that should be loaded, and the source of input.
 In order to see a basic usage help, simply execute <code class="docutils literal"><span class="pre">stoq-cli.py</span></code>:</p>
-<div class="highlight-python"><div class="highlight"><pre>bash$ stoq-cli.py
+<div class="highlight-default"><div class="highlight"><pre><span></span>bash$ stoq-cli.py
 
     .------..------..------..------.
     |S.--. ||T.--. ||O.--. ||Q.--. |
@@ -242,6 +244,8 @@ In order to see a basic usage help, simply execute <code class="docutils literal
     | :\/: || (__) || :\/: || :\/: |
     | &#39;--&#39;S|| &#39;--&#39;T|| &#39;--&#39;O|| &#39;--&#39;Q|
     `------&#39;`------&#39;`------&#39;`------&#39;
+          Analysis. Simplified.
+                v0.9.7
 
 usage:
     stoq-cli.py [command] [&lt;args&gt;]
@@ -256,7 +260,7 @@ usage:
 </div>
 <p>To view a complete listing of available plugins simply call <code class="docutils literal"><span class="pre">stoq-cli.py</span></code> with the
 <code class="docutils literal"><span class="pre">list</span></code> command line argument:</p>
-<div class="highlight-python"><div class="highlight"><pre>bash$ stoq-cli.py list
+<div class="highlight-default"><div class="highlight"><pre><span></span>bash$ stoq-cli.py list
 
     _______ _______  _____   _____
     |______    |    |     | |   __|
@@ -322,7 +326,7 @@ Available Plugins:
 we can begin processing data. Let&#8217;s say that we have a file named <em>bad.exe</em> that we want to
 process with the <em>yara</em> worker plugin. We also want the results to be displayed to our console.
 We can simply run <strong>stoQ</strong> with the following command line arguments:</p>
-<div class="highlight-python"><div class="highlight"><pre>bash$ stoq-cli.py yara -F bad.exe
+<div class="highlight-default"><div class="highlight"><pre><span></span>bash$ stoq-cli.py yara -F bad.exe
 {
 &quot;date&quot; : &quot;2015-10-29T15:22:55.824563&quot;,
 &quot;payloads&quot; : 1,
@@ -381,7 +385,7 @@ the <em>publisher</em>. For now, we will assume that the default worker queues
 <em>malicious</em>. We want to monitor this directory, using the dirmon source plugin,
 for any new files that are created, archive them to MongoDB, and then process
 them with our default workers listed above:</p>
-<div class="highlight-python"><div class="highlight"><pre>bash$ stoq-cli.py publisher -I dirmon -F malicious -A mongodb
+<div class="highlight-default"><div class="highlight"><pre><span></span>bash$ stoq-cli.py publisher -I dirmon -F malicious -A mongodb
 </pre></div>
 </div>
 <p>Once a file is placed into this directory, the newly created file will be
@@ -390,7 +394,7 @@ appropriate queues for processing.</p>
 <p>Now, we need to make sure our worker plugins are running so they can processes
 their newly identified file. In this scenario, since we are saving the file
 itself into MongoDB, we will also save our worker plugin results into MongoDB:</p>
-<div class="highlight-python"><div class="highlight"><pre>bash$ stoq-cli.py yara -I rabbitmq -C mongodb &amp;
+<div class="highlight-default"><div class="highlight"><pre><span></span>bash$ stoq-cli.py yara -I rabbitmq -C mongodb &amp;
 bash$ stoq-cli.py exif -I rabbitmq -C mongodb &amp;
 bash$ stoq-cli.py peinfo -I rabbitmq -C mongodb &amp;
 bash$ stoq-cli.py trid -I rabbitmq -C mongodb &amp;
@@ -401,9 +405,9 @@ bash$ stoq-cli.py trid -I rabbitmq -C mongodb &amp;
 <div class="section" id="indices-and-tables">
 <h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><a class="reference internal" href="genindex.html"><span>Index</span></a></li>
-<li><a class="reference internal" href="py-modindex.html"><span>Module Index</span></a></li>
-<li><a class="reference internal" href="search.html"><span>Search Page</span></a></li>
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
 </ul>
 </div>
 </div>
@@ -423,7 +427,7 @@ bash$ stoq-cli.py trid -I rabbitmq -C mongodb &amp;
 <div id="navbar-related" class=" related navbar navbar-default" role="navigation" aria-label="related navigation">
   <div class="navbar-inner">
     <ul class="nav navbar-nav ">
-        <li><a href="#">stoQ 0.9.7 documentation</a></li>
+        <li><a href="#">stoQ 0.9.37 documentation</a></li>
     </ul>
 <ul class="nav navbar-nav pull-right hidden-xs hidden-sm">
       
@@ -439,8 +443,8 @@ bash$ stoq-cli.py trid -I rabbitmq -C mongodb &amp;
 
       <!-- footer -->
       <footer role="contentinfo">
-          &copy; Copyright 2014-2015, PUNCH Cyber Analytics Group.
-        Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+          &copy; Copyright 2014-2016, PUNCH Cyber Analytics Group.
+        Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.4.8.
       </footer>
       <!-- /footer -->
 

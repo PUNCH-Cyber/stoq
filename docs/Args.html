@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     
-    <title>StoqArgs &mdash; stoQ 0.9.7 documentation</title>
+    <title>StoqArgs &mdash; stoQ 0.9.37 documentation</title>
     <meta name="description" content="">
     <meta name="author" content="">
 
@@ -32,7 +32,7 @@
 <script type="text/javascript">
   var DOCUMENTATION_OPTIONS = {
             URL_ROOT:    './',
-            VERSION:     '0.9.7',
+            VERSION:     '0.9.37',
             COLLAPSE_INDEX: false,
             FILE_SUFFIX: '.html',
             HAS_SOURCE:  true
@@ -46,7 +46,9 @@
 <script type="text/javascript" src="_static/js/basicstrap.js"></script>
 <script type="text/javascript">
 </script>
-    <link rel="top" title="stoQ 0.9.7 documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="stoQ 0.9.37 documentation" href="index.html" />
     <link rel="next" title="StoqPluginManager" href="Plugins.html" />
     <link rel="prev" title="Stoq" href="Stoq.html" /> 
   </head>
@@ -60,7 +62,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="index.html">stoQ 0.9.7 documentation</a>
+          <a class="navbar-brand" href="index.html">stoQ 0.9.37 documentation</a>
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
@@ -184,33 +186,33 @@ within the plugin itself.</p>
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
 <p>From within a worker plugin, define command line arguments:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">sys</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">argparse</span>
-<span class="kn">from</span> <span class="nn">stoq.args</span> <span class="kn">import</span> <span class="n">StoqArgs</span>
+<span class="kn">from</span> <span class="nn">stoq.args</span> <span class="k">import</span> <span class="n">StoqArgs</span>
 
-<span class="c"># Instantiate our workers command line argument parser</span>
+<span class="c1"># Instantiate our workers command line argument parser</span>
 <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
 
-<span class="c"># Initialize the default requirements for a worker, if needed.</span>
+<span class="c1"># Initialize the default requirements for a worker, if needed.</span>
 <span class="n">parser</span> <span class="o">=</span> <span class="n">StoqArgs</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
 
-<span class="c"># Define the argparse group for this plugin</span>
-<span class="n">worker_opts</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="s">&quot;Plugin Options&quot;</span><span class="p">)</span>
+<span class="c1"># Define the argparse group for this plugin</span>
+<span class="n">worker_opts</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="s2">&quot;Plugin Options&quot;</span><span class="p">)</span>
 
-<span class="c"># Define the command line arguments for the worker</span>
-<span class="n">worker_opts</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;-r&quot;</span><span class="p">,</span> <span class="s">&quot;--rules&quot;</span><span class="p">,</span>
-                        <span class="n">dest</span><span class="o">=</span><span class="s">&#39;rulepath&#39;</span><span class="p">,</span>
-                        <span class="n">help</span><span class="o">=</span><span class="s">&quot;Path to rules file.&quot;</span><span class="p">)</span>
+<span class="c1"># Define the command line arguments for the worker</span>
+<span class="n">worker_opts</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s2">&quot;-r&quot;</span><span class="p">,</span> <span class="s2">&quot;--rules&quot;</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;rulepath&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Path to rules file.&quot;</span><span class="p">)</span>
 
-<span class="c"># The first command line argument is reserved for the framework.</span>
-<span class="c"># The work should only parse everything after the first command</span>
-<span class="c"># line argument. We must always use stoQ&#39;s argv object to ensure</span>
-<span class="c"># the plugin is properly instantied whether it is imported or</span>
-<span class="c"># used via a command line script</span>
+<span class="c1"># The first command line argument is reserved for the framework.</span>
+<span class="c1"># The work should only parse everything after the first command</span>
+<span class="c1"># line argument. We must always use stoQ&#39;s argv object to ensure</span>
+<span class="c1"># the plugin is properly instantied whether it is imported or</span>
+<span class="c1"># used via a command line script</span>
 <span class="n">options</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stoq</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
 
-<span class="c"># If we need to handle command line argument, let&#39;s pass them</span>
-<span class="c"># to super().activate so they can be instantied within the worker</span>
+<span class="c1"># If we need to handle command line argument, let&#39;s pass them</span>
+<span class="c1"># to super().activate so they can be instantied within the worker</span>
 <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">activate</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -254,7 +256,7 @@ at initialization, to those defined in <em>worker_opts</em>. The variable
 <div id="navbar-related" class=" related navbar navbar-default" role="navigation" aria-label="related navigation">
   <div class="navbar-inner">
     <ul class="nav navbar-nav ">
-        <li><a href="index.html">stoQ 0.9.7 documentation</a></li>
+        <li><a href="index.html">stoQ 0.9.37 documentation</a></li>
     </ul>
 <ul class="nav navbar-nav pull-right hidden-xs hidden-sm">
       
@@ -271,8 +273,8 @@ at initialization, to those defined in <em>worker_opts</em>. The variable
 
       <!-- footer -->
       <footer role="contentinfo">
-          &copy; Copyright 2014-2015, PUNCH Cyber Analytics Group.
-        Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+          &copy; Copyright 2014-2016, PUNCH Cyber Analytics Group.
+        Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.4.8.
       </footer>
       <!-- /footer -->
 

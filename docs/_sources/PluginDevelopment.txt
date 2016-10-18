@@ -32,7 +32,7 @@ plugins handle the messaging and queueing of objects that the worker should
 handle. For instance, monitoring a directory for new files or AMQP.
 **Extractor** plugins handle various tasks such as decompressing zip files and
 deflating pdf streams. **Carver** plugins are used to carve content out of
-payloads (e.g., SWF streams out of DOC files, PE out of RTF, etc...). 
+payloads (e.g., SWF streams out of DOC files, PE out of RTF, etc...).
 **Decoder** plugins provide the capability to automatically decode a payload,
 such as XOR, ROR, and base64.
 
@@ -44,7 +44,7 @@ Each plugin has it's own configuration file ending in *.stoq*. Upon
 initialization of the plugin, the configuration options within the file will be
 loaded and made available to the worker object.
 
-At a minimum, the below configuration options are required for all plugins. 
+At a minimum, the below configuration options are required for all plugins.
 
 .. code:: yaml
 
@@ -71,9 +71,15 @@ example, if we have defined our plugin object as ``plugin``, we can access the
     [options]
     hashpayload = True
     saveresults = True
+    max_tlp = red
 
 .. note:: *Worker* plugins require the ``hashpayload`` and ``saveresults``
           configuration options. No other plugins have additional requirements.
+
+.. note:: *Worker* plugin supports a ``max_tlp`` option, which will limit
+          it's ability to scan a payload based on the TLP level of the
+          payload itself. Valid options are red, amber, green, and white. More
+          information on TLP levels can be found at https://www.us-cert.gov/tlp
 
 Plugin Development
 ==================
@@ -99,13 +105,38 @@ framework to continue, otherwise |stoQ| will assume that the plugin activation
 has failed.
 
 Additionally, the ``deactivate`` method is called when/if the plugin is ever
-deactivated. This method is not required, though it is recommended should
-|stoQ| need to cleanup or deactivate the plugin for any reason.
+deactivated, including when |stoQ| shuts down. This method is not required,
+though it is recommended should the plugin have any actions that need to
+cleaning up or if |stoQ| needs to deactivate the plugin for any reason.
 
 For each of the above core methods, they should minimally call
 ``super().METHOD_NAME()`` right before they return. METHOD_NAME should be
-changed to the repsective method. This will allow the respective parent class
+changed to the respective method. This will allow the respective parent class
 execute any required code.
+
+For time-based events (periodic flushes of buffers, etc), every plugin can
+define a ``wants_heartbeat`` property of the plugin. If that property is True,
+then a separate thread will be launched by stoQ to call the plugin's ``heartbeat``
+method. The ``heartbeat`` method will be called with the plugin object as its
+only argument (so ``heartbeat`` can be treated as a class method of the plugin).
+The ``heartbeat`` method will only be called once, and it is expected to loop
+to call whatever periodic actions the plugin wishes to take. For example:
+
+.. code:: python
+    def heartbeat(self):
+        while True:
+            time.sleep(1)
+            self._checkCommit()
+
+.. note:: Actions performed in the heartbeat must be multithread/multiprocess
+safe. If the actions in the heartbeat may change the values of properties
+that other plugin methods (like ``save``) may also change, it is the responsibility
+of the plugin to properly handle locking access to those objects, or find other
+methods of thread safety.
+
+.. note:: Also, at present only Worker and Connector plugins are checked to see
+if they need heartbeats. Others may be added in the future if the need arises.
+
 
 Workers
 -------
@@ -113,7 +144,7 @@ Workers
 In addition to the above requirements, the below method is required for
 *Worker* plugins:
 
-    - scan 
+    - scan
 
 The ``scan`` method is called when ``stoq-cli.py`` has a payload available for
 processing. ``scan`` requires two attributes, ``payload`` and ``**kwargs``.
@@ -147,7 +178,7 @@ Below is an example of a basic worker plugin.
         # and must return True in order for the framework to continue
         def activate(self, stoq):
 
-            # Ensure the stoQ class is available throughout the 
+            # Ensure the stoQ class is available throughout the
             # plugin
             self.stoq = stoq
 
@@ -212,7 +243,7 @@ Optionally, the below methods can be provided.
 
 ``connect`` should be called when a connection, or reconnection, to the
 connector database is required. Ideally, logic should be placed in ``save``
-that will call ``connect`` to verify a live connection still exists. 
+that will call ``connect`` to verify a live connection still exists.
 
 ``disconnect`` is called when the connector should cleanly disconnect from the
 database.
@@ -321,7 +352,8 @@ In addition to the above requirements, the below methods are required for
     - ingest
 
 The ``ingest`` method does not require any arrtributes when called. *Source*
-plugins should be the method used to call ``worker.start``. This is the
+plugins should push data back to the worker by calling the
+``worker.multiprocess_put`` method. This is will pull data back to the
 main method for processing data in and our of the framework to include
 retrieving payloads, hashing, metadata generation, result handling, and saving
 of results.
@@ -343,7 +375,7 @@ of results.
         def ingest(self):
 
             path = "/tmp/bad.exe"
-            self.stoq.worker.start(path=path, archive='file')
+            self.stoq.worker.multiprocess_put(path=path, archive='file')
 
             return True
 
@@ -353,33 +385,10 @@ option in it's ``.stoq`` file under the [options] header. For example::
     [options]
     multiprocess = True
 
-If set to ``True``, source plugin will be able to publish to a ``multiprocess``
-queue. Objects may be added to the queue by calling 
-``self.stoq.worker.multiprocess_put()``. As an example, we can use the
-previous example with multiprocessing support.
-
-.. code:: python
-
-    from stoq.plugins import StoqSourcePlugin
-
-
-    class FileSource(StoqSourcePlugin):
-
-        def __init__(self):
-            super().__init__()
-
-        def activate(self, stoq):
-            self.stoq = stoq
-            super().activate()
-
-        def ingest(self):
-
-            paths = ["/tmp/bad.exe", "/tmp/bad1.exe", "/tmp/bad3.exe"]
-            for path in paths:
-                self.stoq.worker.multiprocess_put(path=path, archive='file')
-
-            return True
-
+If set to ``True``, the source plugin will be capable of being run with
+multiple instances simultaneously. Note: if ``multiprocess`` option is
+set to ``False`` the source will still be run in a Python process, but
+stoq will only run one instance of that process.
 
 Extractors
 ----------
@@ -503,7 +512,7 @@ requirements must be met for the plugin package.
       the |stoQ| plugin.
 
     - Optionally, a MANIFEST.in file can be included to define which files within the package
-      should be copied to the installation path. 
+      should be copied to the installation path.
 
 .. note:: The plugin's configuration file will not be copied by default, this
           file should either be defined here or within ``package_data`` in
@@ -522,7 +531,7 @@ As an example, a |stoQ| plugin archive should have the following structure::
 
 The |stoQ| installation process will extract plugin options from it's ``.stoq``
 configuration file. As such, the plugin's ``setup.py`` file should be fairly
-simple. The below ``setup.py`` should suffice for most plugins.:: 
+simple. The below ``setup.py`` should suffice for most plugins.::
 
     from setuptools import setup, find_packages
 
@@ -606,10 +615,9 @@ it was found, we loaded it and searched for the Name and Module configuration
 options within the file. That allowed us to discover the plugin name along with
 the plugins .py filename. |stoQ| then discovered the plugin class to determine
 the full path where the plugin should be installed to. It then called pip to
-complete the installation. 
+complete the installation.
 
 If a file or directory exists, it will not be overwritten. Instead, a warning
 message will be displayed letting the user know that the plugin will not be
 installed.  In order to successfully install the plugin, the file or directory
 must be removed, renamed, or --upgrade be called at the command line.
-

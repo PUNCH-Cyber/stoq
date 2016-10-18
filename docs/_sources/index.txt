@@ -66,7 +66,7 @@ argument.::
         \_______)   )_(   (_______)(____\/_)
 
                 Analysis. Simplified.
-
+                      v0.9.7
 
     [stoQ] >
 
@@ -89,6 +89,8 @@ In order to see a basic usage help, simply execute ``stoq-cli.py``::
         | :\/: || (__) || :\/: || :\/: |
         | '--'S|| '--'T|| '--'O|| '--'Q|
         `------'`------'`------'`------'
+              Analysis. Simplified.
+                    v0.9.7
 
     usage:
         stoq-cli.py [command] [<args>]

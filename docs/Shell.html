@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     
-    <title>StoqShell &mdash; stoQ 0.9.7 documentation</title>
+    <title>StoqShell &mdash; stoQ 0.9.37 documentation</title>
     <meta name="description" content="">
     <meta name="author" content="">
 
@@ -32,7 +32,7 @@
 <script type="text/javascript">
   var DOCUMENTATION_OPTIONS = {
             URL_ROOT:    './',
-            VERSION:     '0.9.7',
+            VERSION:     '0.9.37',
             COLLAPSE_INDEX: false,
             FILE_SUFFIX: '.html',
             HAS_SOURCE:  true
@@ -46,7 +46,9 @@
 <script type="text/javascript" src="_static/js/basicstrap.js"></script>
 <script type="text/javascript">
 </script>
-    <link rel="top" title="stoQ 0.9.7 documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="stoQ 0.9.37 documentation" href="index.html" />
     <link rel="prev" title="StoqBloomFilter" href="Filters.html" /> 
   </head>
   <body role="document">
@@ -59,7 +61,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="index.html">stoQ 0.9.7 documentation</a>
+          <a class="navbar-brand" href="index.html">stoQ 0.9.37 documentation</a>
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
@@ -168,7 +170,7 @@
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
 <p>Instantiate a stoQ Interactive Shell session:</p>
-<div class="highlight-python"><div class="highlight"><pre>$ ./stoq-cli.py shell
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ ./stoq-cli.py shell
 
  .d8888b.  888             .d88888b.
 d88P  Y88b 888            d88P&quot; &quot;Y88b
@@ -186,152 +188,153 @@ Y88b  d88P Y88b. Y88..88P Y88b.Y8b88P
 </pre></div>
 </div>
 <p>List all available plugins:</p>
-<div class="highlight-python"><div class="highlight"><pre>[stoQ] &gt; list
-Available Plugins:
-connectors
-- stdout              v0.9    Sends content to STDOUT
-- file                v0.9    Retrieves and saves content to local disk
-extractors
-- decompress          v0.9    Extract content from a multitude of archive formats
-- gpg                 v0.1    Handle GnuPG encrypted content
-carvers
-- pe                  v0.9    Carve portable executable files from a data stream
-- swf                 v0.9    Carve and decompress SWF payloads
-- ole                 v0.9    Carve OLE streams within Microsoft Office Documents
-- xdp                 v0.9    Carve and decode streams from XDP documents
-- rtf                 v0.9    Carve hex/binary streams from RTF payloads
-readers
-- pdftext             v0.9    Extract text from a PDF document
-- tika                v0.1    Upload content to a Tika server for automated text extraction
-- iocregex            v0.9    Regex routines to extract and normalize IOC&#39;s from a payload
-sources
-- rabbitmq            v0.9    Publish and Consume messages from a RabbitMQ Server
-- dirmon              v0.9    Monitor a directory for newly created files for processing
-- filedir             v0.9    Ingest a file or directory for processing
-workers
-- peinfo              v0.9    Gather relevant information about an executable using pefile
-- exif                v0.9    Processes a payload using ExifTool
-- publisher           v0.9    Publish messages to single or multiple RabbitMQ queues for processing
-- trid                v0.4    Identify file types from their TrID signature
-- xorsearch           v0.9    Search a payload for XOR&#39;d strings
-- yara                v0.9    Process a payload using yara
-- iocextract          v0.9    Utilizes reader/iocregex plugin to extract indicators of compromise from documents
-decoders
-- rot47               v0.1    Decode ROT47 encoded content
-- bitwise_rotate      v0.1    Rotate bits left or right. Defaults to 4 bits right for nibble swapping.
-- b64                 v0.1    Decode base64 encoded content
-- b85                 v0.1    Decode base85 encoded content
-- xor                 v0.1    Decode XOR encoded content
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">stoQ</span><span class="p">]</span> <span class="o">&gt;</span> <span class="nb">list</span>
+<span class="n">Available</span> <span class="n">Plugins</span><span class="p">:</span>
+<span class="n">connectors</span>
+<span class="o">-</span> <span class="n">stdout</span>              <span class="n">v0</span><span class="o">.</span><span class="mi">9</span>    <span class="n">Sends</span> <span class="n">content</span> <span class="n">to</span> <span class="n">STDOUT</span>
+<span class="o">-</span> <span class="n">file</span>                <span class="n">v0</span><span class="o">.</span><span class="mi">9</span>    <span class="n">Retrieves</span> <span class="ow">and</span> <span class="n">saves</span> <span class="n">content</span> <span class="n">to</span> <span class="n">local</span> <span class="n">disk</span>
+<span class="n">extractors</span>
+<span class="o">-</span> <span class="n">decompress</span>          <span class="n">v0</span><span class="o">.</span><span class="mi">9</span>    <span class="n">Extract</span> <span class="n">content</span> <span class="kn">from</span> <span class="nn">a</span> <span class="n">multitude</span> <span class="n">of</span> <span class="n">archive</span> <span class="n">formats</span>
+<span class="o">-</span> <span class="n">gpg</span>                 <span class="n">v0</span><span class="o">.</span><span class="mi">1</span>    <span class="n">Handle</span> <span class="n">GnuPG</span> <span class="n">encrypted</span> <span class="n">content</span>
+<span class="n">carvers</span>
+<span class="o">-</span> <span class="n">pe</span>                  <span class="n">v0</span><span class="o">.</span><span class="mi">9</span>    <span class="n">Carve</span> <span class="n">portable</span> <span class="n">executable</span> <span class="n">files</span> <span class="kn">from</span> <span class="nn">a</span> <span class="n">data</span> <span class="n">stream</span>
+<span class="o">-</span> <span class="n">swf</span>                 <span class="n">v0</span><span class="o">.</span><span class="mi">9</span>    <span class="n">Carve</span> <span class="ow">and</span> <span class="n">decompress</span> <span class="n">SWF</span> <span class="n">payloads</span>
+<span class="o">-</span> <span class="n">ole</span>                 <span class="n">v0</span><span class="o">.</span><span class="mi">9</span>    <span class="n">Carve</span> <span class="n">OLE</span> <span class="n">streams</span> <span class="n">within</span> <span class="n">Microsoft</span> <span class="n">Office</span> <span class="n">Documents</span>
+<span class="o">-</span> <span class="n">xdp</span>                 <span class="n">v0</span><span class="o">.</span><span class="mi">9</span>    <span class="n">Carve</span> <span class="ow">and</span> <span class="n">decode</span> <span class="n">streams</span> <span class="kn">from</span> <span class="nn">XDP</span> <span class="n">documents</span>
+<span class="o">-</span> <span class="n">rtf</span>                 <span class="n">v0</span><span class="o">.</span><span class="mi">9</span>    <span class="n">Carve</span> <span class="nb">hex</span><span class="o">/</span><span class="n">binary</span> <span class="n">streams</span> <span class="kn">from</span> <span class="nn">RTF</span> <span class="n">payloads</span>
+<span class="n">readers</span>
+<span class="o">-</span> <span class="n">pdftext</span>             <span class="n">v0</span><span class="o">.</span><span class="mi">9</span>    <span class="n">Extract</span> <span class="n">text</span> <span class="kn">from</span> <span class="nn">a</span> <span class="n">PDF</span> <span class="n">document</span>
+<span class="o">-</span> <span class="n">tika</span>                <span class="n">v0</span><span class="o">.</span><span class="mi">1</span>    <span class="n">Upload</span> <span class="n">content</span> <span class="n">to</span> <span class="n">a</span> <span class="n">Tika</span> <span class="n">server</span> <span class="k">for</span> <span class="n">automated</span> <span class="n">text</span> <span class="n">extraction</span>
+<span class="o">-</span> <span class="n">iocregex</span>            <span class="n">v0</span><span class="o">.</span><span class="mi">9</span>    <span class="n">Regex</span> <span class="n">routines</span> <span class="n">to</span> <span class="n">extract</span> <span class="ow">and</span> <span class="n">normalize</span> <span class="n">IOC</span><span class="s1">&#39;s from a payload</span>
+<span class="n">sources</span>
+<span class="o">-</span> <span class="n">rabbitmq</span>            <span class="n">v0</span><span class="o">.</span><span class="mi">9</span>    <span class="n">Publish</span> <span class="ow">and</span> <span class="n">Consume</span> <span class="n">messages</span> <span class="kn">from</span> <span class="nn">a</span> <span class="n">RabbitMQ</span> <span class="n">Server</span>
+<span class="o">-</span> <span class="n">dirmon</span>              <span class="n">v0</span><span class="o">.</span><span class="mi">9</span>    <span class="n">Monitor</span> <span class="n">a</span> <span class="n">directory</span> <span class="k">for</span> <span class="n">newly</span> <span class="n">created</span> <span class="n">files</span> <span class="k">for</span> <span class="n">processing</span>
+<span class="o">-</span> <span class="n">filedir</span>             <span class="n">v0</span><span class="o">.</span><span class="mi">9</span>    <span class="n">Ingest</span> <span class="n">a</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">directory</span> <span class="k">for</span> <span class="n">processing</span>
+<span class="n">workers</span>
+<span class="o">-</span> <span class="n">peinfo</span>              <span class="n">v0</span><span class="o">.</span><span class="mi">9</span>    <span class="n">Gather</span> <span class="n">relevant</span> <span class="n">information</span> <span class="n">about</span> <span class="n">an</span> <span class="n">executable</span> <span class="n">using</span> <span class="n">pefile</span>
+<span class="o">-</span> <span class="n">exif</span>                <span class="n">v0</span><span class="o">.</span><span class="mi">9</span>    <span class="n">Processes</span> <span class="n">a</span> <span class="n">payload</span> <span class="n">using</span> <span class="n">ExifTool</span>
+<span class="o">-</span> <span class="n">publisher</span>           <span class="n">v0</span><span class="o">.</span><span class="mi">9</span>    <span class="n">Publish</span> <span class="n">messages</span> <span class="n">to</span> <span class="n">single</span> <span class="ow">or</span> <span class="n">multiple</span> <span class="n">RabbitMQ</span> <span class="n">queues</span> <span class="k">for</span> <span class="n">processing</span>
+<span class="o">-</span> <span class="n">trid</span>                <span class="n">v0</span><span class="o">.</span><span class="mi">4</span>    <span class="n">Identify</span> <span class="n">file</span> <span class="n">types</span> <span class="kn">from</span> <span class="nn">their</span> <span class="n">TrID</span> <span class="n">signature</span>
+<span class="o">-</span> <span class="n">xorsearch</span>           <span class="n">v0</span><span class="o">.</span><span class="mi">9</span>    <span class="n">Search</span> <span class="n">a</span> <span class="n">payload</span> <span class="k">for</span> <span class="n">XOR</span><span class="s1">&#39;d strings</span>
+<span class="o">-</span> <span class="n">yara</span>                <span class="n">v0</span><span class="o">.</span><span class="mi">9</span>    <span class="n">Process</span> <span class="n">a</span> <span class="n">payload</span> <span class="n">using</span> <span class="n">yara</span>
+<span class="o">-</span> <span class="n">iocextract</span>          <span class="n">v0</span><span class="o">.</span><span class="mi">9</span>    <span class="n">Utilizes</span> <span class="n">reader</span><span class="o">/</span><span class="n">iocregex</span> <span class="n">plugin</span> <span class="n">to</span> <span class="n">extract</span> <span class="n">indicators</span> <span class="n">of</span> <span class="n">compromise</span> <span class="kn">from</span> <span class="nn">documents</span>
+<span class="n">decoders</span>
+<span class="o">-</span> <span class="n">rot47</span>               <span class="n">v0</span><span class="o">.</span><span class="mi">1</span>    <span class="n">Decode</span> <span class="n">ROT47</span> <span class="n">encoded</span> <span class="n">content</span>
+<span class="o">-</span> <span class="n">bitwise_rotate</span>      <span class="n">v0</span><span class="o">.</span><span class="mi">1</span>    <span class="n">Rotate</span> <span class="n">bits</span> <span class="n">left</span> <span class="ow">or</span> <span class="n">right</span><span class="o">.</span> <span class="n">Defaults</span> <span class="n">to</span> <span class="mi">4</span> <span class="n">bits</span> <span class="n">right</span> <span class="k">for</span> <span class="n">nibble</span> <span class="n">swapping</span><span class="o">.</span>
+<span class="o">-</span> <span class="n">b64</span>                 <span class="n">v0</span><span class="o">.</span><span class="mi">1</span>    <span class="n">Decode</span> <span class="n">base64</span> <span class="n">encoded</span> <span class="n">content</span>
+<span class="o">-</span> <span class="n">b85</span>                 <span class="n">v0</span><span class="o">.</span><span class="mi">1</span>    <span class="n">Decode</span> <span class="n">base85</span> <span class="n">encoded</span> <span class="n">content</span>
+<span class="o">-</span> <span class="n">xor</span>                 <span class="n">v0</span><span class="o">.</span><span class="mi">1</span>    <span class="n">Decode</span> <span class="n">XOR</span> <span class="n">encoded</span> <span class="n">content</span>
 </pre></div>
 </div>
 <p>Load the yara plugin:</p>
-<div class="highlight-python"><div class="highlight"><pre>[stoQ] &gt; load worker yara
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">stoQ</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">load</span> <span class="n">worker</span> <span class="n">yara</span>
 </pre></div>
 </div>
 <p>Conduct a simple scan of a payload using only the yara plugin:</p>
-<div class="highlight-python"><div class="highlight"><pre>[stoQ] &gt; read /tmp/bad.exe
-[*] Read /tmp/bad.exe(510968 bytes)
-[*] sha1: 074c5b3707ebcda408a186082e529cf8ae5859ed
-[*] sha256: 3cb2eb909ea3cfac42621ed4d024ed9d15a2005cc91a54050ef75fc9bee695b7
-[*] sha512: 53fcb7f9087b5f356067f6f2cd288575e97876fdad9e1376231923e414b541b0fdba7f17095daba0899155f2cde11efb5d4fcad1bfd3390e59c5a894d8bc1c1d
-[*] md5: 0b40e4e5987e7fb14b7a9b9b9218c703
-[*] magic: application/x-dosexec
-[stoQ] &gt; run worker yara
-[stoQ] &gt; results
-{ &quot;hits&quot; : [ {
-        &quot;matches&quot; : true,
-        &quot;meta&quot; : {
-                &quot;author&quot; : &quot;PUNCH Cyber Analytics Group&quot;,
-                &quot;cve&quot; : &quot;N/A&quot;,
-                &quot;description&quot; : &quot;Badness&quot;,
-                &quot;type&quot; : &quot;Suspicious String&quot;,
-                &quot;version&quot; : &quot;1.0&quot;,
-                &quot;weight&quot; : 100
-                },
-        &quot;namespace&quot; : &quot;default&quot;,
-        &quot;rule&quot; : &quot;win_api_LoadLibrary&quot;,
-        &quot;strings&quot; : [
-                [
-                    &quot;23967&quot;,
-                    &quot;$LoadLibrary&quot;,
-                    &quot;b&#39;LoadLibrary&#39;&quot;
-                ],
-            ],
-        &quot;tags&quot; : [  ]
-        } ],
-    }
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">stoQ</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">read</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">bad</span><span class="o">.</span><span class="n">exe</span>
+<span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Read</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">bad</span><span class="o">.</span><span class="n">exe</span><span class="p">(</span><span class="mi">510968</span> <span class="nb">bytes</span><span class="p">)</span>
+<span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">sha1</span><span class="p">:</span> <span class="mi">074</span><span class="n">c5b3707ebcda408a186082e529cf8ae5859ed</span>
+<span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">sha256</span><span class="p">:</span> <span class="mi">3</span><span class="n">cb2eb909ea3cfac42621ed4d024ed9d15a2005cc91a54050ef75fc9bee695b7</span>
+<span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">sha512</span><span class="p">:</span> <span class="mi">53</span><span class="n">fcb7f9087b5f356067f6f2cd288575e97876fdad9e1376231923e414b541b0fdba7f17095daba0899155f2cde11efb5d4fcad1bfd3390e59c5a894d8bc1c1d</span>
+<span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">md5</span><span class="p">:</span> <span class="mi">0</span><span class="n">b40e4e5987e7fb14b7a9b9b9218c703</span>
+<span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">magic</span><span class="p">:</span> <span class="n">application</span><span class="o">/</span><span class="n">x</span><span class="o">-</span><span class="n">dosexec</span>
+<span class="p">[</span><span class="n">stoQ</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">run</span> <span class="n">worker</span> <span class="n">yara</span>
+<span class="p">[</span><span class="n">stoQ</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">results</span>
+<span class="p">{</span> <span class="s2">&quot;hits&quot;</span> <span class="p">:</span> <span class="p">[</span> <span class="p">{</span>
+        <span class="s2">&quot;matches&quot;</span> <span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+        <span class="s2">&quot;meta&quot;</span> <span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;author&quot;</span> <span class="p">:</span> <span class="s2">&quot;PUNCH Cyber Analytics Group&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;cve&quot;</span> <span class="p">:</span> <span class="s2">&quot;N/A&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;description&quot;</span> <span class="p">:</span> <span class="s2">&quot;Badness&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;type&quot;</span> <span class="p">:</span> <span class="s2">&quot;Suspicious String&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;version&quot;</span> <span class="p">:</span> <span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;weight&quot;</span> <span class="p">:</span> <span class="mi">100</span>
+                <span class="p">},</span>
+        <span class="s2">&quot;namespace&quot;</span> <span class="p">:</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;rule&quot;</span> <span class="p">:</span> <span class="s2">&quot;win_api_LoadLibrary&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;strings&quot;</span> <span class="p">:</span> <span class="p">[</span>
+                <span class="p">[</span>
+                    <span class="s2">&quot;23967&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;$LoadLibrary&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;b&#39;LoadLibrary&#39;&quot;</span>
+                <span class="p">],</span>
+            <span class="p">],</span>
+        <span class="s2">&quot;tags&quot;</span> <span class="p">:</span> <span class="p">[</span>  <span class="p">]</span>
+        <span class="p">}</span> <span class="p">],</span>
+    <span class="p">}</span>
 </pre></div>
 </div>
 <p>Display all available settings:</p>
-<div class="highlight-python"><div class="highlight"><pre>[stoQ] &gt; set
-worker.yara.saveresults = True
-worker.yara.max_processes = 1
-worker.yara.website = https://github.com/PUNCH-Cyber/stoq-plugins-public
-worker.yara.templates = plugins/worker/yara/templates/
-worker.yara.carvers = {}
-worker.yara.template = False
-worker.yara.readers = {}
-worker.yara.plugin_path = /usr/local/stoq/plugins/worker/yara
-worker.yara.dispatch = False
-worker.yara.version = 0.9
-worker.yara.description = Process a payload using yara
-worker.yara.yararules = plugins/worker/yara/rules/stoq.yar
-worker.yara.name = yara
-worker.yara.path = False
-worker.yara.module = /usr/local/stoq/plugins/worker/yara/yarascan
-worker.yara.extractors = {}
-worker.yara.archive_connector = False
-worker.yara.source_plugin = False
-worker.yara.workers = {}
-worker.yara.decoders = {}
-worker.yara.category = worker
-worker.yara.log_level = False
-worker.yara.hashpayload = True
-worker.yara.is_activated = True
-worker.yara.output_connector = stdout
-worker.yara.author = Marcus LaFerrera
-worker.yara.error_queue = False
-worker.yara.sources = {}
-stoq.config_file = /usr/local/stoq/stoq.cfg
-stoq.default_connector = stdout
-stoq.log_dir = /usr/local/stoq/logs
-stoq.log_maxbytes = 1500000
-stoq.log_path = /usr/local/stoq/logs/stoq.log
-stoq.base_dir = /usr/local/stoq
-stoq.useragent = Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.1)
-stoq.url_prefix_tuple = http://, https://
-stoq.results_dir = /usr/local/stoq/results
-stoq.temp_dir = /usr/local/stoq/temp
-stoq.dispatch_rules = /usr/local/stoq/dispatcher.yar
-stoq.default_source = filedir
-stoq.log_level = INFO
-stoq.log_backup_count = 5
-stoq.source_base_tuple = /usr/local/stoq
-stoq.max_recursion = 3
-stoq.plugin_dir = /usr/local/stoq/plugins
-stoq.archive_base = /usr/local/stoq/archive
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">stoQ</span><span class="p">]</span> <span class="o">&gt;</span> <span class="nb">set</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">saveresults</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">max_processes</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">website</span> <span class="o">=</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">PUNCH</span><span class="o">-</span><span class="n">Cyber</span><span class="o">/</span><span class="n">stoq</span><span class="o">-</span><span class="n">plugins</span><span class="o">-</span><span class="n">public</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">templates</span> <span class="o">=</span> <span class="n">plugins</span><span class="o">/</span><span class="n">worker</span><span class="o">/</span><span class="n">yara</span><span class="o">/</span><span class="n">templates</span><span class="o">/</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">carvers</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">readers</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">plugin_path</span> <span class="o">=</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span><span class="o">/</span><span class="n">plugins</span><span class="o">/</span><span class="n">worker</span><span class="o">/</span><span class="n">yara</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">dispatch</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="mf">0.9</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">Process</span> <span class="n">a</span> <span class="n">payload</span> <span class="n">using</span> <span class="n">yara</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">yararules</span> <span class="o">=</span> <span class="n">plugins</span><span class="o">/</span><span class="n">worker</span><span class="o">/</span><span class="n">yara</span><span class="o">/</span><span class="n">rules</span><span class="o">/</span><span class="n">stoq</span><span class="o">.</span><span class="n">yar</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">yara</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span><span class="o">/</span><span class="n">plugins</span><span class="o">/</span><span class="n">worker</span><span class="o">/</span><span class="n">yara</span><span class="o">/</span><span class="n">yarascan</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">extractors</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">archive_connector</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">source_plugin</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">workers</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">decoders</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">category</span> <span class="o">=</span> <span class="n">worker</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">log_level</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">hashpayload</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">is_activated</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">output_connector</span> <span class="o">=</span> <span class="n">stdout</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">author</span> <span class="o">=</span> <span class="n">Marcus</span> <span class="n">LaFerrera</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">error_queue</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">yara</span><span class="o">.</span><span class="n">sources</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">stoq</span><span class="o">.</span><span class="n">config_file</span> <span class="o">=</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span><span class="o">/</span><span class="n">stoq</span><span class="o">.</span><span class="n">cfg</span>
+<span class="n">stoq</span><span class="o">.</span><span class="n">default_connector</span> <span class="o">=</span> <span class="n">stdout</span>
+<span class="n">stoq</span><span class="o">.</span><span class="n">log_dir</span> <span class="o">=</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span><span class="o">/</span><span class="n">logs</span>
+<span class="n">stoq</span><span class="o">.</span><span class="n">log_maxbytes</span> <span class="o">=</span> <span class="mi">1500000</span>
+<span class="n">stoq</span><span class="o">.</span><span class="n">log_path</span> <span class="o">=</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span><span class="o">/</span><span class="n">logs</span><span class="o">/</span><span class="n">stoq</span><span class="o">.</span><span class="n">log</span>
+<span class="n">stoq</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span>
+<span class="n">stoq</span><span class="o">.</span><span class="n">useragent</span> <span class="o">=</span> <span class="n">Mozilla</span><span class="o">/</span><span class="mf">5.0</span> <span class="p">(</span><span class="n">Windows</span><span class="p">;</span> <span class="n">U</span><span class="p">;</span> <span class="n">Windows</span> <span class="n">NT</span> <span class="mf">5.1</span><span class="p">;</span> <span class="n">en</span><span class="o">-</span><span class="n">US</span><span class="p">;</span> <span class="n">rv</span><span class="p">:</span><span class="mf">1.8</span><span class="o">.</span><span class="mf">1.1</span><span class="p">)</span>
+<span class="n">stoq</span><span class="o">.</span><span class="n">url_prefix_tuple</span> <span class="o">=</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="p">,</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span>
+<span class="n">stoq</span><span class="o">.</span><span class="n">results_dir</span> <span class="o">=</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span><span class="o">/</span><span class="n">results</span>
+<span class="n">stoq</span><span class="o">.</span><span class="n">temp_dir</span> <span class="o">=</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span><span class="o">/</span><span class="n">temp</span>
+<span class="n">stoq</span><span class="o">.</span><span class="n">dispatch_rules</span> <span class="o">=</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span><span class="o">/</span><span class="n">dispatcher</span><span class="o">.</span><span class="n">yar</span>
+<span class="n">stoq</span><span class="o">.</span><span class="n">default_source</span> <span class="o">=</span> <span class="n">filedir</span>
+<span class="n">stoq</span><span class="o">.</span><span class="n">log_level</span> <span class="o">=</span> <span class="n">INFO</span>
+<span class="n">stoq</span><span class="o">.</span><span class="n">log_backup_count</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">stoq</span><span class="o">.</span><span class="n">source_base_tuple</span> <span class="o">=</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span>
+<span class="n">stoq</span><span class="o">.</span><span class="n">max_recursion</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">stoq</span><span class="o">.</span><span class="n">plugin_dir</span> <span class="o">=</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span><span class="o">/</span><span class="n">plugins</span>
+<span class="n">stoq</span><span class="o">.</span><span class="n">archive_base</span> <span class="o">=</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span><span class="o">/</span><span class="n">archive</span>
 </pre></div>
 </div>
 <p>Update a configuration setting:</p>
-<div class="highlight-python"><div class="highlight"><pre>[stoQ] &gt; set stoq.log_level DEBUG
-stoq.log_level -&gt; DEBUG
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">stoQ</span><span class="p">]</span> <span class="o">&gt;</span> <span class="nb">set</span> <span class="n">stoq</span><span class="o">.</span><span class="n">log_level</span> <span class="n">DEBUG</span>
+<span class="n">stoq</span><span class="o">.</span><span class="n">log_level</span> <span class="o">-&gt;</span> <span class="n">DEBUG</span>
 </pre></div>
 </div>
-<p>Save results, to include any payloads that may have been carved/extracted/decoded.
-If mutiple results have been processed, the integert will be incremented and 
-correspond to the payload id viewable in the <code class="docutils literal"><span class="pre">results</span></code> command:</p>
-<div class="highlight-python"><div class="highlight"><pre>[stoQ] &gt; save
-[*] Saving content to /usr/local/stoq/results/results-0-bad.exe
+<p>Save results, to include any payloads that may have been
+carved/extracted/decoded. If mutiple results have been processed, the integer
+will be incremented and correspond to the payload id viewable in the
+<code class="docutils literal"><span class="pre">results</span></code> command:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">stoQ</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">save</span>
+<span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Saving</span> <span class="n">content</span> <span class="n">to</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">stoq</span><span class="o">/</span><span class="n">results</span><span class="o">/</span><span class="n">results</span><span class="o">-</span><span class="mi">0</span><span class="o">-</span><span class="n">bad</span><span class="o">.</span><span class="n">exe</span>
 </pre></div>
 </div>
 <p>Now&#8217;s let pass arguments to a plugin. In this instance we want to XOR a
 payload using a specific XOR key:</p>
-<div class="highlight-python"><div class="highlight"><pre>[stoQ] &gt; run decoder xor key=2
-[*] Run using xor complete. View results with &#39;results&#39;
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">stoQ</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">run</span> <span class="n">decoder</span> <span class="n">xor</span> <span class="n">key</span><span class="o">=</span><span class="mi">2</span>
+<span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Run</span> <span class="n">using</span> <span class="n">xor</span> <span class="n">complete</span><span class="o">.</span> <span class="n">View</span> <span class="n">results</span> <span class="k">with</span> <span class="s1">&#39;results&#39;</span>
 </pre></div>
 </div>
 <p>List contents of a directory:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span><span class="n">stoQ</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ls</span> <span class="o">/</span><span class="n">tmp</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">stoQ</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ls</span> <span class="o">/</span><span class="n">tmp</span>
 <span class="n">bad</span><span class="o">.</span><span class="n">exe</span>
 </pre></div>
 </div>
@@ -463,7 +466,7 @@ payload using a specific XOR key:</p>
 <div id="navbar-related" class=" related navbar navbar-default" role="navigation" aria-label="related navigation">
   <div class="navbar-inner">
     <ul class="nav navbar-nav ">
-        <li><a href="index.html">stoQ 0.9.7 documentation</a></li>
+        <li><a href="index.html">stoQ 0.9.37 documentation</a></li>
     </ul>
 <ul class="nav navbar-nav pull-right hidden-xs hidden-sm">
       
@@ -479,8 +482,8 @@ payload using a specific XOR key:</p>
 
       <!-- footer -->
       <footer role="contentinfo">
-          &copy; Copyright 2014-2015, PUNCH Cyber Analytics Group.
-        Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+          &copy; Copyright 2014-2016, PUNCH Cyber Analytics Group.
+        Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.4.8.
       </footer>
       <!-- /footer -->
 
