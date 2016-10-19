@@ -73,7 +73,7 @@ from bs4 import UnicodeDammit
 from stoq.plugins import StoqPluginManager
 
 
-__version__ = "0.10.1"
+__version__ = "0.10.2"
 
 
 class Stoq(StoqPluginManager):
@@ -390,6 +390,9 @@ class Stoq(StoqPluginManager):
         if not filename:
             filename = "{}.{}".format(self.get_uuid, self.filename_suffix)
 
+        if not path:
+            path = self.base_dir
+
         # Create our full path to file and make sure it's safe
         # This method is x4 faster than os.path.join
         fullpath = "{}/{}".format(path, filename)
@@ -415,12 +418,11 @@ class Stoq(StoqPluginManager):
 
         # Finally ready to write
         try:
+            self.log.info("Saving file to {}".format(fullpath))
             with open(fullpath, write_mode) as outfile:
                 fcntl.flock(outfile, fcntl.LOCK_EX)
                 outfile.write(payload)
                 fcntl.flock(outfile, fcntl.LOCK_UN)
-
-            self.log.info("Saving file to {}".format(fullpath))
 
         except FileExistsError:
             self.log.debug("File already exists: {}".format(fullpath))
