@@ -66,14 +66,13 @@ import requests
 import datetime
 import configparser
 import demjson
-import logging.handlers
 
 from bs4 import UnicodeDammit
 
 from stoq.plugins import StoqPluginManager
 
 
-__version__ = "0.10.2"
+__version__ = "0.10.3"
 
 
 class Stoq(StoqPluginManager):
@@ -110,6 +109,8 @@ class Stoq(StoqPluginManager):
             self.base_dir = os.path.realpath(os.path.dirname(self.argv[0]))
         else:
             self.base_dir = os.path.realpath(base_dir)
+
+        self.version = __version__
 
         # Make sure the stoQ objects we require exist.
         # Setup our basic directory structure. This is overwritten
@@ -166,9 +167,9 @@ class Stoq(StoqPluginManager):
         # Default TLP for each payload processed
         self.default_tlp = "white"
         self.tlps = {'red': 0,
-                    'amber': 1,
-                    'green': 2,
-                    'white': 3
+                     'amber': 1,
+                     'green': 2,
+                     'white': 3
                      }
 
         # Ensure our plugin manager is initiated

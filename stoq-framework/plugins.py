@@ -97,6 +97,8 @@ except ImportError:
     yara = None
     yara_imported = False
 
+from pkg_resources import parse_version as version
+
 from yapsy.PluginManager import PluginManager
 from yapsy.FilteredPluginManager import FilteredPluginManager
 
@@ -329,19 +331,39 @@ class StoqPluginBase:
 
     def __init__(self):
         self.is_activated = False
+        self.min_stoq_version = None
+        self.max_stoq_version = None
         super().__init__()
+
+    @property
+    def min_version(self):
+        if self.min_stoq_version:
+            return version(self.stoq.version) >= version(self.min_stoq_version)
+        else:
+            return True
+
+    @property
+    def max_version(self):
+        if self.max_stoq_version:
+            return version(self.stoq.version) < version(self.max_stoq_version)
+        else:
+            return True
 
     def activate(self):
         self.is_activated = True
-
-        if hasattr(self, 'max_tlp'):
-            self.max_tlp = self.max_tlp.lower()
 
         # Instantiate the logging handler for this plugin
         logname = "stoq.{}.{}".format(self.category, self.name)
         self.log = logging.getLogger(logname)
 
+        if not self.min_version or not self.max_version:
+            self.log.critical("Plugin not compatible with this version of stoQ. "
+                              "Unpredictable results may occur!")
+
         self.log.debug("{} Plugin Activated".format(self.name))
+
+        if hasattr(self, 'max_tlp'):
+            self.max_tlp = self.max_tlp.lower()
 
     def deactivate(self):
         self.is_activated = False
@@ -378,14 +400,6 @@ class StoqWorkerPlugin(StoqPluginBase):
         self.carvers = {}
         self.decoders = {}
 
-    @property
-    def min_version(self):
-        return None
-
-    @property
-    def max_version(self):
-        return None
-
     def activate(self, options=None):
         """
         Activate the plugin within the framework
@@ -405,6 +419,7 @@ class StoqWorkerPlugin(StoqPluginBase):
             for k in options.__dict__:
                 if options.__dict__[k] is not None:
                     setattr(self, k, options.__dict__[k])
+
 
         # Ensure the log level is set appropriately
         if self.log_level:
@@ -504,13 +519,6 @@ class StoqWorkerPlugin(StoqPluginBase):
                                                   daemon=True)
                         pluginObj.heartbeat_thread = thread
                         thread.start()
-
-    def deactivate(self):
-        """
-        Deactivate the plugin within the framework
-
-        """
-        super().deactivate()
 
     def run(self):
         """
@@ -1211,19 +1219,6 @@ class StoqWorkerPlugin(StoqPluginBase):
 
 
 class StoqConnectorPlugin(StoqPluginBase):
-    @property
-    def min_version(self):
-        return None
-
-    @property
-    def max_version(self):
-        return None
-
-    def activate(self):
-        super().activate()
-
-    def deactivate(self):
-        super().deactivate()
 
     def connect(self):
         pass
@@ -1236,76 +1231,24 @@ class StoqConnectorPlugin(StoqPluginBase):
 
 
 class StoqReaderPlugin(StoqPluginBase):
-    @property
-    def min_version(self):
-        return None
-
-    @property
-    def max_version(self):
-        return None
-
-    def activate(self):
-        super().activate()
-
-    def deactivate(self):
-        super().deactivate()
 
     def read(self):
         pass
 
 
 class StoqSourcePlugin(StoqPluginBase, multiprocessing.Process):
-    @property
-    def min_version(self):
-        return None
-
-    @property
-    def max_version(self):
-        return None
-
-    def activate(self):
-        super().activate()
-
-    def deactivate(self):
-        super().deactivate()
 
     def ingest(self):
         pass
 
 
 class StoqExtractorPlugin(StoqPluginBase):
-    @property
-    def min_version(self):
-        return None
-
-    @property
-    def max_version(self):
-        return None
-
-    def activate(self):
-        super().activate()
-
-    def deactivate(self):
-        super().deactivate()
 
     def extract(self):
         pass
 
 
 class StoqCarverPlugin(StoqPluginBase):
-    @property
-    def min_version(self):
-        return None
-
-    @property
-    def max_version(self):
-        return None
-
-    def activate(self):
-        super().activate()
-
-    def deactivate(self):
-        super().deactivate()
 
     def carve(self):
         pass
@@ -1343,19 +1286,6 @@ class StoqCarverPlugin(StoqPluginBase):
 
 
 class StoqDecoderPlugin(StoqPluginBase):
-    @property
-    def min_version(self):
-        return None
-
-    @property
-    def max_version(self):
-        return None
-
-    def activate(self):
-        super().activate()
-
-    def deactivate(self):
-        super().deactivate()
 
     def decode(self):
         pass
