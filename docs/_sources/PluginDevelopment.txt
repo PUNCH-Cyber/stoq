@@ -64,7 +64,7 @@ At a minimum, the below configuration options are required for all plugins.
 If a plugin requires additional configuration parameters, they can be added to
 the ``[options]`` section and will be made available via the plugin object. For
 example, if we have defined our plugin object as ``plugin``, we can access the
-``hashpayload`` attribute by calling ``plugin.hashpayload``.
+``hashpayload`` attribute by calling ``self.hashpayload``.
 
 .. code:: yaml
 
@@ -72,6 +72,13 @@ example, if we have defined our plugin object as ``plugin``, we can access the
     hashpayload = True
     saveresults = True
     max_tlp = red
+    max_stoq_version = 0.10.3
+    min_stoq_version = 0.9
+
+.. note:: As of |stoQ| version 0.10.3, plugin version checking is supported.
+          If the min/max version of |stoQ| is not met, processing of the
+          payload will proceed, but the user will be warned unpredictable
+          results may be encountered.
 
 .. note:: *Worker* plugins require the ``hashpayload`` and ``saveresults``
           configuration options. No other plugins have additional requirements.

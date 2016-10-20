@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     
-    <title>Plugin Development &mdash; stoQ 0.10.1 documentation</title>
+    <title>Plugin Development &mdash; stoQ 0.10.3 documentation</title>
     <meta name="description" content="">
     <meta name="author" content="">
 
@@ -32,7 +32,7 @@
 <script type="text/javascript">
   var DOCUMENTATION_OPTIONS = {
             URL_ROOT:    './',
-            VERSION:     '0.10.1',
+            VERSION:     '0.10.3',
             COLLAPSE_INDEX: false,
             FILE_SUFFIX: '.html',
             HAS_SOURCE:  true
@@ -48,7 +48,7 @@
 </script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="stoQ 0.10.1 documentation" href="index.html" />
+    <link rel="top" title="stoQ 0.10.3 documentation" href="index.html" />
     <link rel="next" title="Dispatcher" href="Dispatcher.html" />
     <link rel="prev" title="Installing" href="Installation.html" /> 
   </head>
@@ -62,7 +62,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="index.html">stoQ 0.10.1 documentation</a>
+          <a class="navbar-brand" href="index.html">stoQ 0.10.3 documentation</a>
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
@@ -253,12 +253,21 @@ loaded and made available to the worker object.</p>
 <p>If a plugin requires additional configuration parameters, they can be added to
 the <code class="docutils literal"><span class="pre">[options]</span></code> section and will be made available via the plugin object. For
 example, if we have defined our plugin object as <code class="docutils literal"><span class="pre">plugin</span></code>, we can access the
-<code class="docutils literal"><span class="pre">hashpayload</span></code> attribute by calling <code class="docutils literal"><span class="pre">plugin.hashpayload</span></code>.</p>
+<code class="docutils literal"><span class="pre">hashpayload</span></code> attribute by calling <code class="docutils literal"><span class="pre">self.hashpayload</span></code>.</p>
 <div class="code yaml highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">options</span><span class="p">]</span>
 <span class="n">hashpayload</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="n">saveresults</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="n">max_tlp</span> <span class="o">=</span> <span class="n">red</span>
+<span class="n">max_stoq_version</span> <span class="o">=</span> <span class="mf">0.10</span><span class="o">.</span><span class="mi">3</span>
+<span class="n">min_stoq_version</span> <span class="o">=</span> <span class="mf">0.9</span>
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">As of <strong>stoQ</strong> version 0.10.3, plugin version checking is supported.
+If the min/max version of <strong>stoQ</strong> is not met, processing of the
+payload will proceed, but the user will be warned unpredictable
+results may be encountered.</p>
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
@@ -819,7 +828,7 @@ must be removed, renamed, or &#8211;upgrade be called at the command line.</p>
 <div id="navbar-related" class=" related navbar navbar-default" role="navigation" aria-label="related navigation">
   <div class="navbar-inner">
     <ul class="nav navbar-nav ">
-        <li><a href="index.html">stoQ 0.10.1 documentation</a></li>
+        <li><a href="index.html">stoQ 0.10.3 documentation</a></li>
     </ul>
 <ul class="nav navbar-nav pull-right hidden-xs hidden-sm">
       
