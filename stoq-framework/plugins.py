@@ -614,13 +614,12 @@ class StoqWorkerPlugin(StoqPluginBase):
                 # publishing, let's go ahead and push the error to it.
                 # Otherwise, let's just log to the stoQ log
                 msg['err'] = str(e)
+                self.log.error(msg, exc_info=True)
 
                 if hasattr(self.sources[self.source_plugin], 'publish'):
-                    self.publish_connect()
-                    self.publish(msg, self.stoq.worker.name, err=True)
-                    self.publish_release()
-
-                self.log.error(msg, exc_info=True)
+                    self.sources[self.source_plugin].publish_connect()
+                    self.sources[self.source_plugin].publish(msg, self.stoq.worker.name, err=True)
+                    self.sources[self.source_plugin].publish_release()
 
     def multiprocess_put(self, **kwargs):
         # Ensure that the max_queue size is not reached. If so, let's wait 1
