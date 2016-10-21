@@ -399,6 +399,10 @@ class Stoq(StoqPluginManager):
         fullpath = "{}/{}".format(path, filename)
         fullpath = os.path.abspath(fullpath)
 
+        if not payload:
+            self.log.warn("Unable to save file {}, no content was provided".format(fullpath))
+            return False
+
         self.log.debug("Attempting to save file to {} ({} bytes)".format(fullpath, len(payload)))
 
         # Default write mode, do not overwrite
