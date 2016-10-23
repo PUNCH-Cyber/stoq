@@ -213,7 +213,7 @@ class StoqPluginManager:
 
         """
 
-        self.manager.deactivatePluginByName(name, category)
+        return self.manager.deactivatePluginByName(name, category=category)
 
     def load_plugin(self, name, category):
         """
@@ -360,14 +360,25 @@ class StoqPluginBase:
             self.log.critical("Plugin not compatible with this version of stoQ. "
                               "Unpredictable results may occur!")
 
-        self.log.debug("{} Plugin Activated".format(self.name))
+        self.log.debug("{} plugin activated".format(self.name))
 
         if hasattr(self, 'max_tlp'):
             self.max_tlp = self.max_tlp.lower()
 
     def deactivate(self):
-        self.is_activated = False
-        self.log.debug("{} Plugin Deactivated".format(self.name))
+        if not self.is_activated:
+            self.log.debug("{} is not activated..unable to deactivate".format(self.name))
+            return
+
+        try:
+            # Ensure we don't deactivate the file plugin as it will loop until dump.
+            # This plugin probably needs to be renamed to avoid conflict.
+            if self.name != 'file':
+                self.stoq.deactivate_plugin(self.name, self.category)
+            self.is_activated = False
+            self.log.debug("{} plugin deactivated".format(self.name))
+        except:
+            self.log.error("Unable to deactivate plugin {}".format(self.name), exc_info=True)
 
     def heartbeat(self, force=False):
         pass
@@ -419,7 +430,6 @@ class StoqWorkerPlugin(StoqPluginBase):
             for k in options.__dict__:
                 if options.__dict__[k] is not None:
                     setattr(self, k, options.__dict__[k])
-
 
         # Ensure the log level is set appropriately
         if self.log_level:
@@ -555,6 +565,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                                                    args=(self.mp_queues,))
                     proc.start()
                     procs = [proc]
+
                 # Start processing the source plugin
                 self.sources[self.source_plugin].ingest()
 
@@ -1317,7 +1328,6 @@ class StoqPluginInstaller:
     import glob
     import argparse
     import configparser
-    from zipfile import ZipFile
 
     def __init__(self, stoq):
 
