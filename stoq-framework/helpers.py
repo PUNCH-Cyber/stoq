@@ -45,8 +45,12 @@ def ratelimited():
 
                 last_call = time.perf_counter()
 
-                kwargs.pop("ratelimit")
                 lock.release()
+
+            try:
+                kwargs.pop("ratelimit")
+            except KeyError:
+                pass
 
             return func(*args, **kwargs)
 
