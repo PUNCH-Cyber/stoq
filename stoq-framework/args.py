@@ -149,5 +149,10 @@ def StoqArgs(parser):
                              nargs='*',
                              metavar=('key:value'),
                              help="Metadata to add to the results (i.e., tag:APT1 submitter:stoq)")
+    source_opts.add_argument("--rate-limit",
+                             dest='ratelimit',
+                             default=False,
+                             metavar=('count/seconds'),
+                             help="Limit the amount of samples to process per second")
 
     return parser

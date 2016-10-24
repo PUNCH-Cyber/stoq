@@ -74,6 +74,7 @@ example, if we have defined our plugin object as ``plugin``, we can access the
     max_tlp = red
     max_stoq_version = 0.10.3
     min_stoq_version = 0.9
+    ratelimit = 1/5
 
 .. note:: As of |stoQ| version 0.10.3, plugin version checking is supported.
           If the min/max version of |stoQ| is not met, processing of the
@@ -87,6 +88,11 @@ example, if we have defined our plugin object as ``plugin``, we can access the
           it's ability to scan a payload based on the TLP level of the
           payload itself. Valid options are red, amber, green, and white. More
           information on TLP levels can be found at https://www.us-cert.gov/tlp
+
+.. note:: *Worker* plugins support rate limiting. The value for ``ratelimit``
+          should be in the form of "count/per seconds". For example, the value
+          ``1/10`` would mean |stoQ| will processes ``1`` sample every
+          ``10 seconds``.
 
 Plugin Development
 ==================

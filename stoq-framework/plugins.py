@@ -106,6 +106,7 @@ from jinja2 import Environment, FileSystemLoader
 from jinja2.exceptions import TemplateNotFound
 
 from stoq import signal_handler
+from stoq.helpers import ratelimited
 from stoq.exceptions import SigtermCaught
 from stoq.scan import get_hashes, get_ssdeep, get_magic, get_sha1
 
@@ -128,7 +129,7 @@ class StoqPluginManager:
                                   "extractor": StoqExtractorPlugin,
                                   "carver": StoqCarverPlugin,
                                   "decoder": StoqDecoderPlugin
-                                 }
+                                  }
 
         self.manager = PluginManager()
         self.manager.setPluginInfoExtension("stoq")
@@ -402,6 +403,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         self.mp_queues = None
         self.connector_queue = None
         self.connector_feeder = None
+        self.ratelimit = None
 
         self.workers = {}
         self.connectors = {}
@@ -576,7 +578,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                 # Looks like we don't have any. Let's just call the worker
                 # directly. Useful when we have a work plugin that requires no
                 # input.
-                self.start()
+                self.start(ratelimit=self.ratelimit)
 
             done = False
             while not done:
@@ -641,6 +643,9 @@ class StoqWorkerPlugin(StoqPluginBase):
         while self.mp_queues.qsize() >= self.stoq.max_queue:
             self.log.debug("Queue maximum size ({}) reached. Sleeping...".format(self.stoq.max_queue))
             time.sleep(1)
+
+        # Ensure ratelimit is defined
+        kwargs['ratelimit'] = self.ratelimit
 
         self.mp_queues.put(kwargs)
 
@@ -810,11 +815,13 @@ class StoqWorkerPlugin(StoqPluginBase):
         return arc
 
     # Handle our worker and process the results
+    @ratelimited()
     def start(self, payload=None, **kwargs):
         """
         Process the payload with the worker plugin
 
         :param bytes payload: (optional) Payload to be processed
+        :param str ratelimit: Rate limit processing (count/per seconds)
         :param str archive: Connector plugin to use as a source for the payload
         :param str/list uuid: UUID for this result, and any parent results
         :param str filename: File name, if available, for the payload
@@ -1226,6 +1233,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         meta['scan'] = self.scan(content[1])
 
         return meta
+
 
 
 class StoqConnectorPlugin(StoqPluginBase):
