@@ -404,6 +404,8 @@ class StoqWorkerPlugin(StoqPluginBase):
         self.connector_queue = None
         self.connector_feeder = None
         self.ratelimit = None
+        self.default_tlp = None
+        self.outfile = None
 
         self.workers = {}
         self.connectors = {}

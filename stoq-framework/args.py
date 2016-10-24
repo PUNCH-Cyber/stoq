@@ -122,11 +122,9 @@ def StoqArgs(parser):
                              help="Filename or directory to use for ingesting")
     source_opts.add_argument("-O", "--outfile",
                              dest='outfile',
-                             default=False,
                              help="Filename to save reults to (if applicable)")
     source_opts.add_argument("-I", "--ingest",
                              dest='source_plugin',
-                             default=False,
                              help="Source plugin to utilize for ingesting")
     source_opts.add_argument("-E", "--errors",
                              dest='error_queue',
@@ -135,12 +133,10 @@ def StoqArgs(parser):
                              help="Process errors (if applicable)")
     source_opts.add_argument("-D", "--dispatch",
                              dest='dispatch',
-                             default=False,
                              action='store_true',
                              help="Use yara to automatically dispatch payloads")
     source_opts.add_argument("--tlp",
                              dest='default_tlp',
-                             default=False,
                              choices=['white', 'green', 'amber', 'red'],
                              help="TLP level to tag each payload with")
     source_opts.add_argument("--metadata",
@@ -151,7 +147,6 @@ def StoqArgs(parser):
                              help="Metadata to add to the results (i.e., tag:APT1 submitter:stoq)")
     source_opts.add_argument("--rate-limit",
                              dest='ratelimit',
-                             default=False,
                              metavar=('count/seconds'),
                              help="Limit the amount of samples to process per second")
 
