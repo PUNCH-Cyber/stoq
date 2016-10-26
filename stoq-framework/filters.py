@@ -17,8 +17,41 @@
 Overview
 ========
 
+Native support for bloom filters.
+
 Examples
 ========
+
+Create new bloom filter with a maximum of 5000 items and a false positive ratelimited
+of 0.0001%::
+
+
+    from stoq.filters import StoqBloomFilter
+
+    bloomfilter = StoqBloomFilter()
+    bloomfilter.create_filter("/tmp/stoq.bloom", 5000, 0.001)
+
+
+Open a previously created bloom filter::
+
+
+    from stoq.filters import StoqBloomFilter
+
+    bloomfilter = StoqBloomFilter()
+    bloomfilter.import_filter("/tmp/stoq.bloom")
+
+
+Save the bloomfilter to disk every 60 seconds::
+
+
+    bloomfilter.backup_scheduler(60)
+
+
+Check if a string is in the bloom filter, if not, add it::
+
+
+    bloomfilter.query_filter("google.com", add_missing=True)
+
 
 """
 

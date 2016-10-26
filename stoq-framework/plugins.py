@@ -20,7 +20,7 @@ Overview
 *StoqPluginManager()* is the primary class that controls all aspects of
 plugin management to include initialization, loading, listing, and unloading.
 This class is instantiated within the *Stoq()* class. This should not be
-instatiated outside of |stoQ| as it relies on objects within *Stoq()* to
+instantiated outside of |stoQ| as it relies on objects within *Stoq()* to
 function properly.
 
 .. note:: Full plugin development documentation can be found at
