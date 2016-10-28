@@ -205,9 +205,11 @@ install_yara() {
     echo "[stoQ] Installing yara..."
 
     if [ "$OS" == "Debian" ]; then
-        apt-get -yq install bison flex libtool
+        apt-get -yq install bison flex libtool libjansson-dev
+        WITH_CUCKOO="--enable-cuckoo"
     elif [ "$OS" == "RedHat" ]; then
         yum -y -q install bison flex libtool
+        WITH_CUCKOO=""
     fi
 
     cd $TMP_DIR
@@ -225,7 +227,8 @@ install_yara() {
         ./bootstrap.sh
     fi
     set -e
-    ./configure --with-crypto --enable-magic --enable-dotnet
+
+    ./configure --with-crypto --enable-magic $WITH_CUCKOO
     make
     make install
 
