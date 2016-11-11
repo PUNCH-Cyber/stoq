@@ -379,7 +379,7 @@ class StoqPluginBase:
             self.is_activated = False
             self.log.debug("{} plugin deactivated".format(self.name))
         except:
-            self.log.error("Unable to deactivate plugin {}".format(self.name), exc_info=True)
+            pass
 
     def heartbeat(self, force=False):
         pass
