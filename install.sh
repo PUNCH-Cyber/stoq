@@ -244,7 +244,7 @@ install_yara_python() {
     if [ -d $TMP_DIR/yara-python ]; then
         rm -rf $TMP_DIR/yara-python
     fi
-    git clone https://github.com/VirusTotal/yara-python
+    git clone --recursive https://github.com/VirusTotal/yara-python
     cd yara-python
     # We have to install yara-python this way, because of a bug.
     # https://github.com/VirusTotal/yara-python/issues/28
