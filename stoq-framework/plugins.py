@@ -351,7 +351,6 @@ class StoqPluginBase:
             return True
 
     def activate(self):
-        self.is_activated = True
 
         # Instantiate the logging handler for this plugin
         logname = "stoq.{}.{}".format(self.category, self.name)
@@ -361,25 +360,15 @@ class StoqPluginBase:
             self.log.critical("Plugin not compatible with this version of stoQ. "
                               "Unpredictable results may occur!")
 
-        self.log.debug("{} plugin activated".format(self.name))
-
         if hasattr(self, 'max_tlp'):
             self.max_tlp = self.max_tlp.lower()
 
-    def deactivate(self):
-        if not self.is_activated:
-            self.log.debug("{} is not activated..unable to deactivate".format(self.name))
-            return
+        self.is_activated = True
+        self.log.debug("{} plugin activated".format(self.name))
 
-        try:
-            # Ensure we don't deactivate the file plugin as it will loop until dump.
-            # This plugin probably needs to be renamed to avoid conflict.
-            if self.name != 'file':
-                self.stoq.deactivate_plugin(self.name, self.category)
-            self.is_activated = False
-            self.log.debug("{} plugin deactivated".format(self.name))
-        except:
-            pass
+    def deactivate(self):
+        self.is_activated = False
+        self.log.debug("{} plugin deactivated".format(self.name))
 
     def heartbeat(self, force=False):
         pass
@@ -935,6 +924,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         worker_result['source_meta'] = kwargs.copy()
 
         if self.ingest_metadata:
+            for md in self.ingest_metadata
             for k, v in self.ingest_metadata.items():
                 if k not in worker_result['source_meta']:
                     worker_result['source_meta'].update({k: v})
