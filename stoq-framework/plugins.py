@@ -924,7 +924,6 @@ class StoqWorkerPlugin(StoqPluginBase):
         worker_result['source_meta'] = kwargs.copy()
 
         if self.ingest_metadata:
-            for md in self.ingest_metadata
             for k, v in self.ingest_metadata.items():
                 if k not in worker_result['source_meta']:
                     worker_result['source_meta'].update({k: v})
