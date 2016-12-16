@@ -136,13 +136,13 @@ install_core() {
     # Sometimes yara-python fails to install on Ubuntu 16.04 LTS boxes. Why?
     # Because setuptools is the worst thing about python.
     set +e
-    python -c "import yara"
+    python3 -c "import yara"
     if [ $? -ne 0 ]; then
         set -e
         install_yara_python
     fi
 
-    python setup.py install
+    python3 setup.py install
 
     if [ ! -d $PLUGIN_DIR ]; then
         git clone https://github.com/PUNCH-Cyber/stoq-plugins-public.git
