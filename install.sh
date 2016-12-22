@@ -131,7 +131,6 @@ install_core() {
     groupadd -r $STOQ_GROUP
     useradd -r -c stoQ -g $STOQ_GROUP -d $STOQ_DIR -s /bin/bash $STOQ_USER
     set -e
-    cd $STAGE_DIR
 
     # Sometimes yara-python fails to install on Ubuntu 16.04 LTS boxes. Why?
     # Because setuptools is the worst thing about python.
@@ -142,6 +141,7 @@ install_core() {
         install_yara_python
     fi
 
+    cd $STAGE_DIR
     python3 setup.py install
 
     if [ ! -d $PLUGIN_DIR ]; then
