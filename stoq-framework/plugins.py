@@ -446,7 +446,9 @@ class StoqWorkerPlugin(StoqPluginBase):
             self.max_processes = int(self.max_processes)
 
         # yara-python is not installed, dispatching is not supported
-        if not yara_imported:
+        if not yara_imported and self.dispatch:
+            self.log.error("Failed to load yara-python, dispatching will not work. "
+                           "Try reinstalling yara-python.")
             self.dispatch = False
 
         # This is the first worker be initialized, so it will be the primary
