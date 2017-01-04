@@ -393,6 +393,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         self.connector_queue = None
         self.connector_feeder = None
         self.ratelimit = None
+        self.cron = None
         self.default_tlp = None
         self.outfile = None
 

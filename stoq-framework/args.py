@@ -148,6 +148,12 @@ def StoqArgs(parser):
     source_opts.add_argument("--rate-limit",
                              dest='ratelimit',
                              metavar=('count/seconds'),
+                             type=int,
                              help="Limit the amount of samples to process per second")
+    source_opts.add_argument("--cron",
+                             dest='cron',
+                             metavar=('count/seconds'),
+                             type=int,
+                             help="Re-run worker every X seconds")
 
     return parser

@@ -16,6 +16,9 @@
 #   limitations under the License.
 
 import sys
+
+from time import sleep
+
 from argparse import RawDescriptionHelpFormatter, ArgumentParser
 
 from stoq.core import Stoq
@@ -91,7 +94,15 @@ if __name__ == '__main__':
         worker = stoq.load_plugin(options.command, 'worker')
         if not worker:
             exit(-1)
-        worker.run()
+
+        if worker.cron:
+            # Look liks a cron interval was provided, let's loop per the value provided
+            while True:
+                worker.run()
+                sleep(worker.cron)
+        else:
+            # No cron value was provided, let's run once and exit.
+            worker.run()
 
 # Done!
 exit(0)
