@@ -72,7 +72,7 @@ from bs4 import UnicodeDammit
 from stoq.plugins import StoqPluginManager
 
 
-__version__ = "0.10.11"
+__version__ = "0.10.12"
 
 
 class Stoq(StoqPluginManager):
@@ -583,7 +583,7 @@ class Stoq(StoqPluginManager):
                 new_obj[new_key] = obj[key]
         return new_obj
 
-    def __normalize_json(self, obj):
+    def normalize_json(self, obj):
         """
         Normalize json blobs:
             - If a key's value is a dict:
@@ -636,7 +636,7 @@ class Stoq(StoqPluginManager):
         if isinstance(obj, list):
             response = []
             for entry in obj:
-                response.append(self.__normalize_json(entry))
+                response.append(self.normalize_json(entry))
         elif isinstance(obj, dict):
             response = {}
             for key in obj:
@@ -645,10 +645,10 @@ class Stoq(StoqPluginManager):
                 elif isinstance(obj[key], list):
                     response[key] = []
                     for entry in obj[key]:
-                        response[key].append(self.__normalize_json(entry))
+                        response[key].append(self.normalize_json(entry))
                 elif isinstance(obj[key], dict):
                     response[key] = []
-                    response[key].append(self.__normalize_json(obj[key]))
+                    response[key].append(self.normalize_json(obj[key]))
                 elif obj[key] is None:
                     response[key] = ""
                 else:
