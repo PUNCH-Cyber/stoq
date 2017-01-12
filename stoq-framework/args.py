@@ -126,6 +126,9 @@ def StoqArgs(parser):
     source_opts.add_argument("-I", "--ingest",
                              dest='source_plugin',
                              help="Source plugin to utilize for ingesting")
+    source_opts.add_argument("-Q", "--queue",
+                             dest='source_queue',
+                             help="Source queue to utilize for ingesting")
     source_opts.add_argument("-E", "--errors",
                              dest='error_queue',
                              default=False,

@@ -387,6 +387,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         self.dispatch = None
         self.output_connector = None
         self.source_plugin = None
+        self.source_queue = None
         self.yara_dispatcher_rules = None
         self.yara_dispatcher_hits = None
         self.mp_queues = None

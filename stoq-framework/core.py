@@ -72,7 +72,7 @@ from bs4 import UnicodeDammit
 from stoq.plugins import StoqPluginManager
 
 
-__version__ = "0.10.12"
+__version__ = "0.10.13"
 
 
 class Stoq(StoqPluginManager):
