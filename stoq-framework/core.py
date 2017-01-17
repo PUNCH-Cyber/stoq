@@ -351,7 +351,12 @@ class Stoq(StoqPluginManager):
 
         """
 
-        self.log.debug("POST payload ({} bytes) to {}. params={}".format(len(data), url, params))
+        if data:
+            data_len = len(data)
+        else:
+            data_len = 0
+
+        self.log.debug("POST payload ({} bytes) to {}. params={}".format(data_len, url, params))
 
         # Set our default headers
         headers = self.__set_requests_headers(**kwargs)
