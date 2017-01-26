@@ -101,10 +101,10 @@ RUN echo "[stoQ] Installing xorsearch..." \
 ####################
 WORKDIR ${STOQ_TMP}
 RUN echo "[stoQ] Installing exiftool..." \
-  && wget -O exif.tgz "http://www.sno.phy.queensu.ca/~phil/exiftool/Image-ExifTool-10.02.tar.gz" \
+  && wget -O exif.tgz "http://www.sno.phy.queensu.ca/~phil/exiftool/Image-ExifTool-10.38.tar.gz" \
   && tar -xvf exif.tgz
 
-WORKDIR Image-ExifTool-10.02
+WORKDIR Image-ExifTool-10.38
 RUN perl Makefile.PL \
   && make \
   && make test \
