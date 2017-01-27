@@ -104,7 +104,7 @@ RUN echo "[stoQ] Installing exiftool..." \
   && wget -O exif.tgz "http://www.sno.phy.queensu.ca/~phil/exiftool/Image-ExifTool-10.38.tar.gz" \
   && tar -xvf exif.tgz
 
-WORKDIR Image-ExifTool-10.38
+WORKDIR ${STOQ_TMP}/Image-ExifTool-10.38
 RUN perl Makefile.PL \
   && make \
   && make test \
