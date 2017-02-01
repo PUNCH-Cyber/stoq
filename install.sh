@@ -378,18 +378,22 @@ cleanup() {
 # MAIN
 #
 ###
-#Note: never uncomment - this sets up the virtualenv
-install_prereqs
+do_install() {
+    #Note: never uncomment - this sets up the virtualenv
+    install_prereqs
 
-install_yara
-install_core
-install_tika
-install_xor
-install_exif
-install_trid
-install_clamav
-install_floss
-install_rabbitmq
+    install_yara
+    install_core
+    install_tika
+    install_xor
+    install_exif
+    install_trid
+    install_clamav
+    install_floss
+    install_rabbitmq
+    cleanup
+}
 
-# Cleanup
-cleanup
+if [ $0 == "install.sh" ]; then
+    do_install
+fi
