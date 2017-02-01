@@ -295,10 +295,10 @@ install_exif() {
         yum -y -q install perl-ExtUtils-MakeMaker
     fi
     cd $TMP_DIR
-    wget -O exif.tgz "http://www.sno.phy.queensu.ca/~phil/exiftool/Image-ExifTool-10.38.tar.gz"
+    wget -O exif.tgz "http://www.sno.phy.queensu.ca/~phil/exiftool/Image-ExifTool-10.41.tar.gz"
     tar -xvf exif.tgz
     rm exif.tgz
-    cd Image-ExifTool-10.38
+    cd Image-ExifTool-10.41
     perl Makefile.PL
     make
     make test
@@ -328,6 +328,16 @@ install_clamav() {
     echo "[stoQ] Done installing clamav."
 }
 
+# floss worker
+install_floss() {
+    echo "[stoQ] Installing floss..."
+    cd $TMP_DIR
+    wget -O floss.zip https://github.com/fireeye/flare-floss/releases/download/v1.4.0/floss-1.4.0-GNU.Linux.zip
+    unzip floss.zip
+    mv floss $STOQ_DIR/plugins/worker/floss/
+    chmod +x $STOQ_DIR/plugins/worker/floss/floss
+    echo "[stoQ] Done installing floss."
+}
 
 # RabbitMQ worker
 install_rabbitmq() {
@@ -378,6 +388,7 @@ install_xor
 install_exif
 install_trid
 install_clamav
+install_floss
 install_rabbitmq
 
 # Cleanup
