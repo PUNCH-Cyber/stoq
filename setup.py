@@ -7,7 +7,7 @@ os.environ['BUILD_LIB'] = '1'
 
 setup(
     name="stoq",
-    version="0.10.13",
+    version="0.10.14",
     author="Marcus LaFerrera",
     author_email="marcus@punchcyber.com",
     description="A framework for simplifying analysis.",
@@ -26,5 +26,6 @@ setup(
                       'jinja2',
                       'hydra',
                       'Cython',
-                      'yara-python'],
+                      'yara-python',
+                      'python-json-logger'],
 )

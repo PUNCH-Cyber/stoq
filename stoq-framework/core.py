@@ -68,11 +68,12 @@ import configparser
 import demjson
 
 from bs4 import UnicodeDammit
+from pythonjsonlogger import jsonlogger
 
 from stoq.plugins import StoqPluginManager
 
 
-__version__ = "0.10.13"
+__version__ = "0.10.14"
 
 
 class Stoq(StoqPluginManager):
@@ -157,6 +158,9 @@ class Stoq(StoqPluginManager):
         # Define what URL prefixes we accept
         self.url_prefix_tuple = ('http://', 'https://')
 
+        # Default log file format; text or json
+        self.log_syntax = "text"
+
         # Load the configuration file, if it exists
         if os.path.exists(self.config_file):
             self.load_config()
@@ -229,15 +233,19 @@ class Stoq(StoqPluginManager):
         # Setup our STDERR output
         stderr_handler = logging.StreamHandler()
 
-        # Define the format of the log file
-        log_format = logging.Formatter("%(asctime)s %(levelname)s %(name)s:%(filename)s:%(funcName)s:%(lineno)s: "
-                                       "%(message)s",
-                                       datefmt='%Y-%m-%d %H:%M:%S')
+        if self.log_syntax == "json":
+            formatter = jsonlogger.JsonFormatter
+        else:
+            formatter = logging.Formatter
 
-        stderr_log_format = logging.Formatter("[%(levelname)s] %(name)s: %(message)s")
+        # Define the format of the log file
+        log_format = formatter("%(asctime)s %(levelname)s %(name)s:%(filename)s:%(funcName)s:%(lineno)s: "
+                                "%(message)s", datefmt='%Y-%m-%d %H:%M:%S')
+
+        stderr_logformat = formatter("[%(levelname)s] %(name)s: %(message)s")
 
         file_handler.setFormatter(log_format)
-        stderr_handler.setFormatter(stderr_log_format)
+        stderr_handler.setFormatter(stderr_logformat)
 
         # Attach the handler to the logger
         self.log.addHandler(file_handler)
