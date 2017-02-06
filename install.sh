@@ -138,7 +138,7 @@ install_core() {
     python3 -c "import yara"
     if [ $? -ne 0 ]; then
         set -e
-        install_yara_python
+        pip3 install --global-option="build" --global-option="--dynamic-linking" yara-python
     fi
 
     cd $STAGE_DIR
@@ -216,8 +216,12 @@ install_yara() {
     if [ -d $TMP_DIR/yara ]; then
         rm -rf $TMP_DIR/yara
     fi
-    git clone https://github.com/plusvic/yara.git yara
-    cd yara
+
+    # Forcing use of yara v3.5.0, since master is broken a lot.
+    wget https://github.com/VirusTotal/yara/archive/v3.5.0.tar.gz
+    tar zxvf v3.5.0.tar.gz
+    cd yara-3.5.0
+
     set +e
     ./bootstrap.sh
     # Sometimes bootstrap will fail the first time, but work the 2nd time.
@@ -235,23 +239,6 @@ install_yara() {
     install_yara_python
     cd $STOQ_DIR
     echo "[stoQ] Done installing yara."
-}
-
-install_yara_python() {
-    echo "[stoQ] Installing yara-python..."
-
-    cd $TMP_DIR
-    if [ -d $TMP_DIR/yara-python ]; then
-        rm -rf $TMP_DIR/yara-python
-    fi
-    git clone --recursive https://github.com/VirusTotal/yara-python
-    cd yara-python
-    # We have to install yara-python this way, because of a bug.
-    # https://github.com/VirusTotal/yara-python/issues/28
-    python3 setup.py build --dynamic-linking
-    python3 setup.py install
-    cd $STOQ_DIR
-    echo "[stoQ] Done installing yara-python."
 }
 
 # XOR worker
