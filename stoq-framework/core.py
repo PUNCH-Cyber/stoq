@@ -1,4 +1,4 @@
-#   Copyright 2014-2016 PUNCH Cyber Analytics Group
+#   Copyright 2014-2017 PUNCH Cyber Analytics Group
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ from pythonjsonlogger import jsonlogger
 from stoq.plugins import StoqPluginManager
 
 
-__version__ = "0.10.14"
+__version__ = "0.10.15"
 
 
 class Stoq(StoqPluginManager):
@@ -242,7 +242,7 @@ class Stoq(StoqPluginManager):
         log_format = formatter("%(asctime)s %(levelname)s %(name)s:%(filename)s:%(funcName)s:%(lineno)s: "
                                 "%(message)s", datefmt='%Y-%m-%d %H:%M:%S')
 
-        stderr_logformat = formatter("[%(levelname)s] %(name)s: %(message)s")
+        stderr_logformat = formatter("[%(asctime)s %(levelname)s] %(name)s: %(message)s")
 
         file_handler.setFormatter(log_format)
         stderr_handler.setFormatter(stderr_logformat)
@@ -250,6 +250,8 @@ class Stoq(StoqPluginManager):
         # Attach the handler to the logger
         self.log.addHandler(file_handler)
         self.log.addHandler(stderr_handler)
+
+        self.log.info("Starting stoQ v{}".format(__version__))
 
     def get_file(self, source, params=None, verify=True,
                  auth=None, **kwargs):

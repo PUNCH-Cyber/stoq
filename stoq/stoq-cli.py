@@ -30,9 +30,11 @@ if __name__ == '__main__':
 
     stoq = Stoq(argv=sys.argv)
 
+    logo = print_logo()
+
     parser = ArgumentParser(formatter_class=RawDescriptionHelpFormatter,
-                            description=print_logo(),
                             usage='''
+    {}
     %(prog)s [command] [<args>]
 
     Available Commands:
@@ -41,7 +43,7 @@ if __name__ == '__main__':
         list    List available plugins
         worker  Load specified worker plugin
         install Install a stoQ plugin
-    ''',
+    '''.format(logo),
                             epilog='''
     Examples:
 

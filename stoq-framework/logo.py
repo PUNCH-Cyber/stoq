@@ -1,4 +1,4 @@
-#   Copyright 2014-2016 PUNCH Cyber Analytics Group
+#   Copyright 2014-2017 PUNCH Cyber Analytics Group
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -181,9 +181,30 @@ def print_logo():
                          v{}
     """.format(__version__))
 
-    sys.stdout.flush()
-    try:
-        print(random.choice(logo))
-    except:
-        print(logo[3])
-    sys.stdout.flush()
+    # Source: http://ascii.co.uk/art/goat
+    logo.append("""
+          /)  (\\
+     )\\.:::::::::./(
+     \\( o       o )/
+       '-./ / _.-'`-.
+        ( oo  ) / _  \\
+        |'--'/\\/ ( \  \\
+         \\''/  \\| \\ \\  \\
+          ww   |  '  )  \\
+               |.' .'   |
+              .' .'==|==|
+             / .'\\    [_]
+          .-(/\\) |     /
+         /.-\"\"\"'/|    |
+         ||    / |    |
+         //   |  |    |
+         ||   |__|___/
+         \\\\   [__[___]
+         // .-'.-'  (
+         ||(__(__.-._)
+
+      Analysis. Simplified.
+            v{}
+     """.format(__version__))
+
+    return random.choice(logo)
