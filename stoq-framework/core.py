@@ -312,7 +312,7 @@ class Stoq(StoqPluginManager):
 
         return None
 
-    def put_file(self, url, params=None, data=None, auth=None, **kwargs):
+    def put_file(self, url, params=None, data=None, auth=None, verify=True, **kwargs):
         """
         Handles PUT request to specified URL
 
@@ -332,7 +332,7 @@ class Stoq(StoqPluginManager):
         # Set our default headers
         headers = self.__set_requests_headers(**kwargs)
         response = requests.put(url, data, params=params,
-                                auth=auth, headers=headers)
+                                auth=auth, headers=headers, verify=verify)
 
         try:
             response.raise_for_status()
@@ -345,7 +345,7 @@ class Stoq(StoqPluginManager):
 
         return content
 
-    def post_file(self, url, params=None, files=None, data=None, auth=None, **kwargs):
+    def post_file(self, url, params=None, files=None, data=None, auth=None, verify=True, **kwargs):
         """
         Handles POST request to specified URL
 
@@ -371,7 +371,7 @@ class Stoq(StoqPluginManager):
         # Set our default headers
         headers = self.__set_requests_headers(**kwargs)
         response = requests.post(url, data, params=params, files=files,
-                                 auth=auth, headers=headers)
+                                 auth=auth, headers=headers, verify=verify)
 
         try:
             response.raise_for_status()
