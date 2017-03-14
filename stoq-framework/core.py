@@ -73,7 +73,7 @@ from pythonjsonlogger import jsonlogger
 from stoq.plugins import StoqPluginManager
 
 
-__version__ = "0.10.15"
+__version__ = "0.10.16"
 
 
 class Stoq(StoqPluginManager):
