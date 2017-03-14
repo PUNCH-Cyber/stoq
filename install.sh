@@ -236,7 +236,6 @@ install_yara() {
     make
     make install
 
-    install_yara_python
     cd $STOQ_DIR
     echo "[stoQ] Done installing yara."
 }
