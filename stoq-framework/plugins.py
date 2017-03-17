@@ -577,7 +577,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
             done = False
             while not done:
-                alive = [proc.is_alive() for proc in procs]
+                alive = [p.is_alive() for p in procs]
                 if not any(alive):
                     done = True
 
@@ -1185,7 +1185,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                     content = None
             except Exception:
                 self.log.error("Unable to handle dispatched payload with "
-                                "{}:{}".format(plugin_type, plugin_name), exc_info=True)
+                               "{}:{}".format(plugin_type, plugin_name), exc_info=True)
                 content = None
 
             if content:
@@ -1228,7 +1228,6 @@ class StoqWorkerPlugin(StoqPluginBase):
         meta['scan'] = self.scan(content[1])
 
         return meta
-
 
 
 class StoqConnectorPlugin(StoqPluginBase):
