@@ -72,6 +72,11 @@ from pythonjsonlogger import jsonlogger
 
 from stoq.plugins import StoqPluginManager
 
+try:
+    from raven.handlers.logging import SentryHandler
+    raven_imported = True
+except ImportError:
+    raven_imported = False
 
 __version__ = "0.10.16"
 
@@ -160,6 +165,9 @@ class Stoq(StoqPluginManager):
 
         # Default log file format; text or json
         self.log_syntax = "text"
+
+        # Ensure the sentry url is defined for remote logging
+        self.sentry_url = None
 
         # Load the configuration file, if it exists
         if os.path.exists(self.config_file):
@@ -250,6 +258,17 @@ class Stoq(StoqPluginManager):
         # Attach the handler to the logger
         self.log.addHandler(file_handler)
         self.log.addHandler(stderr_handler)
+
+        # If logging to sentry.io, setup the logger
+        if raven_imported and self.sentry_url:
+            try:
+                sentry_handler = SentryHandler(self.sentry_url)
+                sentry_handler.setFormatter("[%(asctime)s][%(levelname)s] %(name)s "
+                                            "%(filename)s:%(funcName)s:%(lineno)d | %(message)s")
+                sentry_handler.setLevel(logging.WARN)
+                self.log.addHandler(sentry_handler)
+            except:
+                self.log.error("Unable to initiate logging to Sentry")
 
         self.log.info("Starting stoQ v{}".format(__version__))
 
