@@ -169,6 +169,9 @@ class Stoq(StoqPluginManager):
         # Ensure the sentry url is defined for remote logging
         self.sentry_url = None
 
+        # Ignored exception for sentry
+        self.sentry_ignore_list = []
+
         # Load the configuration file, if it exists
         if os.path.exists(self.config_file):
             self.load_config()
@@ -262,7 +265,8 @@ class Stoq(StoqPluginManager):
         # If logging to sentry.io, setup the logger
         if raven_imported and self.sentry_url:
             try:
-                sentry_handler = SentryHandler(self.sentry_url)
+                sentry_handler = SentryHandler(self.sentry_url,
+                                               ignore_exceptions=self.sentry_ignore_list)
                 sentry_handler.setFormatter("[%(asctime)s][%(levelname)s] %(name)s "
                                             "%(filename)s:%(funcName)s:%(lineno)d | %(message)s")
                 sentry_handler.setLevel(logging.WARN)
@@ -273,7 +277,7 @@ class Stoq(StoqPluginManager):
         self.log.info("Starting stoQ v{}".format(__version__))
 
     def get_file(self, source, params=None, verify=True,
-                 auth=None, **kwargs):
+                 auth=None, timeout=30, **kwargs):
         """
         Obtain contents of file from disk or URL.
 
@@ -285,6 +289,7 @@ class Stoq(StoqPluginManager):
         :param bytes params: Additional parameters to pass if requesting a URL
         :param bool verify: Ensure SSL Certification Verification
         :param auth: Authentication methods supported by python-requests
+        :param int timeout: Time to wait for a server response
         :param \*\*kwargs: Additional HTTP headers
 
         :returns: Content of file retrieved
@@ -297,8 +302,8 @@ class Stoq(StoqPluginManager):
         if source.startswith(self.url_prefix_tuple):
             # Set our default headers
             headers = self.__set_requests_headers(**kwargs)
-            response = requests.get(source, params=params, auth=auth,
-                                    verify=verify, headers=headers)
+            response = requests.get(source, params=params, auth=auth, verify=verify,
+                                    timeout=timeout, headers=headers)
 
             # Raise an exception if it was not successful
             try:
@@ -331,7 +336,7 @@ class Stoq(StoqPluginManager):
 
         return None
 
-    def put_file(self, url, params=None, data=None, auth=None, verify=True, **kwargs):
+    def put_file(self, url, params=None, data=None, auth=None, verify=True, timeout=30, **kwargs):
         """
         Handles PUT request to specified URL
 
@@ -339,6 +344,8 @@ class Stoq(StoqPluginManager):
         :param bytes params: Additional parameters to pass if requesting a URL
         :param bytes data: Content to PUT
         :param auth: Authentication methods supported by python-requests
+        :param bool verify: Ensure SSL Certification Verification
+        :param int timeout: Time to wait for a server response
         :param \*\*kwargs: Additional HTTP headers
 
         :returns: Content returned from PUT request
@@ -350,7 +357,7 @@ class Stoq(StoqPluginManager):
 
         # Set our default headers
         headers = self.__set_requests_headers(**kwargs)
-        response = requests.put(url, data, params=params,
+        response = requests.put(url, data, params=params, timeout=timeout,
                                 auth=auth, headers=headers, verify=verify)
 
         try:
@@ -364,7 +371,8 @@ class Stoq(StoqPluginManager):
 
         return content
 
-    def post_file(self, url, params=None, files=None, data=None, auth=None, verify=True, **kwargs):
+    def post_file(self, url, params=None, files=None, data=None, auth=None, verify=True, timeout=30,
+                  **kwargs):
         """
         Handles POST request to specified URL
 
@@ -373,6 +381,8 @@ class Stoq(StoqPluginManager):
         :param tuple files: Tuple of file data to POST
         :param bytes data: Content to POST
         :param auth: Authentication methods supported by python-requests
+        :param bool verify: Ensure SSL Certification Verification
+        :param int timeout: Time to wait for a server response
         :param \*\*kwargs: Additional HTTP headers
 
         :returns: Content returned from POST request
@@ -389,7 +399,7 @@ class Stoq(StoqPluginManager):
 
         # Set our default headers
         headers = self.__set_requests_headers(**kwargs)
-        response = requests.post(url, data, params=params, files=files,
+        response = requests.post(url, data, params=params, files=files, timeout=timeout,
                                  auth=auth, headers=headers, verify=verify)
 
         try:
