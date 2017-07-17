@@ -143,6 +143,7 @@ install_core() {
         ldconfig
         pip3 install --global-option="build" --global-option="--dynamic-linking" yara-python
     fi
+    set -e
 
     cd $STAGE_DIR
     python3 setup.py install
