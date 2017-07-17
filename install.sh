@@ -153,7 +153,7 @@ install_core() {
 
     # Make sure we setup stoQ in the proper directory
     for f in `ls stoq`; do
-        mv stoq/$f $STOQ_DIR/
+        cp stoq/$f $STOQ_DIR/
     done
     chmod +x $STOQ_DIR/stoq-cli.py
 
