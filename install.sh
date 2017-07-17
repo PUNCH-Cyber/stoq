@@ -380,6 +380,4 @@ do_install() {
     cleanup
 }
 
-if [ $0 == "install.sh" ]; then
-    do_install
-fi
+do_install
