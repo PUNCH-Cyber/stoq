@@ -35,6 +35,16 @@ framework
   if the required packages are available it should work without issue.
 
 
+> Note:
+  - If installation fails due to ```error: [Errno 104] Connection reset by peer``` error
+  on Ubuntu, execute the below and then re-run the installation script.
+  ```
+  source /usr/local/stoq/.stoq-pyenv/bin/activate
+  pip3 install requests[security]
+  pip3 install yapsy ssdeep python-magic beautifulsoup4
+  deactivate
+  ```
+
 ### Detailed Ubuntu Installation
 
 Install the core requirements via apt-get and pip
