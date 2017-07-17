@@ -139,6 +139,8 @@ install_core() {
     python3 -c "import yara"
     if [ $? -ne 0 ]; then
         set -e
+        # Make sure we run ldconfig, otherwise libyara.so.3 won't be found on new installs
+        ldconfig
         pip3 install --global-option="build" --global-option="--dynamic-linking" yara-python
     fi
 
