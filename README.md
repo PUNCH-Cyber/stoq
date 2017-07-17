@@ -165,7 +165,7 @@ VirtualBox from https://www.virtualbox.org/wiki/Downloads.
 
 Once the prerequisites are installed, download the Ubuntu box::
 
-    vagrant box add ubuntu/trusty64
+    vagrant box add ubuntu/xenial64
 
 Next, create a new directory named ```stoq``` and save the Vagrantfile in it::
 

@@ -15,7 +15,7 @@
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-    config.vm.box = "ubuntu/trusty64"
+    config.vm.box = "ubuntu/xenial64"
     config.vm.provision :shell, inline: "apt-get -yq install git-core"
     config.vm.provision :shell, inline: "cd /vagrant && git clone https://github.com/PUNCH-Cyber/stoq.git"
     config.vm.provision :shell, inline: "cd /vagrant/stoq && bash ./install.sh"
