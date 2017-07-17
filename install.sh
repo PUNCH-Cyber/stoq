@@ -285,7 +285,7 @@ install_exif() {
         yum -y -q install perl-ExtUtils-MakeMaker
     fi
     cd $TMP_DIR
-    wget -O exif.tgz "http://www.sno.phy.queensu.ca/~phil/exiftool/Image-ExifTool-10.41.tar.gz"
+    wget -O exif.tgz "http://www.sno.phy.queensu.ca/~phil/exiftool/Image-ExifTool-10.59.tar.gz"
     tar -xvf exif.tgz
     rm exif.tgz
     cd Image-ExifTool-10.41
