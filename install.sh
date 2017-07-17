@@ -31,6 +31,7 @@ STOQ_DIR=$PREFIX/stoq
 PYENV_DIR=$STOQ_DIR/.stoq-pyenv
 STOQ_USER=stoq
 STOQ_GROUP=stoq
+YARA_VERSION=3.6.3
 
 # Make sure all output, to include STDERR is logged appropriately
 exec > >(tee -a $STAGE_DIR/stoq-install.log)
@@ -218,9 +219,9 @@ install_yara() {
     fi
 
     # Forcing use of yara v3.5.0, since master is broken a lot.
-    wget https://github.com/VirusTotal/yara/archive/v3.5.0.tar.gz
-    tar zxvf v3.5.0.tar.gz
-    cd yara-3.5.0
+    wget https://github.com/VirusTotal/yara/archive/v$YARA_VERSION.tar.gz
+    tar zxvf v$YARA_VERSION.tar.gz
+    cd yara-$YARA_VERSION
 
     set +e
     ./bootstrap.sh
