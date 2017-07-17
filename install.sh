@@ -288,7 +288,7 @@ install_exif() {
     wget -O exif.tgz "http://www.sno.phy.queensu.ca/~phil/exiftool/Image-ExifTool-10.59.tar.gz"
     tar -xvf exif.tgz
     rm exif.tgz
-    cd Image-ExifTool-10.41
+    cd Image-ExifTool-10.59
     perl Makefile.PL
     make
     make test
