@@ -20,12 +20,9 @@ setup(
                       'requests',
                       'python-magic',
                       'ssdeep',
-                      'lxml',
                       'yapsy',
                       'demjson',
                       'jinja2',
-                      'hydra',
-                      'Cython',
                       'yara-python',
                       'python-json-logger'],
 )
