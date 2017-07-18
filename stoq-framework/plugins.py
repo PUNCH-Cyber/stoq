@@ -397,6 +397,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         self.cron = None
         self.default_tlp = None
         self.outfile = None
+        self.use_output_date = False
 
         self.workers = {}
         self.connectors = {}
@@ -1080,6 +1081,9 @@ class StoqWorkerPlugin(StoqPluginBase):
         template_results = None
 
         plugin = results['results'][0].get('plugin', self.name)
+
+        # Make sure we pass whether to append the date to the output connector
+        kwargs.update({'use_date': self.use_output_date})
 
         # Some plugins will only be the plugin name itself. If it is a
         # dispatched result, it will contain the plugin category as well as the

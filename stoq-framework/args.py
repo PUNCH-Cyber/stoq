@@ -114,15 +114,20 @@ def StoqArgs(parser):
                            dest='combined_results',
                            action='store_false',
                            help="Split results on a per plugin basis")
+    conn_opts.add_argument("-O", "--outfile",
+                           dest='outfile',
+                           help="Filename to save reults to (if applicable)")
+    conn_opts.add_argument("-P", "--use-date",
+                           dest='use_output_date',
+                           default=False,
+                           action='store_true',
+                           help="Add date to index or path (if applicable)")
 
     source_opts = parser.add_argument_group('Ingest Options')
     source_opts.add_argument("-F", "--file",
                              dest='path',
                              default=False,
                              help="Filename or directory to use for ingesting")
-    source_opts.add_argument("-O", "--outfile",
-                             dest='outfile',
-                             help="Filename to save reults to (if applicable)")
     source_opts.add_argument("-I", "--ingest",
                              dest='source_plugin',
                              help="Source plugin to utilize for ingesting")
