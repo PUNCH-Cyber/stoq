@@ -146,6 +146,15 @@ install_core() {
     set -e
 
     cd $STAGE_DIR
+
+    # The requests python library removed cacerts.pem, which apparently breaks all the things.
+    # For the time being, let's make sure the appropriate libraries are installed so we
+    # don't have to manually fix this.
+    if [ "$OS" == "Debian" ]; then
+        pip3 install requests[security]
+        pip3 install yapsy ssdeep python-magic beautifulsoup4
+    fi
+
     python3 setup.py install
 
     if [ ! -d $PLUGIN_DIR ]; then
@@ -207,6 +216,11 @@ install_tika() {
 # Yara worker
 install_yara() {
     echo "[stoQ] Installing yara..."
+
+    if [ -f `which yara` ]; then
+        echo "[stoQ] yara v`yara -v` already installed..skipping"
+        return
+    fi
 
     if [ "$OS" == "Debian" ]; then
         apt-get -yq install bison flex libtool libjansson-dev
