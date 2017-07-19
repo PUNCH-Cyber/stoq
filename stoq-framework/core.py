@@ -251,7 +251,7 @@ class Stoq(StoqPluginManager):
 
         # Define the format of the log file
         log_format = formatter("%(asctime)s %(levelname)s %(name)s:%(filename)s:%(funcName)s:%(lineno)s: "
-                                "%(message)s", datefmt='%Y-%m-%d %H:%M:%S')
+                               "%(message)s", datefmt='%Y-%m-%d %H:%M:%S')
 
         stderr_logformat = formatter("[%(asctime)s %(levelname)s] %(name)s: %(message)s")
 
