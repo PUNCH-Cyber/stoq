@@ -461,13 +461,16 @@ class StoqWorkerPlugin(StoqPluginBase):
             # Make sure we are accessible to the framework
             self.stoq.worker = self
 
+        # If no connector was defined by the worker, let's use the
+        # framework's default one. Even if we don't want to save results,
+        # this should be defined just in case a plugin  wants to interact
+        # with a connector.
+        if not self.output_connector:
+            self.output_connector = self.stoq.default_connector
+            
         # If our worker saves it's results let's initialize and load the
         # connector plugin
         if self.saveresults:
-            # If no connector was defined by the worker, let's use the
-            # framework's default one.
-            if not self.output_connector:
-                self.output_connector = self.stoq.default_connector
             self.load_connector(self.output_connector)
             self.log.debug("Using {} as default connector for results".format(self.output_connector))
 
