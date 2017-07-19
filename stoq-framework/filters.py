@@ -57,10 +57,11 @@ Check if a string is in the bloom filter, if not, add it::
 
 import time
 import threading
+
 try:
     from hydra import UpdatingBloomFilter, WritingBloomFilter
-except ImportError:
-    raise Exception("[!] hydra must be installed to use bloom filters")
+except:
+    raise ImportError("[!] hydra must be installed to use bloom filters")
 
 
 class StoqBloomFilter(object):
