@@ -1,0 +1,9 @@
+beautifulsoup4
+requests
+python-magic
+ssdeep
+yapsy
+demjson
+jinja2
+yara-python
+python-json-logger
