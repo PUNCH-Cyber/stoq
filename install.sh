@@ -217,7 +217,7 @@ install_tika() {
 install_yara() {
     echo "[stoQ] Installing yara..."
 
-    if [ -f `which yara` ]; then
+    if [ -f "`which yara`" ]; then
         echo "[stoQ] yara v`yara -v` already installed..skipping"
         return
     fi
