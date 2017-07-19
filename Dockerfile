@@ -7,7 +7,7 @@ ENV STOQ_ENV $STOQ_DIR/.stoq-pyenv
 ADD . ${STOQ_TMP}/stoq
 ADD ./stoq ${STOQ_DIR}
 
-RUN apt-get update \ 
+RUN apt-get update \
   && apt-get -y install software-properties-common \
   && apt-add-repository -y multiverse
 
@@ -52,10 +52,9 @@ RUN echo "[stoQ] Installing yara..." \
   && apt-get -yq install \
     bison \
     flex \
-    libjansson-dev \ 
+    libjansson-dev \
     libtool \
-  && git clone https://github.com/plusvic/yara.git yara \
-  && git clone --recursive https://github.com/VirusTotal/yara-python
+  && git clone https://github.com/plusvic/yara.git yara
 
 WORKDIR ${STOQ_TMP}/yara
 RUN bash bootstrap.sh \
@@ -63,20 +62,14 @@ RUN bash bootstrap.sh \
   && make \
   && make install
 
-WORKDIR ${STOQ_TMP}/yara-python
-RUN echo "[stoQ] Installing yara-python..." \
-  && . ${STOQ_ENV}/bin/activate \
-  && python setup.py build --dynamic-linking \
-  && python setup.py install
-
 ####################
 ### Install Core ###
 ####################
 WORKDIR ${STOQ_TMP}/stoq
 RUN echo "[stoQ] Installing core stoQ components..." \
   && . ${STOQ_ENV}/bin/activate \
-  && python setup.py install \
-  && pip install hydra
+  && pip3 install --global-option="build" --global-option="--dynamic-linking" yara-python \
+  && python setup.py install
 
 WORKDIR ${STOQ_DIR}
 RUN . ${STOQ_ENV}/bin/activate \
@@ -101,10 +94,10 @@ RUN echo "[stoQ] Installing xorsearch..." \
 ####################
 WORKDIR ${STOQ_TMP}
 RUN echo "[stoQ] Installing exiftool..." \
-  && wget -O exif.tgz "http://www.sno.phy.queensu.ca/~phil/exiftool/Image-ExifTool-10.38.tar.gz" \
+  && wget -O exif.tgz "http://www.sno.phy.queensu.ca/~phil/exiftool/Image-ExifTool-10.59.tar.gz" \
   && tar -xvf exif.tgz
 
-WORKDIR ${STOQ_TMP}/Image-ExifTool-10.38
+WORKDIR ${STOQ_TMP}/Image-ExifTool-10.59
 RUN perl Makefile.PL \
   && make \
   && make test \
@@ -127,4 +120,3 @@ RUN echo "[stoQ] Installing trid" \
 ###########################
 WORKDIR ${STOQ_DIR}
 RUN rm -r ${STOQ_TMP}
-
