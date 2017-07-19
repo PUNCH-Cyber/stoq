@@ -398,4 +398,8 @@ do_install() {
     cleanup
 }
 
-do_install
+# Make sure command executed is the same as the script name to
+# allow for sourcing of this script
+if [ "`basename -- $0`" == "`basename -- $BASH_SOURCE`" ]; then
+    do_install
+fi
