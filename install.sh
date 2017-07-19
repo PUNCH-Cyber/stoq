@@ -31,17 +31,16 @@ STOQ_DIR=$PREFIX/stoq
 PYENV_DIR=$STOQ_DIR/.stoq-pyenv
 STOQ_USER=stoq
 STOQ_GROUP=stoq
+
+# Dependency versions
 YARA_VERSION=3.6.3
+XORSEARCH_VERSION=1_11_1
+EXIF_VERSION=10.59
+FLOSS_VERSION=1.5.0
 
 # Make sure all output, to include STDERR is logged appropriately
 exec > >(tee -a $STAGE_DIR/stoq-install.log)
 exec 2> >(tee -a $STAGE_DIR/stoq-install-errors.log)
-
-# Ensure we are ran as root
-if [[ $EUID -ne 0 ]]; then
-   echo "ERROR: stoQ must be installed as root. Run with sudo!" 1>&2
-   exit 1
-fi
 
 # debian and red hat based operating systems supported
 if [ -f /etc/debian_version ]; then
@@ -58,15 +57,6 @@ else
     exit 1
 fi
 
-if [ ! -d $TMP_DIR ]; then
-    mkdir -p $TMP_DIR
-fi
-
-if [ ! -d $STOQ_DIR ]; then
-    mkdir -p $STOQ_DIR
-fi
-
-
 # pre-reqs
 install_prereqs() {
     echo "[stoQ] Installing prerequisites..."
@@ -74,14 +64,14 @@ install_prereqs() {
     if [ "$OS" == "Debian" ]; then
         set +e
         apt-add-repository -y multiverse
+        set -e
         # Some older versions of ubuntu do not have this installed. Catch the
         # error and install it.
         if [ $? -ne 0 ]; then
-            set -e
             apt-get -yq install software-properties-common
             apt-add-repository -y multiverse
         fi
-        set -e
+
         apt-get -yq update
         apt-get -yq install git-core curl wget unzip p7zip-full unace-nonfree p7zip-rar automake \
                             build-essential cython autoconf python3 python3-dev python3-setuptools \
@@ -119,15 +109,25 @@ install_prereqs() {
 
     pip3 install virtualenv --quiet
     echo "[stoQ] Done installing prerequisites."
-    echo "[stoQ] Setting up virtualenv..."
-    virtualenv $PYENV_DIR
-    source $PYENV_DIR/bin/activate
-    echo "[stoQ] virtualenv activated..."
 }
 
 # Core build
 install_core() {
     echo "[stoQ] Installing core components..."
+
+    if [ ! -d $TMP_DIR ]; then
+        mkdir -p $TMP_DIR
+    fi
+
+    if [ ! -d $STOQ_DIR ]; then
+        mkdir -p $STOQ_DIR
+    fi
+
+    echo "[stoQ] Setting up virtualenv..."
+    virtualenv $PYENV_DIR
+    source $PYENV_DIR/bin/activate
+    echo "[stoQ] virtualenv activated..."
+
     set +e
     groupadd -r $STOQ_GROUP
     useradd -r -c stoQ -g $STOQ_GROUP -d $STOQ_DIR -s /bin/bash $STOQ_USER
@@ -137,13 +137,12 @@ install_core() {
     # Because setuptools is the worst thing about python.
     set +e
     python3 -c "import yara"
+    set -e
     if [ $? -ne 0 ]; then
-        set -e
         # Make sure we run ldconfig, otherwise libyara.so.3 won't be found on new installs
         ldconfig
         pip3 install --global-option="build" --global-option="--dynamic-linking" yara-python
     fi
-    set -e
 
     cd $STAGE_DIR
 
@@ -152,7 +151,7 @@ install_core() {
     # don't have to manually fix this.
     if [ "$OS" == "Debian" ]; then
         pip3 install requests[security]
-        pip3 install yapsy ssdeep python-magic beautifulsoup4
+        pip3 install -r requirements.txt
     fi
 
     python3 setup.py install
@@ -209,7 +208,6 @@ install_tika() {
     fi
     mv tika-server-$TIKA_VERSION.jar $TIKA_INSTALL_DIR/
     java -jar $TIKA_INSTALL_DIR/tika-server-$TIKA_VERSION.jar --host=localhost --port=9998 &
-    cd $STOQ_DIR
     echo "[stoQ] Done installing tika."
 }
 
@@ -254,7 +252,6 @@ install_yara() {
     make
     make install
 
-    cd $STOQ_DIR
     echo "[stoQ] Done installing yara."
 }
 
@@ -262,11 +259,10 @@ install_yara() {
 install_xor() {
     echo "[stoQ] Installing xorsearch..."
     cd $TMP_DIR
-    wget -O XORSearch.zip "https://didierstevens.com/files/software/XORSearch_V1_11_1.zip"
+    wget -O XORSearch.zip "https://didierstevens.com/files/software/XORSearch_V$XORSEARCH_VERSION.zip"
     unzip -qq XORSearch -d XORSearch
     gcc -o $BIN_DIR/xorsearch XORSearch/XORSearch.c
     rm -r XORSearch.zip
-    cd $STOQ_DIR
     echo "[stoQ] Done installing xorsearch."
 }
 
@@ -284,7 +280,6 @@ install_trid() {
     wget -O triddefs.zip "http://mark0.net/download/triddefs.zip"
     unzip -qq triddefs -d $STOQ_DIR/plugins/worker/trid
     rm -r triddefs.zip
-    cd $STOQ_DIR
     echo "[stoQ] Done installing trid"
 }
 
@@ -299,15 +294,14 @@ install_exif() {
         yum -y -q install perl-ExtUtils-MakeMaker
     fi
     cd $TMP_DIR
-    wget -O exif.tgz "http://www.sno.phy.queensu.ca/~phil/exiftool/Image-ExifTool-10.59.tar.gz"
+    wget -O exif.tgz "http://www.sno.phy.queensu.ca/~phil/exiftool/Image-ExifTool-$EXIF_VERSION.tar.gz"
     tar -xvf exif.tgz
     rm exif.tgz
-    cd Image-ExifTool-10.59
+    cd Image-ExifTool-$EXIF_VERSION
     perl Makefile.PL
     make
     make test
     make install
-    cd $STOQ_DIR
     echo "[stoQ] Done installing exiftool."
 }
 
@@ -336,7 +330,7 @@ install_clamav() {
 install_floss() {
     echo "[stoQ] Installing floss..."
     cd $TMP_DIR
-    wget -O floss.zip https://github.com/fireeye/flare-floss/releases/download/v1.4.0/floss-1.4.0-GNU.Linux.zip
+    wget -O floss.zip https://github.com/fireeye/flare-floss/releases/download/v$FLOSS_VERSION/floss-$FLOSS_VERSION-GNU.Linux.zip
     unzip floss.zip
     mv floss $STOQ_DIR/plugins/worker/floss/
     chmod +x $STOQ_DIR/plugins/worker/floss/floss
@@ -361,7 +355,6 @@ install_rabbitmq() {
     rabbitmqctl add_vhost stoq
     rabbitmqctl set_permissions -p stoq stoq ".*" ".*" ".*"
     set -e
-    cd $STOQ_DIR
     echo "[stoQ] Done installing RabbitMQ."
     echo "[stoQ] Note RabbitMQ u: stoq p: stoq-password - consider changing."
 }
@@ -375,6 +368,7 @@ cleanup() {
     echo "Run 'sudo su - stoq' to use stoQ"
     echo "*********************************"
     echo ""
+    cd $STOQ_DIR
 }
 
 ####
