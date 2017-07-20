@@ -113,12 +113,17 @@ install_prereqs() {
 
 build_dirs() {
     if [ ! -d $TMP_DIR ]; then
-        echo "[stoQ] Creating temporary directory ($TMP_DIR)"
+        echo "[stoQ] Creating installer temporary directory ($TMP_DIR)"
         mkdir -p $TMP_DIR
     fi
 
     if [ ! -d $STOQ_DIR ]; then
         echo "[stoQ] Creating stoQ directory ($STOQ_DIR)"
+        mkdir -p $STOQ_DIR
+    fi
+
+    if [ ! -d $STOQ_DIR/temp ]; then
+        echo "[stoQ] Creating stoQ tmp directory ($STOQ_DIR/temp)"
         mkdir -p $STOQ_DIR
     fi
 }
