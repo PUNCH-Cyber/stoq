@@ -18,7 +18,6 @@ stoQ Framework
 
 """
 
-import sys
 import random
 
 from stoq.core import __version__

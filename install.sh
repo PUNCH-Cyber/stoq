@@ -111,17 +111,24 @@ install_prereqs() {
     echo "[stoQ] Done installing prerequisites."
 }
 
-# Core build
-install_core() {
-    echo "[stoQ] Installing core components..."
-
+build_dirs() {
     if [ ! -d $TMP_DIR ]; then
+        echo "[stoQ] Creating temporary directory ($TMP_DIR)"
         mkdir -p $TMP_DIR
     fi
 
     if [ ! -d $STOQ_DIR ]; then
+        echo "[stoQ] Creating stoQ directory ($STOQ_DIR)"
         mkdir -p $STOQ_DIR
     fi
+}
+
+# Core build
+install_core() {
+    echo "[stoQ] Installing core components..."
+
+    # Make sure directories are built
+    build_dirs
 
     echo "[stoQ] Setting up virtualenv..."
     virtualenv $PYENV_DIR
@@ -182,6 +189,9 @@ install_core() {
 
 # Tika
 install_tika() {
+    # Make sure directories are built
+    build_dirs
+
     echo "[stoQ] Installing tika..."
 
     TIKA_URL=$(curl https://tika.apache.org/download.html | sed -n 's/.*href="\(.*server.*\.jar\)">.*/\1/ip;T;q')
@@ -213,6 +223,9 @@ install_tika() {
 
 # Yara worker
 install_yara() {
+    # Make sure directories are built
+    build_dirs
+
     echo "[stoQ] Installing yara..."
 
     if [ -f "`which yara`" ]; then
@@ -257,6 +270,9 @@ install_yara() {
 
 # XOR worker
 install_xor() {
+    # Make sure directories are built
+    build_dirs
+
     echo "[stoQ] Installing xorsearch..."
     cd $TMP_DIR
     wget -O XORSearch.zip "https://didierstevens.com/files/software/XORSearch_V$XORSEARCH_VERSION.zip"
@@ -268,6 +284,9 @@ install_xor() {
 
 # TrID worker
 install_trid() {
+    # Make sure directories are built
+    build_dirs
+
     echo "[stoQ] Installing trid"
     cd $TMP_DIR
     # Download and install TRiD
@@ -285,6 +304,9 @@ install_trid() {
 
 # exif worker
 install_exif() {
+    # Make sure directories are built
+    build_dirs
+
     echo "[stoQ] Installing exiftool..."
     # The default debian exiftool does not work properly. Let's just
     # directly from the source.
@@ -328,6 +350,9 @@ install_clamav() {
 
 # floss worker
 install_floss() {
+    # Make sure directories are built
+    build_dirs
+
     echo "[stoQ] Installing floss..."
     cd $TMP_DIR
     wget -O floss.zip https://github.com/fireeye/flare-floss/releases/download/v$FLOSS_VERSION/floss-$FLOSS_VERSION-GNU.Linux.zip
