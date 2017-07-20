@@ -228,6 +228,10 @@ class StoqPluginManager:
 
         """
 
+        if not name or not category:
+            self.log.error("Attempted to load a plugin, but a name or category was not provided")
+            return None
+
         # We are going to dynamically reimplement the isPluginOk method
         # so only the needed plugins are loaded into memory. Much faster
         # and efficient
@@ -467,7 +471,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         # with a connector.
         if not self.output_connector:
             self.output_connector = self.stoq.default_connector
-            
+
         # If our worker saves it's results let's initialize and load the
         # connector plugin
         if self.saveresults:
@@ -607,7 +611,8 @@ class StoqWorkerPlugin(StoqPluginBase):
             plugin_category = getattr(self, full_category_name, None)
             if plugin_category is not None:
                 for plugin in plugin_category:
-                    plugin_category[plugin].deactivate()
+                    if plugin:
+                        plugin_category[plugin].deactivate()
 
     def _multiprocess(self, queue):
         self._start_heartbeats()
