@@ -857,21 +857,8 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         archive_type = False
         payload_hashes = None
-        template_results = None
         results = {}
-        results['results'] = []
-        results['plugins'] = {}
         worker_result = {}
-
-        results['date'] = self.stoq.get_time
-
-        # If we don't have a uuid, let's generate one
-        uid = kwargs.get('uuid', None)
-        if type(uid) == str:
-            self.log.debug("Adding UUID {}".format(uid))
-            kwargs['uuid'] = [uid]
-        elif not uid:
-            kwargs['uuid'] = [self.stoq.get_uuid]
 
         # If we have no payload, let's try to find one to process
         if not payload and 'archive' in kwargs:
@@ -924,164 +911,163 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         self.log.debug("Scan: Scanning payload")
         # Send our payload to the worker, and store the results
-        worker_result['scan'] = self.scan(payload, **kwargs)
+        scan_results = self.scan(payload, **kwargs)
 
-        worker_result['plugin'] = self.name
+        # Make sure the scan_result is a list so we can iterate over them
+        # in case a plugin produces more than one result
+        if type(scan_results) in (dict, str):
+            scan_results = [scan_results]
+        elif not scan_results:
+            scan_results = [{}]
 
-        worker_result['uuid'] = kwargs['uuid'].copy()
+        for scan_result in scan_results:
+            results['results'] = []
+            results['plugins'] = {}
 
-        if payload:
-            worker_result['size'] = len(payload)
+            # If we don't have a uuid, let's generate one
+            uid = kwargs.get('uuid', None)
+            if type(uid) == str:
+                self.log.debug("Adding UUID {}".format(uid))
+                kwargs['uuid'] = [uid]
+            elif not uid:
+                kwargs['uuid'] = [self.stoq.get_uuid]
 
-        # Preserve the original metadata that was submitted with this payload
-        worker_result['source_meta'] = kwargs.copy()
+            worker_result['scan'] = scan_result
 
-        if self.ingest_metadata:
-            for k, v in self.ingest_metadata.items():
-                if k not in worker_result['source_meta']:
-                    worker_result['source_meta'].update({k: v})
-                else:
-                    self.log.debug("Duplicate metadata key found {}, skipping".format(k))
+            results['date'] = self.stoq.get_time
 
-        # Check to see if the keys are in the primary result dict, if so,
-        # we will remove them from the source_meta key, otherwise, we will
-        # leave it be. Meant to reduce duplication of data when chaining
-        # plugins.
-        for k, v in kwargs.items():
-            if k in worker_result:
-                if v == worker_result[k]:
+            worker_result['uuid'] = kwargs['uuid'].copy()
+            worker_result['plugin'] = self.name
+
+            if payload:
+                worker_result['size'] = len(payload)
+
+            # Preserve the original metadata that was submitted with this payload
+            worker_result['source_meta'] = kwargs.copy()
+
+            if self.ingest_metadata:
+                for k, v in self.ingest_metadata.items():
+                    if k not in worker_result['source_meta']:
+                        worker_result['source_meta'].update({k: v})
+                    else:
+                        self.log.debug("Duplicate metadata key found {}, skipping".format(k))
+
+            # Check to see if the keys are in the primary result dict, if so,
+            # we will remove them from the source_meta key, otherwise, we will
+            # leave it be. Meant to reduce duplication of data when chaining
+            # plugins.
+            for k, v in kwargs.items():
+                if k in worker_result:
+                    if v == worker_result[k]:
+                        worker_result['source_meta'].pop(k, None)
+
+                # Sometimes when chaining plugins source_meta will be appended
+                # but the keys should be at the root of the results. Let's make
+                # sure we move them to the root rather than storing them in the
+                # source_meta
+                elif k in ('filename', 'magic', 'ssdeep', 'path', 'size'):
+                    worker_result[k] = v
                     worker_result['source_meta'].pop(k, None)
 
-            # Sometimes when chaining plugins source_meta will be appended
-            # but the keys should be at the root of the results. Let's make
-            # sure we move them to the root rather than storing them in the
-            # source_meta
-            elif k in ('filename', 'magic', 'ssdeep', 'path', 'size'):
-                worker_result[k] = v
-                worker_result['source_meta'].pop(k, None)
+            worker_result['payload_id'] = 0
 
-        worker_result['payload_id'] = 0
+            results['tlp'] = tlp
+            results['plugins'].update({"0": self.name})
 
-        results['tlp'] = tlp
-        results['plugins'].update({"0": self.name})
+            # Keep track of our total count of payloads, in case yara dispatch
+            # finds something
+            payload_id = 1
 
-        # Keep track of our total count of payloads, in case yara dispatch
-        # finds something
-        payload_id = 1
+            results['results'].append(worker_result)
 
-        results['results'].append(worker_result)
+            # If we want to use the dispatcher, let's do that now
+            if self.dispatch:
+                self.log.debug("Dispatch: Beginning dispatching of payload...")
+                # Our carver, extractor, and decoder plugins will return a list of
+                # set()s. Let's make sure we handle the initial payload the same
+                # way, so we can simplify the below routine.
+                dispatch_payloads = [({}, payload)]
 
-        # If we want to use the dispatcher, let's do that now
-        if self.dispatch:
-            self.log.debug("Dispatch: Beginning dispatching of payload...")
-            # Our carver, extractor, and decoder plugins will return a list of
-            # set()s. Let's make sure we handle the initial payload the same
-            # way, so we can simplify the below routine.
-            dispatch_payloads = [({}, payload)]
+                # Track hashes of payloads so we don't handle duplicates.
+                processed_hashes = {}
 
-            # Track hashes of payloads so we don't handle duplicates.
-            processed_hashes = {}
+                while dispatch_payloads:
+                    self.log.debug("Dispatch: Count of payloads to dispatch: {}".format(len(dispatch_payloads)))
+                    for index, dispatch_payload in enumerate(dispatch_payloads):
 
-            while dispatch_payloads:
-                self.log.debug("Dispatch: Count of payloads to dispatch: {}".format(len(dispatch_payloads)))
-                for index, dispatch_payload in enumerate(dispatch_payloads):
+                        dispatch_payloads.pop(index)
 
-                    dispatch_payloads.pop(index)
+                        current_hash = dispatch_payload[0].get('sha1', get_sha1(dispatch_payload[1]))
+                        # get the current parent uuid, so we can ensure any dispatched children are
+                        # appended to the approriate list
+                        dispatch_kwargs = kwargs.copy()
+                        dispatch_kwargs['uuid'] = dispatch_payload[0].get('uuid', worker_result['uuid'])
 
-                    current_hash = dispatch_payload[0].get('sha1', get_sha1(dispatch_payload[1]))
-                    # get the current parent uuid, so we can ensure any dispatched children are
-                    # appended to the approriate list
-                    dispatch_kwargs = kwargs.copy()
-                    dispatch_kwargs['uuid'] = dispatch_payload[0].get('uuid', worker_result['uuid'])
-
-                    if len(dispatch_kwargs['uuid']) > int(self.stoq.max_recursion):
-                        self.log.debug("Dispatch: Maximum recursion depth of {} reached".format(self.stoq.max_recursion))
-                        continue
-
-                    self.log.debug("Dispatch: Current dispatch hash {}".format(current_hash))
-
-                    # Skip over this payload if we've already processed it
-                    if current_hash in processed_hashes:
-                        self.log.info("Dispatch: Skipping duplicate hash {}".format(current_hash))
-                        continue
-
-                    processed_hashes.setdefault(current_hash, True)
-                    # We are copy()ing processed hashes so we don't dispatch
-                    # payloads twice, but we still want to be able to send
-                    # dispatched payloads for additional processing
-                    temp_processed_hashes = processed_hashes.copy()
-
-                    # Send the payload to the yara dispatcher
-                    for yara_result in self.yara_dispatcher(dispatch_payload[1]):
-                        dispatch_result = self._parse_dispatch_results(yara_result, **dispatch_kwargs)
-
-                        if dispatch_result['sha1'] in temp_processed_hashes:
-                            self.log.info("Dispatch: Skipping duplicate hash: {}".format(dispatch_result['sha1']))
+                        if len(dispatch_kwargs['uuid']) > int(self.stoq.max_recursion):
+                            self.log.debug("Dispatch: Maximum recursion depth of {} reached".format(self.stoq.max_recursion))
                             continue
 
-                        temp_processed_hashes.setdefault(dispatch_result['sha1'], True)
+                        self.log.debug("Dispatch: Current dispatch hash {}".format(current_hash))
 
-                        dispatch_payloads.append(yara_result)
+                        # Skip over this payload if we've already processed it
+                        if current_hash in processed_hashes:
+                            self.log.info("Dispatch: Skipping duplicate hash {}".format(current_hash))
+                            continue
 
-                        dispatch_result['payload_id'] = payload_id
+                        processed_hashes.setdefault(current_hash, True)
+                        # We are copy()ing processed hashes so we don't dispatch
+                        # payloads twice, but we still want to be able to send
+                        # dispatched payloads for additional processing
+                        temp_processed_hashes = processed_hashes.copy()
 
-                        if dispatch_result.get('save').lower() == 'true' and self.archive_connector:
-                            self.save_payload(yara_result[1], self.archive_connector)
+                        # Send the payload to the yara dispatcher
+                        for yara_result in self.yara_dispatcher(dispatch_payload[1]):
+                            dispatch_result = self._parse_dispatch_results(yara_result, **dispatch_kwargs)
 
-                        results['results'].append(dispatch_result)
-                        results['plugins'].update({str(payload_id): dispatch_result['dispatcher']})
+                            if dispatch_result['sha1'] in temp_processed_hashes:
+                                self.log.info("Dispatch: Skipping duplicate hash: {}".format(dispatch_result['sha1']))
+                                continue
 
-                        payload_id += 1
+                            temp_processed_hashes.setdefault(dispatch_result['sha1'], True)
 
-        results['payloads'] = payload_id
+                            dispatch_payloads.append(yara_result)
 
-        # If we want the results for all plugins to be returned in one
-        # big json blob, combined_results must be true.
-        if self.combined_results:
-            results, template_results = self._save_results(results)
-        else:
-            # Looks like we want to save each result individually, this
-            # gets complex.
-            split_results = []
-            split_template_results = []
+                            dispatch_result['payload_id'] = payload_id
 
-            # Make sure we save the top level key/values so we can append
-            # them to the new individual result dict
-            result_date = results['date']
-            result_payloads = results['payloads']
-            result_plugins = results['plugins']
+                            if dispatch_result.get('save').lower() == 'true' and self.archive_connector:
+                                self.save_payload(yara_result[1], self.archive_connector)
 
-            for result in results['results']:
-                # Create the new individual results dict
-                plugin_result = {}
-                plugin_result['date'] = result_date
-                plugin_result['payloads'] = result_payloads
-                plugin_result['plugins'] = result_plugins
-                plugin_result['results'] = [result]
+                            results['results'].append(dispatch_result)
+                            results['plugins'].update({str(payload_id): dispatch_result['dispatcher']})
 
-                # Because this function returns the results, we are going
-                # to save the individual results as it is returned from
-                # the _save_results function
-                r, t = self._save_results(plugin_result)
+                            payload_id += 1
 
-                # Append the results to the main results list. In many cases
-                # templates won't be utilized, so no sense in saving them if
-                # nothing is there.
-                split_results.append(r)
-                if t:
-                    split_template_results.append(t)
+            results['payloads'] = payload_id
 
-            # Replace the original results with our newly created list of
-            # results.
-            results = split_results
-            if split_template_results:
-                template_results = split_template_results
+            # If we want the results for all plugins to be returned in one
+            # big json blob, combined_results must be true.
+            if self.combined_results:
+                self._save_results(results)
+            else:
+                # Make sure we save the top level key/values so we can append
+                # them to the new individual result dict
+                result_date = results['date']
+                result_payloads = results['payloads']
+                result_plugins = results['plugins']
 
-        if self.log_level == 'DEBUG':
-            etime = time.process_time()
-            self.log.debug("Processed payload in {:.2f}s".format(etime))
+                for result in results['results']:
+                    # Create the new individual results dict
+                    plugin_result = {}
+                    plugin_result['date'] = result_date
+                    plugin_result['payloads'] = result_payloads
+                    plugin_result['plugins'] = result_plugins
+                    plugin_result['results'] = [result]
 
-        return results, template_results
+                    self._save_results(plugin_result)
+
+            if self.log_level == 'DEBUG':
+                etime = time.process_time()
+                self.log.debug("Processed payload in {:.2f}s".format(etime))
 
     def _save_results(self, results, **kwargs):
         self.log.debug("Save: Attempting to save results")
@@ -1147,7 +1133,6 @@ class StoqWorkerPlugin(StoqPluginBase):
                                                             **kwargs)
 
         self.log.debug("Save: Results saved")
-        return results, template_results
 
     def yara_dispatcher(self, payload, **kwargs):
         """
