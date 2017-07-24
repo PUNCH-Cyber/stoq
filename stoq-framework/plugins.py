@@ -910,7 +910,8 @@ class StoqWorkerPlugin(StoqPluginBase):
                     worker_result.update(get_hashes(payload))
 
         self.log.debug("Scan: Scanning payload")
-        # Send our payload to the worker, and store the results
+        # Send our payload to the worker. This should return a generator or list
+        # if the results are to be processed.
         scan_results = self.scan(payload, **kwargs)
 
         # Make sure the scan_result is a list so we can iterate over them
@@ -918,7 +919,14 @@ class StoqWorkerPlugin(StoqPluginBase):
         if type(scan_results) in (dict, str):
             scan_results = [scan_results]
         elif not scan_results:
-            scan_results = [{}]
+            # If a worker plugin returns None or False, move on, but let the user
+            # know as something could be wrong.
+            self.log.info("No results returned, moving on...")
+            return
+        elif scan_results is True:
+            # Some plugins don't save results or require additional processing.
+            # These plugins should return True so we can silently go on about our day.
+            return
 
         for scan_result in scan_results:
             results['results'] = []
