@@ -574,8 +574,8 @@ class Stoq(StoqPluginManager):
         try:
             return json.loads(data, object_hook=self.__sanitize_json)
         except:
-            return json.loads(data.decode('utf-8'),
-                              object_hook=self.__sanitize_json)
+            js = demjson.decode(data, encode_bytes=str)
+            return self.__sanitize_json(js)
 
     def __set_requests_headers(self, headers=None):
         """
