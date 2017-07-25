@@ -619,7 +619,7 @@ class Stoq(StoqPluginManager):
             new_key = key.replace(".", "_")
             new_key = new_key.replace(" ", "_")
             if isinstance(obj[key], dict):
-                new_obj[key] = self.__sanitize_json(obj[key])
+                new_obj[key] = self.sanitize_json(obj[key])
             else:
                 new_obj[new_key] = obj[key]
         return new_obj
