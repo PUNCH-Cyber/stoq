@@ -616,10 +616,16 @@ class Stoq(StoqPluginManager):
         self.log.debug("Sanitizing JSON")
         new_obj = {}
         for key in obj.keys():
-            new_key = key.replace(".", "_")
-            new_key = new_key.replace(" ", "_")
+            new_key = key.replace(".", "_").replace(" ", "_")
             if isinstance(obj[key], dict):
-                new_obj[key] = self.sanitize_json(obj[key])
+                new_obj[new_key] = self.sanitize_json(obj[key])
+            elif isinstance(obj[key], list):
+                new_obj[new_key] = []
+                for iter_obj in obj[key]:
+                    if isinstance(iter_obj, dict):
+                        new_obj[new_key].append(self.sanitize_json(iter_obj))
+                    else:
+                        new_obj[new_key].append(iter_obj)
             else:
                 new_obj[new_key] = obj[key]
         return new_obj
