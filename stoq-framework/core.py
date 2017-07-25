@@ -570,10 +570,9 @@ class Stoq(StoqPluginManager):
         """
 
         try:
-            return json.loads(data, object_hook=self.__sanitize_json)
+            return json.loads(data)
         except:
-            js = demjson.decode(data, encode_bytes=str)
-            return self.__sanitize_json(js)
+            return demjson.decode(data, encode_bytes=str)
 
     def __set_requests_headers(self, headers=None):
         """
@@ -603,7 +602,7 @@ class Stoq(StoqPluginManager):
         self.log.debug("HTTP Headers: {}".format(headers))
         return headers
 
-    def __sanitize_json(self, obj):
+    def sanitize_json(self, obj):
         """
         Sanitize json so keys do not contain '.' or ' '. Required for
         compaitibility with databases such as mongodb and elasticsearch
