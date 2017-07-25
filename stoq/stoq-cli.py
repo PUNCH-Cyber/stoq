@@ -21,7 +21,8 @@ from time import sleep
 
 from argparse import RawDescriptionHelpFormatter, ArgumentParser
 
-from stoq.core import Stoq
+
+from stoq.core import Stoq, __version__
 from stoq.shell import StoqShell
 from stoq.logo import print_logo
 
@@ -93,6 +94,8 @@ if __name__ == '__main__':
     else:
         # Initialize and load the worker plugin and make it an object of our
         # stoq class
+        stoq.log.info("Starting stoQ v{}".format(__version__))
+
         worker = stoq.load_plugin(options.command, 'worker')
         if not worker:
             exit(-1)

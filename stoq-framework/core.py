@@ -274,8 +274,6 @@ class Stoq(StoqPluginManager):
             except:
                 self.log.error("Unable to initiate logging to Sentry")
 
-        self.log.info("Starting stoQ v{}".format(__version__))
-
     def get_file(self, source, params=None, verify=True,
                  auth=None, timeout=30, **kwargs):
         """
