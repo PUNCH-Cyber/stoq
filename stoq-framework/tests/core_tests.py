@@ -14,6 +14,7 @@
 
 
 import os
+import shutil
 import unittest
 import datetime
 
@@ -51,6 +52,7 @@ class StoqCoreTestCase(unittest.TestCase):
 
         # Variables used to write a file
         self.write_path = os.path.join(self.stoq.temp_dir, "write")
+        self.write_path_nonexist = os.path.join(self.write_path, "newdir")
         self.write_text_file = "text_file"
         self.write_bin_file = "bin_file"
 
@@ -85,13 +87,26 @@ class StoqCoreTestCase(unittest.TestCase):
         payload = "This is the content to write to disk"
         fullpath = os.path.join(self.write_path, self.write_text_file)
         result = self.stoq.write(payload, filename=self.write_text_file, path=self.write_path)
+        os.unlink(fullpath)
+        self.assertEqual(result, fullpath)
+
+    def test_write_text_file_nonexist(self):
+        payload = "This is the content to write to disk"
+        fullpath = os.path.join(self.write_path_nonexist, self.write_text_file)
+        result = self.stoq.write(payload, filename=self.write_text_file, path=self.write_path_nonexist)
+        shutil.rmtree(self.write_path_nonexist)
         self.assertEqual(result, fullpath)
 
     def test_write_text_file_append(self):
+        payload = "This is the content to write to disk"
+        fullpath = os.path.join(self.write_path, self.write_text_file)
+        result = self.stoq.write(payload, filename=self.write_text_file, path=self.write_path)
+
         payload = "...and even more data now"
         fullpath = os.path.join(self.write_path, self.write_text_file)
         result = self.stoq.write(payload, filename=self.write_text_file,
                                  path=self.write_path, append=True)
+        os.unlink(fullpath)
         self.assertEqual(result, fullpath)
 
     def test_write_text_file_overwrite(self):
@@ -106,6 +121,7 @@ class StoqCoreTestCase(unittest.TestCase):
         fullpath = os.path.join(self.write_path, self.write_text_file)
         result = self.stoq.write(payload, filename=self.write_text_file,
                                  path=self.write_path, binary=True)
+        os.unlink(fullpath)
         self.assertEqual(result, fullpath)
 
     def test_force_unicode(self):
