@@ -338,6 +338,7 @@ class StoqPluginBase:
         self.is_activated = False
         self.min_stoq_version = None
         self.max_stoq_version = None
+        self.incompatible_plugin = False
         super().__init__()
 
     @property
@@ -361,8 +362,9 @@ class StoqPluginBase:
         self.log = logging.getLogger(logname)
 
         if not self.min_version or not self.max_version:
-            self.log.critical("Plugin not compatible with this version of stoQ. "
-                              "Unpredictable results may occur!")
+            self.incompatible_plugin = True
+            self.log.warn("Plugin not compatible with this version of stoQ. "
+                          "Unpredictable results may occur!")
 
         if hasattr(self, 'max_tlp'):
             self.max_tlp = self.max_tlp.lower()
@@ -922,11 +924,11 @@ class StoqWorkerPlugin(StoqPluginBase):
             # If a worker plugin returns None or False, move on, but let the user
             # know as something could be wrong.
             self.log.info("No results returned, moving on...")
-            return
+            return False
         elif scan_results is True:
             # Some plugins don't save results or require additional processing.
             # These plugins should return True so we can silently go on about our day.
-            return
+            return True
 
         for scan_result in scan_results:
             results['results'] = []
@@ -1077,6 +1079,8 @@ class StoqWorkerPlugin(StoqPluginBase):
                 etime = time.process_time()
                 self.log.debug("Processed payload in {:.2f}s".format(etime))
 
+        return True
+
     def _save_results(self, results, **kwargs):
         self.log.debug("Save: Attempting to save results")
 
@@ -1113,8 +1117,12 @@ class StoqWorkerPlugin(StoqPluginBase):
                                       trim_blocks=True, lstrip_blocks=True)
                 template_results = tpl_env.get_template(self.template).render(results=results)
             except TemplateNotFound:
+                # Set to False so we don't repeatedly try to render the template
+                self.template = False
                 self.log.error("Unable to load template. Does {}/{} exist?".format(template_path, self.template))
             except Exception as err:
+                # Set to False so we don't repeatedly try to render the template
+                self.template = False
                 self.log.error(str(err))
 
         # If we are saving the results from the worker, let's take care of
