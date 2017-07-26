@@ -461,7 +461,10 @@ class Stoq(StoqPluginManager):
         # Check to see if the directory exists, if not, create it
         if not os.path.exists(path):
             self.log.debug("Creating directory {}".format(path))
-            os.makedirs(path)
+            try:
+                os.makedirs(path)
+            except FileExistsError:
+                self.log.debug("Potential race condition, not creating directory {}".format(path))
 
         # Finally ready to write
         try:
