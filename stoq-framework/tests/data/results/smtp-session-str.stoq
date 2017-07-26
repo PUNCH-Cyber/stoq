@@ -1,0 +1,42 @@
+{
+    "tlp": "white",
+    "results": [
+        {
+            "plugin": "smtp",
+            "sha1": "5dc6f27dedc6f67cd0150c7aaeae2b9eca87e5a9",
+            "sha256": "4681a995136cdb4fe574cd813909b072e3465a6833ce5991a74ab00fb3a35db6",
+            "payload_id": 0,
+            "filename": "stoq-test.eml",
+            "size": 539,
+            "uuid": [
+                "e0cc4b29-d7e5-47b9-ad82-0f193a46aa88"
+            ],
+            "md5": "c8a8587c755f7943d4457a5a429334ba",
+            "archive": "file",
+            "scan": {
+                "body_html": "",
+                "return-path": "<stoq-test@test-server.punchcyber.com>",
+                "message-id": "<20170723230906.4AF074363E@test-server.punchcyber.com>",
+                "from": "stoq@test-server.punchcyber.com (Ubuntu)",
+                "att": [],
+                "date": "Sun, 23 Jul 2017 23:09:06 +0000 (UTC)",
+                "delivered-to": "stoq@test-server.punchcyber.com",
+                "subject": "Test",
+                "body": "This is a test e-mail\nThis is a test e-mail\n",
+                "received": "by test-server.punchcyber.com (Postfix, from userid 1000)\n\tid 4AF074363E; Sun, 23 Jul 2017 23:09:06 +0000 (UTC)",
+                "x-mailer": "mail (GNU Mailutils 2.99.99)",
+                "x-original-to": "stoq@test-server.punchcyber.com",
+                "to": "<stoq@test-server.punchcyber.com>",
+                "dot.notation": "Test"
+            },
+            "sha512": "d6ae6f34e0b9f23e885bba800b1d30093b0e6a56ecf1ed8a7a64275a12d31f80b8c0b304010c1a503a131fe50e9c23813fdfe33a3432e487560359feb1c7571b",
+            "source_meta": {},
+            "path": "/vagrant/stoq-test.eml"
+        }
+    ],
+    "plugins": {
+        "0": "smtp"
+    },
+    "payloads": 1,
+    "date": "2017-07-25T13:00:37.771769"
+}
