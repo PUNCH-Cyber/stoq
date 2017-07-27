@@ -1,0 +1,26 @@
+sudo: enabled
+
+dist: trusty
+
+language: python
+
+python:
+  - 3.4
+  - 3.5
+  - 3.6
+
+install:
+  - apt-get -yq install software-properties-common
+  - apt-add-repository -y multiverse
+  - apt-get -yq update
+  - apt-get -yq install automake build-essential cython autoconf libyaml-dev \
+                        libffi-dev libfuzzy-dev libxml2-dev libxslt1-dev libz-dev \
+                        libssl-dev libmagic-dev
+  - pip3 install requests[security]
+  - pip3 install -r requirements.txt
+  - pip3 install hydra
+  - pip3 install --global-option="build" --global-option="--dynamic-linking" yara-python
+  - chmod +x stoq/stoq-cli.py
+
+script:
+  - cd stoq && python3 stoq-cli.py runtests

@@ -1,6 +1,8 @@
 
 ![alt text](http://stoq.punchcyber.com/i/logo_stoq_mark.png "stoQ")
 
+[![Build Status](https://travis-ci.org/PUNCH-Cyber/stoq.svg?branch=master)](https://travis-ci.org/PUNCH-Cyber/stoq)
+
 ## Overview
 
 stoQ is a modular and highly customizable framework for the creation of data
