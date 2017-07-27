@@ -97,6 +97,8 @@ class StoqBloomFilter(object):
                                                  float(falsepos_rate),
                                                  filename=filepath)
 
+        return True
+
     def import_filter(self, filepath):
         """
         Load a previously created persistent bloom filter
@@ -105,6 +107,8 @@ class StoqBloomFilter(object):
 
         """
         self.current_filter = UpdatingBloomFilter(filepath)
+
+        return True
 
     def backup_scheduler(self, interval):
         """
@@ -117,6 +121,8 @@ class StoqBloomFilter(object):
         backup = threading.Thread(target=self._backup, args=(int(interval),))
         backup.daemon = True
         backup.start()
+
+        return True
 
     def _backup(self, interval):
         """

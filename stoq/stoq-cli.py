@@ -39,11 +39,12 @@ if __name__ == '__main__':
     %(prog)s [command] [<args>]
 
     Available Commands:
-        help    Display help message
-        shell   Launch an interactive shell
-        list    List available plugins
-        worker  Load specified worker plugin
-        install Install a stoQ plugin
+        help     Display help message
+        shell    Launch an interactive shell
+        list     List available plugins
+        worker   Load specified worker plugin
+        install  Install a stoQ plugin
+        runtests Run stoQ tests
     '''.format(logo),
                             epilog='''
     Examples:
@@ -90,6 +91,24 @@ if __name__ == '__main__':
 
     elif options.command == "shell":
         StoqShell(stoq).cmdloop()
+
+    elif options.command == "runtests":
+        import os
+        import unittest
+        # Use tests from installed $CWD/tests, otherwise, try to use the install stoQ tests
+        test_path = os.path.join(os.getcwd(), "tests")
+        if not os.path.isdir(test_path):
+            try:
+                import stoq
+                test_path = os.path.join(os.path.dirname(stoq.__file__), "tests")
+            except ImportError:
+                print("Test suite not found. Is stoQ installed or are tests in {}?".format(test_path))
+                exit(1)
+
+        test_suite = unittest.TestLoader().discover(test_path, pattern='*_tests.py')
+        test_result = unittest.TextTestRunner(verbosity=1).run(test_suite)
+        if not test_result.wasSuccessful():
+            exit("Unit tests failed")
 
     else:
         # Initialize and load the worker plugin and make it an object of our
