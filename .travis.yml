@@ -19,6 +19,7 @@ install:
   - pip3 install hydra
   - pip3 install --global-option="build" --global-option="--dynamic-linking" yara-python
   - chmod +x stoq/stoq-cli.py
+  - python3 setup.py install
 
 script:
   - cd stoq && python3 stoq-cli.py runtests
