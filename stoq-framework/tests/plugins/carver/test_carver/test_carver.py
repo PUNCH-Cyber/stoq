@@ -1,4 +1,4 @@
-#   Copyright 2014-2015 PUNCH Cyber Analytics Group
+#   Copyright 2014-2017 PUNCH Cyber Analytics Group
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -16,44 +16,34 @@
 Overview
 ========
 
-Test stoQ connector plugin
+Test stoQ carver plugin
 
 """
 
-from stoq.plugins import StoqConnectorPlugin
+from stoq.plugins import StoqCarverPlugin
 
 
-class TestConnector(StoqConnectorPlugin):
+class TestCarver(StoqCarverPlugin):
 
     def __init__(self):
         super().__init__()
 
     def activate(self, stoq):
         self.stoq = stoq
+
         super().activate()
 
-    # We are just going to be a wrapper for Stoq.get_file()
-    def get_file(self, **kwargs):
+    def carve(self, payload, **kwargs):
         """
-        Return a payload for testing
+        Test stoQ carver plugin
 
-        :returns: Content of payload
-        :rtype: bytes
-
-        """
-
-        if 'path' in kwargs:
-            return self.stoq.get_file(source=kwargs['path'])
-
-        return True
-
-    def save(self, payload, **kwargs):
-        """
-        Test stoQ connector plugin
-
-        :param bytes payload: Content to be "saved"
+        :param bytes payload: Payload with SWF to be decompressed
         :param **kwargs kwargs: Additional attributes (unused)
 
+        :returns: Test results
+        :rtype: list of tuples
+
         """
 
-        return payload
+        return [(kwargs, payload),
+                (kwargs, payload)]

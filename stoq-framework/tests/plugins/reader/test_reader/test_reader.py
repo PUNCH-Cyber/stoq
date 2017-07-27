@@ -16,14 +16,14 @@
 Overview
 ========
 
-Test stoQ connector plugin
+Test stoQ reader
 
 """
 
-from stoq.plugins import StoqConnectorPlugin
+from stoq.plugins import StoqReaderPlugin
 
 
-class TestConnector(StoqConnectorPlugin):
+class TestReader(StoqReaderPlugin):
 
     def __init__(self):
         super().__init__()
@@ -32,27 +32,15 @@ class TestConnector(StoqConnectorPlugin):
         self.stoq = stoq
         super().activate()
 
-    # We are just going to be a wrapper for Stoq.get_file()
-    def get_file(self, **kwargs):
+    def read(self, payload, **kwargs):
         """
-        Return a payload for testing
+        Test stoQ reader
 
-        :returns: Content of payload
-        :rtype: bytes
-
-        """
-
-        if 'path' in kwargs:
-            return self.stoq.get_file(source=kwargs['path'])
-
-        return True
-
-    def save(self, payload, **kwargs):
-        """
-        Test stoQ connector plugin
-
-        :param bytes payload: Content to be "saved"
+        :param bytes payload : Content
         :param **kwargs kwargs: Additional attributes (unused)
+
+        :returns: Extracted content of payload
+        :rtype: bytes
 
         """
 

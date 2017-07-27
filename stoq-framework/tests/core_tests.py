@@ -91,6 +91,8 @@ class StoqCoreTestCase(unittest.TestCase):
         payload = "This is the content to write to disk"
         fullpath = os.path.join(self.write_path, self.write_text_file)
         result = self.stoq.write(payload, filename=self.write_text_file, path=self.write_path)
+        with open(fullpath, "r") as f:
+                self.assertEqual(payload, f.read())
         os.unlink(fullpath)
         self.assertEqual(result, fullpath)
 
@@ -98,20 +100,29 @@ class StoqCoreTestCase(unittest.TestCase):
         payload = "This is the content to write to disk"
         fullpath = os.path.join(self.write_path_nonexist, self.write_text_file)
         result = self.stoq.write(payload, filename=self.write_text_file, path=self.write_path_nonexist)
-        shutil.rmtree(self.write_path_nonexist)
         self.assertEqual(result, fullpath)
+        with open(fullpath, "r") as f:
+                self.assertEqual(payload, f.read())
+        shutil.rmtree(self.write_path_nonexist)
 
     def test_write_text_file_append(self):
         payload = "This is the content to write to disk"
         fullpath = os.path.join(self.write_path, self.write_text_file)
         result = self.stoq.write(payload, filename=self.write_text_file, path=self.write_path)
 
-        payload = "...and even more data now"
+        with open(fullpath, "r") as f:
+                self.assertEqual(payload, f.read())
+
+        new_payload = "...and even more data now"
         fullpath = os.path.join(self.write_path, self.write_text_file)
-        result = self.stoq.write(payload, filename=self.write_text_file,
+        result = self.stoq.write(new_payload, filename=self.write_text_file,
                                  path=self.write_path, append=True)
-        os.unlink(fullpath)
+
         self.assertEqual(result, fullpath)
+        with open(fullpath, "r") as f:
+                self.assertEqual(payload + new_payload, f.read())
+
+        os.unlink(fullpath)
 
     def test_write_text_file_overwrite(self):
         payload = "but now it is just this."
@@ -119,18 +130,24 @@ class StoqCoreTestCase(unittest.TestCase):
         result = self.stoq.write(payload, filename=self.write_text_file,
                                  path=self.write_path, overwrite=True)
         self.assertEqual(result, fullpath)
+        with open(fullpath, "r") as f:
+                self.assertEqual(payload, f.read())
+        os.unlink(fullpath)
 
     def test_write_bin_file(self):
         payload = b"hi\xe7\x8c\xab\x20\x62\x69\x6c\x6c\x79\x20\x74\x68\x65\x20\x74\x72\x6f\x6c\x6c"
         fullpath = os.path.join(self.write_path, self.write_text_file)
         result = self.stoq.write(payload, filename=self.write_text_file,
                                  path=self.write_path, binary=True)
-        os.unlink(fullpath)
         self.assertEqual(result, fullpath)
+        with open(fullpath, "rb") as f:
+                self.assertEqual(payload, f.read())
+        os.unlink(fullpath)
 
     def test_force_unicode(self):
         data = b"hi\xe7\x8c\xab"
-        self.assertEqual(data, b"hi\xe7\x8c\xab")
+        resp = self.stoq.force_unicode(data)
+        self.assertEqual(resp, "hi猫")
 
     def test_get_time(self):
         # Split the time since the microsecond will be different

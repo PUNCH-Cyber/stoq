@@ -33,45 +33,94 @@ class StoqPluginTestCase(unittest.TestCase):
                 print("Test suite not found. Is stoQ installed or are tests in {}?".format(test_path))
                 exit(1)
 
-        self.stoq.plugin_dir = os.path.join(test_path, "plugins")
+        self.stoq.default_connector = "test_connector"
 
         # Make sure the plugins are setup for tests
-        self.stoq.default_connector = "test_connector"
+        self.stoq.plugin_dir = os.path.join(test_path, "plugins")
         self.stoq.manager.setPluginPlaces([self.stoq.plugin_dir])
         self.stoq.collect_plugins()
+
+        self.data_prefix = os.path.join(test_path, "data")
+
+        # Set stoQ variables for the test environment
+        self.stoq.source_base_tuple = (os.path.join(self.data_prefix, "get"))
+
+        # Variables used to get/read a file
+        self.get_text_file = os.path.join(self.data_prefix, "get/text_file")
 
         self.stoq.log.setLevel("CRITICAL")
 
     def test_load_carver_plugin(self):
-        pass
+        plugin = self.stoq.load_plugin("test_carver", "carver")
+        self.assertFalse(plugin.incompatible_plugin)
+        self.assertIsNotNone(plugin)
+
+    def test_carver_plugin_carve(self):
+        payload = "This is the return string"
+        plugin = self.stoq.load_plugin("test_carver", "carver")
+        resp = plugin.carve(payload)
+        self.assertIsInstance(resp, list)
+        self.assertEqual(resp[0][1], payload)
+        self.assertEqual(resp[1][1], payload)
 
     def test_load_connector_plugin(self):
-        connector = self.stoq.load_plugin("test_connector", "connector")
-        self.assertFalse(connector.incompatible_plugin)
-        self.assertIsNotNone(connector)
+        plugin = self.stoq.load_plugin("test_connector", "connector")
+        self.assertFalse(plugin.incompatible_plugin)
+        self.assertIsNotNone(plugin)
 
-    def test_save_with_connector(self):
+    def test_connector_plugin_save(self):
         payload = "test payload"
         connector = self.stoq.load_plugin("test_connector", "connector")
         resp = connector.save(payload)
         self.assertEqual(resp, payload)
 
-    def test_load_decoder_plugin(self):
-        pass
+    def test_load_decoder(self):
+        plugin = self.stoq.load_plugin("test_decoder", "decoder")
+        self.assertFalse(plugin.incompatible_plugin)
+        self.assertIsNotNone(plugin)
 
-    def test_load_extractor_plugin(self):
-        pass
+    def test_decoder_plugin_decode(self):
+        payload = "This is the return string"
+        plugin = self.stoq.load_plugin("test_decoder", "decoder")
+        resp = plugin.decode(payload)
+        self.assertIsInstance(resp, list)
+        self.assertEqual(resp[0][1], payload)
+        self.assertEqual(resp[1][1], payload)
 
-    def test_load_reader_plugin(self):
-        pass
+    def test_load_extractor(self):
+        plugin = self.stoq.load_plugin("test_extractor", "extractor")
+        self.assertFalse(plugin.incompatible_plugin)
+        self.assertIsNotNone(plugin)
+
+    def test_extractor_plugin_extract(self):
+        payload = "This is the return string"
+        plugin = self.stoq.load_plugin("test_extractor", "extractor")
+        resp = plugin.extract(payload)
+        self.assertIsInstance(resp, list)
+        self.assertEqual(resp[0][1], payload)
+        self.assertEqual(resp[1][1], payload)
+
+    def test_load_reader(self):
+        plugin = self.stoq.load_plugin("test_reader", "reader")
+        self.assertFalse(plugin.incompatible_plugin)
+        self.assertIsNotNone(plugin)
+
+    def test_reader_plugin_read(self):
+        payload = "This is the return string"
+        plugin = self.stoq.load_plugin("test_reader", "reader")
+        resp = plugin.read(payload)
+        self.assertIsInstance(resp, str)
+        self.assertEqual(resp, payload)
 
     def test_load_source_plugin(self):
-        pass
+        plugin = self.stoq.load_plugin("test_source", "source")
+        self.assertFalse(plugin.incompatible_plugin)
+        self.assertIsNotNone(plugin)
 
     def test_load_worker_plugin(self):
         worker = self.stoq.load_plugin("test_worker", "worker")
-        self.assertIsNotNone(worker)
         self.assertFalse(worker.incompatible_plugin)
+        self.assertIsNotNone(worker)
 
     def test_scan_payload_return_none(self):
         worker = self.stoq.load_plugin("test_worker", "worker")
@@ -135,8 +184,19 @@ class StoqPluginTestCase(unittest.TestCase):
     def test_scan_payload_and_save_without_template_use_dispatching(self):
         pass
 
+    def test_scan_payload_with_source(self):
+        self.stoq.default_source = "test_source"
+        worker = self.stoq.load_plugin("test_worker", "worker")
+        self.stoq.worker.path = self.get_text_file
+        resp = worker.run()
+        self.assertTrue(resp)
+
     def test_multiprocessing_worker(self):
-        pass
+        self.stoq.default_source = "test_source"
+        worker = self.stoq.load_plugin("test_worker", "worker")
+        self.stoq.worker.path = os.path.join(self.data_prefix, "get")
+        resp = worker.run()
+        self.assertTrue(resp)
 
     def test_archive_of_source_payload(self):
         pass

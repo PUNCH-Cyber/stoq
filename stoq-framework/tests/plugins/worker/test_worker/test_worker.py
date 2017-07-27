@@ -62,6 +62,7 @@ class TestWorkerScan(StoqWorkerPlugin):
         return_bytes = kwargs.get("return_bytes", False)
         return_list = kwargs.get("return_list", False)
         return_dict = kwargs.get("return_dict", False)
+        return_payload = kwargs.get("return_payload", False)
 
         if return_false:
             return False
@@ -83,5 +84,7 @@ class TestWorkerScan(StoqWorkerPlugin):
             results['list'] = ['a', 'b', 'c']
             results['dict'] = {'a': 1, 'b': '2', 'c': 'abc123'}
             return results
+        elif return_payload:
+            return payload
         else:
             return None

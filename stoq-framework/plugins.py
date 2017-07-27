@@ -603,7 +603,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                 for proc in procs:
                     proc.terminate()
                     proc.join()
-            return None
+            return True
 
     def _deactivate_everything(self):
         # call all plugin deactivate methods, so that they can

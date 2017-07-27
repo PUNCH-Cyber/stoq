@@ -16,44 +16,34 @@
 Overview
 ========
 
-Test stoQ connector plugin
+Test stoQ decoder
 
 """
 
-from stoq.plugins import StoqConnectorPlugin
+from stoq.plugins import StoqDecoderPlugin
 
 
-class TestConnector(StoqConnectorPlugin):
+class TestDecoder(StoqDecoderPlugin):
 
     def __init__(self):
         super().__init__()
 
     def activate(self, stoq):
         self.stoq = stoq
+
         super().activate()
 
-    # We are just going to be a wrapper for Stoq.get_file()
-    def get_file(self, **kwargs):
+    def decode(self, payload, **kwargs):
         """
-        Return a payload for testing
+        Test stoQ decoder
 
-        :returns: Content of payload
-        :rtype: bytes
-
-        """
-
-        if 'path' in kwargs:
-            return self.stoq.get_file(source=kwargs['path'])
-
-        return True
-
-    def save(self, payload, **kwargs):
-        """
-        Test stoQ connector plugin
-
-        :param bytes payload: Content to be "saved"
+        :param bytes payload: Payload to be decoded
         :param **kwargs kwargs: Additional attributes (unused)
 
+        :returns: Base64 decoded content
+        :rtype: list of tuples
+
         """
 
-        return payload
+        return [(kwargs, payload),
+                (kwargs, payload)]
