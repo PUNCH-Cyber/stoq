@@ -5,16 +5,14 @@ dist: trusty
 language: python
 
 python:
-  - 3.4
-  - 3.5
   - 3.6
 
 install:
   - sudo apt-get -yq install software-properties-common
   - sudo apt-add-repository -y multiverse
   - sudo apt-get -yq update
-  - sudo apt-get -yq install automake build-essential cython autoconf libyaml-dev \
-                             libffi-dev libfuzzy-dev libxml2-dev libxslt1-dev libz-dev \
+  - sudo apt-get -yq install automake build-essential cython autoconf libyaml-dev
+                             libffi-dev libfuzzy-dev libxml2-dev libxslt1-dev libz-dev
                              libssl-dev libmagic-dev
   - pip3 install requests[security]
   - pip3 install -r requirements.txt
