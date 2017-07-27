@@ -199,7 +199,7 @@ class StoqPluginTestCase(unittest.TestCase):
         worker.combined_results = False
         worker.start(payload, return_dict=True)
         self.assertTrue(worker.template)
-        
+
     def test_scan_payload_and_save_without_template_use_dispatching(self):
         pass
 
