@@ -165,6 +165,15 @@ class StoqPluginTestCase(unittest.TestCase):
         resp = worker.start(payload, return_dict=True)
         self.assertTrue(resp)
 
+    def test_scan_payload_and_save_combined_without_template(self):
+        payload = b"This is a payload to scan\x90\x90\x90\x00\x20"
+        worker = self.stoq.load_plugin("test_worker", "worker")
+        worker.saveresults = True
+        worker.hashpayload = True
+        worker.combined_results = False
+        resp = worker.start(payload, return_dict=True)
+        self.assertTrue(resp)
+
     def test_scan_filename_and_save_without_template(self):
         worker = self.stoq.load_plugin("test_worker", "worker")
         worker.saveresults = True
@@ -181,6 +190,16 @@ class StoqPluginTestCase(unittest.TestCase):
         worker.start(payload, return_dict=True)
         self.assertTrue(worker.template)
 
+    def test_scan_payload_and_save_combined_with_template(self):
+        payload = b"This is a payload to scan\x90\x90\x90\x00\x20"
+        worker = self.stoq.load_plugin("test_worker", "worker")
+        worker.template = "test.tpl"
+        worker.saveresults = True
+        worker.hashpayload = True
+        worker.combined_results = False
+        worker.start(payload, return_dict=True)
+        self.assertTrue(worker.template)
+        
     def test_scan_payload_and_save_without_template_use_dispatching(self):
         pass
 
