@@ -22,6 +22,10 @@ import datetime
 from stoq.core import Stoq
 from stoq.logo import print_logo
 
+# Disable InsecureRequestWarning
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 
 class StoqCoreTestCase(unittest.TestCase):
     def setUp(self):
