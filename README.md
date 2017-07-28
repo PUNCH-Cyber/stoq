@@ -18,7 +18,7 @@ stoQ plugins are available separately in the [plugin repository](https://github.
 
 ## Installation and Usage
 
- - Requires python >= 3.4
+ - Requires python >= 3.5
  - Additional documentation can be found in the [docs](http://stoq.punchcyber.com/docs/).
 
 
