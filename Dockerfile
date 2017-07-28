@@ -5,7 +5,7 @@ ENV LANG='C.UTF-8' LC_ALL='C.UTF-8' LANGUAGE='C.UTF-8' STOQ_TMP='/usr/local/tmp'
 ENV STOQ_ENV $STOQ_DIR/.stoq-pyenv
 
 ADD . ${STOQ_TMP}/stoq
-ADD ./stoq ${STOQ_DIR}
+ADD ./cmd ${STOQ_DIR}
 
 RUN apt-get update \
   && apt-get -y install software-properties-common \

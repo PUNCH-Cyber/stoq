@@ -55,12 +55,13 @@ the core |stoQ| requirements::
 .. note:: stoQ will install yara-python from pip, however, there is at least one
           issue (https://github.com/VirusTotal/yara-python/issues/28) that may
           cause your ruleset to fail. It is recommend that yara-python be
-          install manually using the ```--dynamic-linking``` option.
+          install manually with:
+          ```pip3 install --global-option="build" --global-option="--dynamic-linking" yara-python```
 
 Make a directory to store all of |stoQ| and then copy the required files::
 
     mkdir /usr/local/stoq
-    cp -R stoq/* /usr/local/stoq/
+    cp -R cmd/* /usr/local/stoq/
     chmod +x /usr/local/stoq/stoq-cli.py
 
 |stoQ| does not require any special permissions to run. For security reasons,

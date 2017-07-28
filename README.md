@@ -74,7 +74,8 @@ Install the latest version of yara from https://virustotal.github.io/yara/
   - stoQ will install yara-python from pip, however, there is at least one
   issue (https://github.com/VirusTotal/yara-python/issues/28) that may
   cause your ruleset to fail. It is recommend that yara-python be
-  install manually using the ```--dynamic-linking``` option.
+  install manually with:
+  ```pip3 install --global-option="build" --global-option="--dynamic-linking" yara-python```
 
 Once the virtualenv has been activated and yara is installed, we can install
 the core *stoQ* requirements
@@ -84,7 +85,7 @@ the core *stoQ* requirements
 Make a directory to store all of *stoQ* and then copy the required files
 
     mkdir /usr/local/stoq
-    cp -R stoq/* /usr/local/stoq/
+    cp -R cmd/* /usr/local/stoq/
 
 *stoQ* does not require any special permissions to run. For security reasons,
 it is recommended that *stoQ* is run as a non-privileged user. To create a
