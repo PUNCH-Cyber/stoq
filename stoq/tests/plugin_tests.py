@@ -37,7 +37,6 @@ class StoqPluginTestCase(unittest.TestCase):
 
         # Make sure the plugins are setup for tests
         self.stoq.plugin_dir = os.path.join(test_path, "plugins")
-        self.stoq.manager.setPluginPlaces([self.stoq.plugin_dir])
         self.stoq.collect_plugins()
 
         self.data_prefix = os.path.join(test_path, "data")

@@ -7,7 +7,7 @@ os.environ['BUILD_LIB'] = '1'
 
 setup(
     name="stoq",
-    version="0.12.0",
+    version="0.13.0",
     author="Marcus LaFerrera",
     author_email="marcus@punchcyber.com",
     description="A framework for simplifying analysis.",
@@ -19,7 +19,6 @@ setup(
                       'requests',
                       'python-magic',
                       'ssdeep',
-                      'yapsy',
                       'demjson',
                       'jinja2',
                       'yara-python',
