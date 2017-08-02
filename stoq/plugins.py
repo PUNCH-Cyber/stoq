@@ -89,7 +89,7 @@ import signal
 import logging
 import threading
 import configparser
-import importlib
+import importlib.util
 import multiprocessing
 
 try:
@@ -239,8 +239,16 @@ class StoqPluginManager:
 
         try:
             spec = importlib.util.spec_from_file_location(module_name, path)
-            plugin = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(plugin)
+            # Because module_from_spec wasn't introduced until python 3.5, we
+            # are going to check for it first. Let's hope this method doesn't
+            # get deprecated also...
+            if hasattr(importlib.util, 'module_from_spec'):
+                plugin = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(plugin)
+            else:
+                # Looks like we are at python 3.4, let's do it that way instead
+                plugin = spec.loader.load_module()
+
             # Since the class we want to load for the plugin is a subclass
             # of a plugin category, we are going to iterate over all classes
             # in the module, and find the first one that is a subclass of
