@@ -331,6 +331,7 @@ class StoqPluginManager:
         plugin.activate(self)
         return plugin
 
+    @property
     def get_all_plugin_names(self):
         """
         List all plugin names
@@ -342,6 +343,7 @@ class StoqPluginManager:
 
         return self.__collected_plugins__.keys()
 
+    @property
     def get_all_plugins(self):
         """
         List all valid plugins and configurations
@@ -351,7 +353,7 @@ class StoqPluginManager:
 
         """
 
-        return self.__collected_plugins__()
+        return self.__collected_plugins__
 
     def list_plugins(self):
         """
