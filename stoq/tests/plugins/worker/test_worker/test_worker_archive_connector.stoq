@@ -13,7 +13,7 @@
 #   limitations under the License.
 
 [Core]
-Name = test_worker
+Name = test_worker_archive_connector
 Module = test_worker
 
 [Documentation]
@@ -25,7 +25,4 @@ Description = Test stoQ worker plugin
 [options]
 hashpayload = False
 saveresults = False
-param_list = a, b, c, d
-param_dict = {"a": 1, "b": true, "c": "abc", "d": ['1', '2', '3'], "e": {'a': 1}}
-param_tuple = 1, 2, 3, 4
-default_tlp = WHITE
+archive_connector = test_connector
