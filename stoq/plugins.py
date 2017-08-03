@@ -92,6 +92,8 @@ import configparser
 import importlib.util
 import multiprocessing
 
+from pkg_resources import parse_version as version
+
 try:
     import yara
     yara_imported = True
@@ -99,10 +101,13 @@ except ImportError:
     yara = None
     yara_imported = False
 
-from pkg_resources import parse_version as version
 
-from jinja2 import Environment, FileSystemLoader
-from jinja2.exceptions import TemplateNotFound
+try:
+    from jinja2 import Environment, FileSystemLoader
+    from jinja2.exceptions import TemplateNotFound
+    jinja_imported = True
+except ImportError:
+    jinja_imported = False
 
 from stoq import signal_handler
 from stoq.helpers import ratelimited
@@ -556,6 +561,11 @@ class StoqWorkerPlugin(StoqPluginBase):
                 self.log.debug("Ingest time metadata: {}".format(self.ingest_metadata))
             except Exception as err:
                 self.log.warn("Unable to parse ingest metadata, skipping: {}".format(err))
+
+        if self.template and not jinja_imported:
+            self.log.warn("Templates will not work. jinja2 must be installed first."
+                          " $ pip3 install jinja2")
+            self.template = False
 
         return self
 
@@ -1143,6 +1153,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         # Parse output with a template
         if self.template:
+
             self.log.debug("Template: Attempting to templatize results")
             try:
                 # Figure out the plugin path from the results plugin object
