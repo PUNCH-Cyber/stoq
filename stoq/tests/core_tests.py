@@ -185,11 +185,11 @@ class StoqCoreTestCase(unittest.TestCase):
         dumps = self.stoq.dumps(json_str)
         self.assertIsNotNone(dumps)
 
-    def test_loads_dumps_bytes_compactly(self):
+    def test_loads_dumps_bytes_no_indent(self):
         payload = self.stoq.get_file(self.result_file_bytes)
         json_str = self.stoq.loads(payload)
         self.assertEqual(json_str['results'][0]['scan']['subject'], "Test")
-        dumps = self.stoq.dumps(json_str, compactly=True)
+        dumps = self.stoq.dumps(json_str, indent=None)
         self.assertIsNotNone(dumps)
 
     def test_sanitize_json(self):

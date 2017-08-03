@@ -19,7 +19,6 @@ setup(
                       'requests',
                       'python-magic',
                       'ssdeep',
-                      'demjson',
                       'jinja2',
                       'yara-python',
                       'python-json-logger'],

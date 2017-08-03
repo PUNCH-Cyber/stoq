@@ -13,8 +13,33 @@
 #   limitations under the License.
 
 import time
+import json
 import threading
 from functools import wraps
+
+
+class JsonComplexDecoder(json.JSONEncoder):
+    """
+    Extends json.dumps() to convert bytes to string
+
+    """
+    def default(self, obj):
+        if isinstance(obj, bytes):
+            return str(obj)
+        else:
+            return obj
+
+
+class JsonComplexEncoder(json.JSONDecoder):
+    """
+    Extends json.loads() to convert bytes to string
+
+    """
+    def default(self, obj):
+        if isinstance(obj, bytes):
+            return str(obj)
+        else:
+            return obj
 
 
 # Based on code from https://gist.github.com/gregburek/1441055

@@ -65,12 +65,12 @@ import logging
 import requests
 import datetime
 import configparser
-import demjson
 
 from bs4 import UnicodeDammit
 from pythonjsonlogger import jsonlogger
 
 from stoq.plugins import StoqPluginManager
+from stoq.helpers import JsonComplexDecoder, JsonComplexEncoder
 
 try:
     from raven.handlers.logging import SentryHandler
@@ -534,11 +534,12 @@ class Stoq(StoqPluginManager):
 
         return os.path.join(self.archive_base, '/'.join(list(sha1[:5])))
 
-    def dumps(self, data, compactly=False):
+    def dumps(self, data, indent=4, compactly=False):
         """
         Wrapper for json library. Dump dict to a json string
 
         :param dict data: Python dict to convert to json
+        :param int indent: Indent level for return value
         :param compactly: set to True to return unindented JSON (no newlines
                           between key/values),
 
@@ -547,19 +548,10 @@ class Stoq(StoqPluginManager):
 
         """
 
-        # We start with the default python json library to encode as
-        # it is *MUCH* faster than demjson. However, if we run into issues
-        # with being unable to serialize, we are going to use demjson
-        # since it handles such data much better.
+        if compactly is True or not indent:
+            indent = None
 
-        try:
-            if compactly is True:
-                indent = None
-            else:
-                indent = 4
-            return json.dumps(data, indent=indent)
-        except TypeError:
-            return demjson.encode(data, encode_bytes=str, compactly=compactly)
+        return json.dumps(data, indent=indent, cls=JsonComplexDecoder)
 
     def loads(self, data):
         """
@@ -572,10 +564,12 @@ class Stoq(StoqPluginManager):
 
         """
 
+        # Using try/except because it is faster than checking the type() of data,
+        # be it str() or bytes()
         try:
-            return json.loads(data)
+            return json.loads(data, cls=JsonComplexEncoder)
         except:
-            return demjson.decode(data, encode_bytes=str)
+            return json.loads(data.decode(), cls=JsonComplexEncoder)
 
     def __set_requests_headers(self, headers=None):
         """
@@ -627,6 +621,8 @@ class Stoq(StoqPluginManager):
                 for iter_obj in obj[key]:
                     if isinstance(iter_obj, dict):
                         new_obj[new_key].append(self.sanitize_json(iter_obj))
+                    if isinstance(iter_obj, bytes):
+                        new_obj[new_key].append(str(iter_obj))
                     else:
                         new_obj[new_key].append(iter_obj)
             else:

@@ -220,6 +220,13 @@ class StoqPluginTestCase(unittest.TestCase):
         resp = worker.start(payload, return_dict=True)
         self.assertTrue(resp)
 
+    def test_scan_filename_and_save_bytes_without_template(self):
+        worker = self.stoq.load_plugin("test_worker", "worker")
+        worker.saveresults = True
+        worker.hashpayload = True
+        resp = worker.start(None, path="/tmp/notreallyafile", archive="test_connector", return_bytes=True)
+        self.assertTrue(resp)
+
     def test_scan_payload_and_save_combined_without_template(self):
         payload = b"This is a payload to scan\x90\x90\x90\x00\x20"
         worker = self.stoq.load_plugin("test_worker", "worker")
