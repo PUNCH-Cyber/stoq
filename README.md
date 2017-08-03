@@ -2,6 +2,7 @@
 ![alt text](http://stoq.punchcyber.com/i/logo_stoq_mark.png "stoQ")
 
 [![Build Status](https://travis-ci.org/PUNCH-Cyber/stoq.svg?branch=master)](https://travis-ci.org/PUNCH-Cyber/stoq)
+[![Coverage Status](https://coveralls.io/repos/github/PUNCH-Cyber/stoq/badge.svg?branch=master)](https://coveralls.io/github/PUNCH-Cyber/stoq?branch=master)
 
 ## Overview
 
