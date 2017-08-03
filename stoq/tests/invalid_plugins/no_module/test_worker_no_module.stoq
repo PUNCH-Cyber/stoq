@@ -14,7 +14,7 @@
 
 [Core]
 Name = test_worker
-Module = test_worker
+Module = test_worker_no_module
 
 [Documentation]
 Author = Marcus LaFerrera
@@ -25,7 +25,3 @@ Description = Test stoQ worker plugin
 [options]
 hashpayload = False
 saveresults = False
-param_list = a, b, c, d
-param_dict = {"a": 1, "b": true, "c": "abc", "d": ["1", "2", "3"], "e": {"a": 1}}
-param_tuple = 1, 2, 3, 4
-default_tlp = WHITE

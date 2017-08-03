@@ -12,9 +12,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-[Core]
+Core]
 Name = test_worker
-Module = test_worker
+Module = test_worker_invalid_config
 
 [Documentation]
 Author = Marcus LaFerrera
@@ -22,10 +22,6 @@ Version = 0.1
 Website = https://github.com/PUNCH-Cyber/stoq-plugins-public
 Description = Test stoQ worker plugin
 
-[options]
+[options
 hashpayload = False
 saveresults = False
-param_list = a, b, c, d
-param_dict = {"a": 1, "b": true, "c": "abc", "d": ["1", "2", "3"], "e": {"a": 1}}
-param_tuple = 1, 2, 3, 4
-default_tlp = WHITE

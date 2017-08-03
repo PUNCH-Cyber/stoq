@@ -44,7 +44,7 @@ framework
   ```
   source /usr/local/stoq/.stoq-pyenv/bin/activate
   pip3 install requests[security]
-  pip3 install yapsy ssdeep python-magic beautifulsoup4
+  pip3 install ssdeep python-magic beautifulsoup4
   deactivate
   ```
 

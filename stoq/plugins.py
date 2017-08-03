@@ -88,7 +88,11 @@ import time
 import signal
 import logging
 import threading
+import configparser
+import importlib.util
 import multiprocessing
+
+from pkg_resources import parse_version as version
 
 try:
     import yara
@@ -97,13 +101,13 @@ except ImportError:
     yara = None
     yara_imported = False
 
-from pkg_resources import parse_version as version
 
-from yapsy.PluginManager import PluginManager
-from yapsy.FilteredPluginManager import FilteredPluginManager
-
-from jinja2 import Environment, FileSystemLoader
-from jinja2.exceptions import TemplateNotFound
+try:
+    from jinja2 import Environment, FileSystemLoader
+    from jinja2.exceptions import TemplateNotFound
+    jinja_imported = True
+except ImportError:
+    jinja_imported = False
 
 from stoq import signal_handler
 from stoq.helpers import ratelimited
@@ -131,65 +135,84 @@ class StoqPluginManager:
                                   "decoder": StoqDecoderPlugin
                                   }
 
-        self.manager = PluginManager()
-        self.manager.setPluginInfoExtension("stoq")
-        self.manager.setPluginPlaces([self.plugin_dir])
-        self.manager.setCategoriesFilter(self.plugin_categories)
-
-        # Setup our plugin filter
-        self.manager = FilteredPluginManager(self.manager)
+        self.plugin_extension = ".stoq"
+        self.collect_plugins()
 
     @property
     def __plugindict__(self):
         """
 
-        Create a dict() of plugin class name and the plugin category
+        Create a dict of plugin class name and the plugin category
 
         """
         plugins = {}
         for category, category_class in self.plugin_categories.items():
-            class_str = re.search(r'(?<=<class \'stoq\.plugins\.)(.+)(?=.*\'>)',
-                                  str(category_class)).group(0)
-            plugins[class_str] = category
+            plugins[category_class.__name__] = category
 
         return plugins
 
     def collect_plugins(self):
         """
-        Wrapper for yapsy.PluginManager.collectPlugins()
+        Find all stoQ plugins and their configuration file
 
         """
 
-        self.manager.collectPlugins()
+        self.__collected_plugins__ = {}
+        abs_plugin_path = os.path.abspath(self.plugin_dir)
+        if not os.path.isdir(abs_plugin_path):
+            return
 
+        for root_path, subdirs, files in os.walk(abs_plugin_path):
+            for plg in files:
+                if plg.endswith(self.plugin_extension):
+                    try:
+                        plugin_path = "{}/{}".format(root_path, plg)
+                        config = configparser.ConfigParser()
+                        config.read(plugin_path)
+                        name = config.get("Core", "Name")
+                        module = config.get("Core", "Module")
+                        module_path = "{}/{}.py".format(root_path, module)
+                        if os.path.isfile(module_path):
+                            # open each module file and detect the category of plugin
+                            with open(module_path, "r") as src:
+                                cat = re.search('(?<=from stoq\.plugins import )(.+)',
+                                                src.read()).group()
+                                category = self.__plugindict__.get(cat, False)
+
+                            config["Core"]["Category"] = category
+                            config["Core"]["Module"] = module_path
+                            self.__collected_plugins__[name] = config
+                        else:
+                            self.log.warn("Found {} but no module {}, skipping".format(plugin_path, module_path))
+                    except:
+                        self.log.error("Error parsing config file: {}".format(plugin_path))
+
+    @property
     def get_categories(self):
         """
-        Wrapper for yapsy.PluginManager.getCategories()
+        Create list of plugin categories available
 
         """
 
-        return self.manager.getCategories()
+        return self.plugin_categories.keys()
 
     def get_plugins_of_category(self, category):
-        """
-        Wrapper for yapsy.PluginManager.getPluginsOfCategory()
-
-        """
-
-        return self.manager.getPluginsOfCategory(category)
-
-    def get_plugin_names_of_category(self, category):
         """
         Lists plugin name of a specific category
 
         :param str category: Category to discover plugins in
 
-        :returns: A list of discovered plugins
-        :rtype: list
+        :returns: A tuple of discovered plugins
+        :rtype: tuple
 
         """
 
-        return [p.name for p in self.get_plugins_of_category(category)]
+        for name, config in self.__collected_plugins__.items():
+            if config.get("Core", "Category") == category:
+                yield (config.get("Core", "Name"),
+                       config.get("Documentation", "Version"),
+                       config.get("Documentation", "Description")
+                       )
 
     def get_plugin(self, name, category):
         """
@@ -203,18 +226,52 @@ class StoqPluginManager:
 
         """
 
-        return self.manager.getPluginByName(name, category)
+        if category not in self.plugin_categories:
+            self.log.error("Invalid plugin category {}".format(category))
+            return False
 
-    def deactivate_plugin(self, name, category):
-        """
-        Deactivate a plugin within a specific category
+        info = self.__collected_plugins__.get(name)
 
-        :param str name: Name of plugin to deactivate
-        :param str category: Category of the named plugin
+        if not info:
+            self.log.warn("No plugin available with the name {}".format(name))
+            return False
 
-        """
+        path = info.get("Core", "Module")
+        if not path:
+            self.log.error("No module found for {}".format(name))
 
-        return self.manager.deactivatePluginByName(name, category=category)
+        module_name = os.path.splitext(path)[0]
+
+        try:
+            spec = importlib.util.spec_from_file_location(module_name, path)
+            # Because module_from_spec wasn't introduced until python 3.5, we
+            # are going to check for it first. Let's hope this method doesn't
+            # get deprecated also...
+            if hasattr(importlib.util, 'module_from_spec'):
+                plugin = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(plugin)
+            else:
+                # Looks like we are at python 3.4, let's do it that way instead
+                plugin = spec.loader.load_module()
+
+            # Since the class we want to load for the plugin is a subclass
+            # of a plugin category, we are going to iterate over all classes
+            # in the module, and find the first one that is a subclass of
+            # plugin type we are looking for.
+            for plugin_object in dir(plugin):
+                try:
+                    if issubclass(getattr(plugin, plugin_object), self.plugin_categories[category]):
+                        if self.plugin_categories[category].__name__ is not plugin_object:
+                            loaded_plugin = getattr(plugin, plugin_object)
+                            loaded_plugin.details = info
+                            return loaded_plugin()
+                except TypeError:
+                    pass
+        except Exception:
+            self.log.error("Unable to load plugin", exc_info=True)
+            return False
+
+        return False
 
     def load_plugin(self, name, category):
         """
@@ -232,16 +289,6 @@ class StoqPluginManager:
             self.log.error("Attempted to load a plugin, but a name or category was not provided")
             return None
 
-        # We are going to dynamically reimplement the isPluginOk method
-        # so only the needed plugins are loaded into memory. Much faster
-        # and efficient
-        self.manager.isPluginOk = lambda x: x.name == name
-
-        # Gather, filter, and load plugin
-        self.manager.locatePlugins()
-        self.manager.filterPlugins()
-        self.manager.loadPlugins()
-
         # Initialize our plugin
         self.log.debug("Attempting to load plugin {}:{}".format(category, name))
         plugin = self.get_plugin(name, category)
@@ -251,11 +298,6 @@ class StoqPluginManager:
             return False
 
         for sect in plugin.details.sections():
-            # Let's skip over the sections that are required by our
-            # plugin manager. No sense in trying to overwrite.
-            if any([s in sect for s in ['Core', 'Documentation']]):
-                next
-
             for opt in plugin.details.options(sect):
                 # define each configuration option as an object within
                 # plugin class.
@@ -264,7 +306,7 @@ class StoqPluginManager:
                 # an error which in turn will cause us to load it as
                 # a string.
                 try:
-                    setattr(plugin.plugin_object, opt,
+                    setattr(plugin, opt,
                             plugin.details.getboolean(sect, opt))
                 except ValueError:
                     value = plugin.details.get(sect, opt)
@@ -281,19 +323,20 @@ class StoqPluginManager:
                     elif opt.endswith("_tuple"):
                         value = tuple(i.strip() for i in value.split(","))
 
-                    setattr(plugin.plugin_object, opt, value)
+                    setattr(plugin, opt, value)
 
-        setattr(plugin.plugin_object, 'category', category)
+        setattr(plugin, 'category', category)
         plugin_path = "{}/{}/{}".format(self.plugin_dir, category, name)
         plugin_path = os.path.abspath(plugin_path)
         self.log.debug("{}:{} plugin path set to {}".format(category, name, plugin_path))
-        setattr(plugin.plugin_object, 'plugin_path', plugin_path)
+        setattr(plugin, 'plugin_path', plugin_path)
 
         # Make sure we attempt to activate the plugin after we setattr
         # from the plugin config file
-        plugin.plugin_object.activate(self)
-        return plugin.plugin_object
+        plugin.activate(self)
+        return plugin
 
+    @property
     def get_all_plugin_names(self):
         """
         List all plugin names
@@ -303,15 +346,19 @@ class StoqPluginManager:
 
         """
 
-        return [p.name for p in self.get_all_plugins()]
+        return self.__collected_plugins__.keys()
 
+    @property
     def get_all_plugins(self):
         """
-        Wrapper for yapsy.PluginManager.getAllPlugins()
+        List all valid plugins and configurations
+
+        :returns: All valid plugins
+        :rtype: dict
 
         """
 
-        return self.manager.getAllPlugins()
+        return self.__collected_plugins__
 
     def list_plugins(self):
         """
@@ -321,15 +368,13 @@ class StoqPluginManager:
 
         # Make sure we update the filter, otherwise all plugins won't be
         # visible.
-        self.manager.isPluginOk = lambda x: x.name != ""
-        self.collect_plugins()
         print("Available Plugins:")
-        for category in self.get_categories():
-            print(" {0}s".format(category))
-            for plugin in self.get_plugins_of_category(category):
-                print("   - {0}v{1}{2}".format(plugin.name.ljust(20),
-                                               str(plugin.version).ljust(7),
-                                               plugin.description))
+        for category in self.get_categories:
+            print(" {}s".format(category))
+            for plugin, ver, desc in self.get_plugins_of_category(category):
+                print("   - {}v{}{}".format(plugin.ljust(20),
+                                            str(ver).ljust(7),
+                                            desc))
 
 
 class StoqPluginBase:
@@ -516,6 +561,11 @@ class StoqWorkerPlugin(StoqPluginBase):
                 self.log.debug("Ingest time metadata: {}".format(self.ingest_metadata))
             except Exception as err:
                 self.log.warn("Unable to parse ingest metadata, skipping: {}".format(err))
+
+        if self.template and not jinja_imported:
+            self.log.warn("Templates will not work. jinja2 must be installed first."
+                          " $ pip3 install jinja2")
+            self.template = False
 
         return self
 
@@ -1103,6 +1153,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         # Parse output with a template
         if self.template:
+
             self.log.debug("Template: Attempting to templatize results")
             try:
                 # Figure out the plugin path from the results plugin object

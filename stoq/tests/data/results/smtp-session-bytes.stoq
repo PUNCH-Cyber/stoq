@@ -26,7 +26,7 @@
                 "received": "by test-server.punchcyber.com (Postfix, from userid 1000)\n\tid 4AF074363E; Sun, 23 Jul 2017 23:09:06 +0000 (UTC)",
                 "x-mailer": "mail (GNU Mailutils 2.99.99)",
                 "from": "stoq@test-server.punchcyber.com (Ubuntu)",
-                "body": "\xe2\x80\x94This is a test e-mail with bytes\n\xe2\x80\x94This is a test e-mail with bytes\n",
+                "body": "\\xe2\\x80\\x94This is a test e-mail with bytes\n\\xe2\\x80\\x94This is a test e-mail with bytes\n",
                 "message-id": "<20170723230906.4AF074363E@test-server.punchcyber.com>",
                 "body_html": "",
                 "x-original-to": "stoq@test-server.punchcyber.com"
