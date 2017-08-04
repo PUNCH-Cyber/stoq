@@ -18,6 +18,12 @@ import types
 import unittest
 import collections
 
+try:
+    import jinja2
+    HAS_JINJA2 = True
+except ImportError:
+    HAS_JINJA2 = False
+
 from stoq.core import Stoq
 
 
@@ -243,6 +249,7 @@ class StoqPluginTestCase(unittest.TestCase):
         resp = worker.start(None, path="/tmp/notreallyafile", archive="test_connector", return_dict=True)
         self.assertTrue(resp)
 
+    @unittest.skipUnless(HAS_JINJA2, "Jinja2 not installed")
     def test_scan_payload_and_save_with_template(self):
         payload = b"This is a payload to scan\x90\x90\x90\x00\x20"
         worker = self.stoq.load_plugin("test_worker", "worker")
@@ -252,6 +259,7 @@ class StoqPluginTestCase(unittest.TestCase):
         worker.start(payload, return_dict=True)
         self.assertTrue(worker.template)
 
+    @unittest.skipUnless(HAS_JINJA2, "Jinja2 not installed")
     def test_scan_payload_and_save_combined_with_template(self):
         payload = b"This is a payload to scan\x90\x90\x90\x00\x20"
         worker = self.stoq.load_plugin("test_worker", "worker")

@@ -15,10 +15,16 @@
 import os
 import unittest
 
-from stoq.core import Stoq
-from stoq.filters import StoqBloomFilter
+try:
+    import hydra
+    from stoq.core import Stoq
+    from stoq.filters import StoqBloomFilter
+    HAS_HYDRA = True
+except ImportError:
+    HAS_HYDRA = False
 
 
+@unittest.skipUnless(HAS_HYDRA, "Hydra not installed, skipping")
 class StoqFiltersTestCase(unittest.TestCase):
 
     def setUp(self):
