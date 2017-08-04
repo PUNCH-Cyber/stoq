@@ -1,8 +1,9 @@
 
-![alt text](http://stoq.punchcyber.com/i/logo_stoq_mark.png "stoQ")
+![stoQ](http://stoq.punchcyber.com/i/logo_stoq_mark.png "stoQ")
 
 [![Build Status](https://travis-ci.org/PUNCH-Cyber/stoq.svg?branch=master)](https://travis-ci.org/PUNCH-Cyber/stoq)
 [![Coverage Status](https://coveralls.io/repos/github/PUNCH-Cyber/stoq/badge.svg?branch=master)](https://coveralls.io/github/PUNCH-Cyber/stoq?branch=master)
+[![Documentation Status](https://readthedocs.org/projects/stoq-framework/badge/?version=latest)](http://stoq-framework.readthedocs.io/en/latest/?badge=latest)
 
 ## Overview
 
@@ -20,7 +21,7 @@ stoQ plugins are available separately in the [plugin repository](https://github.
 ## Installation and Usage
 
  - Requires python >= 3.4
- - Additional documentation can be found in the [docs](http://stoq.punchcyber.com/docs/).
+ - Additional documentation can be found in the [docs](http://stoq-framework.readthedocs.io/).
 
 
 ### Installation Script
