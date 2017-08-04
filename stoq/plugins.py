@@ -226,6 +226,11 @@ class StoqPluginManager:
 
         """
 
+        # Make sure we clean up argv so argument parsing of plugins
+        # doesn't cause issues when loading multiple worker plugins
+        if self.worker and self.argv:
+            self.argv = []
+
         if category not in self.plugin_categories:
             self.log.error("Invalid plugin category {}".format(category))
             return False
