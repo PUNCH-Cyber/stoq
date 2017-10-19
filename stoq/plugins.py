@@ -978,7 +978,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         elif not scan_results:
             # If a worker plugin returns None or False, move on, but let the user
             # know as something could be wrong.
-            self.log.info("No results returned, moving on...")
+            self.log.debug("No results returned, moving on...")
             return False
         elif scan_results is True:
             # Some plugins don't save results or require additional processing.
