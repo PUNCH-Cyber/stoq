@@ -114,9 +114,9 @@ def StoqArgs(parser):
                            dest='combined_results',
                            action='store_false',
                            help="Split results on a per plugin basis")
-    conn_opts.add_argument("-O", "--outfile",
+    conn_opts.add_argument("-O", "--out",
                            dest='outfile',
-                           help="Filename to save reults to (if applicable)")
+                           help="Results directory/filename (if applicable)")
     conn_opts.add_argument("-P", "--use-date",
                            dest='use_output_date',
                            default=False,

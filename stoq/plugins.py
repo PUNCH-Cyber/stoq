@@ -453,6 +453,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         self.cron = None
         self.default_tlp = None
         self.outfile = None
+        self.results_file = None
         self.use_output_date = False
 
         self.workers = {}
@@ -547,6 +548,19 @@ class StoqWorkerPlugin(StoqPluginBase):
                 self.source_plugin = self.stoq.default_source
             self.load_source(self.source_plugin)
             self.log.debug("Using {} as default source".format(self.source_plugin))
+
+        # If an outfile is defined on the command line, let's make sure we update
+        # where stoQ places results
+        if self.outfile:
+            abspath = os.path.abspath(self.outfile)
+            self.stoq.results_dir = abspath
+
+            # Looks like the user wants results to be appended to a file. Ensure
+            # we update the results_dir and results_file to ensure they get saved
+            # there if the output connector supports it
+            if os.path.isfile(abspath):
+                self.results_file = os.path.basename(abspath)
+                self.stoq.results_dir = os.path.dirname(abspath)
 
         if self.dispatch:
             self.log.debug("Loading yara rules for dispatching")
@@ -1188,10 +1202,8 @@ class StoqWorkerPlugin(StoqPluginBase):
             # Just to ensure we have loaded a connector for output
             self.load_connector(self.output_connector)
 
-            if self.outfile:
-                path = os.path.dirname(os.path.abspath(self.outfile))
-                fn = os.path.basename(self.outfile)
-                kwargs.update({'path': path, 'filename': fn, 'append': True})
+            if self.results_file:
+                kwargs.update({'filename': fn, 'append': True})
 
             if template_results:
                 self.connectors[self.output_connector].save(template_results,
