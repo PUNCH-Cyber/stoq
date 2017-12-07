@@ -1,9 +1,16 @@
 import os
+import unittest
 
 from setuptools import setup
 
 # Ensure that the ssdeep library is built, otherwise install will fail
 os.environ['BUILD_LIB'] = '1'
+
+def stoq_tests():
+    stoq_path = os.path.join(os.getcwd(), "stoq")
+    test_path = os.path.join(stoq_path, "tests")
+    test_suite = unittest.TestLoader().discover(test_path, pattern='*_tests.py')
+    return test_suite
 
 setup(
     name="stoq",
@@ -23,6 +30,7 @@ setup(
                       'python-json-logger'],
     keywords='malware-analysis, malware-analyzer, malware-detection, framework, automation',
     python_requires='>=3.4',
+    test_suite='setup.stoq_tests',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Information Technology',
