@@ -23,7 +23,7 @@ class StoqScanTestCase(unittest.TestCase):
     def setUp(self):
         self.payload = b"This string will be hashed for testing"
         self.magic_string = "\x4d\x5a\x90\x00\x03\x00\x00\x00\x04\x00\x00\x00\xff\xff\x00\x00"
-        self.magic = "application/x-dosexec"
+        self.exe_magic = ["application/octet-stream", "application/x-dosexec"]
         self.md5 = "5a2db68e8be7f8ef361c27eb21e2ac37"
         self.sha1 = "632fb8827e40de9ffd8f8dbafdaddf9a4db5fb2a"
         self.sha256 = "a698ce08530306b9fd281f2533207fb48bae63e27a3cfe7529aa505be7e7257b"
@@ -65,7 +65,15 @@ class StoqScanTestCase(unittest.TestCase):
 
     def test_get_magic(self):
         magic = stoq.scan.get_magic(self.magic_string)
-        self.assertEqual(magic, self.magic)
+        magic_result = None
+
+        # This is silly. Depending on the systems magic values, this may be
+        # one of two results. Let's make sure the result is one of the
+        # expected values, then compare.
+        if magic in self.exe_magic:
+            magic_result = magic
+
+        self.assertEqual(magic, magic_result)
 
     def tearDown(self):
         pass
