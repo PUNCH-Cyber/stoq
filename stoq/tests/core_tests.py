@@ -66,6 +66,13 @@ class StoqCoreTestCase(unittest.TestCase):
         self.result_file_str = os.path.join(data_prefix, "results/smtp-session-str.stoq")
         self.result_file_bytes = os.path.join(data_prefix, "results/smtp-session-bytes.stoq")
 
+    def test_signal_handler(self):
+        from stoq import signal_handler
+        from stoq.exceptions import SigtermCaught
+
+        with self.assertRaises(SigtermCaught) as cm:
+            signal_handler(1, None)
+
     def test_logo(self):
         self.assertIsNotNone(print_logo())
 
