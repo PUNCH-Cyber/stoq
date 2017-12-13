@@ -300,8 +300,13 @@ class Stoq(StoqPluginManager):
         if source.startswith(self.url_prefix_tuple):
             # Set our default headers
             headers = self.__set_requests_headers(**kwargs)
-            response = requests.get(source, params=params, auth=auth, verify=verify,
-                                    timeout=timeout, headers=headers)
+            try:
+                response = requests.get(
+                    source, params=params, auth=auth, verify=verify,
+                    timeout=timeout, headers=headers)
+            except requests.exceptions.ConnectionError:
+                self.log.warn("Unable to retrieve content from {}".format(source), exc_info=True)
+                return
 
             # Raise an exception if it was not successful
             try:
@@ -355,8 +360,12 @@ class Stoq(StoqPluginManager):
 
         # Set our default headers
         headers = self.__set_requests_headers(**kwargs)
-        response = requests.put(url, data, params=params, timeout=timeout,
-                                auth=auth, headers=headers, verify=verify)
+        try:
+            response = requests.put(url, data, params=params, timeout=timeout,
+                                    auth=auth, headers=headers, verify=verify)
+        except requests.exceptions.ConnectionError:
+            self.log.warn("Unable to PUT content to {}".format(url), exc_info=True)
+            return
 
         try:
             response.raise_for_status()
@@ -397,8 +406,13 @@ class Stoq(StoqPluginManager):
 
         # Set our default headers
         headers = self.__set_requests_headers(**kwargs)
-        response = requests.post(url, data, params=params, files=files, timeout=timeout,
-                                 auth=auth, headers=headers, verify=verify)
+        try:
+            response = requests.post(
+                url, data, params=params, files=files, timeout=timeout,
+                auth=auth, headers=headers, verify=verify)
+        except requests.exceptions.ConnectionError:
+            self.log.warn("Unable to POST to {}".format(url), exc_info=True)
+            return
 
         try:
             response.raise_for_status()
