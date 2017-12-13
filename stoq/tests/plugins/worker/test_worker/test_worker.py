@@ -56,6 +56,8 @@ class TestWorkerScan(StoqWorkerPlugin):
 
         """
 
+        super().scan()
+
         return_false = kwargs.get("return_false", False)
         return_true = kwargs.get("return_true", False)
         return_string = kwargs.get("return_string", False)

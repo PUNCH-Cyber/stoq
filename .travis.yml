@@ -20,7 +20,7 @@ install:
   - python3 setup.py install
 
 script:
-  - cd cmd && coverage run --source=stoq --omit=*/stoq/tests/* stoq-cli.py runtests
+  - cd cmd && coverage run --include=*/stoq/* --omit=*/stoq/tests/*,*/stoq/shell.py,stoq-cli.py stoq-cli.py runtests
 
 after_success:
   coveralls

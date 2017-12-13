@@ -75,5 +75,12 @@ class StoqScanTestCase(unittest.TestCase):
 
         self.assertEqual(magic, magic_result)
 
+    def test_bytes_frequency(self):
+        freq = []
+        for byte_count in stoq.scan.bytes_frequency(self.magic_string.encode(), min_count=2):
+            freq.append(byte_count)
+
+        self.assertEqual(freq, [(b'\xc3', 2, 10.53), (b'\xbf', 2, 10.53), (b'\xc3\xbf', 2, 10.53)])
+
     def tearDown(self):
         pass

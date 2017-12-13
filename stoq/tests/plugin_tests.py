@@ -205,6 +205,11 @@ class StoqPluginTestCase(unittest.TestCase):
         resp = worker.start(None, return_dict=True)
         self.assertTrue(resp)
 
+    def test_scan_payload_return_true_ratelimit(self):
+        worker = self.stoq.load_plugin("test_worker", "worker")
+        resp = worker.start(None, return_true=True, ratelimit="1/3")
+        self.assertTrue(resp)
+
     def test_load_plugin_validate_config(self):
         worker = self.stoq.load_plugin("test_worker", "worker")
         self.assertFalse(worker.hashpayload)
@@ -378,6 +383,9 @@ class StoqPluginTestCase(unittest.TestCase):
     def test_get_plugins_of_category_decoder(self):
         resp = self.stoq.get_plugins_of_category("decoder")
         self.assertIsInstance(resp, types.GeneratorType)
+
+    def test_list_plugins(self):
+        pass
 
     def tearDown(self):
         pass
