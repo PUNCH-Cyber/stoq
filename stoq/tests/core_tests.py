@@ -14,6 +14,7 @@
 
 
 import os
+import uuid
 import shutil
 import unittest
 import datetime
@@ -53,6 +54,7 @@ class StoqCoreTestCase(unittest.TestCase):
         self.get_text_file_none = os.path.join(data_prefix, "get/nonexistent")
         self.get_text_file_nonauthorized = os.path.join(data_prefix, "notauthorized")
         self.get_text_url = "https://www.google.com/"
+        self.get_invalid_url = "http://{}".format(str(uuid.uuid4()))
 
         # Variables used to write a file
         self.write_path = os.path.join(self.stoq.temp_dir, "write")
@@ -67,9 +69,23 @@ class StoqCoreTestCase(unittest.TestCase):
     def test_logo(self):
         self.assertIsNotNone(print_logo())
 
+    def test_argv(self):
+        argv = ['argv_test']
+        temp_stoq = Stoq(argv=argv)
+        self.assertEqual(temp_stoq.argv, argv)
+
+    def test_base_dir(self):
+        base_dir = os.path.realpath(os.path.dirname(os.getcwd()))
+        temp_stoq = Stoq(base_dir=base_dir)
+        self.assertEqual(temp_stoq.base_dir, base_dir)
+
     def test_get_text_file(self):
         data = self.stoq.get_file(self.get_text_file)
         self.assertEqual(data, b"This is a text file\n")
+
+    def test_get_invalid_url(self):
+        data = self.stoq.get_file(self.get_invalid_url)
+        self.assertIsNone(data)
 
     def test_get_url(self):
         data = self.stoq.get_file(self.get_text_url)
