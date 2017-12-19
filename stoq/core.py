@@ -304,7 +304,7 @@ class Stoq(StoqPluginManager):
                 response = requests.get(
                     source, params=params, auth=auth, verify=verify,
                     timeout=timeout, headers=headers)
-            except requests.exceptions.ConnectionError:
+            except:
                 self.log.warn("Unable to retrieve content from {}".format(source), exc_info=True)
                 return
 
@@ -363,7 +363,7 @@ class Stoq(StoqPluginManager):
         try:
             response = requests.put(url, data, params=params, timeout=timeout,
                                     auth=auth, headers=headers, verify=verify)
-        except requests.exceptions.ConnectionError:
+        except:
             self.log.warn("Unable to PUT content to {}".format(url), exc_info=True)
             return
 
@@ -410,7 +410,7 @@ class Stoq(StoqPluginManager):
             response = requests.post(
                 url, data, params=params, files=files, timeout=timeout,
                 auth=auth, headers=headers, verify=verify)
-        except requests.exceptions.ConnectionError:
+        except:
             self.log.warn("Unable to POST to {}".format(url), exc_info=True)
             return
 
