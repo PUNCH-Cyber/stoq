@@ -56,6 +56,10 @@ class StoqPluginTestCase(unittest.TestCase):
         # Variables used to get/read a file
         self.get_text_file = os.path.join(self.data_prefix, "get/text_file")
 
+        # Dispatcher paths
+        self.dispatch_rules = os.path.join(self.test_path, "test_dispatch.yar")
+        self.get_dispatch_file = os.path.join(self.data_prefix, "get/dispatch_test")
+
         self.stoq.log.setLevel("CRITICAL")
 
     def test_load_carver_plugin(self):
@@ -276,7 +280,15 @@ class StoqPluginTestCase(unittest.TestCase):
         self.assertTrue(worker.template)
 
     def test_scan_payload_and_save_without_template_use_dispatching(self):
-        pass
+        payload = self.stoq.get_file(self.get_dispatch_file)
+        self.stoq.dispatch_rules = self.dispatch_rules
+        worker = self.stoq.load_plugin("test_worker_dispatch", "worker")
+        worker.saveresults = True
+        worker.hashpayload = True
+        resp = worker.start(payload, return_dict=True)
+        self.assertTrue(worker.dispatch)
+        self.assertIsNotNone(worker.yara_dispatcher_rules)
+        self.assertTrue(resp)
 
     def test_scan_payload_with_source(self):
         self.stoq.default_source = "test_source"

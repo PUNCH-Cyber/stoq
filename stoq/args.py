@@ -141,7 +141,8 @@ def StoqArgs(parser):
                              help="Process errors (if applicable)")
     source_opts.add_argument("-D", "--dispatch",
                              dest='dispatch',
-                             action='store_true',
+                             action='store_const',
+                             const=True,
                              help="Use yara to automatically dispatch payloads")
     source_opts.add_argument("--tlp",
                              dest='default_tlp',

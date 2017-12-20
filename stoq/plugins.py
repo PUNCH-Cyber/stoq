@@ -87,6 +87,7 @@ import re
 import time
 import signal
 import logging
+import itertools
 import threading
 import configparser
 import importlib.util
@@ -507,7 +508,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         # yara-python is not installed, dispatching is not supported
         if not yara_imported and self.dispatch:
-            self.log.error("Failed to load yara-python, dispatching will not work. "
+            self.log.warn("Failed to load yara-python, dispatching will not work. "
                            "Try reinstalling yara-python.")
             self.dispatch = False
 
@@ -1069,6 +1070,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
                 # Track hashes of payloads so we don't handle duplicates.
                 processed_hashes = {}
+                recursion_level = 0
 
                 while dispatch_payloads:
                     self.log.debug("Dispatch: Count of payloads to dispatch: {}".format(len(dispatch_payloads)))
@@ -1082,8 +1084,9 @@ class StoqWorkerPlugin(StoqPluginBase):
                         dispatch_kwargs = kwargs.copy()
                         dispatch_kwargs['uuid'] = dispatch_payload[0].get('uuid', worker_result['uuid'])
 
-                        if len(dispatch_kwargs['uuid']) > int(self.stoq.max_recursion):
-                            self.log.debug("Dispatch: Maximum recursion depth of {} reached".format(self.stoq.max_recursion))
+                        if recursion_level > int(self.stoq.max_recursion):
+                            self.log.debug(
+                                "Dispatch: Maximum recursion depth of {} reached".format(self.stoq.max_recursion))
                             continue
 
                         self.log.debug("Dispatch: Current dispatch hash {}".format(current_hash))
@@ -1100,26 +1103,37 @@ class StoqWorkerPlugin(StoqPluginBase):
                         temp_processed_hashes = processed_hashes.copy()
 
                         # Send the payload to the yara dispatcher
-                        for yara_result in self.yara_dispatcher(dispatch_payload[1]):
-                            dispatch_result = self._parse_dispatch_results(yara_result, **dispatch_kwargs)
+                        for dispatch_result, dispatch_content in self.yara_dispatcher(dispatch_payload[1], **dispatch_kwargs):
 
-                            if dispatch_result['sha1'] in temp_processed_hashes:
-                                self.log.info("Dispatch: Skipping duplicate hash: {}".format(dispatch_result['sha1']))
-                                continue
+                            # Create a key based on the sha1 hash of the payload, and
+                            # the dispatched plugin.
+                            hash_key = "{}-{}".format(
+                                dispatch_result['sha1'], dispatch_result['dispatcher'])
 
-                            temp_processed_hashes.setdefault(dispatch_result['sha1'], True)
+                            # Make sure a previously handled payload or dispatched payload has
+                            # not already been handled. If so, let's skip the results.
+                            if dispatch_result['sha1'] in temp_processed_hashes or hash_key in temp_processed_hashes:
+                                 self.log.info(
+                                     "Dispatch: Skipping duplicate hash: {}".format(dispatch_result['sha1']))
+                                 continue
 
-                            dispatch_payloads.append(yara_result)
+                            # Ensure we add this hash key to our processed results
+                            temp_processed_hashes.setdefault(hash_key, True)
+
+                            dispatch_payloads.append((dispatch_result, dispatch_content))
 
                             dispatch_result['payload_id'] = payload_id
 
                             if dispatch_result.get('save').lower() == 'true' and self.archive_connector:
-                                self.save_payload(yara_result[1], self.archive_connector)
+                                self.save_payload(dispatch_content, self.archive_connector)
 
                             results['results'].append(dispatch_result)
                             results['plugins'].update({str(payload_id): dispatch_result['dispatcher']})
 
                             payload_id += 1
+
+                    # Increment the recursion level to make sure we don't go too deep
+                    recursion_level += 1
 
             results['payloads'] = payload_id
 
@@ -1238,57 +1252,87 @@ class StoqWorkerPlugin(StoqPluginBase):
         self.log.debug("Dispatch: Yara hits = {}".format(len(self.yara_dispatcher_hits)))
 
         for hit in self.yara_dispatcher_hits:
+            dispatch_plugins = []
+            plugin_list = []
+
             if 'meta' in hit:
                 plugin_kwargs = hit['meta']
                 if 'plugin' in hit['meta']:
-                    plugin_type, plugin_name = hit['meta']['plugin'].lower().split(":")
+                    # In some instances multiple plugins may be loaded from a single
+                    # yara dispatcher hit. Let's split the `plugin` attribute to ensure
+                    # we load all of the appropriate plugins for dispatching. This will
+                    # result in a list similar to:
+                    # `["decoder:b64", "carver:pe"]`
+                    dispatch_plugins = hit['meta']['plugin'].lower().split(",")
+
+                    # Now that we have a list of plugins for dispatching, let's split
+                    # again, this time by `:` so we have another list of plugin types
+                    # and plugin names. This will result in a list similar to:
+                    # `[("decoder", "b64"), ("carver", "pe")]`
+                    for meta in dispatch_plugins:
+                        try:
+                            meta_plg = meta.split(":")
+                            plugin_list.append((meta_plg[0].strip(), meta_plg[1].strip()))
+                        except:
+                            self.log.debug("Invalid dispatch plugin syntax, skipping: {}".format(meta))
+
+                    # Ensure we have no duplicate plugins
+                    plugin_list.sort()
+                    plugin_list = list(plugin_list for plugin_list,_ in itertools.groupby(plugin_list))
                 else:
                     continue
 
-            # Make sure this is a valid plugin category
-            if plugin_type not in self.stoq.plugin_categories:
-                self.log.error("{} is not a valid plugin type".format(plugin_type))
-                continue
+            for plugin_type, plugin_name in plugin_list:
+                # Make sure this is a valid plugin category
+                if plugin_type not in self.stoq.plugin_categories:
+                    self.log.error("{} is not a valid plugin type".format(plugin_type))
+                    continue
 
-            self.log.debug("Dispatch: Sending payload to {}:{}".format(plugin_type, plugin_name))
+                self.log.debug("Dispatch: Sending payload to {}:{}".format(plugin_type, plugin_name))
 
-            try:
-                if plugin_type == 'carver':
-                    self.load_carver(plugin_name)
-                    content = self.carvers[plugin_name].carve(payload, **plugin_kwargs)
-                elif plugin_type == 'extractor':
-                    self.load_extractor(plugin_name)
-                    content = self.extractors[plugin_name].extract(payload, **plugin_kwargs)
-                elif plugin_type == 'decoder':
-                    self.load_decoder(plugin_name)
-                    content = self.decoders[plugin_name].decode(payload, **plugin_kwargs)
-                else:
+                try:
+                    if plugin_type == 'carver':
+                        self.load_carver(plugin_name)
+                        content = self.carvers[plugin_name].carve(payload, **plugin_kwargs)
+                    elif plugin_type == 'extractor':
+                        self.load_extractor(plugin_name)
+                        content = self.extractors[plugin_name].extract(payload, **plugin_kwargs)
+                    elif plugin_type == 'decoder':
+                        self.load_decoder(plugin_name)
+                        content = self.decoders[plugin_name].decode(payload, **plugin_kwargs)
+                    else:
+                        content = None
+                except Exception:
+                    self.log.error("Unable to handle dispatched payload with "
+                                "{}:{}".format(plugin_type, plugin_name), exc_info=True)
                     content = None
-            except Exception:
-                self.log.error("Unable to handle dispatched payload with "
-                               "{}:{}".format(plugin_type, plugin_name), exc_info=True)
-                content = None
 
-            if content:
-                self.log.debug("Dispatch: {} extracted items".format(len(content)))
-                # Iterate over the results from the plugin and append the
-                # yara rule metadata to it
-                for meta in content:
-                    dispatch_result = hit['meta'].copy()
-                    # Make sure we hash the extracted content
-                    dispatch_result.update(get_hashes(meta[1]))
+                if content:
+                    self.log.debug("Dispatch: {} extracted items".format(len(content)))
+                    # Iterate over the results from the plugin and append the
+                    # yara rule metadata to it
+                    for meta in content:
+                        dispatch_result = hit['meta'].copy()
+                        dispatch_result['dispatcher'] = "{}:{}".format(plugin_type, plugin_name)
+                        dispatch_result['plugin'] =  self.name
+                        dispatch_result['uuid'] = kwargs['uuid'].copy()
+                        dispatch_result['uuid'].append(self.stoq.get_uuid)
+                        dispatch_result['scan'] = self.scan(meta[1])
 
-                    dispatch_result['source_meta'] = {}
+                        # Make sure we hash the extracted content
+                        dispatch_result.update(get_hashes(meta[1]))
 
-                    # Keep any metadata returned by the plugin as source_meta,
-                    # but move some keys to the top lvel of the result.
-                    for k, v in meta[0].items():
-                        if k in ('filename', 'magic', 'ssdeep', 'path', 'size'):
-                            dispatch_result[k] = v
-                        else:
-                            dispatch_result['source_meta'][k] = v
+                        dispatch_result['source_meta'] = {}
 
-                    yield (dispatch_result, meta[1])
+                        # Keep any metadata returned by the plugin as source_meta,
+                        # but move some keys to the top lvel of the result.
+                        for k, v in meta[0].items():
+                            if k in ('filename', 'magic', 'ssdeep', 'path', 'size'):
+                                dispatch_result[k] = v
+                            else:
+                                dispatch_result['source_meta'][k] = v
+
+                        yield dispatch_result, meta[1]
 
         # Cleanup
         self.yara_dispatcher_hits = None
@@ -1297,18 +1341,6 @@ class StoqWorkerPlugin(StoqPluginBase):
         if data['matches']:
             self.yara_dispatcher_hits.append(data)
         yara.CALLBACK_CONTINUE
-
-    def _parse_dispatch_results(self, content, **kwargs):
-        meta = content[0]
-        meta['dispatcher'] = meta['plugin']
-        meta['plugin'] = self.name
-        # Make sure we append our new uuid to the uuid list, so we can track
-        # parents and children
-        meta['uuid'] = kwargs['uuid'].copy()
-        meta['uuid'].append(self.stoq.get_uuid)
-        meta['scan'] = self.scan(content[1])
-
-        return meta
 
 
 class StoqConnectorPlugin(StoqPluginBase):
