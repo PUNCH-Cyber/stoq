@@ -31,9 +31,12 @@ payloads to their intended plugin. As with any yara rules, the ``strings``
 and ``condition`` parameters are required, but dispatching also requires
 the ``meta`` attribute. Two keys, ``plugin`` and ``save`` are required
 within the ``meta`` attribute. The ``plugin`` key identifies the |stoQ|
-plugin category and plugin namei (e.g., ``plugin = "carver:rtf"``) that should
-be loaded if the *yara* rule hits. The ``save`` key identifies whether
-content that is extracted or carved from the payload should be saved.
+plugin category and plugin name (e.g., ``plugin = "carver:rtf"``) that should
+be loaded if the *yara* rule hits. It can contain multiple comma separated
+plugins that the payload should be dispatched to
+(e.g., ``plugin = "carver:rtf,decoder:b64"``). There is no limit on how
+many plugins may be used for dispatching. The ``save`` key identifies
+whether content that is extracted or carved from the payload should be saved.
 Additionally, all of the meta values are passed to the specified plugin
 as \*\*kwargs.
 
