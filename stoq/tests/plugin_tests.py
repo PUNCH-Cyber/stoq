@@ -43,10 +43,8 @@ class StoqPluginTestCase(unittest.TestCase):
 
         self.stoq.default_connector = "test_connector"
 
-        # Make sure the plugins are setup for tests
-        self.stoq.plugin_dir = os.path.join(self.test_path, "plugins")
         self.invalid_plugins = os.path.join(self.test_path, "invalid_plugins")
-        self.stoq.collect_plugins()
+        self.collect_plugins()
 
         self.data_prefix = os.path.join(self.test_path, "data")
 
@@ -61,6 +59,18 @@ class StoqPluginTestCase(unittest.TestCase):
         self.get_dispatch_file = os.path.join(self.data_prefix, "get/dispatch_test")
 
         self.stoq.log.setLevel("CRITICAL")
+
+    def collect_plugins(self, mode=None):
+        plugin_path1 = os.path.join(self.test_path, "plugins")
+        plugin_path2 = os.path.join(self.test_path, "plugins2")
+
+        if mode == 'multiple':
+            plugin_path = "{},{}".format(plugin_path1,plugin_path2)
+            self.stoq.plugin_dir = plugin_path
+        else:
+            self.stoq.plugin_dir = plugin_path1
+
+        self.stoq.collect_plugins()
 
     def test_load_carver_plugin(self):
         plugin = self.stoq.load_plugin("test_carver", "carver")
@@ -163,6 +173,16 @@ class StoqPluginTestCase(unittest.TestCase):
         worker = self.stoq.load_plugin("test_worker", "worker")
         self.assertFalse(worker.incompatible_plugin)
         self.assertIsNotNone(worker)
+
+    def test_load_worker_plugin_multiple(self):
+        self.collect_plugins(mode="multiple")
+        worker = self.stoq.load_plugin("test_worker", "worker")
+        self.assertFalse(worker.incompatible_plugin)
+        self.assertIsNotNone(worker)
+        worker2 = self.stoq.load_plugin("test_worker2", "worker")
+        self.assertFalse(worker2.incompatible_plugin)
+        self.assertIsNotNone(worker2)
+        self.collect_plugins()
 
     def test_load_worker_from_worker(self):
         plugin = self.stoq.load_plugin("test_worker", "worker")

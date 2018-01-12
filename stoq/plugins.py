@@ -159,34 +159,39 @@ class StoqPluginManager:
         """
 
         self.__collected_plugins__ = {}
-        abs_plugin_path = os.path.abspath(self.plugin_dir)
-        if not os.path.isdir(abs_plugin_path):
-            return
 
-        for root_path, subdirs, files in os.walk(abs_plugin_path):
-            for plg in files:
-                if plg.endswith(self.plugin_extension):
-                    try:
-                        plugin_path = "{}/{}".format(root_path, plg)
-                        config = configparser.ConfigParser()
-                        config.read(plugin_path)
-                        name = config.get("Core", "Name")
-                        module = config.get("Core", "Module")
-                        module_path = "{}/{}.py".format(root_path, module)
-                        if os.path.isfile(module_path):
-                            # open each module file and detect the category of plugin
-                            with open(module_path, "r") as src:
-                                cat = re.search('(?<=from stoq\.plugins import )(.+)',
-                                                src.read()).group()
-                                category = self.__plugindict__.get(cat, False)
+        plugin_list = self.plugin_dir.split(',')
 
-                            config["Core"]["Category"] = category
-                            config["Core"]["Module"] = module_path
-                            self.__collected_plugins__[name] = config
-                        else:
-                            self.log.warn("Found {} but no module {}, skipping".format(plugin_path, module_path))
-                    except:
-                        self.log.error("Error parsing config file: {}".format(plugin_path))
+        for plugin_dir_candidate in plugin_list:
+            abs_plugin_path = os.path.abspath(plugin_dir_candidate.strip())
+            if not os.path.isdir(abs_plugin_path):
+                return
+
+            for root_path, subdirs, files in os.walk(abs_plugin_path):
+                for plg in files:
+                    if plg.endswith(self.plugin_extension):
+                        try:
+                            plugin_path = "{}/{}".format(root_path, plg)
+                            config = configparser.ConfigParser()
+                            config.read(plugin_path)
+                            name = config.get("Core", "Name")
+                            module = config.get("Core", "Module")
+                            module_path = "{}/{}.py".format(root_path, module)
+                            if os.path.isfile(module_path):
+                                # open each module file and detect the category of plugin
+                                with open(module_path, "r") as src:
+                                    cat = re.search('(?<=from stoq\.plugins import )(.+)',
+                                                    src.read()).group()
+                                    category = self.__plugindict__.get(cat, False)
+
+                                config["Core"]["Category"] = category
+                                config["Core"]["Module"] = module_path
+                                config["Core"]["Root"] = plugin_path
+                                self.__collected_plugins__[name] = config
+                            else:
+                                self.log.warn("Found {} but no module {}, skipping".format(plugin_path, module_path))
+                        except:
+                            self.log.error("Error parsing config file: {}".format(plugin_path))
 
     @property
     def get_categories(self):
@@ -331,8 +336,8 @@ class StoqPluginManager:
 
                     setattr(plugin, opt, value)
 
-        setattr(plugin, 'category', category)
-        plugin_path = "{}/{}/{}".format(self.plugin_dir, category, name)
+        #setattr(plugin, 'category', category)
+        plugin_path = "{}/{}/{}".format(plugin.root, category, name)
         plugin_path = os.path.abspath(plugin_path)
         self.log.debug("{}:{} plugin path set to {}".format(category, name, plugin_path))
         setattr(plugin, 'plugin_path', plugin_path)
@@ -1455,6 +1460,10 @@ class StoqPluginInstaller:
         installer_opts.add_argument("--upgrade",
                                     action="store_true",
                                     help="Upgrade the stoQ Plugin")
+        installer_opts.add_argument("-P", "--plugin-dir",
+                                    dest='plugin_dir',
+                                    default=False,
+                                    help="Root directory to install plugin to")
 
         options = parser.parse_args(self.stoq.argv[2:])
 
@@ -1464,6 +1473,9 @@ class StoqPluginInstaller:
 
         # Set the source path of the plugin archive/directory
         self.plugin = os.path.abspath(options.plugin)
+
+        # Define a directory to install a plugin to, if so desired
+        self.plugin_dir = options.plugin_dir
 
         self.upgrade_plugin = options.upgrade
 
@@ -1568,7 +1580,15 @@ class StoqPluginInstaller:
             exit(-1)
 
     def set_plugin_path(self):
-        self.plugin_root = os.path.join(self.stoq.plugin_dir,
+        if self.plugin_dir:
+            plugin_dir = self.plugin_dir
+        else:
+            plugin_dir = self.stoq.plugin_dir
+
+        # Default to the first plugin path provided, in case there are many
+        install_path = plugin_dir.split(',')[0]
+
+        self.plugin_root = os.path.join(install_path,
                                         self.plugin_category)
 
         self.stoq.log.info("Installing {} plugin into {}...".format(self.plugin_name, self.plugin_root))
