@@ -14,7 +14,7 @@ def stoq_tests():
 
 setup(
     name="stoq",
-    version="0.15.0",
+    version="0.16.0",
     author="Marcus LaFerrera",
     author_email="marcus@punchcyber.com",
     description="A framework for simplifying analysis.",
