@@ -68,6 +68,7 @@ import configparser
 
 from bs4 import UnicodeDammit
 from pythonjsonlogger import jsonlogger
+from requests.exceptions import HTTPError
 
 from stoq.plugins import StoqPluginManager
 from stoq.helpers import JsonComplexDecoder, JsonComplexEncoder
@@ -311,8 +312,9 @@ class Stoq(StoqPluginManager):
             # Raise an exception if it was not successful
             try:
                 response.raise_for_status()
-            except Exception as err:
+            except HTTPError as err:
                 self.log.warn(err)
+                return
 
             content = response.content
             self.log.debug("{} ({} bytes) retrieved".format(source, len(content)))
@@ -337,7 +339,7 @@ class Stoq(StoqPluginManager):
                 self.log.error("Unauthorized source path. Update "
                                "source_base_tuple path in stoq.cfg.")
 
-        return None
+        return
 
     def put_file(self, url, params=None, data=None, auth=None, verify=True, timeout=30, **kwargs):
         """
@@ -369,8 +371,9 @@ class Stoq(StoqPluginManager):
 
         try:
             response.raise_for_status()
-        except Exception as err:
+        except HTTPError as err:
             self.log.warn(err)
+            return
 
         content = response.content
 
@@ -416,8 +419,9 @@ class Stoq(StoqPluginManager):
 
         try:
             response.raise_for_status()
-        except Exception as err:
+        except HTTPError as err:
             self.log.warn(err)
+            return
 
         content = response.content
 
