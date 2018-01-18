@@ -2,7 +2,6 @@ FROM ubuntu:16.04
 MAINTAINER Adam Trask ”adam@punchcyber.com”
 
 ENV LANG='C.UTF-8' LC_ALL='C.UTF-8' LANGUAGE='C.UTF-8' STOQ_TMP='/usr/local/tmp' STOQ_DIR='/usr/local/stoq'
-ENV STOQ_ENV $STOQ_DIR/.stoq-pyenv
 
 ADD . ${STOQ_TMP}/stoq
 ADD ./cmd ${STOQ_DIR}
@@ -35,44 +34,32 @@ RUN apt-get update \
     p7zip-rar \
     python3 \
     python3-dev \
+    python3-pip \
     python3-setuptools \
     unace-nonfree \
     unzip \
-    wget \
-  && echo "[stoQ] Setting up virtualenv..." \
-  && easy_install3 pip \
-  && pip3 install virtualenv --quiet \
-  && virtualenv ${STOQ_ENV}
+    wget
 
-####################
-### Install Yara ###
-####################
-WORKDIR ${STOQ_TMP}
-RUN echo "[stoQ] Installing yara..." \
-  && apt-get -yq install \
-    bison \
-    flex \
-    libjansson-dev \
-    libtool \
-  && git clone https://github.com/plusvic/yara.git yara
-
-WORKDIR ${STOQ_TMP}/yara
-RUN bash bootstrap.sh \
-  && ./configure --with-crypto --enable-magic --enable-cuckoo \
-  && make \
-  && make install
+############################
+### Install Requirements ###
+############################
+RUN echo "[stoQ] Installing python requirements..." \
+ && pip3 install requests[security] \
+ && pip3 install -r ${STOQ_TMP}/stoq/requirements.txt \
+ && pip3 install hydra jinja2
 
 ####################
 ### Install Core ###
 ####################
 WORKDIR ${STOQ_TMP}/stoq
 RUN echo "[stoQ] Installing core stoQ components..." \
-  && . ${STOQ_ENV}/bin/activate \
-  && pip3 install --global-option="build" --global-option="--dynamic-linking" yara-python \
-  && python setup.py install
+  && python3 setup.py install
 
+#######################
+### Install Plugins ###
+#######################
 WORKDIR ${STOQ_DIR}
-RUN . ${STOQ_ENV}/bin/activate \
+RUN echo "[stoQ] Installing plugins" \
   && chmod +x ${STOQ_DIR}/stoq-cli.py \
   && git clone https://github.com/PUNCH-Cyber/stoq-plugins-public.git \
   && for category in connector decoder extractor carver source reader worker; \
@@ -120,3 +107,8 @@ RUN echo "[stoQ] Installing trid" \
 ###########################
 WORKDIR ${STOQ_DIR}
 RUN rm -r ${STOQ_TMP}
+RUN apt-get clean
+RUN rm -rf \
+	/tmp/* \
+	/var/lib/apt/lists/* \
+	/var/tmp/*
