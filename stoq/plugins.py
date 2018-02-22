@@ -163,6 +163,8 @@ class StoqPluginManager:
         for plugin_dir_candidate in self.plugin_dir_list:
             abs_plugin_path = os.path.abspath(plugin_dir_candidate.strip())
             if not os.path.isdir(abs_plugin_path):
+                self.log.warn("Invalid plugin directory specified, "
+                              "skipping: {}".format(abs_plugin_path))
                 return
 
             for root_path, subdirs, files in os.walk(abs_plugin_path):
