@@ -213,6 +213,11 @@ class Stoq(StoqPluginManager):
                 elif opt.endswith("_tuple"):
                     value = tuple(i.strip() for i in value.split(","))
 
+                if opt == "plugin_dir":
+                    print("plugin_dir has been deprecated, please rename it to "
+                          "plugin_dir_list in stoq.cfg. This will be removed "
+                          "in a future version.")
+                    self.plugin_dir_list = [value]
                 setattr(self, opt, value)
 
     def logger_init(self):
