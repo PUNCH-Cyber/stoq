@@ -65,10 +65,9 @@ class StoqPluginTestCase(unittest.TestCase):
         plugin_path2 = os.path.join(self.test_path, "plugins2")
 
         if mode == 'multiple':
-            plugin_path = "{},{}".format(plugin_path1,plugin_path2)
-            self.stoq.plugin_dir = plugin_path
+            self.stoq.plugin_dir_list = [plugin_path1, plugin_path2]
         else:
-            self.stoq.plugin_dir = plugin_path1
+            self.stoq.plugin_dir_list = [plugin_path1]
 
         self.stoq.collect_plugins()
 
@@ -326,17 +325,17 @@ class StoqPluginTestCase(unittest.TestCase):
 
     # Invalid plugin tests
     def test_collect_plugin_invalid_path(self):
-        self.stoq.plugin_dir = os.path.join(self.invalid_plugins, "nonexistent")
+        self.stoq.plugin_dir_list = os.path.join(self.invalid_plugins, "nonexistent")
         resp = self.stoq.collect_plugins()
         self.assertIsNone(resp)
 
     def test_collect_plugin_invalid_config(self):
-        self.stoq.plugin_dir = os.path.join(self.invalid_plugins, "invalid_config")
+        self.stoq.plugin_dir_list = os.path.join(self.invalid_plugins, "invalid_config")
         resp = self.stoq.collect_plugins()
         self.assertIsNone(resp)
 
     def test_collect_plugin_no_module(self):
-        self.stoq.plugin_dir = os.path.join(self.invalid_plugins, "no_module")
+        self.stoq.plugin_dir_list = os.path.join(self.invalid_plugins, "no_module")
         resp = self.stoq.collect_plugins()
         self.assertIsNone(resp)
 

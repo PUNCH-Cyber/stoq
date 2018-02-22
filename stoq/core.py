@@ -125,7 +125,7 @@ class Stoq(StoqPluginManager):
         self.log_dir = os.path.join(self.base_dir, "logs")
         self.results_dir = os.path.join(self.base_dir, "results")
         self.temp_dir = os.path.join(self.base_dir, "temp")
-        self.plugin_dir = os.path.join(self.base_dir, "plugins")
+        self.plugin_dir_list = [os.path.join(self.base_dir, "plugins")]
         self.archive_base = os.path.join(self.base_dir, "archive")
         self.config_file = os.path.join(self.base_dir, "stoq.cfg")
         self.dispatch_rules = os.path.join(self.base_dir, 'dispatcher.yar')

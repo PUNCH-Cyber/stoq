@@ -160,9 +160,7 @@ class StoqPluginManager:
 
         self.__collected_plugins__ = {}
 
-        plugin_list = self.plugin_dir.split(',')
-
-        for plugin_dir_candidate in plugin_list:
+        for plugin_dir_candidate in self.plugin_dir_list:
             abs_plugin_path = os.path.abspath(plugin_dir_candidate.strip())
             if not os.path.isdir(abs_plugin_path):
                 return
@@ -1581,14 +1579,15 @@ class StoqPluginInstaller:
 
     def set_plugin_path(self):
         if self.plugin_dir:
-            plugin_dir = self.plugin_dir
+            install_path  = self.plugin_dir
         else:
-            plugin_dir = self.stoq.plugin_dir
+            if len(self.stoq.plugin_dir_list) > 1:
+                self.stoq.log.critical("Multiple plugin directories defined in stoq.cfg."
+                                       "Unable to determine plugin installation directory."
+                                       "Please explicitly define one using --plugin-dir")
+                exit(-1)
+            install_path = self.stoq.plugin_dir[0]
 
-        # Default to the first plugin path provided, in case there are many
-        install_path = plugin_dir.split(',')[0]
-
-        self.plugin_root = os.path.join(install_path,
-                                        self.plugin_category)
+        self.plugin_root = os.path.join(install_path, self.plugin_category)
 
         self.stoq.log.info("Installing {} plugin into {}...".format(self.plugin_name, self.plugin_root))

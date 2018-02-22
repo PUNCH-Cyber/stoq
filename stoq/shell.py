@@ -167,7 +167,7 @@ Display all available settings::
     stoq.log_backup_count = 5
     stoq.source_base_tuple = /usr/local/stoq
     stoq.max_recursion = 3
-    stoq.plugin_dir = /usr/local/stoq/plugins
+    stoq.plugin_dir_list = /usr/local/stoq/plugins
     stoq.archive_base = /usr/local/stoq/archive
 
 
