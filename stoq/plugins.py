@@ -1588,7 +1588,7 @@ class StoqPluginInstaller:
                                        "Unable to determine plugin installation directory."
                                        "Please explicitly define one using --plugin-dir")
                 exit(-1)
-            install_path = self.stoq.plugin_dir[0]
+            install_path = self.stoq.plugin_dir_list[0]
 
         self.plugin_root = os.path.join(install_path, self.plugin_category)
 
