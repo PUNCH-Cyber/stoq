@@ -164,10 +164,16 @@ The ``scan`` method is called when ``stoq-cli.py`` has a payload available for
 processing. ``scan`` requires two attributes, ``payload`` and ``**kwargs``.
 ``payload`` is the payload that the plugin should process. If the plugin does
 not require a payload, ``payload`` will be ``None``. ``**kwargs`` is a
-``dict()`` that contains the message provide by RabbitMQ, or some basic
+``dict`` that contains the message provide by RabbitMQ, or some basic
 metadata if RabbitMQ is not utilized. Once the ``scan`` method has completed
-processing the payload, it should return it's results as a ``dict()``.
-Optionally, if the results do not need to be process, it can return ``None``.
+processing the payload, it should return it's results as a ``dict`` or ``list``.
+If results are returned as a ``list``, each item in the ``list`` will be processed
+separately by the ``StoqConnectorPlugin``. This will result in multiple results
+being saved separately for each payload. This allows for worker plugins to save
+results without making multiple calls, such as when interacting with an API that
+returns multiple results or parsing an SMTP session that contains a stream of
+e-mails. Optionally, if the results do not need to be process, it can return
+``None``.
 
 Below is an example of a basic worker plugin.
 
