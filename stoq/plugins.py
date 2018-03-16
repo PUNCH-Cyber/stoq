@@ -1167,7 +1167,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                 etime = time.process_time()
                 self.log.debug("Processed payload in {:.2f}s".format(etime))
 
-        return True
+        return results
 
     def _save_results(self, results, **kwargs):
         self.log.debug("Save: Attempting to save results")
