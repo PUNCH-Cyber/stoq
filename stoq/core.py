@@ -79,7 +79,7 @@ try:
 except ImportError:
     raven_imported = False
 
-__version__ = "0.18.0"
+__version__ = "0.19.0"
 
 
 class Stoq(StoqPluginManager):
