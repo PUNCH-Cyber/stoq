@@ -1129,7 +1129,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
                             dispatch_result['payload_id'] = payload_id
 
-                            if dispatch_result.get('save').lower() == 'true' and self.archive_connector:
+                            if dispatch_result.get('save', '').lower() == 'true' and self.archive_connector:
                                 self.save_payload(dispatch_content, self.archive_connector)
 
                             results['results'].append(dispatch_result)
