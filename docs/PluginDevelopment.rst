@@ -16,6 +16,7 @@ There are several plugin categories that are available currently:
     - extractor
     - carver
     - decoder
+    - decorator
 
 The **worker** plugin category is for the plugins that will produce data from
 payloads and provide the results back to the framework for output. Once the
@@ -34,7 +35,8 @@ handle. For instance, monitoring a directory for new files or AMQP.
 deflating pdf streams. **Carver** plugins are used to carve content out of
 payloads (e.g., SWF streams out of DOC files, PE out of RTF, etc...).
 **Decoder** plugins provide the capability to automatically decode a payload,
-such as XOR, ROR, and base64.
+such as XOR, ROR, and base64. **Decorator** plugins allow for post processing
+of results from |stoQ| before being saved or returned.
 
 
 Configuration
@@ -508,6 +510,40 @@ the decoded content, and Index 1 must be the decoded content itself as bytes.
             # handle any decoding requirements here
             meta = {"size": len(payload), "type": "test"}
             return [(meta, payload)]
+
+Decorators
+----------
+
+In addition to the above requirements, the below methods are required for
+*Decorator* plugins:
+
+    - decorate
+
+``decorate()`` must be called with the ``results`` parameter. The plugin *must*
+return a ``dict`` of the original results provided to it, or modified ``results``.
+
+.. note:: The ``dict`` returned from ``decorate()`` *WILL* be what is saved/returned
+          from |stoQ|, so be extremely careful with how `results` is modified.
+
+.. code:: python
+
+    from stoq.plugins import StoqDecoratorPlugin
+
+
+    class ExampleDecorator(StoqDecoratorPlugin):
+
+        def __init__(self):
+            super().__init__()
+
+        def activate(self, stoq):
+            self.stoq = stoq
+            super().activate()
+
+        def decorate(self, results):
+            # handle any logic to determine what is added to results here
+            if 'APT' in results['scan']:
+                results = {'apt_malware': True}
+            return results
 
 Packaging Plugins
 =================
