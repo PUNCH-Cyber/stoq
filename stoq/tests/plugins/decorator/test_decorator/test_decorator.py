@@ -33,12 +33,11 @@ class TestDecorator(StoqDecoratorPlugin):
 
         super().activate()
 
-    def decorate(self, results, **kwargs):
+    def decorate(self, results):
         """
         Test stoQ decorator
 
-        :param bytes payload: Combined stoQ results to decorate
-        :param **kwargs kwargs: Additional attributes (unused)
+        :param dict results: Combined stoQ results to decorate
 
         :returns: Decorated results
 
