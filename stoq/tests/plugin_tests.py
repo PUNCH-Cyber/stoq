@@ -111,10 +111,10 @@ class StoqPluginTestCase(unittest.TestCase):
         self.assertIsNotNone(plugin)
 
     def test_decorator_plugin_decorate(self):
-        payload = "This is the return string"
+        payload = {"string": "This is the return string"}
         plugin = self.stoq.load_plugin("test_decorator", "decorator")
         resp = plugin.decorate(payload)
-        self.assertEqual(resp, payload)
+        self.assertTrue(resp['decorated'])
 
     def test_load_decoder(self):
         plugin = self.stoq.load_plugin("test_decoder", "decoder")
@@ -239,11 +239,12 @@ class StoqPluginTestCase(unittest.TestCase):
         resp = worker.start(None, return_dict=True)
         self.assertTrue(resp)
 
-    def test_scan_payload_with_decorator(self):
+    def test_scan_payload_return_dict_with_decorator(self):
         worker = self.stoq.load_plugin("test_worker", "worker")
-        self.stoq.load_plugin("test_decorator", "decorator")
+        worker.decorator_plugin = "test_decorator"
+        worker.load_decorator("test_decorator")
         resp = worker.start(None, return_dict=True)
-        self.assertTrue(resp)
+        self.assertTrue(resp['decorated'])
 
     def test_scan_payload_return_true_ratelimit(self):
         worker = self.stoq.load_plugin("test_worker", "worker")

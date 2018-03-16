@@ -82,9 +82,9 @@ def StoqArgs(parser):
 
     stoq_opts = parser.add_argument_group('General Options')
     stoq_opts.add_argument("-P", "--decorator",
-                           dest='decorate_connector',
+                           dest='decorator_plugin',
                            default=False,
-                           help="Decorate connector for post-processing results")
+                           help="Decorator plugin for post-processing of results")
     stoq_opts.add_argument("-L", "--log-level",
                            dest='log_level',
                            default=False,

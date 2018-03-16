@@ -449,7 +449,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         self.max_processes = 0
         self.dispatch = None
         self.output_connector = None
-        self.decorate_plugin = None
+        self.decorator_plugin = None
         self.source_plugin = None
         self.source_queue = None
         self.yara_dispatcher_rules = None
@@ -546,8 +546,8 @@ class StoqWorkerPlugin(StoqPluginBase):
             self.load_connector(self.archive_connector)
             self.log.debug("Using {} as default archive connector".format(self.archive_connector))
 
-        if self.decorate_plugin:
-            self.load_decorator(self.decorate_plugin)
+        if self.decorator_plugin:
+            self.load_decorator(self.decorator_plugin)
 
         # Check to see if a source plugin requirement was defined at the
         # command line. This is useful for plugins that don't need any
@@ -1166,7 +1166,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
             results['payloads'] = payload_id
 
-            if self.decorators:
+            if self.decorator_plugin in self.decorators:
                 results = self.decorators[self.decorator_plugin].decorate(results)
 
             # If we want the results for all plugins to be returned in one

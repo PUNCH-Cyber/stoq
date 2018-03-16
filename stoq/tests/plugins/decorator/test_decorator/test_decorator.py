@@ -44,4 +44,5 @@ class TestDecorator(StoqDecoratorPlugin):
 
         """
 
+        results['decorated'] = True
         return results
