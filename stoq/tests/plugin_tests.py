@@ -112,7 +112,7 @@ class StoqPluginTestCase(unittest.TestCase):
 
     def test_decorator_plugin_decorate(self):
         payload = "This is the return string"
-        plugin = self.stoq.load_plugin("test_decorator", "decorate")
+        plugin = self.stoq.load_plugin("test_decorator", "decorator")
         resp = plugin.decorate(payload)
         self.assertEqual(resp, payload)
 
