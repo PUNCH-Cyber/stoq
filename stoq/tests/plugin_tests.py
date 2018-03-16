@@ -105,6 +105,17 @@ class StoqPluginTestCase(unittest.TestCase):
         resp = connector.save(payload)
         self.assertEqual(resp, payload)
 
+    def test_load_decorator(self):
+        plugin = self.stoq.load_plugin("test_decorator", "decorator")
+        self.assertFalse(plugin.incompatible_plugin)
+        self.assertIsNotNone(plugin)
+
+    def test_decorator_plugin_decorate(self):
+        payload = "This is the return string"
+        plugin = self.stoq.load_plugin("test_decorator", "decorate")
+        resp = plugin.decorate(payload)
+        self.assertEqual(resp, payload)
+
     def test_load_decoder(self):
         plugin = self.stoq.load_plugin("test_decoder", "decoder")
         self.assertFalse(plugin.incompatible_plugin)
@@ -225,6 +236,12 @@ class StoqPluginTestCase(unittest.TestCase):
 
     def test_scan_payload_return_dict(self):
         worker = self.stoq.load_plugin("test_worker", "worker")
+        resp = worker.start(None, return_dict=True)
+        self.assertTrue(resp)
+
+    def test_scan_payload_with_decorator(self):
+        worker = self.stoq.load_plugin("test_worker", "worker")
+        self.stoq.load_plugin("test_decorator", "decorator")
         resp = worker.start(None, return_dict=True)
         self.assertTrue(resp)
 
@@ -413,6 +430,10 @@ class StoqPluginTestCase(unittest.TestCase):
 
     def test_get_plugins_of_category_decoder(self):
         resp = self.stoq.get_plugins_of_category("decoder")
+        self.assertIsInstance(resp, types.GeneratorType)
+
+    def test_get_plugins_of_category_decorator(self):
+        resp = self.stoq.get_plugins_of_category("decorator")
         self.assertIsInstance(resp, types.GeneratorType)
 
     def test_list_plugins(self):

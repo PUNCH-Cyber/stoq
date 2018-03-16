@@ -133,7 +133,8 @@ class StoqPluginManager:
                                   "source": StoqSourcePlugin,
                                   "extractor": StoqExtractorPlugin,
                                   "carver": StoqCarverPlugin,
-                                  "decoder": StoqDecoderPlugin
+                                  "decoder": StoqDecoderPlugin,
+                                  "decorator": StoqDecoratorPlugin
                                   }
 
         self.plugin_extension = ".stoq"
@@ -448,6 +449,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         self.max_processes = 0
         self.dispatch = None
         self.output_connector = None
+        self.decorate_plugin = None
         self.source_plugin = None
         self.source_queue = None
         self.yara_dispatcher_rules = None
@@ -469,6 +471,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         self.extractors = {}
         self.carvers = {}
         self.decoders = {}
+        self.decorators = {}
 
     def activate(self, options=None):
         """
@@ -542,6 +545,9 @@ class StoqWorkerPlugin(StoqPluginBase):
         if self.archive_connector:
             self.load_connector(self.archive_connector)
             self.log.debug("Using {} as default archive connector".format(self.archive_connector))
+
+        if self.decorate_plugin:
+            self.load_decorator(self.decorate_plugin)
 
         # Check to see if a source plugin requirement was defined at the
         # command line. This is useful for plugins that don't need any
@@ -860,6 +866,24 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         return True
 
+    def load_decorator(self, decorator):
+        """
+        Load a decorator plugin
+
+        :param str decorator: The name of decorator plugin to be loaded
+
+        :returns: True
+
+        """
+
+        if decorator not in self.decorators:
+            self.decorators[decorator] = self.stoq.load_plugin(decorator, 'decorator')
+            # Define the parent plugin within the plugin so we can use it
+            # should multiple worker plugins be loaded
+            self.decorators[decorator].parentname = self.name
+
+        return True
+
     def save_payload(self, payload, connector):
         """
         Save a payload using the designated connector
@@ -1142,6 +1166,9 @@ class StoqWorkerPlugin(StoqPluginBase):
 
             results['payloads'] = payload_id
 
+            if self.decorators:
+                results = self.decorators[self.decorator_plugin].decorate(results)
+
             # If we want the results for all plugins to be returned in one
             # big json blob, combined_results must be true.
             if self.combined_results:
@@ -1347,6 +1374,11 @@ class StoqWorkerPlugin(StoqPluginBase):
             self.yara_dispatcher_hits.append(data)
         yara.CALLBACK_CONTINUE
 
+
+class StoqDecoratorPlugin(StoqPluginBase):
+
+    def decorate(self):
+        pass
 
 class StoqConnectorPlugin(StoqPluginBase):
 

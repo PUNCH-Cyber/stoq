@@ -81,21 +81,25 @@ def StoqArgs(parser):
     """
 
     stoq_opts = parser.add_argument_group('General Options')
-    stoq_opts.add_argument("-L", "--loglevel",
+    stoq_opts.add_argument("-P", "--decorator",
+                           dest='decorate_connector',
+                           default=False,
+                           help="Decorate connector for post-processing results")
+    stoq_opts.add_argument("-L", "--log-level",
                            dest='log_level',
                            default=False,
                            choices=['debug', 'info', 'warning', 'error' 'critical'],
                            help="Log level")
-    stoq_opts.add_argument("-T", "--template",
+    stoq_opts.add_argument("--template",
                            dest='template',
                            default=False,
                            help="Name of template to use for output")
-    stoq_opts.add_argument("-M", "--max-processes",
+    stoq_opts.add_argument("--max-processes",
                            dest='max_processes',
                            default=False,
                            type=int,
                            help="Max number of processes (if supported by source plugin)")
-    stoq_opts.add_argument("-R", "--max_recursion",
+    stoq_opts.add_argument("--max-recursion",
                            dest='max_recursion',
                            default=False,
                            type=int,
@@ -110,14 +114,14 @@ def StoqArgs(parser):
                            dest='archive_connector',
                            default=False,
                            help="Connector plugin used to archive files")
-    conn_opts.add_argument("-S", "--split",
+    conn_opts.add_argument("--split",
                            dest='combined_results',
                            action='store_false',
                            help="Split results on a per plugin basis")
     conn_opts.add_argument("-O", "--out",
                            dest='outfile',
                            help="Results directory/filename (if applicable)")
-    conn_opts.add_argument("-P", "--use-date",
+    conn_opts.add_argument("--use-date",
                            dest='use_output_date',
                            default=False,
                            action='store_true',
