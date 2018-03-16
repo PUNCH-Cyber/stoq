@@ -1222,7 +1222,7 @@ class StoqWorkerPlugin(StoqPluginBase):
             self.load_connector(self.output_connector)
 
             if self.results_file:
-                kwargs.update({'filename': fn, 'append': True})
+                kwargs.update({'filename': self.results_file, 'append': True})
 
             if template_results:
                 self.connectors[self.output_connector].save(template_results,
