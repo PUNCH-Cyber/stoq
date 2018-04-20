@@ -102,7 +102,6 @@ except ImportError:
     yara = None
     yara_imported = False
 
-
 try:
     from jinja2 import Environment, FileSystemLoader
     from jinja2.exceptions import TemplateNotFound
@@ -111,7 +110,7 @@ except ImportError:
     jinja_imported = False
 
 from stoq import signal_handler
-from stoq.helpers import ratelimited
+from stoq.helpers import ratelimited, flatten
 from stoq.exceptions import SigtermCaught
 from stoq.scan import get_hashes, get_ssdeep, get_magic, get_sha1
 
@@ -463,6 +462,8 @@ class StoqWorkerPlugin(StoqPluginBase):
         self.outfile = None
         self.results_file = None
         self.use_output_date = False
+        self.flatten_results = False
+        self.flatten_delimiter = False
 
         self.workers = {}
         self.connectors = {}
@@ -594,8 +595,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                 self.log.warn("Unable to parse ingest metadata, skipping: {}".format(err))
 
         if self.template and not jinja_imported:
-            self.log.warn("Templates will not work. jinja2 must be installed first."
-                          " $ pip3 install jinja2")
+            self.log.warn("Templates will not work. jinja2 must be installed first.")
             self.template = False
 
         return self
@@ -1172,8 +1172,12 @@ class StoqWorkerPlugin(StoqPluginBase):
             # If we want the results for all plugins to be returned in one
             # big json blob, combined_results must be true.
             if self.combined_results:
-                self._save_results(results)
+                # We will overwrite results with what is returned in order to
+                # support post processing results, such as with flattening
+                # and templates.
+                results = self._save_results(results)
             else:
+                results_list = []
                 # Make sure we save the top level key/values so we can append
                 # them to the new individual result dict
                 result_date = results['date']
@@ -1188,7 +1192,9 @@ class StoqWorkerPlugin(StoqPluginBase):
                     plugin_result['plugins'] = result_plugins
                     plugin_result['results'] = [result]
 
-                    self._save_results(plugin_result)
+                    results_list.append(self._save_results(plugin_result))
+
+                results = results_list
 
             if self.log_level == 'DEBUG':
                 etime = time.process_time()
@@ -1199,9 +1205,8 @@ class StoqWorkerPlugin(StoqPluginBase):
     def _save_results(self, results, **kwargs):
         self.log.debug("Save: Attempting to save results")
 
-        template_results = None
-
         plugin = results['results'][0].get('plugin', self.name)
+        sha1 = results['results'][0].get('sha1', None)
 
         # Make sure we pass whether to append the date to the output connector
         kwargs.update({'use_date': self.use_output_date})
@@ -1216,6 +1221,10 @@ class StoqWorkerPlugin(StoqPluginBase):
             plugin_name = plugin
             index = plugin_name
 
+        if self.flatten_results:
+            self.log.debug("Save: flattening results")
+            results = flatten(results, delim=self.flatten_delimiter)
+
         # Parse output with a template
         if self.template:
 
@@ -1229,17 +1238,21 @@ class StoqWorkerPlugin(StoqPluginBase):
 
                 template_path = "{}/templates".format(plugin_path)
 
-                tpl_env = Environment(loader=FileSystemLoader(template_path),
-                                      trim_blocks=True, lstrip_blocks=True)
-                template_results = tpl_env.get_template(self.template).render(results=results)
+                tpl = Environment(
+                    loader=FileSystemLoader(template_path), trim_blocks=True, lstrip_blocks=True)
+
+                results = tpl.get_template(self.template).render(results=results)
+
             except TemplateNotFound:
                 # Set to False so we don't repeatedly try to render the template
                 self.template = False
-                self.log.error("Unable to load template. Does {}/{} exist?".format(template_path, self.template))
+                self.log.error("Unable to load template. Does {}/{} exist?".format(
+                    template_path, self.template))
             except Exception as err:
                 # Set to False so we don't repeatedly try to render the template
                 self.template = False
                 self.log.error(str(err))
+                results = None
 
         # If we are saving the results from the worker, let's take care of
         # it. This is defined in the .stoq configuration file for the
@@ -1251,18 +1264,12 @@ class StoqWorkerPlugin(StoqPluginBase):
             if self.results_file:
                 kwargs.update({'filename': self.results_file, 'append': True})
 
-            if template_results:
-                self.connectors[self.output_connector].save(template_results,
-                                                            index=index,
-                                                            **kwargs)
-            else:
-                sha1 = results['results'][0].get('sha1', None)
-                self.connectors[self.output_connector].save(results,
-                                                            sha1=sha1,
-                                                            index=index,
-                                                            **kwargs)
+            self.connectors[self.output_connector].save(
+                results, sha1=sha1, index=index, **kwargs)
 
         self.log.debug("Save: Results saved")
+
+        return results
 
     def yara_dispatcher(self, payload, **kwargs):
         """

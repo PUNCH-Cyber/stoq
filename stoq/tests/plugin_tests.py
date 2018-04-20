@@ -272,6 +272,25 @@ class StoqPluginTestCase(unittest.TestCase):
         resp = worker.start(payload, return_dict=True)
         self.assertTrue(resp)
 
+    def test_scan_payload_and_save_flatten(self):
+        payload = b"This is a payload to scan\x90\x90\x90\x00\x20"
+        worker = self.stoq.load_plugin("test_worker", "worker")
+        worker.saveresults = True
+        worker.hashpayload = True
+        worker.flatten_results = True
+        resp = worker.start(payload, return_dict=True)
+        self.assertEqual(resp['results:0:source_meta:return_dict'], True)
+
+    def test_scan_payload_and_save_flatten_custom_delim(self):
+        payload = b"This is a payload to scan\x90\x90\x90\x00\x20"
+        worker = self.stoq.load_plugin("test_worker", "worker")
+        worker.saveresults = True
+        worker.hashpayload = True
+        worker.flatten_results = True
+        worker.flatten_delimiter = '_'
+        resp = worker.start(payload, return_dict=True)
+        self.assertEqual(resp['results_0_source_meta_return_dict'], True)
+
     def test_scan_filename_and_save_bytes_without_template(self):
         worker = self.stoq.load_plugin("test_worker", "worker")
         worker.saveresults = True
@@ -286,7 +305,7 @@ class StoqPluginTestCase(unittest.TestCase):
         worker.hashpayload = True
         worker.combined_results = False
         resp = worker.start(payload, return_dict=True)
-        self.assertTrue(resp)
+        self.assertIsInstance(resp, list)
 
     def test_scan_filename_and_save_without_template(self):
         worker = self.stoq.load_plugin("test_worker", "worker")
@@ -313,7 +332,8 @@ class StoqPluginTestCase(unittest.TestCase):
         worker.saveresults = True
         worker.hashpayload = True
         worker.combined_results = False
-        worker.start(payload, return_dict=True)
+        resp = worker.start(payload, return_dict=True)
+        self.assertIsInstance(resp, list)
         self.assertTrue(worker.template)
 
     def test_scan_payload_and_save_without_template_use_dispatching(self):
