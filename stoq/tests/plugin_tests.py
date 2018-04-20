@@ -305,7 +305,7 @@ class StoqPluginTestCase(unittest.TestCase):
         worker.hashpayload = True
         worker.combined_results = False
         resp = worker.start(payload, return_dict=True)
-        self.assertTrue(resp)
+        self.assertIsInstance(resp, list)
 
     def test_scan_filename_and_save_without_template(self):
         worker = self.stoq.load_plugin("test_worker", "worker")
@@ -332,7 +332,8 @@ class StoqPluginTestCase(unittest.TestCase):
         worker.saveresults = True
         worker.hashpayload = True
         worker.combined_results = False
-        worker.start(payload, return_dict=True)
+        resp = worker.start(payload, return_dict=True)
+        self.assertIsInstance(resp, list)
         self.assertTrue(worker.template)
 
     def test_scan_payload_and_save_without_template_use_dispatching(self):
