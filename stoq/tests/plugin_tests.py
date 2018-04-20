@@ -75,11 +75,17 @@ class StoqPluginTestCase(unittest.TestCase):
         plugin = self.stoq.load_plugin("test_carver", "carver")
         self.assertFalse(plugin.incompatible_plugin)
         self.assertIsNotNone(plugin)
+        plugin.deactivate()
+        self.assertFalse(plugin.is_activated)
 
     def test_load_carver_from_worker(self):
         plugin = self.stoq.load_plugin("test_worker", "worker")
         resp = plugin.load_carver("test_carver")
         self.assertTrue(resp)
+        plugin.deactivate()
+        self.assertFalse(plugin.is_activated)
+        plugin.carvers['test_carver'].deactivate()
+        self.assertFalse(plugin.carvers['test_carver'].is_activated)
 
     def test_carver_plugin_carve(self):
         payload = "This is the return string"
@@ -93,11 +99,17 @@ class StoqPluginTestCase(unittest.TestCase):
         plugin = self.stoq.load_plugin("test_connector", "connector")
         self.assertFalse(plugin.incompatible_plugin)
         self.assertIsNotNone(plugin)
+        plugin.deactivate()
+        self.assertFalse(plugin.is_activated)
 
     def test_load_connector_from_worker(self):
         plugin = self.stoq.load_plugin("test_worker", "worker")
         resp = plugin.load_connector("test_connector")
         self.assertTrue(resp)
+        plugin.deactivate()
+        self.assertFalse(plugin.is_activated)
+        plugin.connectors['test_connector'].deactivate()
+        self.assertFalse(plugin.connectors['test_connector'].is_activated)
 
     def test_connector_plugin_save(self):
         payload = "test payload"
@@ -109,6 +121,8 @@ class StoqPluginTestCase(unittest.TestCase):
         plugin = self.stoq.load_plugin("test_decorator", "decorator")
         self.assertFalse(plugin.incompatible_plugin)
         self.assertIsNotNone(plugin)
+        plugin.deactivate()
+        self.assertFalse(plugin.is_activated)
 
     def test_decorator_plugin_decorate(self):
         payload = {"string": "This is the return string"}
@@ -120,11 +134,17 @@ class StoqPluginTestCase(unittest.TestCase):
         plugin = self.stoq.load_plugin("test_decoder", "decoder")
         self.assertFalse(plugin.incompatible_plugin)
         self.assertIsNotNone(plugin)
+        plugin.deactivate()
+        self.assertFalse(plugin.is_activated)
 
     def test_load_decoder_from_worker(self):
         plugin = self.stoq.load_plugin("test_worker", "worker")
         resp = plugin.load_decoder("test_decoder")
         self.assertTrue(resp)
+        plugin.deactivate()
+        self.assertFalse(plugin.is_activated)
+        plugin.decoders['test_decoder'].deactivate()
+        self.assertFalse(plugin.decoders['test_decoder'].is_activated)
 
     def test_decoder_plugin_decode(self):
         payload = "This is the return string"
@@ -138,11 +158,17 @@ class StoqPluginTestCase(unittest.TestCase):
         plugin = self.stoq.load_plugin("test_extractor", "extractor")
         self.assertFalse(plugin.incompatible_plugin)
         self.assertIsNotNone(plugin)
+        plugin.deactivate()
+        self.assertFalse(plugin.is_activated)
 
     def test_load_extractor_from_worker(self):
         plugin = self.stoq.load_plugin("test_worker", "worker")
         resp = plugin.load_extractor("test_extractor")
         self.assertTrue(resp)
+        plugin.deactivate()
+        self.assertFalse(plugin.is_activated)
+        plugin.extractors['test_extractor'].deactivate()
+        self.assertFalse(plugin.extractors['test_extractor'].is_activated)
 
     def test_extractor_plugin_extract(self):
         payload = "This is the return string"
@@ -156,11 +182,17 @@ class StoqPluginTestCase(unittest.TestCase):
         plugin = self.stoq.load_plugin("test_reader", "reader")
         self.assertFalse(plugin.incompatible_plugin)
         self.assertIsNotNone(plugin)
+        plugin.deactivate()
+        self.assertFalse(plugin.is_activated)
 
     def test_load_reader_from_worker(self):
         plugin = self.stoq.load_plugin("test_worker", "worker")
         resp = plugin.load_reader("test_reader")
         self.assertTrue(resp)
+        plugin.deactivate()
+        self.assertFalse(plugin.is_activated)
+        plugin.readers['test_reader'].deactivate()
+        self.assertFalse(plugin.readers['test_reader'].is_activated)
 
     def test_reader_plugin_read(self):
         payload = "This is the return string"
@@ -178,6 +210,10 @@ class StoqPluginTestCase(unittest.TestCase):
         plugin = self.stoq.load_plugin("test_worker", "worker")
         resp = plugin.load_source("test_source")
         self.assertTrue(resp)
+        plugin.deactivate()
+        self.assertFalse(plugin.is_activated)
+        plugin.sources['test_source'].deactivate()
+        self.assertFalse(plugin.sources['test_source'].is_activated)
 
     def test_load_worker_plugin(self):
         worker = self.stoq.load_plugin("test_worker", "worker")
@@ -198,6 +234,10 @@ class StoqPluginTestCase(unittest.TestCase):
         plugin = self.stoq.load_plugin("test_worker", "worker")
         resp = plugin.load_worker("test_worker_archive_connector")
         self.assertTrue(resp)
+        plugin.deactivate()
+        self.assertFalse(plugin.is_activated)
+        plugin.workers['test_worker_archive_connector'].deactivate()
+        self.assertFalse(plugin.workers['test_worker_archive_connector'].is_activated)
 
     def test_load_worker_plugin_archive_connector(self):
         worker = self.stoq.load_plugin("test_worker_archive_connector", "worker")
@@ -408,10 +448,32 @@ class StoqPluginTestCase(unittest.TestCase):
         self.assertTrue(worker.incompatible_plugin)
 
     def test_carve_payload(self):
-        pass
+        payload = "ZZZThis isZZZa test"
+        plugin = self.stoq.load_plugin("test_carver", "carver")
+        for result in plugin.carve_payload('ZZZ', payload):
+            start, end = result
+            self.assertIsInstance(start, int)
+            self.assertIsInstance(end, int)
+
+    def test_carve_payload_ignorecase(self):
+        payload = "ZZZThis isZZZa test"
+        plugin = self.stoq.load_plugin("test_carver", "carver")
+        for result in plugin.carve_payload('ZZZ', payload, ignorecase=True):
+            start, end = result
+            self.assertIsInstance(start, int)
+            self.assertIsInstance(end, int)
+
+    def test_decoder_to_bytearray_bytes(self):
+        payload = b"\x90\x41\x90\x41\x41\x41"
+        plugin = self.stoq.load_plugin("test_decoder", "decoder")
+        resp = plugin.to_bytearray(payload)
+        self.assertIsInstance(resp, bytearray)
 
     def test_decoder_to_bytearray(self):
-        pass
+        payload = "This is a string"
+        plugin = self.stoq.load_plugin("test_decoder", "decoder")
+        resp = plugin.to_bytearray(payload)
+        self.assertIsInstance(resp, bytearray)
 
     def test_get_categories(self):
         resp = self.stoq.get_categories
@@ -428,37 +490,54 @@ class StoqPluginTestCase(unittest.TestCase):
     def test_get_plugins_of_category_worker(self):
         resp = self.stoq.get_plugins_of_category("worker")
         self.assertIsInstance(resp, types.GeneratorType)
+        for plg in resp:
+            self.assertIsInstance(plg, tuple)
 
     def test_get_plugins_of_category_connector(self):
         resp = self.stoq.get_plugins_of_category("connector")
         self.assertIsInstance(resp, types.GeneratorType)
+        for plg in resp:
+            self.assertIsInstance(plg, tuple)
 
     def test_get_plugins_of_category_reader(self):
         resp = self.stoq.get_plugins_of_category("reader")
         self.assertIsInstance(resp, types.GeneratorType)
+        for plg in resp:
+            self.assertIsInstance(plg, tuple)
 
     def test_get_plugins_of_category_source(self):
         resp = self.stoq.get_plugins_of_category("source")
         self.assertIsInstance(resp, types.GeneratorType)
+        for plg in resp:
+            self.assertIsInstance(plg, tuple)
 
     def test_get_plugins_of_category_extractor(self):
         resp = self.stoq.get_plugins_of_category("extractor")
         self.assertIsInstance(resp, types.GeneratorType)
+        for plg in resp:
+            self.assertIsInstance(plg, tuple)
 
     def test_get_plugins_of_category_carver(self):
         resp = self.stoq.get_plugins_of_category("carver")
         self.assertIsInstance(resp, types.GeneratorType)
+        for plg in resp:
+            self.assertIsInstance(plg, tuple)
 
     def test_get_plugins_of_category_decoder(self):
         resp = self.stoq.get_plugins_of_category("decoder")
         self.assertIsInstance(resp, types.GeneratorType)
+        for plg in resp:
+            self.assertIsInstance(plg, tuple)
 
     def test_get_plugins_of_category_decorator(self):
         resp = self.stoq.get_plugins_of_category("decorator")
         self.assertIsInstance(resp, types.GeneratorType)
+        for plg in resp:
+            self.assertIsInstance(plg, tuple)
 
     def test_list_plugins(self):
-        pass
+        resp = self.stoq.list_plugins()
+        self.assertTrue(resp)
 
     def tearDown(self):
         pass

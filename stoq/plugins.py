@@ -377,8 +377,6 @@ class StoqPluginManager:
 
         """
 
-        # Make sure we update the filter, otherwise all plugins won't be
-        # visible.
         print("Available Plugins:")
         for category in self.get_categories:
             print(" {}s".format(category))
@@ -387,6 +385,7 @@ class StoqPluginManager:
                                             str(ver).ljust(7),
                                             desc))
 
+        return True
 
 class StoqPluginBase:
 

@@ -110,6 +110,12 @@ class StoqCoreTestCase(unittest.TestCase):
         data = self.stoq.get_file(self.get_text_file_nonauthorized)
         self.assertIsNone(data)
 
+    def test_json_logger(self):
+        s = Stoq()
+        s.log_syntax = 'json'
+        s.logger_init()
+        self.assertEqual(s.log_syntax, 'json')
+
     def test_write_text_file(self):
         payload = "This is the content to write to disk"
         fullpath = os.path.join(self.write_path, self.write_text_file)
@@ -211,15 +217,33 @@ class StoqCoreTestCase(unittest.TestCase):
     def test_loads_dumps_bytes_no_indent(self):
         payload = self.stoq.get_file(self.result_file_bytes)
         json_str = self.stoq.loads(payload)
+        json_str['bytes'] = b"hi\xe7\x8c\xab\x20\x62\x69\x6c\x6c\x79\x20\x74\x68\x65\x20\x74\x72\x6f\x6c\x6c"
         self.assertEqual(json_str['results'][0]['scan']['subject'], "Test")
         dumps = self.stoq.dumps(json_str, indent=None)
+        self.assertIsInstance(dumps, str)
+        loads = self.stoq.loads(dumps)
+        self.assertIsInstance(loads, dict)
+        self.assertIsInstance(loads['bytes'], str)
+
+    def test_loads_dumps_bytes_dict(self):
+        payload = self.stoq.get_file(self.result_file_str)
+        json_str = self.stoq.loads(payload)
+        self.assertEqual(json_str['results'][0]['scan']['subject'], "Test")
+        dumps = self.stoq.dumps(json_str)
         self.assertIsNotNone(dumps)
+
 
     def test_sanitize_json(self):
         payload = self.stoq.get_file(self.result_file_str)
         json_str = self.stoq.loads(payload.decode())
         sanitized_json = self.stoq.sanitize_json(json_str)
         self.assertEqual(sanitized_json['results'][0]['scan']['dot_notation'], 'Test')
+
+    def test_normalize_json(self):
+        payload = self.stoq.get_file(self.result_file_str)
+        json_str = self.stoq.loads(payload.decode())
+        normalized_json = self.stoq.normalize_json(json_str)
+        self.assertIsInstance(normalized_json, dict)
 
     def tearDown(self):
         pass
