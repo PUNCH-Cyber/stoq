@@ -1194,6 +1194,8 @@ class StoqWorkerPlugin(StoqPluginBase):
 
                     results_list.append(self._save_results(plugin_result))
 
+                results = results_list
+
             if self.log_level == 'DEBUG':
                 etime = time.process_time()
                 self.log.debug("Processed payload in {:.2f}s".format(etime))
