@@ -44,7 +44,4 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
-    extras_require={
-        'template': ['jinja2'],
-    },
 )
