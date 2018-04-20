@@ -1,207 +1,42 @@
 
-![stoQ](http://stoq.punchcyber.com/i/logo_stoq_mark.png "stoQ")
+<p align="center">
+<img src="http://stoq.punchcyber.com/i/stoq.png" width="400"><br />
+</p>
+
 
 [![Build Status](https://travis-ci.org/PUNCH-Cyber/stoq.svg?branch=master)](https://travis-ci.org/PUNCH-Cyber/stoq)
 [![Coverage Status](https://coveralls.io/repos/github/PUNCH-Cyber/stoq/badge.svg?branch=master)](https://coveralls.io/github/PUNCH-Cyber/stoq?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/stoq-framework/badge/?version=latest)](http://stoq-framework.readthedocs.io/en/latest/?badge=latest)
 
-## Overview
+# Overview
 
-stoQ is a modular and highly customizable framework for the creation of data
-sets from multiple disparate data sources. stoQ leverages multiple robust
-technologies in order to allow for a scalable and distributed architecture.
-The framework can be quickly and easily extended by utilizing an embedded
-plugin architecture.
+stoQ is a automation framework that helps to simplify the more mundane and
+repetitive tasks an analyst is required to do. It allows analysts and
+DevSecOps teams the ability to quickly transition from different data sources,
+databases, decoders/encoders, and numerous other tasks. stoQ was designed to be
+enterprise ready and scalable, while also being lean enough for individual security
+researchers.
 
-### Plugins
+Want to learn more? Read some of the blog posts we've written to learn more.
+- [Introduction to stoQ](https://stoq-framework.blogspot.com/2016/01/introduction-to-stoq.html)
+- [stoQ and Enterprise e-mail](https://stoq-framework.blogspot.com/2016/05/know-thy-e-mail-with-stoq.html)
+- [Operationalizing Indicators](https://stoq-framework.blogspot.com/2016/04/operationalizing-indicators.html)
+- [stoQ with Suricata](https://stoq-framework.blogspot.com/2016/02/using-stoq-with-suricatas-file.html)
 
-stoQ plugins are available separately in the [plugin repository](https://github.com/PUNCH-Cyber/stoq-plugins-public)
+# Plugins
 
+stoQ currently has over 40 publicly available plugins. These plugins are
+available separately in the [plugin repository](https://github.com/PUNCH-Cyber/stoq-plugins-public)
 
-## Installation and Usage
+Don't see a plugin you need? Check out the [plugin development](https://stoq-framework.readthedocs.io/en/latest/PluginDevelopment.html) documentation, or contact us.
 
- - Requires python >= 3.4
- - Additional documentation can be found in the [docs](http://stoq-framework.readthedocs.io/).
+# Installation and Documenation
 
+Want to get started quicky? Check out the [docker image](https://hub.docker.com/r/punchcyber/stoq/).
 
-### Installation Script
+stoQ requires a minimum of python 3.4. Installation on Debian based systems is
+as simple as running a script. For detailed instructions on how to install stoQ,
+to include the installation script, please visit stoQ's [install documentation](https://stoq-framework.readthedocs.io/en/latest/Installation.html). If you're
+interested in learning more about stoQ, to include how to develop your own plugins,
+checkout the [full documentation](http://stoq-framework.readthedocs.io/).
 
-If using Ubuntu, Redhat 7, or CentOS, installation of the core framework and
-plugins can be installed utilizing the installation script provided with the
-framework
-
-    git clone https://github.com/PUNCH-Cyber/stoq.git
-    cd stoq/
-    ./install.sh
-
-> Note:
-  - stoQ has not been tested on other operating systems, however,
-  if the required packages are available it should work without issue.
-
-
-> Note:
-  - If installation fails due to ```error: [Errno 104] Connection reset by peer``` error
-  on Ubuntu, execute the below and then re-run the installation script.
-  ```
-  source /usr/local/stoq/.stoq-pyenv/bin/activate
-  pip3 install requests[security]
-  pip3 install ssdeep python-magic beautifulsoup4
-  deactivate
-  ```
-
-### Detailed Ubuntu Installation
-
-Install the core requirements via apt-get and pip
-
-    sudo apt-add-repository -y multiverse
-    sudo apt-get install automake build-essential cython autoconf  \
-                         python3 python3-dev python3-setuptools \
-                         libyaml-dev libffi-dev libfuzzy-dev \
-                         libxml2-dev libxslt1-dev libz-dev p7zip-full \
-                         p7zip-rar unace-nonfree libssl-dev libmagic-dev
-    sudo easy_install3 pip
-
-
-It is recommended to install *stoQ* within a virtualenv. This is however
-completely optional.  In order to setup the virtualenv, the following should be
-completed
-
-    sudo pip3 install virtualenv
-    virtualenv /usr/local/stoq/.stoq-pyenv
-    source /usr/local/stoq/.stoq-pyenv/bin/activate
-
-Install the latest version of yara from https://virustotal.github.io/yara/
-
-> Note:
-  - stoQ will install yara-python from pip, however, there is at least one
-  issue (https://github.com/VirusTotal/yara-python/issues/28) that may
-  cause your ruleset to fail. It is recommend that yara-python be
-  install manually with:
-  ```pip3 install --global-option="build" --global-option="--dynamic-linking" yara-python```
-
-Once the virtualenv has been activated and yara is installed, we can install
-the core *stoQ* requirements
-
-    python setup.py install
-
-Make a directory to store all of *stoQ* and then copy the required files
-
-    mkdir /usr/local/stoq
-    cp -R cmd/* /usr/local/stoq/
-
-*stoQ* does not require any special permissions to run. For security reasons,
-it is recommended that *stoQ* is run as a non-privileged user. To create a
-*stoQ* user, run
-
-     sudo groupadd -r stoq
-     sudo useradd -r -c stoQ -g stoq -d /usr/local/stoq stoq
-     chown -R stoq:stoq /usr/local/stoq
-
-The core framework for *stoQ* should now be installed. We can use *stoQ*'s plugin
-installation feature to handle this. First, we will need to clone *stoQ*'s public
-plugin repository
-
-    git clone https://github.com/PUNCH-Cyber/stoq-plugins-public.git /tmp/stoq-plugins-public
-
-Plugins can be installed manually using ```stoq-cli.py install /path/to/plugin```,
-or, we can install all of the publicly available plugins using a simple script
-
-    #!/bin/bash
-    cd /usr/local/stoq
-    for category in connector decoder extractor carver source reader worker;
-    do
-        for plugin in `ls /tmp/stoq-plugins-public/$category`;
-        do
-            ./stoq-cli.py install /tmp/stoq-plugins-public/$category/$plugin
-        done
-    done
-
-> Note:
- - xorsearch requires XORsearch to be installed (http://blog.didierstevens.com/programs/xorsearch)
- - exif requires ExifTool to be installed (http://www.sno.phy.queensu.ca/~phil/exiftool)
- - tika requires that Apache Tika be installed (https://tika.apache.org/download.html)
- - clamav requires that a ClamAV daemon be installed (http://www.clamav.net/)
-
-
-## Supervisord
-
-*stoQ* can easily be added to supervisord for running as a system service in
-daemon mode. In our example, let's say that we want to use the yara and exif
-plugins to monitor RabbitMQ and save any results into MongoDB. We've installed
-*stoQ* into /usr/local/stoq and our python virtual environment is in
-```/usr/local/stoq/.stoq-pyenv```. First, let's install the supervisor Ubuntu package
-
-    sudo apt-get install supervisor
-
-
-Now, let's create a new file in ```/etc/supervisor/conf.d``` named ```stoq.conf```
-with the below content
-
-    [program:exif]
-    command=/usr/local/stoq/.stoq-pyenv/bin/python stoq-cli.py %(program_name)s -I rabbitmq -C mongodb
-    process_name=%(program_name)s_%(process_num)02d
-    directory=/usr/local/stoq
-    autostart=true
-    autorestart=true
-    startretries=3
-    numprocs=1
-    user=stoq
-
-    [program:yara]
-    command=/usr/local/stoq/.stoq-pyenv/bin/python stoq-cli.py %(program_name)s -I rabbitmq -C mongodb
-    process_name=%(program_name)s_%(process_num)02d
-    directory=/usr/local/stoq
-    autostart=true
-    autorestart=true
-    startretries=3
-    numprocs=1
-    user=stoq
-
-
-Then, simply restart supervisord
-
-    supervisorctl reload
-
-
-> Note:
-  - If supervisorctl fails, ensure that the supervisor service is running
-  ```service supervisor start```
-
-You should now have two *stoQ* workers running, monitoring their RabbitMQ queue,
-and saving their results into your MongoDB instance.
-
-## Vagrant
-
-If testing *stoQ* is something you are interested in doing, you can use Vagrant
-to setup a simple instance.
-
-First, install Vagrant from https://www.vagrantup.com/downloads, then, install
-VirtualBox from https://www.virtualbox.org/wiki/Downloads.
-
-Once the prerequisites are installed, download the Ubuntu box::
-
-    vagrant box add ubuntu/xenial64
-
-Next, create a new directory named ```stoq``` and save the Vagrantfile in it::
-
-    wget -O Vagrantfile https://raw.githubusercontent.com/PUNCH-Cyber/stoq/master/Vagrantfile
-
-
-Now, let's bring up the Vagrant box::
-
-    vagrant up
-
-
-Log into the new box::
-
-    vagrant ssh
-
-
-Switch to the ```stoq``` user::
-
-    sudo su - stoq
-
-
-Your newly installed *stoQ* instance is now available in ``/usr/local/stoq``.
-
-All done!
