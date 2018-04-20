@@ -25,3 +25,4 @@ Description = Test stoQ source
 [options]
 # Does this plugin support multiprocessing?
 multiprocess = True
+recursive = False

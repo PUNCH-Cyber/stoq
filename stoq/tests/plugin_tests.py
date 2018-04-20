@@ -390,6 +390,7 @@ class StoqPluginTestCase(unittest.TestCase):
     def test_scan_payload_with_source(self):
         self.stoq.default_source = "test_source"
         worker = self.stoq.load_plugin("test_worker", "worker")
+        worker.source_plugin = "test_source"
         self.stoq.worker.path = self.get_text_file
         resp = worker.run()
         self.assertTrue(resp)
@@ -397,6 +398,7 @@ class StoqPluginTestCase(unittest.TestCase):
     def test_multiprocessing_worker(self):
         self.stoq.default_source = "test_source"
         worker = self.stoq.load_plugin("test_worker", "worker")
+        worker.source_plugin = "test_source"
         self.stoq.worker.path = os.path.join(self.data_prefix, "get")
         resp = worker.run()
         self.assertTrue(resp)
@@ -538,6 +540,17 @@ class StoqPluginTestCase(unittest.TestCase):
     def test_list_plugins(self):
         resp = self.stoq.list_plugins()
         self.assertTrue(resp)
+
+    def test_deactivate_everything(self):
+        plugin = self.stoq.load_plugin("test_worker", "worker")
+        plugin.load_extractor("test_extractor")
+        plugin.load_connector("test_connector")
+        plugin.load_source("test_source")
+        plugin.load_reader("test_reader")
+        plugin.load_decoder("test_decoder")
+        plugin.load_carver("test_carver")
+        plugin.load_decorator("test_decorator")
+        plugin._deactivate_everything()
 
     def tearDown(self):
         pass

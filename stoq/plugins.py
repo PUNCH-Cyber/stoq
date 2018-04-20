@@ -691,9 +691,9 @@ class StoqWorkerPlugin(StoqPluginBase):
         for category in self.stoq.plugin_categories:
             full_category_name = category + "s"
             plugin_category = getattr(self, full_category_name, None)
-            if plugin_category is not None:
+            if plugin_category:
                 for plugin in plugin_category:
-                    if plugin:
+                    if plugin_category[plugin]:
                         plugin_category[plugin].deactivate()
 
     def _multiprocess(self, queue):
