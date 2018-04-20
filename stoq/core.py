@@ -590,9 +590,9 @@ class Stoq(StoqPluginManager):
         # Using try/except because it is faster than checking the type() of data,
         # be it str() or bytes()
         try:
-            return json.loads(data, cls=JsonComplexEncoder)
+            return json.loads(data, object_hook=JsonComplexEncoder)
         except:
-            return json.loads(data.decode(), cls=JsonComplexEncoder)
+            return json.loads(data.decode(), object_hook=JsonComplexEncoder)
 
     def __set_requests_headers(self, headers=None):
         """
