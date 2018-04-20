@@ -1,0 +1,15 @@
+
+[run]
+branch = True
+source = stoq/
+omit =
+    */stoq/tests/*
+    */stoq/shell.py
+    stoq-cli.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise NotImplementedError
+    if __name__ == .__main__.:
