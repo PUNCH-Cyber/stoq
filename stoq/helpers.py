@@ -1,4 +1,4 @@
-#   Copyright 2014-2016 PUNCH Cyber Analytics Group
+#   Copyright 2014-2018 PUNCH Cyber Analytics Group
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
 import time
 import json
 import threading
+import collections
+
 from functools import wraps
 
 
@@ -82,3 +84,29 @@ def ratelimited():
         return ratelimit
 
     return decorator
+
+
+def flatten(data, delim='_'):
+    """
+    Flatten a nested `dict`
+
+    """
+    result = {}
+
+    def flatten_dict(keys, name=''):
+        if isinstance(keys, collections.MutableMapping):
+            for value in keys:
+                flatten_dict(keys[value], "{}{}{}".format(name, value, delim))
+        elif isinstance(keys, list):
+            count = 0
+            for value in keys:
+                if isinstance(value, collections.MutableMapping):
+                    flatten_dict(value, "{}{}{}".format(name, count, delim))
+                else:
+                    result[name[:-1]] = keys
+                count += 1
+        else:
+            result[name[:-1]] = keys
+
+    flatten_dict(data)
+    return result

@@ -126,6 +126,15 @@ def StoqArgs(parser):
                            default=False,
                            action='store_true',
                            help="Add date to index or path (if applicable)")
+    conn_opts.add_argument("--flatten",
+                           dest='flatten_results',
+                           default=False,
+                           action='store_true',
+                           help="Flatten JSON results")
+    conn_opts.add_argument("--delimiter",
+                           dest='flatten_delimiter',
+                           default=':',
+                           help="Delimiter to use for flattened results")
 
     source_opts = parser.add_argument_group('Ingest Options')
     source_opts.add_argument("-F", "--file",

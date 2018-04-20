@@ -14,7 +14,7 @@ def stoq_tests():
 
 setup(
     name="stoq",
-    version="0.19.0",
+    version="0.20.0",
     author="Marcus LaFerrera",
     author_email="marcus@punchcyber.com",
     description="A framework for simplifying analysis.",
@@ -44,4 +44,7 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
+    extras_require={
+        'template': ['jinja2'],
+    },
 )
