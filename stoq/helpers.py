@@ -32,16 +32,15 @@ class JsonComplexDecoder(json.JSONEncoder):
             return obj
 
 
-class JsonComplexEncoder(json.JSONDecoder):
+def JsonComplexEncoder(obj):
     """
     Extends json.loads() to convert bytes to string
 
     """
-    def default(self, obj):
-        if isinstance(obj, bytes):
-            return str(obj)
-        else:
-            return obj
+    if isinstance(obj, bytes):
+        return str(obj)
+    else:
+        return obj
 
 
 # Based on code from https://gist.github.com/gregburek/1441055
