@@ -163,7 +163,7 @@ class StoqPluginManager:
         for plugin_dir_candidate in self.plugin_dir_list:
             abs_plugin_path = os.path.abspath(plugin_dir_candidate.strip())
             if not os.path.isdir(abs_plugin_path):
-                self.log.warn("Invalid plugin directory specified, "
+                self.log.warning("Invalid plugin directory specified, "
                               "skipping: {}".format(abs_plugin_path))
                 return
 
@@ -189,7 +189,7 @@ class StoqPluginManager:
                                 config["Core"]["Root"] = plugin_dir_candidate
                                 self.__collected_plugins__[name] = config
                             else:
-                                self.log.warn("Found {} but no module {}, skipping".format(plugin_path, module_path))
+                                self.log.warning("Found {} but no module {}, skipping".format(plugin_path, module_path))
                         except:
                             self.log.error("Error parsing config file: {}".format(plugin_path))
 
@@ -244,7 +244,7 @@ class StoqPluginManager:
         info = self.__collected_plugins__.get(name)
 
         if not info:
-            self.log.warn("No plugin available with the name {}".format(name))
+            self.log.warning("No plugin available with the name {}".format(name))
             return False
 
         path = info.get("Core", "Module")
@@ -305,7 +305,7 @@ class StoqPluginManager:
         plugin = self.get_plugin(name, category)
 
         if not plugin:
-            self.log.warn("Plugin {}:{} failed to load".format(category, name))
+            self.log.warning("Plugin {}:{} failed to load".format(category, name))
             return False
 
         for sect in plugin.details.sections():
@@ -419,7 +419,7 @@ class StoqPluginBase:
 
         if not self.min_version or not self.max_version:
             self.incompatible_plugin = True
-            self.log.warn("Plugin not compatible with this version of stoQ. "
+            self.log.warning("Plugin not compatible with this version of stoQ. "
                           "Unpredictable results may occur!")
 
         if hasattr(self, 'max_tlp'):
@@ -517,7 +517,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
         # yara-python is not installed, dispatching is not supported
         if not yara_imported and self.dispatch:
-            self.log.warn("Failed to load yara-python, dispatching will not work. "
+            self.log.warning("Failed to load yara-python, dispatching will not work. "
                            "Try reinstalling yara-python.")
             self.dispatch = False
 
@@ -592,10 +592,10 @@ class StoqWorkerPlugin(StoqPluginBase):
                 self.ingest_metadata = ingest_metadata
                 self.log.debug("Ingest time metadata: {}".format(self.ingest_metadata))
             except Exception as err:
-                self.log.warn("Unable to parse ingest metadata, skipping: {}".format(err))
+                self.log.warning("Unable to parse ingest metadata, skipping: {}".format(err))
 
         if self.template and not jinja_imported:
-            self.log.warn("Templates will not work. jinja2 must be installed first.")
+            self.log.warning("Templates will not work. jinja2 must be installed first.")
             self.template = False
 
         return self
@@ -673,9 +673,9 @@ class StoqWorkerPlugin(StoqPluginBase):
                     done = True
 
         except KeyboardInterrupt:
-            self.log.warn("Keyboard interrupt received..attempting graceful shutdown")
+            self.log.warning("Keyboard interrupt received..attempting graceful shutdown")
         except SigtermCaught:
-            self.log.warn("SIGTERM Caught..attempting graceful shutdown")
+            self.log.warning("SIGTERM Caught..attempting graceful shutdown")
         except Exception as err:
             self.log.critical(err, exc_info=True)
         finally:
@@ -975,7 +975,7 @@ class StoqWorkerPlugin(StoqPluginBase):
                 self.log.debug("Attempting to retrieve payload using {}".format(archive_type))
                 payload = self.connectors[archive_type].get_file(**kwargs)
             else:
-                self.log.warn("Connector unable to get file..skipping")
+                self.log.warning("Connector unable to get file..skipping")
                 return False
 
         if payload:

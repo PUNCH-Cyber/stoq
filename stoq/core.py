@@ -311,14 +311,14 @@ class Stoq(StoqPluginManager):
                     source, params=params, auth=auth, verify=verify,
                     timeout=timeout, headers=headers)
             except:
-                self.log.warn("Unable to retrieve content from {}".format(source), exc_info=True)
+                self.log.warning("Unable to retrieve content from {}".format(source), exc_info=True)
                 return
 
             # Raise an exception if it was not successful
             try:
                 response.raise_for_status()
             except HTTPError as err:
-                self.log.warn(err)
+                self.log.warning(err)
                 return
 
             content = response.content
@@ -339,7 +339,7 @@ class Stoq(StoqPluginManager):
                             self.log.debug("{} ({} bytes) retrieved".format(abspath, len(content)))
                             return content
                     except PermissionError as err:
-                        self.log.warn("{}".format(err))
+                        self.log.warning("{}".format(err))
             else:
                 self.log.error("Unauthorized source path. Update "
                                "source_base_tuple path in stoq.cfg.")
@@ -371,13 +371,13 @@ class Stoq(StoqPluginManager):
             response = requests.put(url, data, params=params, timeout=timeout,
                                     auth=auth, headers=headers, verify=verify)
         except:
-            self.log.warn("Unable to PUT content to {}".format(url), exc_info=True)
+            self.log.warning("Unable to PUT content to {}".format(url), exc_info=True)
             return
 
         try:
             response.raise_for_status()
         except HTTPError as err:
-            self.log.warn(err)
+            self.log.warning(err)
             return
 
         content = response.content
@@ -419,13 +419,13 @@ class Stoq(StoqPluginManager):
                 url, data, params=params, files=files, timeout=timeout,
                 auth=auth, headers=headers, verify=verify)
         except:
-            self.log.warn("Unable to POST to {}".format(url), exc_info=True)
+            self.log.warning("Unable to POST to {}".format(url), exc_info=True)
             return
 
         try:
             response.raise_for_status()
         except HTTPError as err:
-            self.log.warn(err)
+            self.log.warning(err)
             return
 
         content = response.content
@@ -465,7 +465,7 @@ class Stoq(StoqPluginManager):
         fullpath = os.path.abspath(fullpath)
 
         if not payload:
-            self.log.warn("Unable to save file {}, no content was provided".format(fullpath))
+            self.log.warning("Unable to save file {}, no content was provided".format(fullpath))
             return False
 
         self.log.debug("Attempting to save file to {} ({} bytes)".format(fullpath, len(payload)))
