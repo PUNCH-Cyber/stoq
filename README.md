@@ -18,10 +18,10 @@ enterprise ready and scalable, while also being lean enough for individual secur
 researchers.
 
 Want to learn more? Read some of the blog posts we've written to learn more.
-- [Introduction to stoQ](https://stoq-framework.blogspot.com/2016/01/introduction-to-stoq.html)
-- [stoQ and Enterprise e-mail](https://stoq-framework.blogspot.com/2016/05/know-thy-e-mail-with-stoq.html)
-- [Operationalizing Indicators](https://stoq-framework.blogspot.com/2016/04/operationalizing-indicators.html)
-- [stoQ with Suricata](https://stoq-framework.blogspot.com/2016/02/using-stoq-with-suricatas-file.html)
+- [Introduction to stoQ](https://medium.com/stoq/introduction-to-stoq-b163b3ec9e08)
+- [stoQ and Enterprise e-mail](https://medium.com/stoq/know-thy-e-mail-613974084977)
+- [Operationalizing Indicators](https://medium.com/stoq/operationalizing-indicators-84a2e12229d4)
+- [stoQ with Suricata](https://medium.com/stoq/using-stoq-with-suricatas-file-extraction-capability-2d2ccc5b3077)
 
 # Plugins
 
