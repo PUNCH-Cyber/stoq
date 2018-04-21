@@ -17,7 +17,7 @@ databases, decoders/encoders, and numerous other tasks. stoQ was designed to be
 enterprise ready and scalable, while also being lean enough for individual security
 researchers.
 
-Want to learn more? Read some of the blog posts we've written to learn more.
+Want to learn more? Read some of the [blog posts](https://medium.com/stoq) we've written to learn more.
 - [Introduction to stoQ](https://medium.com/stoq/introduction-to-stoq-b163b3ec9e08)
 - [stoQ and Enterprise e-mail](https://medium.com/stoq/know-thy-e-mail-613974084977)
 - [Operationalizing Indicators](https://medium.com/stoq/operationalizing-indicators-84a2e12229d4)
