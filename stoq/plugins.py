@@ -1033,12 +1033,10 @@ class StoqWorkerPlugin(StoqPluginBase):
             results['plugins'] = {}
 
             # If we don't have a uuid, let's generate one
-            uid = kwargs.get('uuid', None)
-            if type(uid) == str:
+            uid = kwargs.get('uuid', self.stoq.get_uuid)
+            if isinstance(uid, str):
                 self.log.debug("Adding UUID {}".format(uid))
                 kwargs['uuid'] = [uid]
-            elif not uid:
-                kwargs['uuid'] = [self.stoq.get_uuid]
 
             worker_result['scan'] = scan_result
 
