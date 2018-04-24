@@ -50,6 +50,7 @@ class StoqCoreTestCase(unittest.TestCase):
         self.stoq.log.setLevel("CRITICAL")
 
         # Variables used to get/read a file or url
+        self.config_file_test = os.path.join(data_prefix, "stoq.cfg")
         self.get_text_file = os.path.join(data_prefix, "get/text_file")
         self.get_text_file_none = os.path.join(data_prefix, "get/nonexistent")
         self.get_text_file_nonauthorized = os.path.join(data_prefix, "notauthorized")
@@ -115,6 +116,15 @@ class StoqCoreTestCase(unittest.TestCase):
         s.log_syntax = 'json'
         s.logger_init()
         self.assertEqual(s.log_syntax, 'json')
+
+    def test_load_config(self):
+        s = Stoq()
+        s.config_file = self.config_file_test
+        s.load_config()
+        self.assertIsInstance(s.log_level, str)
+        self.assertIsInstance(s.url_prefix_tuple, tuple)
+        self.assertIsInstance(s.plugin_dir_list, list)
+        self.assertIsInstance(s.is_dict, dict)
 
     def test_write_text_file(self):
         payload = "This is the content to write to disk"
@@ -231,7 +241,6 @@ class StoqCoreTestCase(unittest.TestCase):
         self.assertEqual(json_str['results'][0]['scan']['subject'], "Test")
         dumps = self.stoq.dumps(json_str)
         self.assertIsNotNone(dumps)
-
 
     def test_sanitize_json(self):
         payload = self.stoq.get_file(self.result_file_str)

@@ -16,6 +16,7 @@ before_install:
   - pip3 install hydra scandir jinja2 coveralls
   - cp cmd/stoq.cfg .
   - chmod +x cmd/stoq-cli.py
+  - mkdir plugins
 
 install:
   - python3 setup.py install
