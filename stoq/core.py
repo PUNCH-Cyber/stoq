@@ -69,6 +69,7 @@ import configparser
 from bs4 import UnicodeDammit
 from pythonjsonlogger import jsonlogger
 from requests.exceptions import HTTPError
+from logging.handlers import RotatingFileHandler
 
 from stoq.plugins import StoqPluginManager
 from stoq.helpers import JsonComplexDecoder, JsonComplexEncoder
@@ -242,10 +243,9 @@ class Stoq(StoqPluginManager):
         self.log_path = os.path.abspath(os.path.join(self.log_dir, log_file))
 
         # Setup our logfile
-        file_handler = logging.handlers.RotatingFileHandler(filename=self.log_path,
-                                                            mode='a',
-                                                            maxBytes=int(self.log_maxbytes),
-                                                            backupCount=int(self.log_backup_count))
+        file_handler = RotatingFileHandler(
+            filename=self.log_path, mode='a', maxBytes=int(self.log_maxbytes),
+            backupCount=int(self.log_backup_count))
 
         # Setup our STDERR output
         stderr_handler = logging.StreamHandler()
