@@ -2,6 +2,7 @@
 [run]
 branch = True
 source = stoq/
+concurrency=multiprocessing
 omit =
     */stoq/tests/*
     */stoq/shell.py

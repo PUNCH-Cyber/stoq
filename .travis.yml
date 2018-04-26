@@ -23,6 +23,7 @@ install:
 
 script:
   - coverage run setup.py test
+  - coverage combine
 
 after_success:
   coveralls

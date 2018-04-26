@@ -279,6 +279,16 @@ class StoqPluginTestCase(unittest.TestCase):
         resp = worker.start(None, return_dict=True)
         self.assertTrue(resp)
 
+    def test_scan_payload_return_dict_worker_options(self):
+        worker = self.stoq.load_plugin("test_worker_options", "worker")
+        resp = worker.start(None, return_dict=True)
+        self.assertIsInstance(resp, dict)
+        self.assertTrue(resp['decorated'])
+        self.assertEqual(resp['tlp'], 'white')
+        self.assertEqual(resp['results'][0]['plugin'], 'test_worker_options')
+        self.assertEqual(resp['results'][0]['source_meta']['metatest'], '1')
+        self.assertEqual(resp['results'][0]['source_meta']['metatest2'], 'abc')
+
     def test_scan_payload_return_dict_with_decorator(self):
         worker = self.stoq.load_plugin("test_worker", "worker")
         worker.decorator_plugin = "test_decorator"
@@ -376,6 +386,16 @@ class StoqPluginTestCase(unittest.TestCase):
         self.assertIsInstance(resp, list)
         self.assertTrue(worker.template)
 
+    @unittest.skipUnless(HAS_JINJA2, "Jinja2 not installed")
+    def test_scan_payload_and_save_with_template_invalid_template_file(self):
+        payload = b"This is a payload to scan\x90\x90\x90\x00\x20"
+        worker = self.stoq.load_plugin("test_worker", "worker")
+        worker.template = "nonexistent.tpl"
+        worker.saveresults = True
+        worker.hashpayload = True
+        worker.start(payload, return_dict=True)
+        self.assertFalse(worker.template)
+
     def test_scan_payload_and_save_without_template_use_dispatching(self):
         payload = self.stoq.get_file(self.get_dispatch_file)
         self.stoq.dispatch_rules = self.dispatch_rules
@@ -421,6 +441,10 @@ class StoqPluginTestCase(unittest.TestCase):
 
     def test_get_plugin_invalid_category(self):
         resp = self.stoq.get_plugin("test_worker", "invalid_category")
+        self.assertFalse(resp)
+
+    def test_get_plugin_no_module(self):
+        resp = self.stoq.get_plugin("test_worker_no_module", "worker")
         self.assertFalse(resp)
 
     def test_get_plugin_invalid_name(self):

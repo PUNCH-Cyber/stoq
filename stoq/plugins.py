@@ -254,6 +254,7 @@ class StoqPluginManager:
         path = info.get("Core", "Module")
         if not path:
             self.log.error("No module found for {}".format(name))
+            return False
 
         module_name = os.path.splitext(path)[0]
 
@@ -1485,7 +1486,7 @@ class StoqDecoderPlugin(StoqPluginBase):
 class StoqPluginInstaller:
 
     pip_exists_str = "already exists. Specify --upgrade to force replacement."
-    
+
     def __init__(self, stoq):
 
         self.stoq = stoq
@@ -1544,7 +1545,7 @@ class StoqPluginInstaller:
                 if self.pip_exists_str.encode() in output:
                     self.stoq.log.critical("Plugin {}".format(self.pip_exists_str))
                     exit(-1)
-                                           
+
                 # Time to install the requirements, if they exist.
                 requirements = "{}/requirements.txt".format(self.plugin)
                 if os.path.isfile(requirements):
