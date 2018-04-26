@@ -1486,6 +1486,8 @@ class StoqDecoderPlugin(StoqPluginBase):
 
 class StoqPluginInstaller:
 
+    pip_exists_str = "already exists. Specify --upgrade to force replacement."
+    
     def __init__(self, stoq):
 
         self.stoq = stoq
@@ -1534,15 +1536,17 @@ class StoqPluginInstaller:
                     self.plugin,
                     '-t',
                     self.plugin_root,
-                    '--quiet',
                 ]
                 # Use pip to install/upgrade the plugin in the appropriate
                 # directory for this plugin category
                 if self.upgrade_plugin:
                     cmd.append('--upgrade')
 
-                subprocess.check_call(cmd)
-
+                output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+                if self.pip_exists_str.encode() in output:
+                    self.stoq.log.critical("Plugin {}".format(self.pip_exists_str))
+                    exit(-1)
+                                           
                 # Time to install the requirements, if they exist.
                 requirements = "{}/requirements.txt".format(self.plugin)
                 if os.path.isfile(requirements):
