@@ -4,7 +4,7 @@ import unittest
 from setuptools import setup
 
 # Ensure that the ssdeep library is built, otherwise install will fail
-os.environ['BUILD_LIB'] = '1'
+# os.environ['BUILD_LIB'] = '1'
 
 def stoq_tests():
     stoq_path = os.path.join(os.getcwd(), "stoq")
