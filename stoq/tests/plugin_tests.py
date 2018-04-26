@@ -396,9 +396,9 @@ class StoqPluginTestCase(unittest.TestCase):
         self.assertTrue(resp)
 
     def test_multiprocessing_worker(self):
-        self.stoq.default_source = "test_source"
+        self.stoq.default_source = "test_source_multiprocess"
         worker = self.stoq.load_plugin("test_worker", "worker")
-        worker.source_plugin = "test_source"
+        worker.source_plugin = "test_source_multiprocess"
         self.stoq.worker.path = os.path.join(self.data_prefix, "get")
         resp = worker.run()
         self.assertTrue(resp)
@@ -436,7 +436,10 @@ class StoqPluginTestCase(unittest.TestCase):
         self.assertIsNone(resp)
 
     def test_archive_of_source_payload(self):
-        pass
+        worker = self.stoq.load_plugin("test_worker", "worker")
+        worker.log_level = "DEBUG"
+        resp = worker.save_payload(b"this is a payload", "test_connector_archive")
+        self.assertIsInstance(resp, dict)
 
     def test_add_metadata_to_results(self):
         pass

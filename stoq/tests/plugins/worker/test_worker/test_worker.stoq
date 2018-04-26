@@ -29,3 +29,4 @@ param_list = a, b, c, d
 param_dict = {"a": 1, "b": true, "c": "abc", "d": ["1", "2", "3"], "e": {"a": 1}}
 param_tuple = 1, 2, 3, 4
 default_tlp = WHITE
+max_tlp = white

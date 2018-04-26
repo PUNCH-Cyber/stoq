@@ -20,4 +20,4 @@ Module = test_connector
 Author = Marcus LaFerrera
 Version = 0.1
 Website = https://github.com/PUNCH-Cyber/stoq-plugins-public
-Description = Test stoQ connector plugi
+Description = Test stoQ connector plugin

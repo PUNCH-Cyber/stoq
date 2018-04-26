@@ -13,7 +13,7 @@
 #   limitations under the License.
 
 [Core]
-Name = test_source
+Name = test_source_multiprocess
 Module = test_source
 
 [Documentation]
@@ -24,5 +24,5 @@ Description = Test stoQ source
 
 [options]
 # Does this plugin support multiprocessing?
-multiprocess = False
-recursive = False
+multiprocess = True
+recursive = True
