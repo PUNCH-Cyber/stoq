@@ -84,11 +84,15 @@ API
 
 import os
 import re
+import sys
+import glob
 import time
 import signal
 import logging
+import argparse
 import itertools
 import threading
+import subprocess
 import configparser
 import importlib.util
 import multiprocessing
@@ -1480,17 +1484,14 @@ class StoqDecoderPlugin(StoqPluginBase):
 
 class StoqPluginInstaller:
 
-    import pip
-    import glob
-    import argparse
-    import configparser
-
+    pip_exists_str = "already exists. Specify --upgrade to force replacement."
+    
     def __init__(self, stoq):
 
         self.stoq = stoq
         self.plugin_info = {}
 
-        parser = self.argparse.ArgumentParser()
+        parser = argparse.ArgumentParser()
         installer_opts = parser.add_argument_group("Plugin Installer Options")
         installer_opts.add_argument("plugin", help="stoQ Plugin Archive")
         installer_opts.add_argument("--upgrade",
@@ -1525,19 +1526,37 @@ class StoqPluginInstaller:
                 exit(-1)
 
             try:
-                cmd = ['install', self.plugin, '-t', self.plugin_root,
-                       '--quiet', '--allow-all-external']
+                cmd = [
+                    sys.executable,
+                    '-m',
+                    'pip',
+                    'install',
+                    self.plugin,
+                    '-t',
+                    self.plugin_root,
+                ]
                 # Use pip to install/upgrade the plugin in the appropriate
                 # directory for this plugin category
                 if self.upgrade_plugin:
                     cmd.append('--upgrade')
 
-                self.pip.main(cmd)
-
+                output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+                if self.pip_exists_str.encode() in output:
+                    self.stoq.log.critical("Plugin {}".format(self.pip_exists_str))
+                    exit(-1)
+                                           
                 # Time to install the requirements, if they exist.
                 requirements = "{}/requirements.txt".format(self.plugin)
                 if os.path.isfile(requirements):
-                    self.pip.main(['install', '--quiet', '-r', requirements])
+                    subprocess.check_call([
+                        sys.executable,
+                        '-m',
+                        'pip',
+                        'install',
+                        '--quiet',
+                        '-r',
+                        requirements,
+                    ])
 
             except Exception as err:
                 self.stoq.log.critical("Error installing requirements: {}".format(str(err)))
@@ -1551,7 +1570,7 @@ class StoqPluginInstaller:
 
     def setup_from_dir(self):
         # Find the stoQ configuration file
-        config_file = self.glob.glob("{}/*/*.stoq".format(self.plugin))
+        config_file = glob.glob("{}/*/*.stoq".format(self.plugin))
 
         if len(config_file) > 1:
             self.stoq.log.critical("More than one stoQ configuration file found. Exiting.")
@@ -1578,7 +1597,7 @@ class StoqPluginInstaller:
         return True
 
     def parse_config(self, stream):
-        config = self.configparser.ConfigParser()
+        config = configparser.ConfigParser()
         config.read_string(stream.decode('utf-8'))
         try:
             self.plugin_name = config['Core']['Name']
