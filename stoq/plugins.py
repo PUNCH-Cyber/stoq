@@ -183,7 +183,7 @@ class StoqPluginManager:
                             module_path = "{}/{}.py".format(root_path, module)
                             if os.path.isfile(module_path):
                                 # open each module file and detect the category of plugin
-                                with open(module_path, "r") as src:
+                                with open(module_path, "r", encoding="utf-8") as src:
                                     cat = re.search('(?<=from stoq\.plugins import )(.+)',
                                                     src.read()).group()
                                     category = self.__plugindict__.get(cat, False)
