@@ -443,10 +443,6 @@ class StoqPluginTestCase(unittest.TestCase):
         resp = self.stoq.get_plugin("test_worker", "invalid_category")
         self.assertFalse(resp)
 
-    def test_get_plugin_no_module(self):
-        resp = self.stoq.get_plugin("test_worker_no_module", "worker")
-        self.assertFalse(resp)
-
     def test_get_plugin_invalid_name(self):
         resp = self.stoq.get_plugin("invalid_name", "worker")
         self.assertFalse(resp)
