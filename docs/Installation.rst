@@ -14,7 +14,7 @@ framework.::
 
     git clone https://github.com/PUNCH-Cyber/stoq.git
     cd stoq/
-    ./install.sh
+    bash install.sh
 
 .. note:: |stoQ| has not been tested on other operating systems, however,
           if the required packages are available it should work without issue.
