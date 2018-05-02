@@ -426,6 +426,13 @@ class StoqPluginBase:
             self.log.warning("Plugin not compatible with this version of stoQ. "
                           "Unpredictable results may occur!")
 
+        # See if plugin options were provided when Stoq() was instantiated
+        if hasattr(self.stoq, 'plugin_options'):
+            plugin_options = self.stoq.plugin_options.get(self.name, {})
+            for k in plugin_options:
+                if plugin_options[k] is not None:
+                    setattr(self, k, plugin_options[k])
+
         if hasattr(self, 'max_tlp'):
             self.max_tlp = self.max_tlp.lower()
 

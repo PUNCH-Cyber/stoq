@@ -90,7 +90,7 @@ class Stoq(StoqPluginManager):
 
     """
 
-    def __init__(self, argv=None, base_dir=None):
+    def __init__(self, argv=None, base_dir=None, **kwargs):
         """
         Initialize a stoQ class
 
@@ -119,70 +119,73 @@ class Stoq(StoqPluginManager):
             self.base_dir = os.path.realpath(base_dir)
 
         self.version = __version__
+        self.worker = None
 
         # Make sure the stoQ objects we require exist.
         # Setup our basic directory structure. This is overwritten
         # if we have anything set in our configuration file.
-        self.log_dir = os.path.join(self.base_dir, "logs")
-        self.results_dir = os.path.join(self.base_dir, "results")
-        self.temp_dir = os.path.join(self.base_dir, "temp")
-        self.plugin_dir_list = [os.path.join(self.base_dir, "plugins")]
-        self.archive_base = os.path.join(self.base_dir, "archive")
-        self.config_file = os.path.join(self.base_dir, "stoq.cfg")
-        self.dispatch_rules = os.path.join(self.base_dir, 'dispatcher.yar')
+        self.log_dir = kwargs.get('log_dir', os.path.join(self.base_dir, "logs"))
+        self.results_dir = kwargs.get('results_dir', os.path.join(self.base_dir, "results"))
+        self.temp_dir = kwargs.get('temp_dir', os.path.join(self.base_dir, "temp"))
+        self.plugin_dir_list = kwargs.get('plugin_list_dir', [os.path.join(self.base_dir, "plugins")])
+        self.archive_base = kwargs.get('archive_base', os.path.join(self.base_dir, "archive"))
+        self.config_file = kwargs.get('config_file', os.path.join(self.base_dir, "stoq.cfg"))
+        self.dispatch_rules = kwargs.get('dispatch_rules', os.path.join(self.base_dir, 'dispatcher.yar'))
 
         # What should be our default user agent when retrieving urls?
-        self.useragent = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.1)"
+        self.useragent = kwargs.get('useragent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.1)')
 
-        self.worker = None
+        # Options to be passed to the plugins in lieu of command line arguments
+        self.plugin_options = kwargs.get('plugin_options', {})
 
         # Default logging options
         # Valid options: DEBUG, INFO, WARN, ERROR, CRITICAL
-        self.log_level = "INFO"
-        self.log_maxbytes = 1500000
-        self.log_backup_count = 5
+        self.log_level = kwargs.get('log_level', 'INFO')
+        self.log_maxbytes = kwargs.get('log_maxbytes', 1500000)
+        self.log_backup_count = kwargs.get('log_backup_count', 5)
 
         # Default connector plugin to be used for output
-        self.default_connector = "stdout"
+        self.default_connector = kwargs.get('default_connector', 'stdout')
 
         # Default source plugin to be used for input
-        self.default_source = "filedir"
+        self.default_source = kwargs.get('default_source', 'filedir')
 
         # The default suffix to append to a filename if
         # a filename is not provided.
-        self.filename_suffix = "stoq"
+        self.filename_suffix = kwargs.get('filename_suffix', 'stoq')
 
         # Define the default maximum recursion depth for the dispatcher
-        self.max_recursion = 3
+        self.max_recursion = kwargs.get('max_recursion', 3)
 
         # Maximum queue size for multiprocessing support
-        self.max_queue = 100
+        self.max_queue = kwargs.get('max_queue', 100)
 
         # tuple() to match the root directory of where files can be ingested
         # from. Need for get_file().
-        self.source_base_tuple = (self.base_dir)
+        self.source_base_tuple = kwargs.get('source_base_tuple', (self.base_dir))
 
         # Define what URL prefixes we accept
-        self.url_prefix_tuple = ('http://', 'https://')
+        self.url_prefix_tuple = kwargs.get('url_prefix_tuple', ('http://', 'https://'))
 
         # Default log file format; text or json
-        self.log_syntax = "text"
+        self.log_syntax = kwargs.get('log_syntax', 'text')
 
         # Ensure the sentry url is defined for remote logging
-        self.sentry_url = None
+        self.sentry_url = kwargs.get('sentry_url', None)
 
         # Ignored exception for sentry
-        self.sentry_ignore_list = []
+        self.sentry_ignore_list = kwargs.get('sentry_ignore_list', [])
+
+        # Default TLP for each payload processed
+        self.default_tlp = kwargs.get('default_tlp', 'white')
 
         # Load the configuration file, if it exists
         if os.path.exists(self.config_file):
-            self.load_config()
+            self.load_config(**kwargs)
 
         # Initialize the logger
         self.logger_init()
 
-        # Default TLP for each payload processed
-        self.default_tlp = "white"
         self.tlps = {'red': 0,
                      'amber': 1,
                      'green': 2,
@@ -192,7 +195,7 @@ class Stoq(StoqPluginManager):
         # Ensure our plugin manager is initiated
         StoqPluginManager.__init__(self)
 
-    def load_config(self):
+    def load_config(self, **kwargs):
         """
         Load configuration file. Defaults to stoq.cfg.
 
@@ -202,6 +205,12 @@ class Stoq(StoqPluginManager):
         config.read(self.config_file)
         for sect in config.sections():
             for opt in config.options(sect):
+
+                # Skip this option if it was provided as a named parameter
+                # upon instantiation so we don't overwrite
+                if opt in kwargs:
+                    continue
+
                 # define each configuration option as an object within
                 # self class
                 value = config.get(sect, opt)
