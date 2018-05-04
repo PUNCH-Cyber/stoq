@@ -1114,6 +1114,10 @@ class StoqWorkerPlugin(StoqPluginBase):
                         # appended to the approriate list
                         dispatch_kwargs = kwargs.copy()
                         dispatch_kwargs['uuid'] = dispatch_payload[0].get('uuid', worker_result['uuid'])
+                        # The dispatch args are empty for the initial payload,
+                        # so only overwrite if we have a value
+                        if 'filename' in dispatch_payload[0]:
+                            dispatch_kwargs['filename'] = dispatch_payload[0].get('filename')
 
                         if recursion_level > int(self.stoq.max_recursion):
                             self.log.debug(
@@ -1298,6 +1302,7 @@ class StoqWorkerPlugin(StoqPluginBase):
 
             if 'meta' in hit:
                 plugin_kwargs = hit['meta']
+                plugin_kwargs.update(kwargs)
                 if 'plugin' in hit['meta']:
                     # In some instances multiple plugins may be loaded from a single
                     # yara dispatcher hit. Let's split the `plugin` attribute to ensure
