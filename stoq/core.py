@@ -96,7 +96,7 @@ class Stoq(StoqPluginManager):
         self, argv=[''], base_dir=None, log_dir=None, results_dir=None,
         temp_dir=None, plugin_dir_list=None, archive_base=None,
         config_file=None, dispatch_rules=None, useragent=None, plugin_options={},
-        log_level=None, log_maxbytes=1500000, log_backup_count=5, default_connector='stdout',
+        log_level='info', log_maxbytes=1500000, log_backup_count=5, default_connector='stdout',
         default_source='filedir', filename_suffix="stoq", max_recursion=3, max_queue=100,
         source_base_tuple=None, url_prefix_tuple=None, log_syntax='text',
         sentry_url=None, sentry_ignore_list=[], default_tlp='white'):
