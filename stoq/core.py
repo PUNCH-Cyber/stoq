@@ -61,7 +61,13 @@ Instantiate *Stoq* class, and set attributes for plugins::
 
     from stoq.core import Stoq
 
-    plugin_options = {'yara': {'yararules': '/data/yara/rules.yar'}}
+    plugin_options = {
+        'worker': {
+            'yara': {
+                'yararules': '/data/yara/rules.yar'
+                }
+            }
+        }
     stoq = Stoq(plugin_options=plugin_options)
 
 The plugin options will be available within the plugin object itself.
