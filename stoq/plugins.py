@@ -113,7 +113,7 @@ try:
 except ImportError:
     jinja_imported = False
 
-from stoq import signal_handler
+from stoq import signal_handler, __version__
 from stoq.helpers import ratelimited, flatten
 from stoq.exceptions import SigtermCaught
 from stoq.scan import get_hashes, get_ssdeep, get_magic, get_sha1
@@ -404,14 +404,14 @@ class StoqPluginBase:
     @property
     def min_version(self):
         if self.min_stoq_version:
-            return version(self.stoq.version) >= version(self.min_stoq_version)
+            return version(__version__) >= version(self.min_stoq_version)
         else:
             return True
 
     @property
     def max_version(self):
         if self.max_stoq_version:
-            return version(self.stoq.version) < version(self.max_stoq_version)
+            return version(__version__) < version(self.max_stoq_version)
         else:
             return True
 

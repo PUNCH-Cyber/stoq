@@ -95,8 +95,6 @@ try:
 except ImportError:
     raven_imported = False
 
-__version__ = "0.20.1"
-
 
 class Stoq(StoqPluginManager):
     """
@@ -104,8 +102,6 @@ class Stoq(StoqPluginManager):
     Core stoQ Framework Class
 
     """
-
-    version = __version__
 
     def __init__(
         self, argv=[''], base_dir=None, log_dir=None, results_dir=None,
