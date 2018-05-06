@@ -53,6 +53,21 @@ Write content to disk::
           the file will be overwritten. If the content to be written is
           binary, one may add ``binary=True`` when calling ``Stoq.write()``.
 
+In many cases, you may wish to define plugin options. This is especially so
+if you are not using *stoQ* from the command line. You may provide the
+parameter `plugin_options` when instantiating the *Stoq()* class.
+
+Instantiate *Stoq* class, and set attributes for plugins::
+
+    from stoq.core import Stoq
+
+    plugin_options = {'yara': {'yararules': '/data/yara/rules.yar'}}
+    stoq = Stoq(plugin_options=plugin_options)
+
+The plugin options will be available within the plugin object itself.
+For instance, in the above example the yara worker plugin will now have
+the attribute `yararules` defined as `/data/yara/rules.yar`.
+
 API
 ===
 """
@@ -176,11 +191,12 @@ class Stoq(StoqPluginManager):
         self.sentry_url = sentry_url
         self.sentry_ignore_list = sentry_ignore_list
         self.default_tlp = default_tlp
-        self.tlps = {'red': 0,
-                     'amber': 1,
-                     'green': 2,
-                     'white': 3
-                     }
+        self.tlps = {
+            'red': 0,
+            'amber': 1,
+            'green': 2,
+            'white': 3
+            }
 
         self.logger_init()
 
