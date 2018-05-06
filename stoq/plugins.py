@@ -937,11 +937,12 @@ class StoqWorkerPlugin(StoqPluginBase):
         Process the payload with the worker plugin
 
         :param bytes payload: (optional) Payload to be processed
+        :param str tlp: TLP Level of results
         :param str ratelimit: Rate limit processing (count/per seconds)
         :param str archive: Connector plugin to use as a source for the payload
-        :param str/list uuid: UUID for this result, and any parent results
         :param str filename: File name, if available, for the payload
         :param str path: Path the file is being ingested from
+        :param str/list uuid: UUID for this result, and any parent results
 
         :returns: Tuple of JSON results and template rendered results
         :rtype: dict and str or lists
