@@ -110,13 +110,13 @@ class Stoq(StoqPluginManager):
     """
 
     def __init__(
-        self, argv=[''], base_dir=None, log_dir=None, results_dir=None,
+        self, argv=None, base_dir=None, log_dir=None, results_dir=None,
         temp_dir=None, plugin_dir_list=None, archive_base=None,
-        config_file=None, dispatch_rules=None, useragent=None, plugin_options={},
+        config_file=None, dispatch_rules=None, useragent=None, plugin_options=None,
         log_level='info', log_maxbytes=1500000, log_backup_count=5, default_connector='stdout',
-        default_source='filedir', filename_suffix="stoq", max_recursion=3, max_queue=100,
+        default_source='filedir', filename_suffix='stoq', max_recursion=3, max_queue=100,
         source_base_tuple=None, url_prefix_tuple=None, log_syntax='text',
-        sentry_url=None, sentry_ignore_list=[], default_tlp='white'):
+        sentry_url=None, sentry_ignore_list=None, default_tlp='white'):
         """
         Initialize a stoQ class
 
@@ -133,12 +133,12 @@ class Stoq(StoqPluginManager):
         :param dict plugin_options: Options to be passed to the plugins in lieu of command line arguments
         :param str log_level: Log level for stoQ and all loaded plugins
         :param int log_maxbytes: Maximum log file size in bytes
-        :param int log_backup_count: Maximm amount of log files to retain
+        :param int log_backup_count: Maximum amount of log files to retain
         :param str default_connector: Default connector plugin to use for output
         :param str default_source: Default source plugin to use for ingesting
         :param str filename_suffix: The filename suffix to use when saving files without a filename
         :param int max_recursion: Maximum recursion level when dispatching payloads
-        :param int max_queue: When using multiprocessing, maxmimum amount of messages permitted in queue
+        :param int max_queue: When using multiprocessing, maximum amount of messages permitted in queue
         :param tuple source_base_tuple: Base directories permitted to read from when ingesting
         :param tuple url_prefix_tuple: Permitted URL prefixes
         :param str log_syntax: Defines the format for log files
@@ -151,8 +151,8 @@ class Stoq(StoqPluginManager):
         # stoq-cli.py, we will parse the command line parameters. If not,
         # we will set the command line parameters to an empty list so we
         # can still have our required variables set without making spaghetti
-        # code.
-        self.argv = argv
+        # code
+        self.argv = argv if argv else ['']
 
         # Default to the base directory as the working directory, otherwise
         # it will be set to the value passed at instantiation. This value
@@ -178,7 +178,7 @@ class Stoq(StoqPluginManager):
         self.archive_base = archive_base if archive_base else os.path.join(self.base_dir, "archive")
         self.dispatch_rules = dispatch_rules if dispatch_rules else os.path.join(self.base_dir, 'dispatcher.yar')
         self.useragent = useragent if useragent else 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.1)'
-        self.plugin_options = plugin_options
+        self.plugin_options = plugin_options if plugin_options else {}
         self.log_level = log_level
         self.log_maxbytes = log_maxbytes
         self.log_backup_count = log_backup_count
@@ -187,11 +187,11 @@ class Stoq(StoqPluginManager):
         self.filename_suffix = filename_suffix
         self.max_recursion = max_recursion
         self.max_queue = max_queue
-        self.source_base_tuple = source_base_tuple if source_base_tuple else (self.base_dir)
+        self.source_base_tuple = source_base_tuple if source_base_tuple else (self.base_dir,)
         self.url_prefix_tuple = url_prefix_tuple if url_prefix_tuple else ('http://', 'https://')
         self.log_syntax = log_syntax
         self.sentry_url = sentry_url
-        self.sentry_ignore_list = sentry_ignore_list
+        self.sentry_ignore_list = sentry_ignore_list if sentry_ignore_list else []
         self.default_tlp = default_tlp
         self.tlps = {
             'red': 0,
