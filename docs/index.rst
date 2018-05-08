@@ -29,12 +29,11 @@ Quick Links
 Overview
 ========
 
-|stoQ| is a modular and highly customizable framework for the creation of data
-sets from multiple disparate data sources. |stoQ| leverages RabbitMQ in order
-to allow for a scalable and distributed architecture. The framework can be
-quickly and easily extended by utilizing the *Plugin* architecture. Output from
-the framework can be modified for human presentation using |stoQ|'s builtin
-templating engine
+|stoQ| is a automation framework that helps to simplify the more mundane and
+repetitive tasks an analyst is required to do. It allows analysts and DevSecOps
+teams the ability to quickly transition from different data sources, databases,
+decoders/encoders, and numerous other tasks. stoQ was designed to be enterprise
+ready and scalable, while also being lean enough for individual security researchers.
 
 
 Usage
