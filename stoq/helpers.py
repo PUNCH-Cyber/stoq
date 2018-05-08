@@ -15,6 +15,7 @@
 import time
 import json
 import threading
+import datetime
 import collections
 
 from functools import wraps
@@ -26,7 +27,7 @@ class JsonComplexDecoder(json.JSONEncoder):
 
     """
     def default(self, obj):
-        if isinstance(obj, bytes):
+        if isinstance(obj, (bytes, datetime.datetime)):
             return str(obj)
         else:
             return obj
