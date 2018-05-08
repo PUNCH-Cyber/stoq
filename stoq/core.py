@@ -113,10 +113,10 @@ class Stoq(StoqPluginManager):
         self, argv=None, base_dir=None, log_dir=None, results_dir=None,
         temp_dir=None, plugin_dir_list=None, archive_base=None,
         config_file=None, dispatch_rules=None, useragent=None, plugin_options=None,
-        log_level='info', log_maxbytes=1500000, log_backup_count=5, default_connector='stdout',
-        default_source='filedir', filename_suffix='stoq', max_recursion=3, max_queue=100,
-        source_base_tuple=None, url_prefix_tuple=None, log_syntax='text',
-        sentry_url=None, sentry_ignore_list=None, default_tlp='white'):
+        log_level=None, log_maxbytes=None, log_backup_count=None, default_connector=None,
+        default_source=None, filename_suffix=None, max_recursion=None, max_queue=None,
+        source_base_tuple=None, url_prefix_tuple=None, log_syntax=None,
+        sentry_url=None, sentry_ignore_list=None, default_tlp=None):
         """
         Initialize a stoQ class
 
@@ -171,28 +171,28 @@ class Stoq(StoqPluginManager):
         # Setup our basic directory structure. This is overwritten
         # if we have anything set in our configuration file, unless
         self.worker = None
-        self.log_dir = log_dir if log_dir else os.path.join(self.base_dir, "logs")
-        self.results_dir = results_dir if results_dir else os.path.join(self.base_dir, "results")
-        self.temp_dir = temp_dir if temp_dir else os.path.join(self.base_dir, "temp")
-        self.plugin_dir_list = plugin_dir_list if plugin_dir_list else [os.path.join(self.base_dir, "plugins")]
-        self.archive_base = archive_base if archive_base else os.path.join(self.base_dir, "archive")
-        self.dispatch_rules = dispatch_rules if dispatch_rules else os.path.join(self.base_dir, 'dispatcher.yar')
-        self.useragent = useragent if useragent else 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.1)'
-        self.plugin_options = plugin_options if plugin_options else {}
-        self.log_level = log_level
-        self.log_maxbytes = log_maxbytes
-        self.log_backup_count = log_backup_count
-        self.default_connector = default_connector
-        self.default_source = default_source
-        self.filename_suffix = filename_suffix
-        self.max_recursion = max_recursion
-        self.max_queue = max_queue
-        self.source_base_tuple = source_base_tuple if source_base_tuple else (self.base_dir,)
-        self.url_prefix_tuple = url_prefix_tuple if url_prefix_tuple else ('http://', 'https://')
-        self.log_syntax = log_syntax
-        self.sentry_url = sentry_url
-        self.sentry_ignore_list = sentry_ignore_list if sentry_ignore_list else []
-        self.default_tlp = default_tlp
+        self.log_dir = self._set_opt('log_dir', log_dir, os.path.join(self.base_dir, "logs"))
+        self.results_dir = self._set_opt('results_dir', results_dir,  os.path.join(self.base_dir, "results"))
+        self.temp_dir = self._set_opt('temp_dir', temp_dir, os.path.join(self.base_dir, "temp"))
+        self.plugin_dir_list = self._set_opt('plugin_dir_list', plugin_dir_list, [os.path.join(self.base_dir, "plugins")])
+        self.archive_base = self._set_opt('archive_base', archive_base, os.path.join(self.base_dir, "archive"))
+        self.dispatch_rules = self._set_opt('dispatch_rules', dispatch_rules, os.path.join(self.base_dir, 'dispatcher.yar'))
+        self.useragent = self._set_opt('useragent', useragent, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.1)')
+        self.plugin_options = self._set_opt('plugin_options', plugin_options, {})
+        self.log_level = self._set_opt('log_level', log_level, 'info')
+        self.log_maxbytes = self._set_opt('log_maxbytes', log_maxbytes, 1500000)
+        self.log_backup_count = self._set_opt('log_backup_count', log_backup_count, 5)
+        self.default_connector = self._set_opt('default_connector', default_connector, 'stdout')
+        self.default_source = self._set_opt('default_source', default_source, 'filedir')
+        self.filename_suffix = self._set_opt('filename_suffix', filename_suffix, 'stoq')
+        self.max_recursion = self._set_opt('max_recursion', max_recursion, 3)
+        self.max_queue = self._set_opt('max_queue', max_queue, 100)
+        self.source_base_tuple = self._set_opt('source_base_tuple', source_base_tuple, (self.base_dir,))
+        self.url_prefix_tuple = self._set_opt('url_prefix_tuple', url_prefix_tuple, ('http://', 'https://'))
+        self.log_syntax = self._set_opt('log_syntax', log_syntax, 'text')
+        self.sentry_url = self._set_opt('sentry_url', sentry_url)
+        self.sentry_ignore_list = self._set_opt('sentry_ignore_list', sentry_ignore_list,  [])
+        self.default_tlp = self._set_opt('default_tlp', default_tlp, 'white')
         self.tlps = {
             'red': 0,
             'amber': 1,
@@ -205,6 +205,8 @@ class Stoq(StoqPluginManager):
         # Ensure our plugin manager is initiated
         StoqPluginManager.__init__(self)
 
+
+
     def load_config(self):
         """
         Load configuration file. Defaults to stoq.cfg.
@@ -215,6 +217,11 @@ class Stoq(StoqPluginManager):
         config.read(self.config_file)
         for sect in config.sections():
             for opt in config.options(sect):
+
+                # Skip if this has already been set
+                if hasattr(self, opt):
+                    if not getattr(self, opt):
+                        continue
 
                 # define each configuration option as an object within
                 # self class
@@ -743,3 +750,29 @@ class Stoq(StoqPluginManager):
         else:
             response = str(obj)
         return response
+
+    def _set_opt(self, obj, value, default=None):
+        """
+        Determine value of object based on precedence
+
+        - If parameter defined at instantiation, return value
+        - Else, if the object exists and is None, return default
+        - Else, if the object is defined, return object value
+        - Else, return default
+
+        """
+        # If a value was provided, return the value
+        if value:
+            return value
+        elif hasattr(self, obj):
+            # Otherwise, the object already exists...
+
+            # But, the object is set to None
+            if getattr(self, obj) is None:
+                return default
+            else:
+                # Return the value the object is already set to
+                return getattr(self, obj)
+        else:
+            # No value was provided, and the object does not exist
+            return default
