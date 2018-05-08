@@ -113,7 +113,7 @@ try:
 except ImportError:
     jinja_imported = False
 
-from stoq import signal_handler
+from stoq import signal_handler, __version__
 from stoq.helpers import ratelimited, flatten
 from stoq.exceptions import SigtermCaught
 from stoq.scan import get_hashes, get_ssdeep, get_magic, get_sha1
@@ -404,14 +404,14 @@ class StoqPluginBase:
     @property
     def min_version(self):
         if self.min_stoq_version:
-            return version(self.stoq.version) >= version(self.min_stoq_version)
+            return version(__version__) >= version(self.min_stoq_version)
         else:
             return True
 
     @property
     def max_version(self):
         if self.max_stoq_version:
-            return version(self.stoq.version) < version(self.max_stoq_version)
+            return version(__version__) < version(self.max_stoq_version)
         else:
             return True
 
@@ -425,6 +425,12 @@ class StoqPluginBase:
             self.incompatible_plugin = True
             self.log.warning("Plugin not compatible with this version of stoQ. "
                           "Unpredictable results may occur!")
+
+        # See if plugin options were provided when Stoq() was instantiated
+        plugin_options = self.stoq.plugin_options.get(self.category, {}).get(self.name, {})
+        for k in plugin_options:
+            if plugin_options[k] is not None:
+                setattr(self, k, plugin_options[k])
 
         if hasattr(self, 'max_tlp'):
             self.max_tlp = self.max_tlp.lower()
@@ -930,11 +936,12 @@ class StoqWorkerPlugin(StoqPluginBase):
         Process the payload with the worker plugin
 
         :param bytes payload: (optional) Payload to be processed
+        :param str tlp: TLP Level of results
         :param str ratelimit: Rate limit processing (count/per seconds)
         :param str archive: Connector plugin to use as a source for the payload
-        :param str/list uuid: UUID for this result, and any parent results
         :param str filename: File name, if available, for the payload
         :param str path: Path the file is being ingested from
+        :param str/list uuid: UUID for this result, and any parent results
 
         :returns: Tuple of JSON results and template rendered results
         :rtype: dict and str or lists

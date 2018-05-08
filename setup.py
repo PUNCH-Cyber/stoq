@@ -1,4 +1,5 @@
 import os
+import re
 import unittest
 
 from setuptools import setup
@@ -12,9 +13,16 @@ def stoq_tests():
     test_suite = unittest.TestLoader().discover(test_path, pattern='*_tests.py')
     return test_suite
 
+def version():
+    version_pattern = r"__version__\W*=\W*'([^']+)'"
+    src = os.path.join(os.path.dirname(__file__), 'stoq/__init__.py')
+    with open(src, "r") as f:
+        v, = re.findall(version_pattern, f.read())
+    return v
+
 setup(
     name="stoq",
-    version="0.20.2",
+    version=version(),
     author="Marcus LaFerrera",
     author_email="marcus@punchcyber.com",
     description="A framework for simplifying analysis.",

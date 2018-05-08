@@ -20,7 +20,7 @@ stoQ Framework
 
 import random
 
-from stoq.core import __version__
+from stoq import __version__
 
 
 def print_logo():
