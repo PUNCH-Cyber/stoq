@@ -165,7 +165,7 @@ install_core() {
     fi
 
     # Make sure we setup stoQ in the proper directory
-    for f in `ls extras`; do
+    for f in `dispatcher.yar stoq.cfg`; do
         cp extras/$f $STOQ_HOME/
     done
 
