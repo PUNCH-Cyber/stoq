@@ -24,7 +24,7 @@ Examples
 
 Instantiate a stoQ Interactive Shell session::
 
-    $ ./stoq-cli.py shell
+    $ stoq shell
 
      .d8888b.  888             .d88888b.
     d88P  Y88b 888            d88P" "Y88b

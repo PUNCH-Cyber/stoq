@@ -7,12 +7,6 @@ from setuptools import setup
 # Ensure that the ssdeep library is built, otherwise install will fail
 # os.environ['BUILD_LIB'] = '1'
 
-def stoq_tests():
-    stoq_path = os.path.join(os.getcwd(), "stoq")
-    test_path = os.path.join(stoq_path, "tests")
-    test_suite = unittest.TestLoader().discover(test_path, pattern='*_tests.py')
-    return test_suite
-
 def version():
     version_pattern = r"__version__\W*=\W*'([^']+)'"
     src = os.path.join(os.path.dirname(__file__), 'stoq/__init__.py')
@@ -32,13 +26,17 @@ setup(
     packages=['stoq'],
     install_requires=['beautifulsoup4',
                       'requests',
+                      'requests[security]',
                       'python-magic',
                       'ssdeep',
                       'yara-python',
                       'python-json-logger'],
     keywords='malware-analysis, malware-analyzer, malware-detection, framework, automation',
     python_requires='>=3.4',
-    test_suite='setup.stoq_tests',
+    test_suite='stoq.tests',
+    entry_points= {
+        'console_scripts': [ 'stoq=stoq:main' ]
+    },
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Information Technology',
@@ -47,7 +45,6 @@ setup(
         'Topic :: Security',
         'Topic :: Utilities',
         'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',

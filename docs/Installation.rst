@@ -36,14 +36,27 @@ Install the core requirements via apt-get and pip::
                          p7zip-rar unace-nonfree libssl-dev libmagic-dev
     sudo easy_install3 pip
 
+Define an environment variable for where |stoQ| should be setup, `STOQ_HOME`.
+If none is setup `$HOME/.stoq` will be used. For the purpose of this installation
+process, we will use `$STOQ_HOME` in all installation commands that require it::
+
+    export STOQ_HOME=/usr/local/stoq
+
+|stoQ| does not require any special permissions to run. For security reasons,
+it is recommended that |stoQ| is run as a non-privileged user. To create a
+|stoQ| user, run::
+
+     sudo groupadd -r stoq
+     sudo useradd -r -c stoQ -g stoq -d $STOQ_HOME stoq
+     chown -R stoq:stoq $STOQ_HOME
 
 It is recommended to install |stoQ| within a virtualenv. This is however
 completely optional.  In order to setup the virtualenv, the following should be
 completed::
 
     sudo pip3 install virtualenv
-    virtualenv /usr/local/stoq/.stoq-pyenv
-    source /usr/local/stoq/.stoq-pyenv/bin/activate
+    virtualenv $STOQ_HOME/.stoq-pyenv
+    source $STOQ_HOME/.stoq-pyenv/bin/activate
 
 Install the latest version of yara from https://plusvic.github.io/yara/
 
@@ -58,19 +71,10 @@ the core |stoQ| requirements::
           install manually with:
           ```pip3 install --global-option="build" --global-option="--dynamic-linking" yara-python```
 
-Make a directory to store all of |stoQ| and then copy the required files::
 
-    mkdir /usr/local/stoq
-    cp -R cmd/* /usr/local/stoq/
-    chmod +x /usr/local/stoq/stoq-cli.py
+Copy |stoQ| configuration file and the default dispatcher.yar to |stoQ|'s home directory::
 
-|stoQ| does not require any special permissions to run. For security reasons,
-it is recommended that |stoQ| is run as a non-privileged user. To create a
-|stoQ| user, run::
-
-     sudo groupadd -r stoq
-     sudo useradd -r -c stoQ -g stoq -d /usr/local/stoq stoq
-     chown -R stoq:stoq /usr/local/stoq
+    cp extras/* $STOQ_HOME
 
 The core framework for |stoQ| should now be installed. We can use |stoQ|'s plugin
 installation feature to handle this. First, we will need to clone |stoQ|'s public
@@ -78,16 +82,15 @@ plugin repository::
 
     git clone https://github.com/PUNCH-Cyber/stoq-plugins-public.git /tmp/stoq-plugins-public
 
-Plugins can be installed manually using ```stoq-cli.py install /path/to/plugin```,
+Plugins can be installed manually using ```stoq install /path/to/plugin```,
 or, we can install all of the publicly available plugins using a simple script::
 
     #!/bin/bash
-    cd /usr/local/stoq
     for category in connector decoder extractor carver source reader worker;
     do
         for plugin in `ls /tmp/stoq-plugins-public/$category`;
         do
-            ./stoq-cli.py install /tmp/stoq-plugins-public/$category/$plugin
+            stoq install /tmp/stoq-plugins-public/$category/$plugin
         done
     done
 
@@ -104,19 +107,6 @@ or, we can install all of the publicly available plugins using a simple script::
                      http://www.clamav.net/
 
 
-Supervisord
-***********
-
-|stoQ| can easily be added to supervisord for running as a system service in
-daemon mode. In our example, let's say that we want to use the yara and exif
-plugins to monitor RabbitMQ and save any results into MongoDB. We've installed
-|stoQ| into /usr/local/stoq and our python virtual environment is in
-```/usr/local/stoq/env```. First, let's install the supervisor Ubuntu package::
-
-    sudo apt-get install supervisor
-
-Now, let's create a new file in ```/etc/supervisor/conf.d``` named ```stoq.conf```
-
 
 Additional Plugins
 ------------------
@@ -132,7 +122,7 @@ Supervisord
 daemon mode. In our example, let's say that we want to use the yara and exif
 plugins to monitor RabbitMQ and save any results into MongoDB. We've installed
 |stoQ| into /usr/local/stoq and our python virtual environment is in
-```/usr/local/stoq/env```. First, let's install the supervisor Ubuntu package::
+```/usr/local/stoq/.stoq-pyenv```. First, let's install the supervisor Ubuntu package::
 
     sudo apt-get install supervisor
 
@@ -140,7 +130,7 @@ Now, let's create a new file in ```/etc/supervisor/conf.d``` named ```stoq.conf`
 with the below content::
 
     [program:exif]
-    command=/usr/local/stoq/.stoq-pyenv/bin/python stoq-cli.py %(program_name)s -I rabbitmq -C mongodb
+    command=/usr/local/stoq/.stoq-pyenv/bin/stoq %(program_name)s -I rabbitmq -C mongodb
     process_name=%(program_name)s_%(process_num)02d
     directory=/usr/local/stoq
     autostart=true
@@ -150,7 +140,7 @@ with the below content::
     user=stoq
 
     [program:yara]
-    command=/usr/local/stoq/.stoq-pyenv/bin/python stoq-cli.py %(program_name)s -I rabbitmq -C mongodb
+    command=/usr/local/stoq/.stoq-pyenv/bin/stoq  %(program_name)s -I rabbitmq -C mongodb
     process_name=%(program_name)s_%(process_num)02d
     directory=/usr/local/stoq
     autostart=true

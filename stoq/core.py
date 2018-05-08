@@ -148,7 +148,7 @@ class Stoq(StoqPluginManager):
         """
 
         # If Stoq is instantiated from a command line script, such as
-        # stoq-cli.py, we will parse the command line parameters. If not,
+        # `stoq`, we will parse the command line parameters. If not,
         # we will set the command line parameters to an empty list so we
         # can still have our required variables set without making spaghetti
         # code
