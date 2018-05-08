@@ -78,6 +78,7 @@ API
 ===
 """
 
+
 import os
 import json
 import uuid
@@ -91,6 +92,7 @@ from bs4 import UnicodeDammit
 from pythonjsonlogger import jsonlogger
 from requests.exceptions import HTTPError
 from logging.handlers import RotatingFileHandler
+from argparse import RawDescriptionHelpFormatter, ArgumentParser
 
 from stoq.plugins import StoqPluginManager
 from stoq.helpers import JsonComplexDecoder, JsonComplexEncoder

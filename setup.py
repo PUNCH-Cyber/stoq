@@ -4,8 +4,6 @@ import unittest
 
 from setuptools import setup
 
-# Ensure that the ssdeep library is built, otherwise install will fail
-# os.environ['BUILD_LIB'] = '1'
 
 def version():
     version_pattern = r"__version__\W*=\W*'([^']+)'"
@@ -34,9 +32,7 @@ setup(
     keywords='malware-analysis, malware-analyzer, malware-detection, framework, automation',
     python_requires='>=3.4',
     test_suite='stoq.tests',
-    entry_points= {
-        'console_scripts': [ 'stoq=stoq:main' ]
-    },
+    scripts=['extras/stoq'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Information Technology',
