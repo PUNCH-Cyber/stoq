@@ -234,6 +234,8 @@ class Stoq(StoqPluginManager):
                     value = self.loads(value)
                 elif opt.endswith("_tuple"):
                     value = tuple(i.strip() for i in value.split(","))
+                elif opt.endswith("_int"):
+                    value = int(value.strip())
 
                 if opt == "plugin_dir":
                     print("plugin_dir has been deprecated, please rename it to "
