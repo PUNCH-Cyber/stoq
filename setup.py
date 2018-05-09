@@ -32,7 +32,9 @@ setup(
     keywords='malware-analysis, malware-analyzer, malware-detection, framework, automation',
     python_requires='>=3.4',
     test_suite='stoq.tests',
-    scripts=['extras/stoq'],
+    entry_points= {
+        'console_scripts': [ 'stoq=stoq.cli:main', 'blah=stoq.a:main']
+    },
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Information Technology',
