@@ -91,6 +91,7 @@ from bs4 import UnicodeDammit
 from pythonjsonlogger import jsonlogger
 from requests.exceptions import HTTPError
 from logging.handlers import RotatingFileHandler
+from distutils.util import strtobool
 
 from stoq.plugins import StoqPluginManager
 from stoq.helpers import JsonComplexDecoder, JsonComplexEncoder
@@ -236,6 +237,8 @@ class Stoq(StoqPluginManager):
                     value = tuple(i.strip() for i in value.split(","))
                 elif opt.endswith("_int"):
                     value = int(value.strip())
+                elif opt.endswith("_bool"):
+                    value = strtobool(value.strip())
 
                 if opt == "plugin_dir":
                     print("plugin_dir has been deprecated, please rename it to "

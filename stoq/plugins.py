@@ -117,7 +117,7 @@ from stoq import signal_handler, __version__
 from stoq.helpers import ratelimited, flatten
 from stoq.exceptions import SigtermCaught
 from stoq.scan import get_hashes, get_ssdeep, get_magic, get_sha1
-
+from distutils.util import strtobool
 
 class StoqPluginManager:
     """
@@ -340,6 +340,8 @@ class StoqPluginManager:
                         value = tuple(i.strip() for i in value.split(","))
                     elif opt.endswith("_int"):
                         value = int(value.strip())
+                    elif opt.endswith("_bool"):
+                        value = strtobool(value.strip())
 
                     setattr(plugin, opt, value)
 
