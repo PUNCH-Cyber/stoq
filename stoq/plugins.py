@@ -338,6 +338,8 @@ class StoqPluginManager:
                         value = self.loads(value)
                     elif opt.endswith("_tuple"):
                         value = tuple(i.strip() for i in value.split(","))
+                    elif opt.endswith("_int"):
+                        value = int(value.strip())
 
                     setattr(plugin, opt, value)
 
@@ -737,7 +739,7 @@ class StoqWorkerPlugin(StoqPluginBase):
         # as RabbitMQ or Kafka, they will keep adding to the multiprocessing
         # queue until the queue has emptied, or, until the system resources
         # have been exhausted. If the latter, stoQ will silently die.
-        while self.mp_queues.qsize() >= self.stoq.max_queue:
+        while self.mp_queues.qsize() >= int(self.stoq.max_queue):
             self.log.debug("Queue maximum size ({}) reached. Sleeping...".format(self.stoq.max_queue))
             time.sleep(1)
 
