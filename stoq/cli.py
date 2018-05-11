@@ -1,7 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-#
-#   Copyright 2014-2016 PUNCH Cyber Analytics Group
+#   Copyright 2014-2018 PUNCH Cyber Analytics Group
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -15,21 +12,30 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import os
 import sys
+import unittest
 
 from time import sleep
+from pathlib import Path
 
 from argparse import RawDescriptionHelpFormatter, ArgumentParser
 
+import stoq
 from stoq import __version__
 from stoq.core import Stoq
 from stoq.shell import StoqShell
 from stoq.logo import print_logo
+from stoq.plugins import StoqPluginInstaller
 
 
-if __name__ == '__main__':
+def main():
 
-    stoq = Stoq(argv=sys.argv)
+    # If $STOQ_HOME exists, set our base directory to that, otherwise
+    # use ~/.stoq
+    homedir = os.getenv("STOQ_HOME", "{}/.stoq".format(str(Path.home())))
+
+    s = Stoq(argv=sys.argv, base_dir=homedir)
 
     logo = print_logo()
 
@@ -75,31 +81,27 @@ if __name__ == '__main__':
     ''')
 
     parser.add_argument("command", help="Subcommand to be run")
-    options = parser.parse_args(stoq.argv[1:2])
+    options = parser.parse_args(s.argv[1:2])
 
     if not options.command or options.command == 'help':
         parser.print_help()
 
     # Display a listing of valid plugins and their category
     elif options.command == "list":
-        stoq.list_plugins()
+        s.list_plugins()
 
     elif options.command == "install":
-        from stoq.plugins import StoqPluginInstaller
-        installer = StoqPluginInstaller(stoq)
+        installer = StoqPluginInstaller(s)
         installer.install()
 
     elif options.command == "shell":
-        StoqShell(stoq).cmdloop()
+        StoqShell(s).cmdloop()
 
     elif options.command == "runtests":
-        import os
-        import unittest
         # Use tests from installed $CWD/tests, otherwise, try to use the install stoQ tests
         test_path = os.path.join(os.getcwd(), "tests")
         if not os.path.isdir(test_path):
             try:
-                import stoq
                 test_path = os.path.join(os.path.dirname(stoq.__file__), "tests")
             except ImportError:
                 print("Test suite not found. Is stoQ installed or are tests in {}?".format(test_path))
@@ -113,9 +115,9 @@ if __name__ == '__main__':
     else:
         # Initialize and load the worker plugin and make it an object of our
         # stoq class
-        stoq.log.info("Starting stoQ v{}".format(__version__))
+        s.log.info("Starting stoQ v{}".format(__version__))
 
-        worker = stoq.load_plugin(options.command, 'worker')
+        worker = s.load_plugin(options.command, 'worker')
         if not worker:
             exit(-1)
 
@@ -127,6 +129,3 @@ if __name__ == '__main__':
         else:
             # No cron value was provided, let's run once and exit.
             worker.run()
-
-# Done!
-exit(0)

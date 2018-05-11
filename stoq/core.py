@@ -78,6 +78,7 @@ API
 ===
 """
 
+
 import os
 import json
 import uuid
@@ -91,6 +92,7 @@ from bs4 import UnicodeDammit
 from pythonjsonlogger import jsonlogger
 from requests.exceptions import HTTPError
 from logging.handlers import RotatingFileHandler
+from argparse import RawDescriptionHelpFormatter, ArgumentParser
 
 from stoq.plugins import StoqPluginManager
 from stoq.helpers import JsonComplexDecoder, JsonComplexEncoder
@@ -148,7 +150,7 @@ class Stoq(StoqPluginManager):
         """
 
         # If Stoq is instantiated from a command line script, such as
-        # stoq-cli.py, we will parse the command line parameters. If not,
+        # `stoq`, we will parse the command line parameters. If not,
         # we will set the command line parameters to an empty list so we
         # can still have our required variables set without making spaghetti
         # code

@@ -53,7 +53,7 @@ a much more granular level than via the command line.
 To enter the interactive shell, simply run |stoQ| with the ``shell``
 argument.::
 
-    bash$ ./stoq-cli.py shell
+    bash$ stoq shell
 
         _______ _________ _______  _______
         (  ____ \__   __/(  ___  )(  ___  )

@@ -1,7 +1,7 @@
 FROM ubuntu:16.04
 MAINTAINER Adam Trask ”adam@punchcyber.com”
 
-ENV LANG='C.UTF-8' LC_ALL='C.UTF-8' LANGUAGE='C.UTF-8' STOQ_TMP='/usr/local/tmp' STOQ_DIR='/usr/local/stoq'
+ENV LANG='C.UTF-8' LC_ALL='C.UTF-8' LANGUAGE='C.UTF-8' STOQ_TMP='/tmp' STOQ_DIR='/usr/local/stoq'
 
 ADD . ${STOQ_TMP}/stoq
 ADD ./cmd ${STOQ_DIR}

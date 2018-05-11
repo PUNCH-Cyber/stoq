@@ -162,7 +162,7 @@ In addition to the above requirements, the below method is required for
 
     - scan
 
-The ``scan`` method is called when ``stoq-cli.py`` has a payload available for
+The ``scan`` method is called when command ``stoq`` command has a payload available for
 processing. ``scan`` requires two attributes, ``payload`` and ``**kwargs``.
 ``payload`` is the payload that the plugin should process. If the plugin does
 not require a payload, ``payload`` will be ``None``. ``**kwargs`` is a
@@ -646,7 +646,7 @@ install the basicworker plugin that comes prepackaged with |stoQ|. We must
 first package the plugin as detailed above, and then run the command from
 within the |stoQ| directory::
 
-    stoq-cli.py install basicworker-plugin
+    stoq install basicworker-plugin
 
 
         .d8888b.  888             .d88888b.
@@ -660,8 +660,6 @@ within the |stoQ| directory::
                                         Y8b
 
     [+] Looking for plugin in /vagrant/stoq/plugin-packages/worker/yara...
-    [+] Found a plugin named yara
-    [+] yara's category is worker
     [+] Installing yara plugin into /vagrant/stoq/stoq/plugins/worker...
     [+] Install complete.
 
