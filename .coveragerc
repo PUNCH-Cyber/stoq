@@ -6,7 +6,7 @@ concurrency=multiprocessing
 omit =
     */stoq/tests/*
     */stoq/shell.py
-    stoq-cli.py
+    */stoq/cli.py
 
 [report]
 exclude_lines =
