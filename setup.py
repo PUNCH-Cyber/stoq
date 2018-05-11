@@ -30,10 +30,10 @@ setup(
                       'yara-python',
                       'python-json-logger'],
     keywords='malware-analysis, malware-analyzer, malware-detection, framework, automation',
-    python_requires='>=3.4',
+    python_requires='>=3.5',
     test_suite='stoq.tests',
     entry_points= {
-        'console_scripts': [ 'stoq=stoq.cli:main', 'blah=stoq.a:main']
+        'console_scripts': [ 'stoq=stoq.cli:main']
     },
     classifiers=[
         'Development Status :: 4 - Beta',
