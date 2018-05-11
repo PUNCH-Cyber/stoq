@@ -30,7 +30,7 @@ setup(
                       'yara-python',
                       'python-json-logger'],
     keywords='malware-analysis, malware-analyzer, malware-detection, framework, automation',
-    python_requires='>=3.5',
+    python_requires='>=3.4',
     test_suite='stoq.tests',
     entry_points= {
         'console_scripts': [ 'stoq=stoq.cli:main']
@@ -43,6 +43,7 @@ setup(
         'Topic :: Security',
         'Topic :: Utilities',
         'License :: OSI Approved :: Apache Software License',
+        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
