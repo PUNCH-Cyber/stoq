@@ -23,11 +23,11 @@
 set -e
 
 PREFIX=/usr/local
+export STOQ_HOME=$PREFIX/stoq
 BIN_DIR=$PREFIX/bin
 STAGE_DIR=$PWD
 TMP_DIR=$STAGE_DIR/tmp
 PLUGIN_DIR=$STAGE_DIR/stoq-plugins-public
-STOQ_HOME=$PREFIX/stoq
 PYENV_DIR=$STOQ_HOME/.stoq-pyenv
 STOQ_USER=stoq
 STOQ_GROUP=stoq
@@ -165,7 +165,7 @@ install_core() {
     fi
 
     # Make sure we setup stoQ in the proper directory
-    for f in `dispatcher.yar stoq.cfg`; do
+    for f in `ls extras/`; do
         cp extras/$f $STOQ_HOME/
     done
 
