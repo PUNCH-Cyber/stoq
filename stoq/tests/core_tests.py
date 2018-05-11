@@ -83,7 +83,7 @@ class StoqCoreTestCase(unittest.TestCase):
         self.assertEqual(temp_stoq.argv, argv)
 
     def test_base_dir(self):
-        base_dir = os.path.realpath(os.path.dirname(os.getcwd()))
+        base_dir = os.path.realpath(os.getcwd())
         temp_stoq = Stoq(base_dir=base_dir)
         self.assertEqual(temp_stoq.base_dir, base_dir)
 
