@@ -98,6 +98,7 @@ from stoq.plugins.carver import StoqCarverPlugin
 from stoq.plugins.decoder import StoqDecoderPlugin
 from stoq.plugins.decorator import StoqDecoratorPlugin
 
+
 class StoqPluginManager:
     """
 
@@ -105,20 +106,20 @@ class StoqPluginManager:
 
     """
 
+    # Define the plugin categories and the associated class.
+    # If we need to add a new plugin category, it must be done here.
+    plugin_categories = {
+        "worker": StoqWorkerPlugin,
+        "connector": StoqConnectorPlugin,
+        "reader": StoqReaderPlugin,
+        "source": StoqSourcePlugin,
+        "extractor": StoqExtractorPlugin,
+        "carver": StoqCarverPlugin,
+        "decoder": StoqDecoderPlugin,
+        "decorator": StoqDecoratorPlugin
+        }
+
     def __init__(self):
-
-        # Define the plugin categories and the associated class.
-        # If we need to add a new plugin category, it must be done here.
-        self.plugin_categories = {"worker": StoqWorkerPlugin,
-                                  "connector": StoqConnectorPlugin,
-                                  "reader": StoqReaderPlugin,
-                                  "source": StoqSourcePlugin,
-                                  "extractor": StoqExtractorPlugin,
-                                  "carver": StoqCarverPlugin,
-                                  "decoder": StoqDecoderPlugin,
-                                  "decorator": StoqDecoratorPlugin
-                                  }
-
         self.plugin_extension = ".stoq"
         self.collect_plugins()
 
