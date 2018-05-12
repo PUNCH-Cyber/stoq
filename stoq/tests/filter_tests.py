@@ -28,8 +28,7 @@ except ImportError:
 class StoqFiltersTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.stoq = Stoq()
-        self.stoq.log.setLevel("CRITICAL")
+        self.stoq = Stoq(log_level="CRITICAL")
 
         self.bloom_file = os.path.join(self.stoq.temp_dir, "stoq-test.bloom")
 
