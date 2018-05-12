@@ -1,3 +1,5 @@
+import re
+
 from stoq.plugins.base import StoqPluginBase
 
 
