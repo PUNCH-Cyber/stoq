@@ -152,7 +152,7 @@ class StoqPluginInstaller:
         # category, so now we can identity where the plugin will be
         # installed into
         try:
-            plugin_type = re.search('(?<=from stoq\.plugins import )(.+)',
+            plugin_type = re.search(r'(?<=from stoq\.plugins import )(.+)',
                                     plugin_stream.decode('utf-8')).group()
             self.plugin_category = self.stoq.__plugindict__[plugin_type]
         except Exception as err:
