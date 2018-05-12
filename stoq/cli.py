@@ -26,7 +26,7 @@ from stoq import __version__
 from stoq.core import Stoq
 from stoq.shell import StoqShell
 from stoq.logo import print_logo
-from stoq.plugins import StoqPluginInstaller
+from stoq.plugins.installer import StoqPluginInstaller
 
 
 def main():
