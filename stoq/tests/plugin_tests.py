@@ -29,7 +29,7 @@ from stoq.core import Stoq
 
 class StoqPluginTestCase(unittest.TestCase):
     def setUp(self):
-        self.stoq = Stoq()
+        self.stoq = Stoq(log_level="CRITICAL", default_connector="test_connector")
 
         # Use tests from installed $CWD/tests, otherwise, try to use the install stoQ tests
         self.test_path = os.path.join(os.getcwd(), "tests")
@@ -41,7 +41,6 @@ class StoqPluginTestCase(unittest.TestCase):
                 print("Test suite not found. Is stoQ installed or are tests in {}?".format(self.test_path))
                 exit(1)
 
-        self.stoq.default_connector = "test_connector"
 
         self.invalid_plugins = os.path.join(self.test_path, "invalid_plugins")
         self.collect_plugins()
@@ -57,8 +56,6 @@ class StoqPluginTestCase(unittest.TestCase):
         # Dispatcher paths
         self.dispatch_rules = os.path.join(self.test_path, "test_dispatch.yar")
         self.get_dispatch_file = os.path.join(self.data_prefix, "get/dispatch_test")
-
-        self.stoq.log.setLevel("CRITICAL")
 
     def collect_plugins(self, mode=None):
         plugin_path1 = os.path.join(self.test_path, "plugins")

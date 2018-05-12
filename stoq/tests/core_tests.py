@@ -30,7 +30,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class StoqCoreTestCase(unittest.TestCase):
     def setUp(self):
-        self.stoq = Stoq()
+        self.stoq = Stoq(log_level="CRITICAL")
 
         # Use tests from installed $CWD/tests, otherwise, try to use the install stoQ tests
         test_path = os.path.join(os.getcwd(), "tests")
@@ -46,8 +46,6 @@ class StoqCoreTestCase(unittest.TestCase):
         # Set stoQ variables for the test environment
         self.stoq.source_base_tuple = (os.path.join(data_prefix, "get"),
                                        os.path.join(data_prefix, "results"))
-
-        self.stoq.log.setLevel("CRITICAL")
 
         # Variables used to get/read a file or url
         self.config_file_test = os.path.join(data_prefix, "stoq.cfg")
@@ -112,13 +110,13 @@ class StoqCoreTestCase(unittest.TestCase):
         self.assertIsNone(data)
 
     def test_json_logger(self):
-        s = Stoq()
+        s = Stoq(log_level="CRITICAL")
         s.log_syntax = 'json'
         s.logger_init()
         self.assertEqual(s.log_syntax, 'json')
 
     def test_load_config(self):
-        s = Stoq()
+        s = Stoq(log_level="CRITICAL")
         s.config_file = self.config_file_test
         s.load_config()
         self.assertIsInstance(s.log_level, str)
