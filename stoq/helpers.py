@@ -12,14 +12,17 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import os
 import time
 import json
 import threading
 import datetime
 import collections
+import unittest
 
 from functools import wraps
 
+import stoq
 
 class JsonComplexDecoder(json.JSONEncoder):
     """
@@ -110,3 +113,54 @@ def flatten(data, delim='_'):
 
     flatten_dict(data)
     return result
+
+
+def runtests(s, plugin=None, everything=False):
+    """
+    Run stoQ tests
+
+    :param object s: Stoq() object
+    :param str plugin: stoQ plugin name
+    :param bool everything: Test all plugin
+
+    """
+
+    tests = []
+    if plugin:
+        for plg in plugin:
+            try:
+                test_path = os.path.join(
+                    os.path.abspath(
+                        os.path.dirname(
+                            s.__collected_plugins__.get(plg).get(
+                                "Core", "Config"))), "tests")
+            except AttributeError:
+                s.log.error("Plugin does not exist: {}".format(plg))
+            else:
+                tests.append(test_path)
+    elif everything:
+        for _, config in s.__collected_plugins__.items():
+            test_path = os.path.join(
+                os.path.abspath(
+                    os.path.join(
+                        os.path.dirname(
+                            config.get("Core", "Config")), "tests")))
+            tests.append(test_path)
+    else:
+        try:
+            test_path = os.path.join(
+                os.path.dirname(stoq.__file__), "tests")
+        except ImportError:
+            s.log.error(
+                "Test suite not found. Is stoQ installed or are tests in {}?".format(
+                    test_path))
+        else:
+            tests.append(test_path)
+
+    for test_path in tests:
+        if not os.path.isdir(test_path):
+            s.log.error("Invalid test suite {} ..skipping".format(test_path))
+            continue
+
+        test_suite = unittest.TestLoader().discover(test_path, pattern='*_tests.py')
+        unittest.TextTestRunner(verbosity=1).run(test_suite)

@@ -172,6 +172,7 @@ class StoqPluginManager:
                                 config["Core"]["Category"] = category
                                 config["Core"]["Module"] = module_path
                                 config["Core"]["Root"] = plugin_dir_candidate
+                                config["Core"]["Config"] = plugin_path
                                 self.__collected_plugins__[name] = config
                             else:
                                 self.log.warning("Found {} but no module {}, skipping".format(plugin_path, module_path))
