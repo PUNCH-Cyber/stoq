@@ -114,14 +114,29 @@ def flatten(data, delim='_'):
     flatten_dict(data)
     return result
 
-
-def runtests(s, plugin=None, everything=False):
+def run_stoq_tests(s):
     """
-    Run stoQ tests
+    Run stoQ framework tests
 
-    :param object s: Stoq() object
-    :param str plugin: stoQ plugin name
-    :param bool everything: Test all plugin
+    :param Stoq s: Stoq() object
+
+    """
+    try:
+        test_path = os.path.join(
+            os.path.dirname(stoq.__file__), "tests")
+    except ImportError:
+        s.log.error(
+            "Test suite not found. Is stoQ installed or are tests in {}?".format(
+                test_path))
+    else:
+        run_test(test_path)
+
+def run_plugin_tests(s, plugin=None):
+    """
+    Run stoQ plugin tests
+
+    :param Stoq s: Stoq() object
+    :param list plugin: stoQ plugin names
 
     """
 
@@ -138,7 +153,7 @@ def runtests(s, plugin=None, everything=False):
                 s.log.error("Plugin does not exist: {}".format(plg))
             else:
                 tests.append(test_path)
-    elif everything:
+    else:
         for _, config in s.__collected_plugins__.items():
             test_path = os.path.join(
                 os.path.abspath(
@@ -146,21 +161,14 @@ def runtests(s, plugin=None, everything=False):
                         os.path.dirname(
                             config.get("Core", "Config")), "tests")))
             tests.append(test_path)
-    else:
-        try:
-            test_path = os.path.join(
-                os.path.dirname(stoq.__file__), "tests")
-        except ImportError:
-            s.log.error(
-                "Test suite not found. Is stoQ installed or are tests in {}?".format(
-                    test_path))
-        else:
-            tests.append(test_path)
 
     for test_path in tests:
         if not os.path.isdir(test_path):
             s.log.error("Invalid test suite {} ..skipping".format(test_path))
             continue
 
-        test_suite = unittest.TestLoader().discover(test_path, pattern='*_tests.py')
-        unittest.TextTestRunner(verbosity=1).run(test_suite)
+        run_test(test_path)
+
+def run_test(test_path):
+    test_suite = unittest.TestLoader().discover(test_path, pattern='*_tests.py')
+    unittest.TextTestRunner(verbosity=1).run(test_suite)

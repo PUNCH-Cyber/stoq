@@ -25,7 +25,7 @@ from stoq import __version__
 from stoq.core import Stoq
 from stoq.shell import StoqShell
 from stoq.logo import print_logo
-from stoq.helpers import runtests
+from stoq.helpers import run_stoq_tests, run_plugin_tests
 from stoq.plugins.installer import StoqPluginInstaller
 
 
@@ -105,11 +105,11 @@ def main():
         # of using argparse.
         try:
             if s.argv[2] == "stoq":
-                runtests(s)
+                run_stoq_tests(s)
             elif s.argv[2] == "all":
-                runtests(s, everything=True)
+                run_plugin_tests(s)
             else:
-                runtests(s, plugin=s.argv[2:])
+                run_plugin_tests(s, plugin=s.argv[2:])
         except IndexError:
             parser.print_usage()
             print("No test type provided. Valid options are: {stoq|all|plugin name ...}")
