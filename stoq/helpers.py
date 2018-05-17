@@ -29,8 +29,10 @@ class JsonComplexDecoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, (bytes, datetime.datetime)):
             return str(obj)
+        elif isinstance(obj, set):
+            return list(obj)
         else:
-            return obj
+            return json.JSONEncoder.default(self, obj)
 
 
 def JsonComplexEncoder(obj):
