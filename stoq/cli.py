@@ -14,7 +14,6 @@
 
 import os
 import sys
-import unittest
 
 from time import sleep
 from pathlib import Path
@@ -26,6 +25,7 @@ from stoq import __version__
 from stoq.core import Stoq
 from stoq.shell import StoqShell
 from stoq.logo import print_logo
+from stoq.helpers import run_stoq_tests, run_plugin_tests
 from stoq.plugins.installer import StoqPluginInstaller
 
 
@@ -39,20 +39,23 @@ def main():
 
     logo = print_logo()
 
-    parser = ArgumentParser(formatter_class=RawDescriptionHelpFormatter,
-                            usage='''
-    {}
-    %(prog)s [command] [<args>]
+    parser = ArgumentParser(
+        formatter_class=RawDescriptionHelpFormatter,
+        description='''
+    stoQ - an automated analysis framework
 
+            {}
     Available Commands:
         help     Display help message
         shell    Launch an interactive shell
         list     List available plugins
         worker   Load specified worker plugin
         install  Install a stoQ plugin
-        runtests Run stoQ tests
-    '''.format(logo),
-                            epilog='''
+        test     Run stoQ tests
+
+            '''.format(logo),
+        usage='%(prog)s [command] [<args>]',
+        epilog='''
     Examples:
 
         - Scan a file with yara:
@@ -80,7 +83,7 @@ def main():
 
     ''')
 
-    parser.add_argument("command", help="Subcommand to be run")
+    parser.add_argument(dest="command", help="Commands")
     options = parser.parse_args(s.argv[1:2])
 
     if not options.command or options.command == 'help':
@@ -97,21 +100,19 @@ def main():
     elif options.command == "shell":
         StoqShell(s).cmdloop()
 
-    elif options.command == "runtests":
-        # Use tests from installed $CWD/tests, otherwise, try to use the install stoQ tests
-        test_path = os.path.join(os.getcwd(), "tests")
-        if not os.path.isdir(test_path):
-            try:
-                test_path = os.path.join(os.path.dirname(stoq.__file__), "tests")
-            except ImportError:
-                print("Test suite not found. Is stoQ installed or are tests in {}?".format(test_path))
-                exit(1)
-
-        test_suite = unittest.TestLoader().discover(test_path, pattern='*_tests.py')
-        test_result = unittest.TextTestRunner(verbosity=1).run(test_suite)
-        if not test_result.wasSuccessful():
-            exit("Unit tests failed")
-
+    elif options.command == "test":
+        # We are going to manually parse the command line options here instead
+        # of using argparse.
+        try:
+            if s.argv[2] == "stoq":
+                run_stoq_tests(s)
+            elif s.argv[2] == "all":
+                run_plugin_tests(s)
+            else:
+                run_plugin_tests(s, plugin=s.argv[2:])
+        except IndexError:
+            parser.print_usage()
+            print("No test type provided. Valid options are: {stoq|all|plugin name ...}")
     else:
         # Initialize and load the worker plugin and make it an object of our
         # stoq class
