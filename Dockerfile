@@ -1,10 +1,9 @@
 FROM ubuntu:16.04
-MAINTAINER Adam Trask "adam@punchcyber.com"
+LABEL maintainer="adam@punchyber.com, marcus@punchcyber.com"
 
-ENV LANG='C.UTF-8' LC_ALL='C.UTF-8' LANGUAGE='C.UTF-8' STOQ_TMP='/tmp' STOQ_DIR='/usr/local/stoq' STOQ_HOME='/root/.stoq'
+ENV LANG='C.UTF-8' LC_ALL='C.UTF-8' LANGUAGE='C.UTF-8' STOQ_TMP='/tmp' STOQ_HOME='/usr/local/stoq'
 
 ADD . ${STOQ_TMP}/stoq
-ADD ./stoq ${STOQ_DIR}
 
 RUN apt-get update \
   && apt-get -y install software-properties-common \
@@ -55,6 +54,17 @@ WORKDIR ${STOQ_TMP}/stoq
 RUN echo "[stoQ] Installing core stoQ components..." \
   && python3 setup.py install
 
+#######################
+### Install Plugins ###
+#######################
+WORKDIR ${STOQ_TMP}
+RUN echo "[stoQ] Installing plugins" \
+  && git clone https://github.com/PUNCH-Cyber/stoq-plugins-public.git \
+  && for category in connector decoder extractor carver source reader worker; \
+    do for plugin in `ls ${STOQ_TMP}/stoq-plugins-public/$category`; \
+      do stoq install ${STOQ_TMP}/stoq-plugins-public/$category/$plugin; done \
+    done
+
 ###################
 ### Install Xor ###
 ###################
@@ -78,18 +88,6 @@ RUN perl Makefile.PL \
   && make test \
   && make install
 
-#######################
-### Install Plugins ###
-#######################
-WORKDIR ${STOQ_HOME}
-RUN echo "[stoQ] Installing plugins" \
-  && chmod +x ${STOQ_DIR}/cli.py \
-  && git clone https://github.com/PUNCH-Cyber/stoq-plugins-public.git plugins \
-  && for category in connector decoder extractor carver source reader worker; \
-    do for plugin in `ls ${STOQ_HOME}/plugins/$category`; \
-      do ${STOQ_DIR}/cli.py install ${STOQ_HOME}/plugins/$category/$plugin; done \
-    done
-
 ####################
 ### Install Trid ###
 ####################
@@ -105,10 +103,11 @@ RUN echo "[stoQ] Installing trid" \
 ###########################
 ### Cleanup and Staging ###
 ###########################
-WORKDIR ${STOQ_DIR}
 RUN rm -r ${STOQ_TMP}
 RUN apt-get clean
 RUN rm -rf \
 	/tmp/* \
 	/var/lib/apt/lists/* \
 	/var/tmp/*
+
+WORKDIR ${STOQ_HOME}
