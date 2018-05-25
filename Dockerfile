@@ -1,10 +1,10 @@
 FROM ubuntu:16.04
-MAINTAINER Adam Trask ”adam@punchcyber.com”
+MAINTAINER Adam Trask "adam@punchcyber.com"
 
-ENV LANG='C.UTF-8' LC_ALL='C.UTF-8' LANGUAGE='C.UTF-8' STOQ_TMP='/tmp' STOQ_DIR='/usr/local/stoq'
+ENV LANG='C.UTF-8' LC_ALL='C.UTF-8' LANGUAGE='C.UTF-8' STOQ_TMP='/tmp' STOQ_DIR='/usr/local/stoq' STOQ_HOME='/root/.stoq'
 
 ADD . ${STOQ_TMP}/stoq
-ADD ./cmd ${STOQ_DIR}
+ADD ./stoq ${STOQ_DIR}
 
 RUN apt-get update \
   && apt-get -y install software-properties-common \
@@ -55,18 +55,6 @@ WORKDIR ${STOQ_TMP}/stoq
 RUN echo "[stoQ] Installing core stoQ components..." \
   && python3 setup.py install
 
-#######################
-### Install Plugins ###
-#######################
-WORKDIR ${STOQ_DIR}
-RUN echo "[stoQ] Installing plugins" \
-  && chmod +x ${STOQ_DIR}/stoq-cli.py \
-  && git clone https://github.com/PUNCH-Cyber/stoq-plugins-public.git \
-  && for category in connector decoder extractor carver source reader worker; \
-    do for plugin in `ls ${STOQ_DIR}/stoq-plugins-public/$category`; \
-      do ${STOQ_DIR}/stoq-cli.py install ${STOQ_DIR}/stoq-plugins-public/$category/$plugin; done \
-    done
-
 ###################
 ### Install Xor ###
 ###################
@@ -90,6 +78,18 @@ RUN perl Makefile.PL \
   && make test \
   && make install
 
+#######################
+### Install Plugins ###
+#######################
+WORKDIR ${STOQ_HOME}
+RUN echo "[stoQ] Installing plugins" \
+  && chmod +x ${STOQ_DIR}/cli.py \
+  && git clone https://github.com/PUNCH-Cyber/stoq-plugins-public.git plugins \
+  && for category in connector decoder extractor carver source reader worker; \
+    do for plugin in `ls ${STOQ_HOME}/plugins/$category`; \
+      do ${STOQ_DIR}/cli.py install ${STOQ_HOME}/plugins/$category/$plugin; done \
+    done
+
 ####################
 ### Install Trid ###
 ####################
@@ -100,7 +100,7 @@ RUN echo "[stoQ] Installing trid" \
   && unzip -qq trid_linux_64 -d /usr/local/bin \
   && chmod +x /usr/local/bin/trid \
   && wget -O triddefs.zip "http://mark0.net/download/triddefs.zip" \
-  && unzip -qq triddefs -d ${STOQ_DIR}/plugins/worker/trid
+  && unzip -qq triddefs -d ${STOQ_HOME}/plugins/worker/trid
 
 ###########################
 ### Cleanup and Staging ###
