@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 #   Copyright 2014-2018 PUNCH Cyber Analytics Group
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,121 +14,156 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import argparse
 import os
+from pathlib import Path
+import select
 import sys
 
-from time import sleep
-from pathlib import Path
-
-from argparse import RawDescriptionHelpFormatter, ArgumentParser
-
-import stoq
-from stoq import __version__
-from stoq.core import Stoq
-from stoq.shell import StoqShell
-from stoq.logo import print_logo
-from stoq.helpers import run_stoq_tests, run_plugin_tests
-from stoq.plugins.installer import StoqPluginInstaller
+from stoq import Stoq, PayloadMeta
+import stoq.helpers as helpers
+from stoq.logo import get_logo
 
 
-def main():
-
+def main() -> None:
     # If $STOQ_HOME exists, set our base directory to that, otherwise
     # use ~/.stoq
-    homedir = os.getenv("STOQ_HOME", "{}/.stoq".format(str(Path.home())))
+    homedir = os.getenv('STOQ_HOME', '{}/.stoq'.format(str(Path.home())))
 
-    s = Stoq(argv=sys.argv, base_dir=homedir)
-
-    logo = print_logo()
-
-    parser = ArgumentParser(
-        formatter_class=RawDescriptionHelpFormatter,
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
         description='''
     stoQ - an automated analysis framework
 
             {}
-    Available Commands:
-        help     Display help message
-        shell    Launch an interactive shell
-        list     List available plugins
-        worker   Load specified worker plugin
-        install  Install a stoQ plugin
-        test     Run stoQ tests
-
-            '''.format(logo),
-        usage='%(prog)s [command] [<args>]',
+            '''.format(get_logo()),
         epilog='''
-    Examples:
+Examples:
 
-        - Scan a file with yara:
+    - Scan a file with installed plugins and dispatch rules:
 
-        $ %(prog)s yara -F mybadfile.exe
+    $ %(prog)s scan mybadfile.exe
 
-        - Monitor a directory for newly created files in the new_files
-          directory, send them to workers, and archive the file into MongoDB:
+    - Scan a file and force it to go through the yara plugin:
 
-        $ %(prog)s publisher -I dirmon -F new_files/ -w yara -w trid -w exif -A mongodb
+    $ %(prog)s scan mybadfile.exe -s yara
 
-        - Start workers, ingest from RabbitMQ, and save results to file:
+    - Ingest from RabbitMQ, force all payloads through yara, trid, and exif,
+      then save results to file:
 
-        $ %(prog)s yara -C file -I rabbitmq &
-        $ %(prog)s trid -C file -I rabbitmq &
-        $ %(prog)s exif -C file -I rabbitmq &
+    $ %(prog)s run -a yara trid exif -P rabbitmq -C file
 
-        - Install a plugin from a directory
+    - Monitor a directory (specified in dirmon.stoq) for newly created files
+      send them to workers, and archive all payloads into MongoDB:
 
-        $ %(prog)s install path/to/plugin_directory
+    $ %(prog)s run -P dirmon -A mongodb
 
-        - Display worker specific command line arguments
+    - Install a plugin from a directory
 
-        $ %(prog)s yara -h
+    $ %(prog)s install path/to/plugin_directory
 
     ''')
+    subparsers = parser.add_subparsers(title='commands', dest='command')
+    subparsers.required = True
 
-    parser.add_argument(dest="command", help="Commands")
-    options = parser.parse_args(s.argv[1:2])
+    scan = subparsers.add_parser('scan', help='Scan a given payload')
+    scan.add_argument(
+        'file',
+        nargs='?',
+        type=argparse.FileType('rb'),
+        default=sys.stdin.buffer,
+        help='File to scan, can also be provided from stdin')
+    scan.add_argument(
+        '-s',
+        '--start-dispatch',
+        nargs='+',
+        help='Worker plugins to add to the original payload dispatch')
 
-    if not options.command or options.command == 'help':
-        parser.print_help()
+    run = subparsers.add_parser(
+        'run',
+        help='Continually ingest and scan payloads from Provider plugins')
+    run.add_argument(
+        '-P',
+        '--providers',
+        nargs='+',
+        help='Provider plugins to ingest payloads from')
 
-    # Display a listing of valid plugins and their category
-    elif options.command == "list":
-        s.list_plugins()
+    # Add shared arguments so they still show up in the help dialog
+    for subparser in [scan, run]:
+        subparser.add_argument(
+            '-A',
+            '--archivers',
+            nargs='+',
+            help='Archiver plugins to send payloads to')
+        subparser.add_argument(
+            '-C',
+            '--connectors',
+            nargs='+',
+            help='Connector plugins to send results to')
+        subparser.add_argument(
+            '-a',
+            '--always-dispatch',
+            nargs='+',
+            help='Worker plugins to always dispatch plugins to')
 
-    elif options.command == "install":
-        installer = StoqPluginInstaller(s)
-        installer.install()
+    subparsers.add_parser('list', help='List available plugins')
+    subparsers.add_parser('install', help='Install a given plugin')
+    subparsers.add_parser('shell', help='Launch an interactive shell')
+    subparsers.add_parser('test', help='Run stoQ tests')
 
-    elif options.command == "shell":
-        StoqShell(s).cmdloop()
+    args = parser.parse_args()
 
-    elif options.command == "test":
-        # We are going to manually parse the command line options here instead
-        # of using argparse.
-        try:
-            if s.argv[2] == "stoq":
-                run_stoq_tests(s)
-            elif s.argv[2] == "all":
-                run_plugin_tests(s)
-            else:
-                run_plugin_tests(s, plugin=s.argv[2:])
-        except IndexError:
-            parser.print_usage()
-            print("No test type provided. Valid options are: {stoq|all|plugin name ...}")
-    else:
-        # Initialize and load the worker plugin and make it an object of our
-        # stoq class
-        s.log.info("Starting stoQ v{}".format(__version__))
+    if args.command == 'scan':
+        with args.file as f:
+            # Verify that the file or stdin has some sort of data
+            if not select.select([f], [], [], 0.0)[0]:
+                print('Error: No content to scan was provided')
+                sys.exit(2)
+            content = f.read()
+        if not content:
+            print('Error: The provided content to scan was empty')
+            sys.exit(2)
 
-        worker = s.load_plugin(options.command, 'worker')
-        if not worker:
-            exit(-1)
-
-        if worker.cron:
-            # Look liks a cron interval was provided, let's loop per the value provided
-            while True:
-                worker.run()
-                sleep(worker.cron)
+        if args.file.name == '<stdin>':
+            filename = None
         else:
-            # No cron value was provided, let's run once and exit.
-            worker.run()
+            path = args.file.name
+            try:
+                filename = os.path.basename(path.encode('utf-8'))
+            except AttributeError:
+                filename = os.path.basename(path)
+
+        stoq = Stoq(
+            base_dir=homedir,
+            archivers=args.archivers,
+            connectors=args.connectors,
+            always_dispatch=args.always_dispatch)
+        response = stoq.scan(
+            content,
+            PayloadMeta(filename=filename),
+            add_start_dispatch=args.start_dispatch)
+        print(helpers.dumps(response))
+    elif args.command == 'run':
+        stoq = Stoq(
+            base_dir=homedir,
+            providers=args.providers,
+            archivers=args.archivers,
+            connectors=args.connectors,
+            always_dispatch=args.always_dispatch)
+        stoq.run()
+    elif args.command == 'list':
+        stoq = Stoq(base_dir=homedir)
+        print(stoq.list_plugins())
+    elif args.command == 'install':
+        # TODO
+        pass
+    elif args.command == 'shell':
+        # TODO
+        pass
+    elif args.command == 'test':
+        # TODO
+        pass
+
+
+if __name__ == '__main__':
+    main()
