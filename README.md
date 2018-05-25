@@ -32,7 +32,7 @@ Don't see a plugin you need? Check out the [plugin development](https://stoq-fra
 
 # Installation and Documenation
 
-Want to get started quicky? Check out the [docker image](https://hub.docker.com/r/punchcyber/stoq/).
+Want to get started quickly? Check out the [docker image](https://hub.docker.com/r/punchcyber/stoq/).
 
 stoQ requires a minimum of python 3.4. Installation on Debian based systems is
 as simple as running a script. For detailed instructions on how to install stoQ,
