@@ -1,7 +1,6 @@
 beautifulsoup4
 requests
 requests[security]
-pathlib
 python-magic
 ssdeep
 yara-python
