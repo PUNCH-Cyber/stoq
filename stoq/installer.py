@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 #   Copyright 2014-2018 PUNCH Cyber Analytics Group
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,178 +14,99 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import argparse
-import os
-import sys
-import subprocess
-import glob
+
 import configparser
-import re
+import glob
+import os
+import subprocess
+import sys
+from typing import Any, Dict
 
 
 class StoqPluginInstaller:
 
-    pip_exists_str = "already exists. Specify --upgrade to force replacement."
+    PIP_EXISTS_STR = "already exists. Specify --upgrade to force replacement."
 
-    def __init__(self, stoq):
-
-        self.stoq = stoq
-        self.plugin_info = {}
-
-        parser = argparse.ArgumentParser()
-        installer_opts = parser.add_argument_group("Plugin Installer Options")
-        installer_opts.add_argument("plugin", help="stoQ Plugin Archive")
-        installer_opts.add_argument("--upgrade",
-                                    action="store_true",
-                                    help="Upgrade the stoQ Plugin")
-        installer_opts.add_argument("-P", "--plugin-dir",
-                                    dest='plugin_dir',
-                                    default=False,
-                                    help="Root directory to install plugin to")
-
-        options = parser.parse_args(self.stoq.argv[2:])
-
-        if not options.plugin:
-            parser.print_help()
-            exit(-1)
-
-        # Set the source path of the plugin archive/directory
-        self.plugin = os.path.abspath(options.plugin)
-
-        # Define a directory to install a plugin to, if so desired
-        self.plugin_dir = options.plugin_dir
-
-        self.upgrade_plugin = options.upgrade
-
-    def install(self):
-        self.stoq.log.info("Looking for plugin in {}...".format(self.plugin))
-        try:
-            if os.path.isdir(self.plugin):
-                self.setup_from_dir()
-            else:
-                self.stoq.log.critical("Unable to install plugin. Is this a valid plugin?")
-                exit(-1)
-
-            try:
-                cmd = [
-                    sys.executable,
-                    '-m',
-                    'pip',
-                    'install',
-                    self.plugin,
-                    '-t',
-                    self.plugin_root,
-                ]
-                # Use pip to install/upgrade the plugin in the appropriate
-                # directory for this plugin category
-                if self.upgrade_plugin:
-                    cmd.append('--upgrade')
-
-                output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-                if self.pip_exists_str.encode() in output:
-                    self.stoq.log.critical("Plugin {}".format(self.pip_exists_str))
-                    exit(-1)
-
-                # Time to install the requirements, if they exist.
-                requirements = "{}/requirements.txt".format(self.plugin)
-                if os.path.isfile(requirements):
-                    subprocess.check_call([
-                        sys.executable,
-                        '-m',
-                        'pip',
-                        'install',
-                        '--quiet',
-                        '-r',
-                        requirements,
-                    ])
-
-            except Exception as err:
-                self.stoq.log.critical("Error installing requirements: {}".format(str(err)))
-                exit(-1)
-
-        except FileNotFoundError as err:
-            self.stoq.log.critical(err)
-            exit(-1)
-
-        self.stoq.log.info("Install complete.")
-
-    def setup_from_dir(self):
+    @staticmethod
+    def install(plugin_dir: str, install_dir: str, upgrade: bool) -> None:
+        plugin_dir = os.path.abspath(plugin_dir)
+        install_dir = os.path.abspath(install_dir)
+        if not os.path.isdir(plugin_dir):
+            raise RuntimeError(f'Given plugin directory does not exist: {plugin_dir}')
+        if not os.path.isdir(install_dir):
+            raise RuntimeError(f'Given install directory does not exist: {install_dir}')
         # Find the stoQ configuration file
-        config_file = glob.glob("{}/*/*.stoq".format(self.plugin))
+        config_path_glob = '{}/*/*.stoq'.format(plugin_dir)
+        config_path = glob.glob(config_path_glob)
+        if len(config_path) == 0:
+            raise RuntimeError(f'No config file found matching glob {config_path_glob}')
+        elif len(config_path) > 1:
+            raise RuntimeError(f'More than one config file found matching glob {config_path_glob}')
+        plugin_info = StoqPluginInstaller.parse_config(config_path[0])
+        StoqPluginInstaller.save_plugin_info(plugin_info, plugin_dir)
+        StoqPluginInstaller.setup_package(plugin_dir, install_dir, upgrade)
+        # Run pip install -t on 'install_dir/plugin_name/'
+        # Check for upgrade
+        # If it exists, run pip install -r on the requirements file
 
-        if len(config_file) > 1:
-            self.stoq.log.critical("More than one stoQ configuration file found. Exiting.")
-            exit(-1)
+    @staticmethod
+    def setup_package(plugin_dir: str, install_dir: str, upgrade: bool) -> None:
+        cmd = [
+            sys.executable,
+            '-m',
+            'pip',
+            'install',
+            plugin_dir,
+            '-t',
+            install_dir,
+        ]
+        if upgrade:
+            cmd.append('--upgrade')
 
-        if os.path.isfile(config_file[0]):
-            # Open the stoQ configuration files and parse it
-            with open(config_file[0], "rb") as config_content:
-                self.parse_config(config_content.read())
-        else:
-            self.stoq.log.critical("Is this a valid configuration file? Exiting.")
-            exit(-1)
+        output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        if StoqPluginInstaller.PIP_EXISTS_STR.encode() in output:
+            raise RuntimeError('There is an existing version of this plugin '
+                               'already installed. You must specify "upgrade" '
+                               'to force replacement')
 
-        # Find the module name and set the plugin options
-        module_root = os.path.join(self.plugin, self.plugin_name)
-        module_path = os.path.join(module_root, self.plugin_module)
-        with open(module_path, "rb") as module_content:
-            self.set_plugin_category(module_content.read())
+        # TODO: Is it correct to do this install after the setup.py one? requirements.txt contains specific library versions (or githubs), whereas setup.py doesn't
+        requirements = '{}/requirements.txt'.format(plugin_dir)
+        if os.path.isfile(requirements):
+            subprocess.check_call([
+                sys.executable,
+                '-m',
+                'pip',
+                'install',
+                '--quiet',
+                '-r',
+                requirements,
+            ])
 
-        self.set_plugin_path()
-
-        self.save_plugin_info()
-
-        return True
-
-    def parse_config(self, stream):
+    @staticmethod
+    def parse_config(config_path: str) -> Dict[str, Any]:
         config = configparser.ConfigParser()
-        config.read_string(stream.decode('utf-8'))
-        try:
-            self.plugin_name = config['Core']['Name']
-            self.plugin_module = "{}.py".format(config['Core']['Module'])
+        config.read(config_path)
+        plugin_name = config.get('Core', 'Name', fallback=None)
+        if not plugin_name:
+            raise RuntimeError('Config file must contain a Name in the Core section')
+        # We are going to use this to dynamically define data points in
+        # setup.py
+        plugin_info = {}
+        plugin_info['NAME'] = plugin_name
+        if config.get('Documentation', 'Author', fallback=None):
+            plugin_info['AUTHOR'] = config['Documentation']['Author']
+        if config.get('Documentation', 'Version', fallback=None):
+            plugin_info['VERSION'] = config['Documentation']['Version']
+        if config.get('Documentation', 'Website', fallback=None):
+            plugin_info['WEBSITE'] = config['Documentation']['Website']
+        if config.get('Documentation', 'Description', fallback=None):
+            plugin_info['DESCRIPTION'] = config['Documentation']['Description']
+        return plugin_info
 
-            # We are going to use this to dynamically define data points in
-            # setup.py
-            self.plugin_info['NAME'] = self.plugin_name
-            self.plugin_info['AUTHOR'] = config['Documentation']['Author']
-            self.plugin_info['VERSION'] = config['Documentation']['Version']
-            self.plugin_info['WEBSITE'] = config['Documentation']['Website']
-            self.plugin_info['DESCRIPTION'] = config['Documentation']['Description']
-
-        except Exception as err:
-            self.stoq.log.critical("Is this a valid stoQ configuration file? {}".format(err))
-            exit(-1)
-
-    def save_plugin_info(self):
+    @staticmethod
+    def save_plugin_info(plugin_info: Dict[str, Any], plugin_dir: str) -> None:
         # Let's create text files with the appropriate attributes so setup.py
         # can be more dynamic
-        for option, value in self.plugin_info.items():
-            with open(os.path.join(self.plugin, option), "w") as f:
+        for option, value in plugin_info.items():
+            with open(os.path.join(plugin_dir, option), 'w') as f:
                 f.write(value)
-
-    def set_plugin_category(self, plugin_stream):
-        # We've extract the StoqPlugin class that is specific to our plugin
-        # category, so now we can identity where the plugin will be
-        # installed into
-        try:
-            plugin_type = re.search(r'(?<=from stoq\.plugins import )(.+)',
-                                    plugin_stream.decode('utf-8')).group()
-            self.plugin_category = self.stoq.__plugindict__[plugin_type]
-        except Exception as err:
-            self.stoq.log.critical("Unable to determine the category. Is this a valid plugin? {}".format(err))
-            exit(-1)
-
-    def set_plugin_path(self):
-        if self.plugin_dir:
-            install_path  = self.plugin_dir
-        else:
-            if len(self.stoq.plugin_dir_list) > 1:
-                self.stoq.log.critical("Multiple plugin directories defined in stoq.cfg."
-                                       "Unable to determine plugin installation directory."
-                                       "Please explicitly define one using --plugin-dir")
-                exit(-1)
-            install_path = self.stoq.plugin_dir_list[0]
-
-        self.plugin_root = os.path.join(install_path, self.plugin_category)
-
-        self.stoq.log.info("Installing {} plugin into {}...".format(self.plugin_name, self.plugin_root))

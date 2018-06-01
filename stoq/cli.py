@@ -22,13 +22,14 @@ import sys
 
 from stoq import Stoq, PayloadMeta
 import stoq.helpers as helpers
+from stoq.installer import StoqPluginInstaller
 from stoq.logo import get_logo
 
 
 def main() -> None:
     # If $STOQ_HOME exists, set our base directory to that, otherwise
     # use ~/.stoq
-    homedir = os.getenv('STOQ_HOME', '{}/.stoq'.format(str(Path.home())))
+    stoq_home = os.getenv('STOQ_HOME', '{}/.stoq'.format(str(Path.home())))
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -107,7 +108,19 @@ Examples:
             help='Worker plugins to always dispatch plugins to')
 
     subparsers.add_parser('list', help='List available plugins')
-    subparsers.add_parser('install', help='Install a given plugin')
+
+    install = subparsers.add_parser('install', help='Install a given plugin')
+    install.add_argument(
+        'plugin_dir', help='Directory of the plugin to install')
+    install.add_argument(
+        '--install_dir',
+        default=os.path.join(stoq_home, 'plugins'),
+        help='Override the default plugin installation directory')
+    install.add_argument(
+        '--upgrade',
+        action='store_true',
+        help='Force the plugin to be upgraded if it already exists')
+
     subparsers.add_parser('shell', help='Launch an interactive shell')
     subparsers.add_parser('test', help='Run stoQ tests')
 
@@ -134,7 +147,7 @@ Examples:
                 filename = os.path.basename(path)
 
         stoq = Stoq(
-            base_dir=homedir,
+            base_dir=stoq_home,
             archivers=args.archivers,
             connectors=args.connectors,
             always_dispatch=args.always_dispatch)
@@ -145,18 +158,18 @@ Examples:
         print(helpers.dumps(response))
     elif args.command == 'run':
         stoq = Stoq(
-            base_dir=homedir,
+            base_dir=stoq_home,
             providers=args.providers,
             archivers=args.archivers,
             connectors=args.connectors,
             always_dispatch=args.always_dispatch)
         stoq.run()
     elif args.command == 'list':
-        stoq = Stoq(base_dir=homedir)
+        stoq = Stoq(base_dir=stoq_home)
         print(stoq.list_plugins())
     elif args.command == 'install':
-        # TODO
-        pass
+        StoqPluginInstaller.install(args.plugin_dir, args.install_dir, args.upgrade)
+        print(f'Successfully installed to {args.install_dir}')
     elif args.command == 'shell':
         # TODO
         pass
