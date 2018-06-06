@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 #   Copyright 2014-2018 PUNCH Cyber Analytics Group
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,15 +14,13 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from stoq.plugins.base import StoqPluginBase
+from abc import abstractmethod
 
-class StoqConnectorPlugin(StoqPluginBase):
+from stoq.data_classes import StoqResponse
+from stoq.plugins import BasePlugin
 
-    def connect(self):
-        pass
 
-    def disconnect(self):
-        pass
-
-    def save(self):
+class ConnectorPlugin(BasePlugin):
+    @abstractmethod
+    def save(self, response: StoqResponse) -> None:
         pass

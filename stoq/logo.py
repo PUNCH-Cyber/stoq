@@ -23,7 +23,7 @@ import random
 from stoq import __version__
 
 
-def print_logo():
+def get_logo():
     """
 
     print random ascii art
