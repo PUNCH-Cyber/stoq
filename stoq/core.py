@@ -365,6 +365,8 @@ class Stoq(StoqPluginManager):
                             return content
                     except PermissionError as err:
                         self.log.warning("{}".format(err))
+                else:
+                    self.log.warning("attempted to open {}, but file does not exist".format(abspath))
             else:
                 self.log.error("Unauthorized source path. Update "
                                "source_base_tuple path in stoq.cfg.")
