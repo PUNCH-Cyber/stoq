@@ -16,7 +16,7 @@
 from stoq.exceptions import SigtermCaught
 
 
-__version__ = '0.99'
+__version__ = '1.0.0'
 
 
 def signal_handler(signum, frame):
