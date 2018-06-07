@@ -3,7 +3,6 @@ dist: trusty
 language: python
 python:
   - 3.6
-  - 3.7
 
 before_install:
   - sudo apt-get -yq install software-properties-common
@@ -19,7 +18,6 @@ install:
 
 script:
   - coverage run setup.py test
-  - coverage combine
 
 after_success:
   coveralls

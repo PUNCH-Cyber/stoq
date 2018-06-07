@@ -20,5 +20,5 @@ from stoq.logo import get_logo
 
 
 class TestLogo(unittest.TestCase):
-    def test_get(self):
+    def test_get_logo(self):
         self.assertIsNotNone(get_logo())

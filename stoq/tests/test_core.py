@@ -336,7 +336,7 @@ class TestCore(unittest.TestCase):
         dummy_connector = s.load_plugin('dummy_connector')
         dummy_connector.save = create_autospec(dummy_connector.save)
         s.run()
-        self.assertEquals(dummy_connector.save.call_count, 2)
+        self.assertEqual(dummy_connector.save.call_count, 2)
 
     def test_provider_exception(self):
         s = Stoq(base_dir=utils.get_data_dir(), providers=['simple_provider'])
