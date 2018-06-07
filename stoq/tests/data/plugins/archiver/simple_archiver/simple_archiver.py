@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#   Copyright 2014-2018 PUNCH Cyber Analytics Group
+#   Copyright 2014-2017 PUNCH Cyber Analytics Group
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -14,15 +14,21 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from abc import abstractmethod
 from typing import Optional
 
 from stoq.data_classes import ArchiverResponse, Payload, RequestMeta
-from stoq.plugins import BasePlugin
+from stoq.plugins import ArchiverPlugin
 
 
-class ArchiverPlugin(BasePlugin):
-    @abstractmethod
+class SimpleArchiver(ArchiverPlugin):
+    RAISE_EXCEPTION = False
+    RETURN_ERRORS = False
+
     def archive(self, payload: Payload,
                 request_meta: RequestMeta) -> Optional[ArchiverResponse]:
-        pass
+        if self.RAISE_EXCEPTION:
+            raise Exception('Test exception please ignore')
+        ar = ArchiverResponse({'file_save_id': 12345})
+        if self.RETURN_ERRORS:
+            ar.errors += ['Test error please ignore']
+        return ar

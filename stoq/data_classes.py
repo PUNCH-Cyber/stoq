@@ -22,7 +22,7 @@ class Payload():
                  extracted_by: Optional[str] = None,
                  extracted_from: Optional[int] = None) -> None:
         self.content = content
-        self.payload_meta = payload_meta
+        self.payload_meta = PayloadMeta() if payload_meta is None else payload_meta
         self.extracted_by = extracted_by
         self.extracted_from = extracted_from
 
@@ -94,7 +94,7 @@ class ExtractedPayload():
                  content: bytes,
                  payload_meta: Optional[PayloadMeta] = None) -> None:
         self.content = content
-        self.payload_meta = payload_meta
+        self.payload_meta = PayloadMeta() if payload_meta is None else payload_meta
 
 
 class WorkerResponse():

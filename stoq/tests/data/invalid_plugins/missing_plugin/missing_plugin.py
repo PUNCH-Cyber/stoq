@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#   Copyright 2014-2018 PUNCH Cyber Analytics Group
+#   Copyright 2014-2017 PUNCH Cyber Analytics Group
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -14,12 +14,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from abc import ABC
-from configparser import ConfigParser
-from typing import Dict, Optional
+import stoq.plugins
 
-
-class BasePlugin(ABC):
-    def __init__(self, config: ConfigParser, plugin_opts: Optional[Dict]) -> None:
-        self.config = config
-        self.plugin_opts = plugin_opts
+class RandomClassNotAPlugin():
+    pass

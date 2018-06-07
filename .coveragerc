@@ -2,11 +2,11 @@
 [run]
 branch = True
 source = stoq/
-concurrency=multiprocessing
 omit =
     */stoq/tests/*
-    */stoq/shell.py
     */stoq/cli.py
+    */stoq/installer.py
+    */stoq/utils.py
 
 [report]
 exclude_lines =
@@ -14,6 +14,5 @@ exclude_lines =
     def __repr__
     raise NotImplementedError
     if __name__ == .__main__.:
-    class StoqPluginInstaller:
     if raven_imported and self.sentry_url:
     pass

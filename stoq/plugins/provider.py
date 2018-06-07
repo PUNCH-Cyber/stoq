@@ -15,11 +15,12 @@
 #   limitations under the License.
 
 from abc import abstractmethod
+from queue import Queue
 
 from stoq.plugins import BasePlugin
 
 
 class ProviderPlugin(BasePlugin):
     @abstractmethod
-    def ingest(self, queue) -> None:
+    def ingest(self, queue: Queue) -> None:
         pass

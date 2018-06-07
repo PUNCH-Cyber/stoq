@@ -1,7 +1,2 @@
-beautifulsoup4
-requests
-requests[security]
-python-magic
-ssdeep
 yara-python
 python-json-logger
