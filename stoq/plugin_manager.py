@@ -5,8 +5,9 @@ import importlib.util
 import inspect
 import logging
 import os
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
+from .stoq_exception import StoqException
 from stoq.plugins import (ArchiverPlugin, BasePlugin, ProviderPlugin,
                           WorkerPlugin, ConnectorPlugin)
 
@@ -24,7 +25,7 @@ class StoqPluginManager():
         self._loaded_archiver_plugins: Dict[str, ArchiverPlugin] = {}
         self._loaded_connector_plugins: List[ConnectorPlugin] = []
 
-        if not self.log:
+        if not hasattr(self, 'log') or self.log is None:
             self.log = logging.getLogger('stoq')
         self._collect_plugins(plugin_dir_list)
 
@@ -51,6 +52,11 @@ class StoqPluginManager():
                             exc_info=True)
                         continue
                     module_path = os.path.join(root_path, module_name) + '.py'
+                    if not os.path.isfile(module_path):
+                        self.log.warning(
+                            f'Unable to find module at: {module_path}',
+                            exc_info=True)
+                        continue
                     self._plugin_name_to_info[name] = (module_path, config)
 
     def add_plugin(self, name: str, plugin: BasePlugin) -> None:
@@ -65,8 +71,8 @@ class StoqPluginManager():
         elif isinstance(plugin, ConnectorPlugin):
             self._loaded_connector_plugins.append(plugin)
         else:
-            raise RuntimeError(f'The provided plugin {name} is not a child of '
-                               'any of the supported plugin classes')
+            raise StoqException(f'The provided plugin {name} is not a child '
+                                'of any of the supported plugin classes')
 
     def load_plugin(self, name: str) -> BasePlugin:
         name = name.strip()
@@ -82,10 +88,14 @@ class StoqPluginManager():
             predicate=
             lambda mem: inspect.isclass(mem) and issubclass(mem, BasePlugin) and not inspect.isabstract(mem)
         )
+        if len(plugin_classes) == 0:
+            raise StoqException('No valid plugin classes found in the module '
+                                f'for {name}')
         _, plugin_class = plugin_classes[0]
         plugin = plugin_class(config, self._plugin_opts.get(name))
         self.add_plugin(name, plugin)
         return plugin
 
-    def list_plugins(self) -> List[str]:
-        return list(self._plugin_name_to_info.keys())
+    def list_plugins(self) -> Set[str]:
+        return set().union(self._plugin_name_to_info.keys(),
+                           self._loaded_plugins.keys())

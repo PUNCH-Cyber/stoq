@@ -19,11 +19,13 @@ import os
 from pathlib import Path
 import select
 import sys
+import unittest
 
 from stoq import Stoq, PayloadMeta
 import stoq.helpers as helpers
 from stoq.installer import StoqPluginInstaller
 from stoq.logo import get_logo
+import stoq.tests as tests
 
 
 def main() -> None:
@@ -121,7 +123,6 @@ Examples:
         action='store_true',
         help='Force the plugin to be upgraded if it already exists')
 
-    subparsers.add_parser('shell', help='Launch an interactive shell')
     subparsers.add_parser('test', help='Run stoQ tests')
 
     args = parser.parse_args()
@@ -170,12 +171,10 @@ Examples:
     elif args.command == 'install':
         StoqPluginInstaller.install(args.plugin_dir, args.install_dir, args.upgrade)
         print(f'Successfully installed to {args.install_dir}')
-    elif args.command == 'shell':
-        # TODO
-        pass
     elif args.command == 'test':
-        # TODO
-        pass
+        test_path = os.path.dirname(tests.__file__)
+        test_suite = unittest.TestLoader().discover(test_path)
+        unittest.TextTestRunner(verbosity=1).run(test_suite)
 
 
 if __name__ == '__main__':

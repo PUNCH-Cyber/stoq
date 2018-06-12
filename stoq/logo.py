@@ -26,7 +26,7 @@ from stoq import __version__
 def get_logo():
     """
 
-    print random ascii art
+    get random ascii art
 
     """
 

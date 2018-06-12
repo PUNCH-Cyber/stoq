@@ -28,22 +28,26 @@ import queue
 from pythonjsonlogger import jsonlogger
 import yara
 
+from .stoq_exception import StoqException
 from stoq.data_classes import Payload, PayloadMeta, PayloadResults, RequestMeta, StoqResponse
 import stoq.helpers as helpers
 from stoq.plugin_manager import StoqPluginManager
 from stoq.utils import ratelimited
+
+# Created to enable `None' as a valid paramater
+_UNSET = object()
 
 
 class Stoq(StoqPluginManager):
     def __init__(self,
                  base_dir: str = None,
                  config_file: str = None,
-                 log_dir: str = None,
+                 log_dir: str = _UNSET,
                  log_level: str = None,
-                 dispatch_rules_path: str = None,
+                 dispatch_rules_path: str = _UNSET,
                  plugin_dir_list: List[str] = None,
                  plugin_opts: Dict[str, Dict] = None,
-                 sources: List[str] = None,
+                 providers: List[str] = None,
                  archivers: List[str] = None,
                  connectors: List[str] = None,
                  always_dispatch: List[str] = None) -> None:
@@ -53,7 +57,7 @@ class Stoq(StoqPluginManager):
         config_file = config_file if config_file else os.path.join(
             base_dir, 'stoq.cfg')
 
-        config = configparser.ConfigParser()
+        config = configparser.ConfigParser(allow_no_value=True)
         if os.path.exists(config_file):
             config.read(config_file)
 
@@ -61,7 +65,7 @@ class Stoq(StoqPluginManager):
         self.max_recursion = int(
             config.get('core', 'max_recursion', fallback='3'))
 
-        if not log_dir:
+        if log_dir is _UNSET:
             log_dir = config.get(
                 'core', 'log_dir', fallback=os.path.join(base_dir, 'logs'))
         if not log_level:
@@ -74,12 +78,16 @@ class Stoq(StoqPluginManager):
         self._init_logger(log_dir, log_level, log_maxbytes, log_backup_count,
                           log_syntax)
 
-        if not dispatch_rules_path:
+        if dispatch_rules_path is _UNSET:
             dispatch_rules_path = config.get(
                 'core',
                 'dispatch_rules_path',
                 fallback=os.path.join(base_dir, 'dispatcher.yar'))
-        self.set_dispatch_rules(os.path.realpath(dispatch_rules_path))
+        self.dispatch_rules = None
+        try:
+            self.set_dispatch_rules_path(os.path.realpath(dispatch_rules_path))
+        except Exception:
+            self.log.warning(f'Failed to set dispatch rules, skipping: {dispatch_rules_path}')
 
         if not plugin_dir_list:
             plugin_dir_str = config.get(
@@ -90,21 +98,22 @@ class Stoq(StoqPluginManager):
 
         super().__init__(plugin_dir_list, plugin_opts)
 
-        if not sources:
-            sources_str = config.get('core', 'sources', fallback='')
-            sources = [d.strip() for d in sources_str.split(',') if d.strip()]
+        if not providers:
+            providers_str = config.get('core', 'providers', fallback='')
+            providers = [d.strip() for d in providers_str.split(',') if d.strip()]
         if not archivers:
             arch_str = config.get('core', 'archivers', fallback='')
             archivers = [d.strip() for d in arch_str.split(',') if d.strip()]
         if not connectors:
             conn_str = config.get('core', 'connectors', fallback='')
             connectors = [d.strip() for d in conn_str.split(',') if d.strip()]
-        if not always_dispatch:
+        self.always_dispatch = always_dispatch
+        if not self.always_dispatch:
             ad_str = config.get('core', 'always_dispatch', fallback='')
             self.always_dispatch = [
                 d.strip() for d in ad_str.split(',') if d.strip()
             ]
-        for plugin_name in itertools.chain(sources, archivers, connectors,
+        for plugin_name in itertools.chain(providers, archivers, connectors,
                                            self.always_dispatch):
             self.load_plugin(plugin_name)
 
@@ -115,6 +124,7 @@ class Stoq(StoqPluginManager):
              request_meta: Optional[RequestMeta] = None,
              add_start_dispatch: Optional[List[str]] = None,
              ratelimit: Optional[str] = None) -> StoqResponse:
+        payload_meta = PayloadMeta() if payload_meta is None else payload_meta
         payload = Payload(content, payload_meta)
         return self.scan_payload(payload, request_meta, add_start_dispatch)
 
@@ -132,7 +142,7 @@ class Stoq(StoqPluginManager):
         hashes_seen: Set[str] = set(helpers.get_sha256(payload.content))
 
         num_payloads = 0
-        for _recursion_level in range(self.max_recursion):
+        for _recursion_level in range(self.max_recursion + 1):
             next_scan_queue: List[Tuple[Payload, List[str]]] = []
             for payload, add_dispatch in scan_queue:
                 payload_results, extracted, p_errors = self._single_scan(
@@ -140,8 +150,10 @@ class Stoq(StoqPluginManager):
                 scan_results.append(payload_results)
                 # TODO: Add option for no-dedup
                 for ex in extracted:
-                    if helpers.get_sha256(ex.content) not in hashes_seen:
-                        next_scan_queue.append(ex)
+                    ex_hash = helpers.get_sha256(ex.content)
+                    if ex_hash not in hashes_seen:
+                        hashes_seen.add(ex_hash)
+                        next_scan_queue.append((ex, []))  # Empty list for no additional dispatches
                 errors.extend(p_errors)
                 num_payloads += 1
             scan_queue = next_scan_queue
@@ -151,42 +163,40 @@ class Stoq(StoqPluginManager):
         return response
 
     def run(self) -> None:
-        # Don't initialize any (provider) plugins here!
-        # Callers should use load_plugin()
-        # TODO: throw if no activated source plugins
+        # Don't initialize any (provider) plugins here! They should be
+        # initialized on stoq start-up or via load_plugin()
+        if not self._loaded_provider_plugins:
+            raise StoqException('No activated provider plugins')
         self.payload_queue: queue.Queue = queue.Queue(self.max_queue)
         with concurrent.futures.ThreadPoolExecutor() as executor:
             # Start the load operations and mark each future with its URL
             future_to_name = {
                 executor.submit(plugin.ingest, self.payload_queue): name
-                for name, plugin in self._act_provider_plugins.items()
+                for name, plugin in self._loaded_provider_plugins.items()
             }
             while len(future_to_name) > 0 or self.payload_queue.qsize() > 0:
                 try:
                     # Using get_nowait results in high CPU churn
-                    self.scan_payload(self.payload_queue.get(timeout=5))
+                    self.scan_payload(self.payload_queue.get(timeout=0.1))
                 except queue.Empty:
                     pass
                 for future in [fut for fut in future_to_name if fut.done()]:
                     try:
                         future.result()
                         self.log.info('Provider plugin '
-                                      f'{future_to_name[future]} '
-                                      'exited')
+                                      f'{future_to_name[future]} exited')
+                        del future_to_name[future]
                     except Exception as e:
-                        self.log.exception('Provider plugin '
-                                           f'{future_to_name[future]} exited '
-                                           'with an exception')
-                        raise
+                        msg = (f'Provider plugin {future_to_name[future]} '
+                               'exited with an exception')
+                        self.log.exception(msg)
+                        raise StoqException(msg) from e
 
-    def set_dispatch_rules(self, filepath: Optional[str]) -> None:
+    def set_dispatch_rules_path(self, filepath: Optional[str]) -> None:
         if filepath is None:
             self.dispatch_rules = None
         elif not os.path.isfile(filepath):
-            self.log.warning(
-                f'Nonexistent dispatch rules file provided, skipping: {filepath}'
-            )
-            self.dispatch_rules = None
+            raise StoqException(f'Nonexistent dispatch rules file provided: {filepath}')
         else:
             self.dispatch_rules = yara.compile(filepath=filepath)
 
@@ -203,7 +213,6 @@ class Stoq(StoqPluginManager):
                     dr.get('save', '').lower().strip() == 'false'
                     for dr in dispatch_rules):
                 yara_dr_archive = False
-            payload_results.dispatched_to.append(plugin_name)
             try:
                 plugin = self.load_plugin(plugin_name)
             except Exception as e:
@@ -211,10 +220,12 @@ class Stoq(StoqPluginManager):
                 self.log.exception(msg)
                 errors.append(msg)
                 continue
+            payload_results.dispatched_to.append(plugin_name)
             try:
-                worker_response = plugin.scan(payload, dispatch_rules, request_meta)
+                worker_response = plugin.scan(payload, dispatch_rules,
+                                              request_meta)
             except Exception as e:
-                msg = f'Exception scanning with plugin {plugin_name}'
+                msg = f'Exception scanning with plugin {plugin_name}: {str(e)}'
                 self.log.exception(msg)
                 errors.append(msg)
                 continue
@@ -229,12 +240,12 @@ class Stoq(StoqPluginManager):
             if worker_response.errors is not None:
                 errors.extend(worker_response.errors)
         if request_meta.archive_payloads and payload.payload_meta.should_archive and yara_dr_archive:
-            for name, archiver in self._loaded_archiver_plugins.items():
-                payload_results.dispatched_to.append(name)
+            for plugin_name, archiver in self._loaded_archiver_plugins.items():
+                payload_results.dispatched_to.append(plugin_name)
                 try:
                     archiver_response = archiver.archive(payload, request_meta)
                 except Exception as e:
-                    msg = f'Exception archiving payload with archiver {plugin_name}'
+                    msg = f'Exception archiving with archiver {plugin_name}: {str(e)}'
                     self.log.exception(msg)
                     errors.append(msg)
                     continue
@@ -247,8 +258,9 @@ class Stoq(StoqPluginManager):
                     errors.extend(archiver_response.errors)
         return (payload_results, extracted, errors)
 
-    def _init_logger(self, log_dir: str, log_level: str, log_maxbytes: int,
-                     log_backup_count: int, log_syntax: str) -> None:
+    def _init_logger(self, log_dir: Optional[str], log_level: str,
+                     log_maxbytes: int, log_backup_count: int,
+                     log_syntax: str) -> None:
         self.log = logging.getLogger('stoq')
         self.log.setLevel(log_level.upper())
 
@@ -263,30 +275,37 @@ class Stoq(StoqPluginManager):
         stderr_handler.setFormatter(stderr_logformat)
         self.log.addHandler(stderr_handler)
 
-        # Let's attempt to make the log directory if it doesn't exist
-        os.makedirs(log_dir, exist_ok=True)
-        log_path = os.path.abspath(os.path.join(log_dir, 'stoq.log'))
-        file_handler = RotatingFileHandler(
-            filename=log_path,
-            mode='a',
-            maxBytes=log_maxbytes,
-            backupCount=log_backup_count)
-        file_logformat = formatter(
-            '%(asctime)s %(levelname)s %(name)s:'
-            '%(filename)s:%(funcName)s:%(lineno)s: '
-            '%(message)s',
-            datefmt='%Y-%m-%d %H:%M:%S')
-        file_handler.setFormatter(file_logformat)
-        self.log.addHandler(file_handler)
+        if log_dir:
+            # Let's attempt to make the log directory if it doesn't exist
+            os.makedirs(log_dir, exist_ok=True)
+            log_path = os.path.abspath(os.path.join(log_dir, 'stoq.log'))
+            file_handler = RotatingFileHandler(
+                filename=log_path,
+                mode='a',
+                maxBytes=log_maxbytes,
+                backupCount=log_backup_count)
+            file_logformat = formatter(
+                '%(asctime)s %(levelname)s %(name)s:'
+                '%(filename)s:%(funcName)s:%(lineno)s: '
+                '%(message)s',
+                datefmt='%Y-%m-%d %H:%M:%S')
+            file_handler.setFormatter(file_logformat)
+            self.log.addHandler(file_handler)
+            self.log.debug(f'Writing logs to {log_path}')
 
     def _get_dispatches(self, payload: Payload, add_dispatches: List[str]
                         ) -> List[Tuple[str, Optional[List[Dict]]]]:
         names_to_rules: DefaultDict = collections.defaultdict(list)
         for match in self._yara_dispatch_matches(payload.content):
             if 'plugin' in match['meta']:
-                plugin_names = set(match['meta']['plugin'].lower().split(','))
+                plugin_str = match['meta']['plugin'].lower().strip()
+                plugin_names = {
+                    p.strip()
+                    for p in plugin_str.split(',') if p.strip()
+                }
                 for name in plugin_names:
-                    names_to_rules[name.strip()].append(match['meta'])
+                    if name:
+                        names_to_rules[name.strip()].append(match)
         return ([(d, None) for d in add_dispatches] +
                 [(d, None) for d in self.always_dispatch] +
                 list(names_to_rules.items()))
@@ -294,4 +313,14 @@ class Stoq(StoqPluginManager):
     def _yara_dispatch_matches(self, content: bytes) -> List[Dict]:
         if self.dispatch_rules is None:
             return []
-        return self.dispatch_rules.match(data=content, timeout=60)
+        matches = self.dispatch_rules.match(data=content, timeout=60)
+        dict_matches = []
+        for match in matches:
+            dict_matches.append({
+                'tags': match.tags,
+                'namespace': match.namespace,
+                'rule': match.rule,
+                'meta': match.meta,
+                'strings': match.strings,
+            })
+        return dict_matches
