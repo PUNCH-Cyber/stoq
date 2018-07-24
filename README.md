@@ -1,12 +1,12 @@
 
 <p align="center">
-<img src="http://stoq.punchcyber.com/i/stoq.png" width="400"><br />
+<img src="https://stoq.punchcyber.com/i/stoq.png" width="400"><br />
 </p>
 
 
 [![Build Status](https://travis-ci.org/PUNCH-Cyber/stoq.svg?branch=master)](https://travis-ci.org/PUNCH-Cyber/stoq)
 [![Coverage Status](https://coveralls.io/repos/github/PUNCH-Cyber/stoq/badge.svg?branch=master)](https://coveralls.io/github/PUNCH-Cyber/stoq?branch=master)
-[![Documentation Status](https://readthedocs.org/projects/stoq-framework/badge/?version=latest)](http://stoq-framework.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/stoq-framework/badge/?version=latest)](https://stoq-framework.readthedocs.io/en/latest/?badge=latest)
 
 # Overview
 
@@ -38,5 +38,5 @@ stoQ requires a minimum of python 3.4. Installation on Debian based systems is
 as simple as running a script. For detailed instructions on how to install stoQ,
 to include the installation script, please visit stoQ's [install documentation](https://stoq-framework.readthedocs.io/en/latest/Installation.html). If you're
 interested in learning more about stoQ, to include how to develop your own plugins,
-checkout the [full documentation](http://stoq-framework.readthedocs.io/).
+checkout the [full documentation](https://stoq-framework.readthedocs.io/).
 
