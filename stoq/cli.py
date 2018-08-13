@@ -99,6 +99,11 @@ Examples:
             nargs='+',
             help='Archiver plugins to send payloads to')
         subparser.add_argument(
+            '-D',
+            '--decorators',
+            nargs='+',
+            help='Decorator plugins to send results to before saving')
+        subparser.add_argument(
             '-C',
             '--connectors',
             nargs='+',
@@ -151,6 +156,7 @@ Examples:
             base_dir=stoq_home,
             archivers=args.archivers,
             connectors=args.connectors,
+            decorators=args.decorators,
             always_dispatch=args.always_dispatch)
         response = stoq.scan(
             content,
@@ -163,6 +169,7 @@ Examples:
             providers=args.providers,
             archivers=args.archivers,
             connectors=args.connectors,
+            decorators=args.decorators,
             always_dispatch=args.always_dispatch)
         stoq.run()
     elif args.command == 'list':
