@@ -18,6 +18,6 @@ from .core import Stoq
 from .data_classes import (ArchiverResponse, ExtractedPayload, Payload,
                            PayloadMeta, PayloadResults, RequestMeta,
                            StoqResponse, WorkerResponse)
-from .stoq_exception import StoqException
+from .exceptions import StoqException
 
 __version__ = '2.0.0'
