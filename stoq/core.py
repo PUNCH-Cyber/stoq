@@ -163,8 +163,21 @@ class Stoq(StoqPluginManager):
             scan_queue = next_scan_queue
         response = StoqResponse(datetime.now(), scan_results, request_meta, errors)
 
-        for decorator in self._loaded_decorator_plugins:
-            response = decorator.decorate(response)
+        for plugin_name, decorator in self._loaded_decorator_plugins.items():
+            try:
+                decorator_response = decorator.decorate(response)
+            except Exception as e:
+                msg = f'Exception decorating with decoratorn {plugin_name}: {str(e)}'
+                self.log.exception(msg)
+                errors.append(msg)
+                continue
+            if decorator_response is None:
+                continue
+            if decorator_response.results is not None:
+                response.decorators[
+                    plugin_name] = decorator_response.results
+            if decorator_response.errors is not None:
+                response.errors.extend(decorator_response.errors)
 
         for connector in self._loaded_connector_plugins:
             connector.save(response)

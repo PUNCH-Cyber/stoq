@@ -16,11 +16,11 @@
 from abc import abstractmethod
 from typing import Optional
 
-from stoq.data_classes import StoqResponse
+from stoq.data_classes import StoqResponse, DecoratorResponse
 from stoq.plugins import BasePlugin
 
 
 class DecoratorPlugin(BasePlugin):
     @abstractmethod
-    def decorate(self, reponse: StoqResponse) -> Optional[StoqResponse]:
+    def decorate(self, response: StoqResponse) -> Optional[DecoratorResponse]:
         pass

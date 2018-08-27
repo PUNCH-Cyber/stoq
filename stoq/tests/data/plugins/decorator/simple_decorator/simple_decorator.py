@@ -16,7 +16,7 @@
 
 from typing import Optional
 
-from stoq.data_classes import StoqResponse
+from stoq.data_classes import StoqResponse, DecoratorResponse
 from stoq.plugins import DecoratorPlugin
 
 
@@ -24,10 +24,10 @@ class SimpleDecorator(DecoratorPlugin):
     RAISE_EXCEPTION = False
     RETURN_ERRORS = False
 
-    def decorate(self, response: StoqResponse) -> Optional[StoqResponse]:
+    def decorate(self, response: StoqResponse) -> Optional[DecoratorResponse]:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')
-        response.decorated = True
+        dr = DecoratorResponse({'simple_decoration': 123})
         if self.RETURN_ERRORS:
-            response.errors += ['Test error please ignore']
-        return response
+            dr.errors += ['Test error please ignore']
+        return dr

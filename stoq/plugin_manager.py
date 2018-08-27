@@ -24,7 +24,7 @@ class StoqPluginManager():
         self._loaded_worker_plugins: Dict[str, WorkerPlugin] = {}
         self._loaded_archiver_plugins: Dict[str, ArchiverPlugin] = {}
         self._loaded_connector_plugins: List[ConnectorPlugin] = []
-        self._loaded_decorator_plugins: List[DecoratorPlugin] = []
+        self._loaded_decorator_plugins: List[DecoratorPlugin] = {}
 
         if not hasattr(self, 'log') or self.log is None:
             self.log = logging.getLogger('stoq')
@@ -72,7 +72,7 @@ class StoqPluginManager():
         elif isinstance(plugin, ConnectorPlugin):
             self._loaded_connector_plugins.append(plugin)
         elif isinstance(plugin, DecoratorPlugin):
-            self._loaded_decorator_plugins.append(plugin)
+            self._loaded_decorator_plugins[name] = plugin
         else:
             raise StoqException(f'The provided plugin {name} is not a child '
                                 'of any of the supported plugin classes')

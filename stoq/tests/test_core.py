@@ -314,28 +314,28 @@ class TestCore(unittest.TestCase):
 
     def test_decorator(self):
         s = Stoq(base_dir=utils.get_data_dir(), decorators=['simple_decorator'])
-        simple_decorator = s.load_plugin('simple_decorator')
-        simple_decorator.decorate = create_autospec(simple_decorator.decorate)
+        _ = s.load_plugin('simple_decorator')
         response = s.scan(self.generic_content)
-        self.assertTrue(response.decorated)
-        simple_decorator.decorate.assert_called_once()
-
-    def test_decorator_exception(self):
-        s = Stoq(base_dir=utils.get_data_dir(), decorators=['dummy_decorator'])
-        dummy_decorator = s.load_plugin('dummy_decorator')
-        dummy_decorator.decorate = create_autospec(
-            dummy_decorator.decorate,
-            side_effect=RuntimeError('Unexpected exception'))
-        with self.assertRaises(Exception):
-            s.scan(self.generic_content)
+        self.assertIn('simple_decorator', response.decorators)
+        self.assertIn('simple_decoration', response.decorators['simple_decorator'])
 
     def test_decorator_errors(self):
         s = Stoq(base_dir=utils.get_data_dir(), decorators=['simple_decorator'])
         simple_decorator = s.load_plugin('simple_decorator')
         simple_decorator.RETURN_ERRORS = True
         response = s.scan(self.generic_content)
+        self.assertIn('simple_decorator', response.decorators)
+        self.assertIn('simple_decoration', response.decorators['simple_decorator'])
         self.assertEqual(len(response.errors), 1)
         self.assertIn('Test error', response.errors[0])
+
+    def test_decorator_exception(self):
+        s = Stoq(base_dir=utils.get_data_dir(), decorators=['simple_decorator'])
+        simple_decorator = s.load_plugin('simple_decorator')
+        simple_decorator.RAISE_EXCEPTION = True
+        response = s.scan(self.generic_content)
+        self.assertEqual(len(response.errors), 1)
+        self.assertIn('Test exception', response.errors[0])
 
     ############ 'RUN' TESTS ############
 
