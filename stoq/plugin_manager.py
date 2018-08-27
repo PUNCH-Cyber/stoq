@@ -9,7 +9,7 @@ from typing import Dict, List, Optional, Set, Tuple
 
 from .stoq_exception import StoqException
 from stoq.plugins import (ArchiverPlugin, BasePlugin, ProviderPlugin,
-                          WorkerPlugin, ConnectorPlugin)
+                          WorkerPlugin, ConnectorPlugin, DispatcherPlugin)
 
 
 class StoqPluginManager():
@@ -23,6 +23,7 @@ class StoqPluginManager():
         self._loaded_provider_plugins: Dict[str, ProviderPlugin] = {}
         self._loaded_worker_plugins: Dict[str, WorkerPlugin] = {}
         self._loaded_archiver_plugins: Dict[str, ArchiverPlugin] = {}
+        self._loaded_dispatcher_plugins: Dict[str, DispatcherPlugin] = {}
         self._loaded_connector_plugins: List[ConnectorPlugin] = []
 
         if not hasattr(self, 'log') or self.log is None:
@@ -68,6 +69,8 @@ class StoqPluginManager():
             self._loaded_worker_plugins[name] = plugin
         elif isinstance(plugin, ArchiverPlugin):
             self._loaded_archiver_plugins[name] = plugin
+        elif isinstance(plugin, DispatcherPlugin):
+            self._loaded_dispatcher_plugins[name] = plugin
         elif isinstance(plugin, ConnectorPlugin):
             self._loaded_connector_plugins.append(plugin)
         else:

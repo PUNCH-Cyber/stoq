@@ -113,3 +113,15 @@ class ArchiverResponse():
                  errors: List[str] = None) -> None:
         self.results = results
         self.errors = [] if errors is None else errors
+
+
+class DispatcherResponse():
+    def __init__(self,
+                 plugin: str,
+                 save: Optional[bool] = None,
+                 meta: Optional[Dict] = None,
+                 errors: List[str] = None) -> None:
+        self.plugin = plugin
+        self.save = True if save is None else save
+        self.meta = {} if meta is None else meta
+        self.errors = [] if errors is None else errors
