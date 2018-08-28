@@ -113,7 +113,7 @@ class Stoq(StoqPluginManager):
             ]
 
         for plugin_name in itertools.chain(
-          providers, archivers, connectors, decorators, dispatchers, 
+          providers, archivers, connectors, decorators, dispatchers,
           self.always_dispatch):
             self.load_plugin(plugin_name)
 
@@ -164,7 +164,7 @@ class Stoq(StoqPluginManager):
             try:
                 decorator_response = decorator.decorate(response)
             except Exception as e:
-                msg = f'Exception decorating with decoratorn {plugin_name}: {str(e)}'
+                msg = f'Exception decorating with decorator {plugin_name}: {str(e)}'
                 self.log.exception(msg)
                 errors.append(msg)
                 continue
