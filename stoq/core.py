@@ -28,7 +28,7 @@ import queue
 from pythonjsonlogger import jsonlogger
 import yara
 
-from .stoq_exception import StoqException
+from .exceptions import StoqException
 from stoq.data_classes import Payload, PayloadMeta, PayloadResults, RequestMeta, StoqResponse
 import stoq.helpers as helpers
 from stoq.plugin_manager import StoqPluginManager
@@ -157,7 +157,7 @@ class Stoq(StoqPluginManager):
                 errors.extend(p_errors)
                 num_payloads += 1
             scan_queue = next_scan_queue
-        response = StoqResponse(datetime.now(), scan_results, request_meta, errors)
+        response = StoqResponse(datetime.now().isoformat(), scan_results, request_meta, errors)
         for connector in self._loaded_connector_plugins:
             connector.save(response)
         return response
