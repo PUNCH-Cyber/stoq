@@ -7,9 +7,10 @@ import logging
 import os
 from typing import Dict, List, Optional, Set, Tuple
 
-from .stoq_exception import StoqException
+from .exceptions import StoqException
 from stoq.plugins import (ArchiverPlugin, BasePlugin, ProviderPlugin,
-                          WorkerPlugin, ConnectorPlugin, DispatcherPlugin)
+                          WorkerPlugin, ConnectorPlugin, DispatcherPlugin,
+                          DecoratorPlugin)
 
 
 class StoqPluginManager():
@@ -25,6 +26,7 @@ class StoqPluginManager():
         self._loaded_archiver_plugins: Dict[str, ArchiverPlugin] = {}
         self._loaded_dispatcher_plugins: Dict[str, DispatcherPlugin] = {}
         self._loaded_connector_plugins: List[ConnectorPlugin] = []
+        self._loaded_decorator_plugins: List[DecoratorPlugin] = {}
 
         if not hasattr(self, 'log') or self.log is None:
             self.log = logging.getLogger('stoq')
@@ -73,6 +75,8 @@ class StoqPluginManager():
             self._loaded_dispatcher_plugins[name] = plugin
         elif isinstance(plugin, ConnectorPlugin):
             self._loaded_connector_plugins.append(plugin)
+        elif isinstance(plugin, DecoratorPlugin):
+            self._loaded_decorator_plugins[name] = plugin
         else:
             raise StoqException(f'The provided plugin {name} is not a child '
                                 'of any of the supported plugin classes')

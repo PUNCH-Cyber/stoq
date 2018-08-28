@@ -54,7 +54,8 @@ class TestCore(unittest.TestCase):
             base_dir=utils.get_data_dir(),
             providers=['dummy_provider'],
             archivers=['dummy_archiver'],
-            connectors=['dummy_connector'])
+            connectors=['dummy_connector'],
+            decorators=['dummy_decorator'])
         self.assertEqual(len(s._loaded_provider_plugins), 1)
         self.assertEqual(len(s._loaded_archiver_plugins), 1)
         self.assertEqual(len(s._loaded_connector_plugins), 1)
@@ -310,6 +311,31 @@ class TestCore(unittest.TestCase):
             side_effect=RuntimeError('Unexpected exception'))
         with self.assertRaises(Exception):
             s.scan(self.generic_content)
+
+    def test_decorator(self):
+        s = Stoq(base_dir=utils.get_data_dir(), decorators=['simple_decorator'])
+        _ = s.load_plugin('simple_decorator')
+        response = s.scan(self.generic_content)
+        self.assertIn('simple_decorator', response.decorators)
+        self.assertIn('simple_decoration', response.decorators['simple_decorator'])
+
+    def test_decorator_errors(self):
+        s = Stoq(base_dir=utils.get_data_dir(), decorators=['simple_decorator'])
+        simple_decorator = s.load_plugin('simple_decorator')
+        simple_decorator.RETURN_ERRORS = True
+        response = s.scan(self.generic_content)
+        self.assertIn('simple_decorator', response.decorators)
+        self.assertIn('simple_decoration', response.decorators['simple_decorator'])
+        self.assertEqual(len(response.errors), 1)
+        self.assertIn('Test error', response.errors[0])
+
+    def test_decorator_exception(self):
+        s = Stoq(base_dir=utils.get_data_dir(), decorators=['simple_decorator'])
+        simple_decorator = s.load_plugin('simple_decorator')
+        simple_decorator.RAISE_EXCEPTION = True
+        response = s.scan(self.generic_content)
+        self.assertEqual(len(response.errors), 1)
+        self.assertIn('Test exception', response.errors[0])
 
     ############ 'RUN' TESTS ############
 

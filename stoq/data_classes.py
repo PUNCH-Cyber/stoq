@@ -39,7 +39,7 @@ class RequestMeta():
 
 class PayloadResults():
     def __init__(self,
-                 payload_id: int,
+                 payload_id: str,
                  md5: str,
                  sha1: str,
                  sha256: str,
@@ -50,6 +50,7 @@ class PayloadResults():
                  extracted_by: Optional[str] = None,
                  workers: Optional[Dict[str, Dict]] = None,
                  archivers: Optional[Dict[str, Dict]] = None,
+                 decorators: Optional[Dict[str, Dict]] = None,
                  dispatched_to: List[str] = None) -> None:
         self.payload_id = payload_id
         self.md5 = md5
@@ -82,11 +83,14 @@ class StoqResponse():
                  time: str,
                  results: List[PayloadResults],
                  request_meta: RequestMeta,
-                 errors: List[str]) -> None:
+                 errors: List[str],
+                 decorators: Optional[Dict[str, Dict]] = None,
+                 ) -> None:
         self.time = time
         self.results = results
         self.request_meta = request_meta
         self.errors = errors
+        self.decorators = {} if decorators is None else decorators
 
 
 class ExtractedPayload():
@@ -124,4 +128,12 @@ class DispatcherResponse():
         self.plugin = plugin
         self.save = True if save is None else save
         self.meta = {} if meta is None else meta
+        self.errors = [] if errors is None else errors
+
+        
+class DecoratorResponse():
+    def __init__(self,
+                 results: Optional[Dict] = None,
+                 errors: List[str] = None) -> None:
+        self.results = results
         self.errors = [] if errors is None else errors

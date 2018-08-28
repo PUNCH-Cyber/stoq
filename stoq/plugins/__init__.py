@@ -4,3 +4,4 @@ from .connector import ConnectorPlugin
 from .provider import ProviderPlugin
 from .worker import WorkerPlugin
 from .dispatcher import DispatcherPlugin
+from .decorator import DecoratorPlugin

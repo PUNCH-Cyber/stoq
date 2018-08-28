@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 #   Copyright 2014-2018 PUNCH Cyber Analytics Group
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,10 +13,14 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from .core import Stoq
-from .data_classes import (ArchiverResponse, ExtractedPayload, Payload,
-                           PayloadMeta, PayloadResults, RequestMeta,
-                           StoqResponse, WorkerResponse)
-from .exceptions import StoqException
+from abc import abstractmethod
+from typing import Optional
 
-__version__ = '2.0.0'
+from stoq.data_classes import StoqResponse, DecoratorResponse
+from stoq.plugins import BasePlugin
+
+
+class DecoratorPlugin(BasePlugin):
+    @abstractmethod
+    def decorate(self, response: StoqResponse) -> Optional[DecoratorResponse]:
+        pass

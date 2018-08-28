@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#   Copyright 2014-2018 PUNCH Cyber Analytics Group
+#   Copyright 2014-2017 PUNCH Cyber Analytics Group
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from .core import Stoq
-from .data_classes import (ArchiverResponse, ExtractedPayload, Payload,
-                           PayloadMeta, PayloadResults, RequestMeta,
-                           StoqResponse, WorkerResponse)
-from .exceptions import StoqException
+from stoq.data_classes import StoqResponse
+from stoq.plugins import DecoratorPlugin
 
-__version__ = '2.0.0'
+
+class DummyDecorator(DecoratorPlugin):
+    def decorate(self, response: StoqResponse) -> None:
+        pass
