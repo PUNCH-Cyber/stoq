@@ -28,6 +28,11 @@ import stoq.tests.utils as utils
 
 
 class TestPluginManager(unittest.TestCase):
+    DUMMY_PLUGINS = [
+        'dummy_archiver', 'dummy_connector', 'dummy_provider',
+        'dummy_worker', 'dummy_decorator'
+        ]
+
     def setUp(self):
         logging.disable(logging.CRITICAL)
 
@@ -41,8 +46,7 @@ class TestPluginManager(unittest.TestCase):
     def test_collect_plugins(self):
         pm = StoqPluginManager([utils.get_plugins_dir()])
         collected_plugins = pm.list_plugins()
-        for name in ['dummy_archiver', 'dummy_connector', 'dummy_provider',
-                     'dummy_worker']:
+        for name in self.DUMMY_PLUGINS:
             self.assertIn(name, collected_plugins)
 
     def test_multiple_dirs(self):
@@ -50,8 +54,7 @@ class TestPluginManager(unittest.TestCase):
             [utils.get_plugins_dir(),
              utils.get_plugins2_dir()])
         collected_plugins = pm.list_plugins()
-        for name in ['dummy_archiver', 'dummy_connector', 'dummy_provider',
-                     'dummy_worker', 'dummy_worker2']:
+        for name in self.DUMMY_PLUGINS + ['dummy_worker2']:
             self.assertIn(name, collected_plugins)
 
     def test_collect_one_invalid_dir(self):
@@ -80,8 +83,7 @@ class TestPluginManager(unittest.TestCase):
 
     def test_load_plugin(self):
         pm = StoqPluginManager([utils.get_plugins_dir()])
-        for name in ['dummy_archiver', 'dummy_connector', 'dummy_provider',
-                                                          'dummy_worker']:
+        for name in self.DUMMY_PLUGINS:
             pm.load_plugin(name)
 
     def test_load_non_plugin(self):
@@ -119,10 +121,10 @@ class ExampleExternalPlugin(WorkerPlugin):
     def __init__(self):
         pass
 
-    def scan(payload: Payload, *args) -> Optional[WorkerResponse]:
+    def scan(self, payload: Payload, *args) -> Optional[WorkerResponse]:
         pass
 
 
 class NoParentClassPlugin():
-    def scan(payload: Payload, *args) -> Optional[WorkerResponse]:
+    def scan(self, payload: Payload, *args) -> Optional[WorkerResponse]:
         pass

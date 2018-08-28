@@ -50,6 +50,7 @@ class Stoq(StoqPluginManager):
                  providers: List[str] = None,
                  archivers: List[str] = None,
                  connectors: List[str] = None,
+                 decorators: List[str] = None,
                  always_dispatch: List[str] = None) -> None:
         if not base_dir:
             base_dir = os.getcwd()
@@ -107,13 +108,16 @@ class Stoq(StoqPluginManager):
         if not connectors:
             conn_str = config.get('core', 'connectors', fallback='')
             connectors = [d.strip() for d in conn_str.split(',') if d.strip()]
+        if not decorators:
+            decorators_str = config.get('core', 'decorators', fallback='')
+            decorators = [d.strip() for d in decorators_str.split(',') if d.strip()]
         self.always_dispatch = always_dispatch
         if not self.always_dispatch:
             ad_str = config.get('core', 'always_dispatch', fallback='')
             self.always_dispatch = [
                 d.strip() for d in ad_str.split(',') if d.strip()
             ]
-        for plugin_name in itertools.chain(providers, archivers, connectors,
+        for plugin_name in itertools.chain(providers, archivers, connectors, decorators,
                                            self.always_dispatch):
             self.load_plugin(plugin_name)
 
@@ -157,7 +161,25 @@ class Stoq(StoqPluginManager):
                 errors.extend(p_errors)
                 num_payloads += 1
             scan_queue = next_scan_queue
+
         response = StoqResponse(datetime.now().isoformat(), scan_results, request_meta, errors)
+
+        for plugin_name, decorator in self._loaded_decorator_plugins.items():
+            try:
+                decorator_response = decorator.decorate(response)
+            except Exception as e:
+                msg = f'Exception decorating with decoratorn {plugin_name}: {str(e)}'
+                self.log.exception(msg)
+                errors.append(msg)
+                continue
+            if decorator_response is None:
+                continue
+            if decorator_response.results is not None:
+                response.decorators[
+                    plugin_name] = decorator_response.results
+            if decorator_response.errors is not None:
+                response.errors.extend(decorator_response.errors)
+
         for connector in self._loaded_connector_plugins:
             connector.save(response)
         return response
