@@ -39,7 +39,7 @@ class RequestMeta():
 
 class PayloadResults():
     def __init__(self,
-                 payload_id: int,
+                 payload_id: str,
                  md5: str,
                  sha1: str,
                  sha256: str,

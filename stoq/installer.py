@@ -21,7 +21,7 @@ import subprocess
 import sys
 from typing import Any, Dict
 
-from .stoq_exception import StoqException
+from .exceptions import StoqException
 
 
 class StoqPluginInstaller:

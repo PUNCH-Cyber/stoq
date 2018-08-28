@@ -7,7 +7,7 @@ import logging
 import os
 from typing import Dict, List, Optional, Set, Tuple
 
-from .stoq_exception import StoqException
+from .exceptions import StoqException
 from stoq.plugins import (ArchiverPlugin, BasePlugin, ProviderPlugin,
                           WorkerPlugin, ConnectorPlugin, DecoratorPlugin)
 
