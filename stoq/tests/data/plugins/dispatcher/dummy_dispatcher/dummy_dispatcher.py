@@ -14,10 +14,13 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from stoq.data_classes import Payload
+from typing import Optional, Iterator
+
+from stoq.data_classes import Payload, RequestMeta, DispatcherResponse
 from stoq.plugins import DispatcherPlugin
 
 
 class DummyDispatcher(DispatcherPlugin):
-    def dispatch(self, payload: Payload) -> None:
+    def dispatch(self, payload: Payload,
+        request_meta: RequestMeta) -> Optional[Iterator[DispatcherResponse]]:
         pass

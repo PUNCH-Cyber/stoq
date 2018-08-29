@@ -121,16 +121,14 @@ class ArchiverResponse():
 
 class DispatcherResponse():
     def __init__(self,
-                 plugin: str,
-                 save: Optional[bool] = None,
+                 plugin_name: Optional[str] = None,
                  meta: Optional[Dict] = None,
                  errors: List[str] = None) -> None:
-        self.plugin = plugin
-        self.save = True if save is None else save
+        self.plugin_name = plugin_name
         self.meta = {} if meta is None else meta
         self.errors = [] if errors is None else errors
 
-        
+
 class DecoratorResponse():
     def __init__(self,
                  results: Optional[Dict] = None,

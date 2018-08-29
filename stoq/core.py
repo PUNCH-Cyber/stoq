@@ -22,7 +22,7 @@ import itertools
 import logging
 from logging.handlers import RotatingFileHandler
 import os
-from typing import DefaultDict, Dict, List, Optional, Set, Tuple
+from typing import DefaultDict, Dict, List, Optional, Set, Tuple, Iterator
 import queue
 
 from pythonjsonlogger import jsonlogger
@@ -216,34 +216,39 @@ class Stoq(StoqPluginManager):
         payload_results = PayloadResults.from_payload(payload, id)
         extracted = []
         errors = []
-        for dispatch in self._get_dispatches(payload, add_dispatch):
+        for dispatch in self._get_dispatches(payload, add_dispatch, request_meta):
             try:
-                plugin = self.load_plugin(dispatch.plugin)
+                if dispatch.plugin_name:
+                    plugin = self.load_plugin(dispatch.plugin_name)
+                else:
+                    if dispatch.errors:
+                        errors.extend(dispatch.errors)
+                    continue
             except Exception as e:
-                msg = f'Exception loading plugin {dispatch.plugin} for dispatch'
+                msg = f'Exception loading plugin {dispatch.plugin_name} for dispatch'
                 self.log.exception(msg)
                 errors.append(msg)
                 continue
-            payload_results.dispatched_to.append(dispatch.plugin)
+            payload_results.dispatched_to.append(dispatch.plugin_name)
             try:
                 worker_response = plugin.scan(payload, dispatch.meta,
                                               request_meta)
             except Exception as e:
-                msg = f'Exception scanning with plugin {dispatch.plugin}: {str(e)}'
+                msg = f'Exception scanning with plugin {dispatch.plugin_name}: {str(e)}'
                 self.log.exception(msg)
                 errors.append(msg)
                 continue
             if worker_response is None:
                 continue
             if worker_response.results is not None:
-                payload_results.workers[dispatch.plugin] = worker_response.results
+                payload_results.workers[dispatch.plugin_name] = worker_response.results
             extracted.extend([
-                Payload(ex.content, ex.payload_meta, dispatch.plugin, id)
+                Payload(ex.content, ex.payload_meta, dispatch.plugin_name, id)
                 for ex in worker_response.extracted
             ])
             if worker_response.errors is not None:
                 errors.extend(worker_response.errors)
-        if request_meta.archive_payloads and payload.payload_meta.should_archive and dispatch.save:
+        if request_meta.archive_payloads and payload.payload_meta.should_archive:
             for plugin_name, archiver in self._loaded_archiver_plugins.items():
                 payload_results.dispatched_to.append(plugin_name)
                 try:
@@ -297,12 +302,18 @@ class Stoq(StoqPluginManager):
             self.log.addHandler(file_handler)
             self.log.debug(f'Writing logs to {log_path}')
 
-    def _get_dispatches(self, payload: Payload, add_dispatches: List[str]
-                        ) -> DispatcherResponse:
+    def _get_dispatches(self, payload: Payload, add_dispatches: List[str],
+                        request_meta: RequestMeta
+                        ) -> Iterator[DispatcherResponse]:
 
-        for plugin_name, dispatcher in self._loaded_dispatcher_plugins.items():
-            for dispatch in dispatcher.dispatch(payload):
-                yield dispatch
+        for dispatcher_name, dispatcher in self._loaded_dispatcher_plugins.items():
+            try:
+                for dispatch in dispatcher.dispatch(payload, request_meta):
+                    yield dispatch
+            except Exception as e:
+                msg = f'Exception with dispatcher {dispatcher_name}: {str(e)}'
+                self.log.exception(msg)
+                yield DispatcherResponse(errors=[msg])
 
         additional_dispatches = [d for d in add_dispatches] + \
                                 [d for d in self.always_dispatch]

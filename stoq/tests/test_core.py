@@ -55,22 +55,13 @@ class TestCore(unittest.TestCase):
             providers=['dummy_provider'],
             archivers=['dummy_archiver'],
             connectors=['dummy_connector'],
-            decorators=['dummy_decorator'])
+            decorators=['dummy_decorator'],
+            dispatchers=['dummy_dispatcher'])
         self.assertEqual(len(s._loaded_provider_plugins), 1)
         self.assertEqual(len(s._loaded_archiver_plugins), 1)
         self.assertEqual(len(s._loaded_connector_plugins), 1)
-
-    def test_invalid_initial_dispatch_rules(self):
-        # Verify that we gracefully handle (don't raise) invalid initial dispatch rules
-        s = Stoq(
-            base_dir=utils.get_data_dir(),
-            dispatch_rules_path='/no/way/this/exists')
-        s.scan(self.generic_content)
-
-    def test_set_invalid_dispatch_rules(self):
-        s = Stoq(base_dir=utils.get_data_dir())
-        with self.assertRaises(StoqException):
-            s.set_dispatch_rules_path('/no/way/this/exists')
+        self.assertEqual(len(s._loaded_decorator_plugins), 1)
+        self.assertEqual(len(s._loaded_dispatcher_plugins), 1)
 
     ############ 'SCAN' TESTS ############
 
@@ -96,10 +87,10 @@ class TestCore(unittest.TestCase):
         self.assertIn('extract_random', response.results[0].dispatched_to)
         self.assertNotIn('extract_random', response.results[1].dispatched_to)
 
-    def test_yara_dispatch(self):
+    def test_dispatch(self):
         s = Stoq(
             base_dir=utils.get_data_dir(),
-            dispatch_rules_path=utils.get_always_dispatcher())
+            dispatchers=['simple_dispatcher'])
         dummy_worker = s.load_plugin('dummy_worker')
         dummy_worker.scan = create_autospec(
             dummy_worker.scan, return_value=None)
@@ -108,28 +99,29 @@ class TestCore(unittest.TestCase):
         # args that the mock was called with. We expect that the 'always_dummy'
         # rule will be passed to the plugin but the 'always_nothing' rule won't
         self.assertEqual(len(dummy_worker.scan.call_args[0][1]), 1)
-        self.assertEqual(dummy_worker.scan.call_args[0][1][0]['rule'],
-                         'always_dummy')
+        self.assertEqual(dummy_worker.scan.call_args[0][1]['rule0'],
+                         'dummy_worker')
         self.assertIn('dummy_worker', response.results[0].dispatched_to)
 
-    def test_yara_dispatch_multiple_rules(self):
+    def test_dispatch_multiple_rules(self):
         s = Stoq(
             base_dir=utils.get_data_dir(),
-            dispatch_rules_path=utils.get_complex_dispatcher())
+            dispatchers=['simple_dispatcher'])
+        s._loaded_dispatcher_plugins['simple_dispatcher'].WORKERS = ['simple_worker']
+        s._loaded_dispatcher_plugins['simple_dispatcher'].RULE_COUNT = 2
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.scan = create_autospec(
             simple_worker.scan, return_value=None)
         s.scan(self.generic_content)
-        # Both yara rules that dispatch to this plugin should be combined into
-        # one call with the match data of both rules
-        simple_worker.scan.assert_called_once()
-        self.assertEqual(len(simple_worker.scan.call_args[0][1]), 2)
+        self.assertEqual(simple_worker.scan.call_count, 2)
+        self.assertEqual(len(simple_worker.scan.call_args[0][1]), 1)
 
-    def test_yara_dispatch_multiple_plugins(self):
+    def test_dispatch_multiple_plugins(self):
         multi_plugin_content = b'multi-plugin-content'
         s = Stoq(
             base_dir=utils.get_data_dir(),
-            dispatch_rules_path=utils.get_complex_dispatcher())
+            dispatchers=['simple_dispatcher'])
+        s._loaded_dispatcher_plugins['simple_dispatcher'].WORKERS = ['simple_worker', 'dummy_worker']
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.scan = create_autospec(
             simple_worker.scan, return_value=None)
@@ -142,11 +134,12 @@ class TestCore(unittest.TestCase):
         dummy_worker.scan.assert_called_once()
         self.assertEqual(len(dummy_worker.scan.call_args[0][1]), 1)
 
-    def test_yara_dispatch_multiple_plugins2(self):
+    def test_dispatch_multiple_plugins2(self):
         again_multi_plugin_content = b'again-multi-plugin-space-content'
         s = Stoq(
             base_dir=utils.get_data_dir(),
-            dispatch_rules_path=utils.get_complex_dispatcher())
+            dispatchers=['simple_dispatcher'])
+        s._loaded_dispatcher_plugins['simple_dispatcher'].WORKERS = ['simple_worker', 'dummy_worker']
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.scan = create_autospec(
             simple_worker.scan, return_value=None)

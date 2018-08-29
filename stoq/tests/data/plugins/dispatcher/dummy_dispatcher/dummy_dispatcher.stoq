@@ -21,6 +21,3 @@ Author = Marcus LaFerrera
 Version = 0.1
 Website = https://github.com/PUNCH-Cyber/stoq-plugins-public
 Description = Dummy stoQ Dispatcher plugin
-
-[options]
-dispatch_rules = plugins/dispatcher/dummy_dispatcher/dispatcher.yar
