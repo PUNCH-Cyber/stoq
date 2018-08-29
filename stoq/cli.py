@@ -109,7 +109,7 @@ Examples:
             nargs='+',
             help='Connector plugins to send results to')
         subparser.add_argument(
-            '-D',
+            '-R',
             '--dispatchers',
             nargs='+',
             help='Dispatcher plugins to use send payloads to')
