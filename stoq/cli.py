@@ -109,6 +109,11 @@ Examples:
             nargs='+',
             help='Connector plugins to send results to')
         subparser.add_argument(
+            '-R',
+            '--dispatchers',
+            nargs='+',
+            help='Dispatcher plugins to use send payloads to')
+        subparser.add_argument(
             '-a',
             '--always-dispatch',
             nargs='+',
@@ -156,6 +161,7 @@ Examples:
             base_dir=stoq_home,
             archivers=args.archivers,
             connectors=args.connectors,
+            dispatchers=args.dispatchers,
             decorators=args.decorators,
             always_dispatch=args.always_dispatch)
         response = stoq.scan(
@@ -169,6 +175,7 @@ Examples:
             providers=args.providers,
             archivers=args.archivers,
             connectors=args.connectors,
+            dispatchers=args.dispatchers,
             decorators=args.decorators,
             always_dispatch=args.always_dispatch)
         stoq.run()

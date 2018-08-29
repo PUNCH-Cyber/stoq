@@ -22,14 +22,14 @@ import itertools
 import logging
 from logging.handlers import RotatingFileHandler
 import os
-from typing import DefaultDict, Dict, List, Optional, Set, Tuple
+from typing import DefaultDict, Dict, List, Optional, Set, Tuple, Iterator
 import queue
 
 from pythonjsonlogger import jsonlogger
 import yara
 
 from .exceptions import StoqException
-from stoq.data_classes import Payload, PayloadMeta, PayloadResults, RequestMeta, StoqResponse
+from stoq.data_classes import Payload, PayloadMeta, PayloadResults, RequestMeta, StoqResponse, DispatcherResponse
 import stoq.helpers as helpers
 from stoq.plugin_manager import StoqPluginManager
 from stoq.utils import ratelimited
@@ -44,12 +44,12 @@ class Stoq(StoqPluginManager):
                  config_file: str = None,
                  log_dir: str = _UNSET,
                  log_level: str = None,
-                 dispatch_rules_path: str = _UNSET,
                  plugin_dir_list: List[str] = None,
                  plugin_opts: Dict[str, Dict] = None,
                  providers: List[str] = None,
                  archivers: List[str] = None,
                  connectors: List[str] = None,
+                 dispatchers: List[str] = None,
                  decorators: List[str] = None,
                  always_dispatch: List[str] = None) -> None:
         if not base_dir:
@@ -79,16 +79,6 @@ class Stoq(StoqPluginManager):
         self._init_logger(log_dir, log_level, log_maxbytes, log_backup_count,
                           log_syntax)
 
-        if dispatch_rules_path is _UNSET:
-            dispatch_rules_path = config.get(
-                'core',
-                'dispatch_rules_path',
-                fallback=os.path.join(base_dir, 'dispatcher.yar'))
-        self.dispatch_rules = None
-        try:
-            self.set_dispatch_rules_path(os.path.realpath(dispatch_rules_path))
-        except Exception:
-            self.log.warning(f'Failed to set dispatch rules, skipping: {dispatch_rules_path}')
 
         if not plugin_dir_list:
             plugin_dir_str = config.get(
@@ -108,17 +98,23 @@ class Stoq(StoqPluginManager):
         if not connectors:
             conn_str = config.get('core', 'connectors', fallback='')
             connectors = [d.strip() for d in conn_str.split(',') if d.strip()]
+        if not dispatchers:
+            dispatcher_str = config.get('core', 'dispatchers', fallback='')
+            dispatchers = [d.strip() for d in dispatcher_str.split(',') if d.strip()]
         if not decorators:
             decorators_str = config.get('core', 'decorators', fallback='')
             decorators = [d.strip() for d in decorators_str.split(',') if d.strip()]
+
         self.always_dispatch = always_dispatch
         if not self.always_dispatch:
             ad_str = config.get('core', 'always_dispatch', fallback='')
             self.always_dispatch = [
                 d.strip() for d in ad_str.split(',') if d.strip()
             ]
-        for plugin_name in itertools.chain(providers, archivers, connectors, decorators,
-                                           self.always_dispatch):
+
+        for plugin_name in itertools.chain(
+          providers, archivers, connectors, decorators, dispatchers,
+          self.always_dispatch):
             self.load_plugin(plugin_name)
 
     @ratelimited()
@@ -168,7 +164,7 @@ class Stoq(StoqPluginManager):
             try:
                 decorator_response = decorator.decorate(response)
             except Exception as e:
-                msg = f'Exception decorating with decoratorn {plugin_name}: {str(e)}'
+                msg = f'Exception decorating with decorator {plugin_name}: {str(e)}'
                 self.log.exception(msg)
                 errors.append(msg)
                 continue
@@ -214,54 +210,45 @@ class Stoq(StoqPluginManager):
                         self.log.exception(msg)
                         raise StoqException(msg) from e
 
-    def set_dispatch_rules_path(self, filepath: Optional[str]) -> None:
-        if filepath is None:
-            self.dispatch_rules = None
-        elif not os.path.isfile(filepath):
-            raise StoqException(f'Nonexistent dispatch rules file provided: {filepath}')
-        else:
-            self.dispatch_rules = yara.compile(filepath=filepath)
-
     def _single_scan(self, payload: Payload, id: int, add_dispatch: List[str],
                      request_meta: RequestMeta,
                      ) -> Tuple[PayloadResults, List[Payload], List[str]]:
         payload_results = PayloadResults.from_payload(payload, id)
         extracted = []
         errors = []
-        dispatches = self._get_dispatches(payload, add_dispatch)
-        yara_dr_archive = True
-        for plugin_name, dispatch_rules in dispatches:
-            if dispatch_rules and any(
-                    dr.get('save', '').lower().strip() == 'false'
-                    for dr in dispatch_rules):
-                yara_dr_archive = False
+        for dispatch in self._get_dispatches(payload, add_dispatch, request_meta):
             try:
-                plugin = self.load_plugin(plugin_name)
+                if dispatch.plugin_name:
+                    plugin = self.load_plugin(dispatch.plugin_name)
+                else:
+                    if dispatch.errors:
+                        errors.extend(dispatch.errors)
+                    continue
             except Exception as e:
-                msg = f'Exception loading plugin {plugin_name} for dispatch'
+                msg = f'Exception loading plugin {dispatch.plugin_name} for dispatch'
                 self.log.exception(msg)
                 errors.append(msg)
                 continue
-            payload_results.dispatched_to.append(plugin_name)
+            payload_results.dispatched_to.append(dispatch.plugin_name)
             try:
-                worker_response = plugin.scan(payload, dispatch_rules,
+                worker_response = plugin.scan(payload, dispatch.meta,
                                               request_meta)
             except Exception as e:
-                msg = f'Exception scanning with plugin {plugin_name}: {str(e)}'
+                msg = f'Exception scanning with plugin {dispatch.plugin_name}: {str(e)}'
                 self.log.exception(msg)
                 errors.append(msg)
                 continue
             if worker_response is None:
                 continue
             if worker_response.results is not None:
-                payload_results.workers[plugin_name] = worker_response.results
+                payload_results.workers[dispatch.plugin_name] = worker_response.results
             extracted.extend([
-                Payload(ex.content, ex.payload_meta, plugin_name, id)
+                Payload(ex.content, ex.payload_meta, dispatch.plugin_name, id)
                 for ex in worker_response.extracted
             ])
             if worker_response.errors is not None:
                 errors.extend(worker_response.errors)
-        if request_meta.archive_payloads and payload.payload_meta.should_archive and yara_dr_archive:
+        if request_meta.archive_payloads and payload.payload_meta.should_archive:
             for plugin_name, archiver in self._loaded_archiver_plugins.items():
                 payload_results.dispatched_to.append(plugin_name)
                 try:
@@ -315,34 +302,22 @@ class Stoq(StoqPluginManager):
             self.log.addHandler(file_handler)
             self.log.debug(f'Writing logs to {log_path}')
 
-    def _get_dispatches(self, payload: Payload, add_dispatches: List[str]
-                        ) -> List[Tuple[str, Optional[List[Dict]]]]:
-        names_to_rules: DefaultDict = collections.defaultdict(list)
-        for match in self._yara_dispatch_matches(payload.content):
-            if 'plugin' in match['meta']:
-                plugin_str = match['meta']['plugin'].lower().strip()
-                plugin_names = {
-                    p.strip()
-                    for p in plugin_str.split(',') if p.strip()
-                }
-                for name in plugin_names:
-                    if name:
-                        names_to_rules[name.strip()].append(match)
-        return ([(d, None) for d in add_dispatches] +
-                [(d, None) for d in self.always_dispatch] +
-                list(names_to_rules.items()))
+    def _get_dispatches(self, payload: Payload, add_dispatches: List[str],
+                        request_meta: RequestMeta
+                        ) -> Iterator[DispatcherResponse]:
 
-    def _yara_dispatch_matches(self, content: bytes) -> List[Dict]:
-        if self.dispatch_rules is None:
-            return []
-        matches = self.dispatch_rules.match(data=content, timeout=60)
-        dict_matches = []
-        for match in matches:
-            dict_matches.append({
-                'tags': match.tags,
-                'namespace': match.namespace,
-                'rule': match.rule,
-                'meta': match.meta,
-                'strings': match.strings,
-            })
-        return dict_matches
+        for dispatcher_name, dispatcher in self._loaded_dispatcher_plugins.items():
+            try:
+                for dispatch in dispatcher.dispatch(payload, request_meta):
+                    yield dispatch
+            except Exception as e:
+                msg = f'Exception with dispatcher {dispatcher_name}: {str(e)}'
+                self.log.exception(msg)
+                yield DispatcherResponse(errors=[msg])
+
+        additional_dispatches = [d for d in add_dispatches] + \
+                                [d for d in self.always_dispatch]
+
+        for plugin_name in additional_dispatches:
+            if plugin_name:
+                yield DispatcherResponse(plugin_name)

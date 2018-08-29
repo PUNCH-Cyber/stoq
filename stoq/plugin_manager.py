@@ -9,7 +9,8 @@ from typing import Dict, List, Optional, Set, Tuple
 
 from .exceptions import StoqException
 from stoq.plugins import (ArchiverPlugin, BasePlugin, ProviderPlugin,
-                          WorkerPlugin, ConnectorPlugin, DecoratorPlugin)
+                          WorkerPlugin, ConnectorPlugin, DispatcherPlugin,
+                          DecoratorPlugin)
 
 
 class StoqPluginManager():
@@ -23,6 +24,7 @@ class StoqPluginManager():
         self._loaded_provider_plugins: Dict[str, ProviderPlugin] = {}
         self._loaded_worker_plugins: Dict[str, WorkerPlugin] = {}
         self._loaded_archiver_plugins: Dict[str, ArchiverPlugin] = {}
+        self._loaded_dispatcher_plugins: Dict[str, DispatcherPlugin] = {}
         self._loaded_connector_plugins: List[ConnectorPlugin] = []
         self._loaded_decorator_plugins: List[DecoratorPlugin] = {}
 
@@ -69,6 +71,8 @@ class StoqPluginManager():
             self._loaded_worker_plugins[name] = plugin
         elif isinstance(plugin, ArchiverPlugin):
             self._loaded_archiver_plugins[name] = plugin
+        elif isinstance(plugin, DispatcherPlugin):
+            self._loaded_dispatcher_plugins[name] = plugin
         elif isinstance(plugin, ConnectorPlugin):
             self._loaded_connector_plugins.append(plugin)
         elif isinstance(plugin, DecoratorPlugin):

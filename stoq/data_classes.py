@@ -119,6 +119,16 @@ class ArchiverResponse():
         self.errors = [] if errors is None else errors
 
 
+class DispatcherResponse():
+    def __init__(self,
+                 plugin_name: Optional[str] = None,
+                 meta: Optional[Dict] = None,
+                 errors: List[str] = None) -> None:
+        self.plugin_name = plugin_name
+        self.meta = {} if meta is None else meta
+        self.errors = [] if errors is None else errors
+
+
 class DecoratorResponse():
     def __init__(self,
                  results: Optional[Dict] = None,

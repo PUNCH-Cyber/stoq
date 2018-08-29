@@ -14,11 +14,15 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from .core import Stoq
-from .data_classes import (ArchiverResponse, ExtractedPayload, Payload,
-                           PayloadMeta, PayloadResults, RequestMeta,
-                           StoqResponse, WorkerResponse, DispatcherResponse,
-                           DecoratorResponse)
-from .exceptions import StoqException
+from abc import abstractmethod
+from typing import Optional, Iterator
 
-__version__ = '2.0.0'
+from stoq.data_classes import Payload, DispatcherResponse, RequestMeta
+from stoq.plugins import BasePlugin
+
+
+class DispatcherPlugin(BasePlugin):
+    @abstractmethod
+    def dispatch(self, payload: Payload, request_meta: RequestMeta
+        ) -> Optional[Iterator[DispatcherResponse]]:
+        pass
