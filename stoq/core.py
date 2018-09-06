@@ -92,18 +92,23 @@ class Stoq(StoqPluginManager):
         if not providers:
             providers_str = config.get('core', 'providers', fallback='')
             providers = [d.strip() for d in providers_str.split(',') if d.strip()]
+        self._loaded_provider_plugins = {d: self.load_plugin(d) for d in providers if d}
         if not archivers:
             arch_str = config.get('core', 'archivers', fallback='')
             archivers = [d.strip() for d in arch_str.split(',') if d.strip()]
+        self._loaded_archiver_plugins = {d: self.load_plugin(d) for d in archivers if d}
         if not connectors:
             conn_str = config.get('core', 'connectors', fallback='')
             connectors = [d.strip() for d in conn_str.split(',') if d.strip()]
+        self._loaded_connector_plugins = [self.load_plugin(d) for d in connectors if d]
         if not dispatchers:
             dispatcher_str = config.get('core', 'dispatchers', fallback='')
             dispatchers = [d.strip() for d in dispatcher_str.split(',') if d.strip()]
+        self._loaded_dispatcher_plugins = {d: self.load_plugin(d) for d in dispatchers if d}
         if not decorators:
-            decorators_str = config.get('core', 'decorators', fallback='')
-            decorators = [d.strip() for d in decorators_str.split(',') if d.strip()]
+            decorator_str = config.get('core', 'decorators', fallback='')
+            decorators = [d.strip() for d in decorator_str.split(',') if d.strip()]
+        self._loaded_decorator_plugins = {d: self.load_plugin(d) for d in decorators if d}
 
         self.always_dispatch = always_dispatch
         if not self.always_dispatch:
@@ -111,11 +116,8 @@ class Stoq(StoqPluginManager):
             self.always_dispatch = [
                 d.strip() for d in ad_str.split(',') if d.strip()
             ]
-
-        for plugin_name in itertools.chain(
-          providers, archivers, connectors, decorators, dispatchers,
-          self.always_dispatch):
-            self.load_plugin(plugin_name)
+            for ad in self.always_dispatch:
+                self.load_plugin(ad)
 
     @ratelimited()
     def scan(self,
@@ -317,6 +319,6 @@ class Stoq(StoqPluginManager):
                 msg = f'Exception with dispatcher {dispatcher_name}: {str(e)}'
                 self.log.exception(msg)
                 errors.append(msg)
-                
+
         return (dispatchers, errors)
 

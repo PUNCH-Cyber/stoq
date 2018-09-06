@@ -26,7 +26,7 @@ class StoqPluginManager():
         self._loaded_archiver_plugins: Dict[str, ArchiverPlugin] = {}
         self._loaded_dispatcher_plugins: Dict[str, DispatcherPlugin] = {}
         self._loaded_connector_plugins: List[ConnectorPlugin] = []
-        self._loaded_decorator_plugins: List[DecoratorPlugin] = {}
+        self._loaded_decorator_plugins: Dict[str, DecoratorPlugin] = {}
 
         if not hasattr(self, 'log') or self.log is None:
             self.log = logging.getLogger('stoq')
@@ -63,23 +63,18 @@ class StoqPluginManager():
                     self._plugin_name_to_info[name] = (module_path, config)
 
     def add_plugin(self, name: str, plugin: BasePlugin) -> None:
-        name = name.strip()
-        self._loaded_plugins[name] = plugin
         if isinstance(plugin, ProviderPlugin):
             self._loaded_provider_plugins[name] = plugin
-        elif isinstance(plugin, WorkerPlugin):
+        if isinstance(plugin, WorkerPlugin):
             self._loaded_worker_plugins[name] = plugin
-        elif isinstance(plugin, ArchiverPlugin):
+        if isinstance(plugin, ArchiverPlugin):
             self._loaded_archiver_plugins[name] = plugin
-        elif isinstance(plugin, DispatcherPlugin):
+        if isinstance(plugin, DispatcherPlugin):
             self._loaded_dispatcher_plugins[name] = plugin
-        elif isinstance(plugin, ConnectorPlugin):
+        if isinstance(plugin, ConnectorPlugin):
             self._loaded_connector_plugins.append(plugin)
-        elif isinstance(plugin, DecoratorPlugin):
+        if isinstance(plugin, DecoratorPlugin):
             self._loaded_decorator_plugins[name] = plugin
-        else:
-            raise StoqException(f'The provided plugin {name} is not a child '
-                                'of any of the supported plugin classes')
 
     def load_plugin(self, name: str) -> BasePlugin:
         name = name.strip()
@@ -100,7 +95,7 @@ class StoqPluginManager():
                                 f'for {name}')
         _, plugin_class = plugin_classes[0]
         plugin = plugin_class(config, self._plugin_opts.get(name))
-        self.add_plugin(name, plugin)
+        self._loaded_plugins[name] = plugin
         return plugin
 
     def list_plugins(self) -> Set[str]:
