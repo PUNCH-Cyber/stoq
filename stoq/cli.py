@@ -166,7 +166,7 @@ Examples:
             always_dispatch=args.always_dispatch)
         response = stoq.scan(
             content,
-            PayloadMeta(filename=filename),
+            PayloadMeta(extra_data={'filename': filename}),
             add_start_dispatch=args.start_dispatch)
         print(helpers.dumps(response))
     elif args.command == 'run':
