@@ -39,31 +39,31 @@ class RequestMeta():
 
 class PayloadResults():
     def __init__(self,
-                 payload_id: str,
+                 payload_id: int,
                  md5: str,
                  sha1: str,
                  sha256: str,
                  sha512: str,
                  size: int,
+                 plugins: Dict[str, List],
                  payload_meta: Optional[PayloadMeta] = None,
                  extracted_from: Optional[int] = None,
                  extracted_by: Optional[str] = None,
                  workers: Optional[Dict[str, Dict]] = None,
                  archivers: Optional[Dict[str, Dict]] = None,
-                 decorators: Optional[Dict[str, Dict]] = None,
-                 dispatched_to: List[str] = None) -> None:
+                 decorators: Optional[Dict[str, Dict]] = None) -> None:
         self.payload_id = payload_id
         self.md5 = md5
         self.sha1 = sha1
         self.sha256 = sha256
         self.sha512 = sha512
         self.size = size
+        self.plugins = plugins
         self.payload_meta = payload_meta
         self.extracted_from = extracted_from  # payload_id of parent payload
         self.extracted_by = extracted_by
         self.workers = {} if workers is None else workers
         self.archivers = {} if archivers is None else archivers
-        self.dispatched_to = [] if dispatched_to is None else dispatched_to
 
     @classmethod
     def from_payload(cls, payload: Payload,
@@ -73,7 +73,8 @@ class PayloadResults():
         sha256 = helpers.get_sha256(payload.content)
         sha512 = helpers.get_sha512(payload.content)
         size = len(payload.content)
-        return cls(payload_id, md5, sha1, sha256, sha512, size,
+        plugins = {'workers': [], 'archivers': []}
+        return cls(payload_id, md5, sha1, sha256, sha512, size, plugins,
                    payload.payload_meta, payload.extracted_from,
                    payload.extracted_by)
 

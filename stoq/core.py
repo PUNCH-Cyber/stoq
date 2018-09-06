@@ -217,6 +217,7 @@ class Stoq(StoqPluginManager):
         extracted = []
         errors = []
         for dispatch in self._get_dispatches(payload, add_dispatch, request_meta):
+            payload_results.plugins['workers'].append(dispatch.plugin_name)
             try:
                 if dispatch.plugin_name:
                     plugin = self.load_plugin(dispatch.plugin_name)
@@ -229,7 +230,6 @@ class Stoq(StoqPluginManager):
                 self.log.exception(msg)
                 errors.append(msg)
                 continue
-            payload_results.dispatched_to.append(dispatch.plugin_name)
             try:
                 worker_response = plugin.scan(payload, dispatch.meta,
                                               request_meta)
@@ -250,7 +250,7 @@ class Stoq(StoqPluginManager):
                 errors.extend(worker_response.errors)
         if request_meta.archive_payloads and payload.payload_meta.should_archive:
             for plugin_name, archiver in self._loaded_archiver_plugins.items():
-                payload_results.dispatched_to.append(plugin_name)
+                payload_results.plugins['archivers'].append(plugin_name)
                 try:
                     archiver_response = archiver.archive(payload, request_meta)
                 except Exception as e:
