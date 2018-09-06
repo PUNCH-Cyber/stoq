@@ -22,6 +22,5 @@ from stoq.plugins import WorkerPlugin
 
 class DummyWorker2(WorkerPlugin):
     def scan(self, payload: Payload,
-             dispatch_rules: Optional[List[Dict]],
              request_meta: RequestMeta) -> Optional[WorkerResponse]:
         pass

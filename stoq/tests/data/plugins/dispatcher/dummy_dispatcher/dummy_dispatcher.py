@@ -22,5 +22,5 @@ from stoq.plugins import DispatcherPlugin
 
 class DummyDispatcher(DispatcherPlugin):
     def dispatch(self, payload: Payload,
-        request_meta: RequestMeta) -> Optional[Iterator[DispatcherResponse]]:
+        request_meta: RequestMeta) -> Optional[DispatcherResponse]:
         pass

@@ -20,11 +20,13 @@ class Payload():
                  content: bytes,
                  payload_meta: Optional[PayloadMeta] = None,
                  extracted_by: Optional[str] = None,
-                 extracted_from: Optional[int] = None) -> None:
+                 extracted_from: Optional[int] = None,
+                 dispatch_meta: Optional[Dict[str, Dict]] = None) -> None:
         self.content = content
         self.payload_meta = PayloadMeta() if payload_meta is None else payload_meta
         self.extracted_by = extracted_by
         self.extracted_from = extracted_from
+        self.dispatch_meta = {} if dispatch_meta is None else dispatch_meta
 
 
 class RequestMeta():
@@ -121,10 +123,10 @@ class ArchiverResponse():
 
 class DispatcherResponse():
     def __init__(self,
-                 plugin_name: Optional[str] = None,
+                 plugin_names: Optional[List[str]] = None,
                  meta: Optional[Dict] = None,
                  errors: List[str] = None) -> None:
-        self.plugin_name = plugin_name
+        self.plugin_names = [] if plugin_names is None else plugin_names
         self.meta = {} if meta is None else meta
         self.errors = [] if errors is None else errors
 

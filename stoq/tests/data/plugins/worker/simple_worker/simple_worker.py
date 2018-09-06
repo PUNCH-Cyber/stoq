@@ -24,7 +24,7 @@ class SimpleWorker(WorkerPlugin):
     RAISE_EXCEPTION = False
     RETURN_ERRORS = False
 
-    def scan(self, payload: Payload, dispatch_rules: Optional[List[Dict]],
+    def scan(self, payload: Payload,
              request_meta: RequestMeta) -> Optional[WorkerResponse]:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')

@@ -21,7 +21,7 @@ from stoq.plugins import WorkerPlugin
 
 
 class ConfigurableWorker(WorkerPlugin):
-    def scan(self, payload: Payload, dispatch_rules: Optional[List[Dict]],
+    def scan(self, payload: Payload,
              request_meta: RequestMeta) -> Optional[WorkerResponse]:
         pass
 

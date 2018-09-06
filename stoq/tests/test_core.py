@@ -95,12 +95,10 @@ class TestCore(unittest.TestCase):
         dummy_worker.scan = create_autospec(
             dummy_worker.scan, return_value=None)
         response = s.scan(self.generic_content)
-        # call_args returns a tuple, the first element of which are the ordered
-        # args that the mock was called with. We expect that the 'always_dummy'
-        # rule will be passed to the plugin but the 'always_nothing' rule won't
-        self.assertEqual(len(dummy_worker.scan.call_args[0][1]), 1)
-        self.assertEqual(dummy_worker.scan.call_args[0][1]['rule0'],
-                         'dummy_worker')
+        self.assertEqual(len(dummy_worker.scan.call_args[0]), 2)
+        self.assertEqual(
+            dummy_worker.scan.call_args[0][0].dispatch_meta['simple_dispatcher']['dummy_worker']['rule0'],
+            'dummy_worker')
         self.assertIn('dummy_worker', response.results[0].dispatched_to)
 
     def test_dispatch_multiple_rules(self):
@@ -114,7 +112,7 @@ class TestCore(unittest.TestCase):
             simple_worker.scan, return_value=None)
         s.scan(self.generic_content)
         self.assertEqual(simple_worker.scan.call_count, 2)
-        self.assertEqual(len(simple_worker.scan.call_args[0][1]), 1)
+        self.assertEqual(len(simple_worker.scan.call_args[0]), 2)
 
     def test_dispatch_multiple_plugins(self):
         multi_plugin_content = b'multi-plugin-content'
@@ -130,9 +128,9 @@ class TestCore(unittest.TestCase):
             dummy_worker.scan, return_value=None)
         s.scan(multi_plugin_content)
         simple_worker.scan.assert_called_once()
-        self.assertEqual(len(simple_worker.scan.call_args[0][1]), 1)
+        self.assertEqual(len(simple_worker.scan.call_args[0]), 2)
         dummy_worker.scan.assert_called_once()
-        self.assertEqual(len(dummy_worker.scan.call_args[0][1]), 1)
+        self.assertEqual(len(dummy_worker.scan.call_args[0]), 2)
 
     def test_dispatch_multiple_plugins2(self):
         again_multi_plugin_content = b'again-multi-plugin-space-content'
@@ -148,9 +146,9 @@ class TestCore(unittest.TestCase):
             dummy_worker.scan, return_value=None)
         s.scan(again_multi_plugin_content)
         simple_worker.scan.assert_called_once()
-        self.assertEqual(len(simple_worker.scan.call_args[0][1]), 1)
+        self.assertEqual(len(simple_worker.scan.call_args[0]), 2)
         dummy_worker.scan.assert_called_once()
-        self.assertEqual(len(dummy_worker.scan.call_args[0][1]), 1)
+        self.assertEqual(len(dummy_worker.scan.call_args[0]), 2)
 
     def test_dispatch_nonexistent_plugin(self):
         s = Stoq(base_dir=utils.get_data_dir())
