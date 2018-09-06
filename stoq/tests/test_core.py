@@ -77,15 +77,15 @@ class TestCore(unittest.TestCase):
             base_dir=utils.get_data_dir(), always_dispatch=['simple_worker'])
         self.assertEqual(len(s._loaded_worker_plugins), 1)
         response = s.scan(self.generic_content)
-        self.assertIn('simple_worker', response.results[0].dispatched_to)
-        self.assertIn('simple_worker', response.results[1].dispatched_to)
+        self.assertIn('simple_worker', response.results[0].plugins['workers'])
+        self.assertIn('simple_worker', response.results[1].plugins['workers'])
 
     def test_start_dispatch(self):
         s = Stoq(base_dir=utils.get_data_dir())
         response = s.scan(
             self.generic_content, add_start_dispatch=['extract_random'])
-        self.assertIn('extract_random', response.results[0].dispatched_to)
-        self.assertNotIn('extract_random', response.results[1].dispatched_to)
+        self.assertIn('extract_random', response.results[0].plugins['workers'])
+        self.assertNotIn('extract_random', response.results[1].plugins['workers'])
 
     def test_dispatch(self):
         s = Stoq(
@@ -155,8 +155,8 @@ class TestCore(unittest.TestCase):
         response = s.scan(
             self.generic_content,
             add_start_dispatch=['this_plugin_doesnt_exist'])
-        self.assertNotIn('this_plugin_doesnt_exist',
-                         response.results[0].dispatched_to)
+        self.assertIn('this_plugin_doesnt_exist', response.results[0].plugins['workers'])
+        self.assertEqual(len(response.errors), 1)
 
     def test_archive(self):
         s = Stoq(base_dir=utils.get_data_dir(), archivers=['dummy_archiver'])
@@ -167,7 +167,7 @@ class TestCore(unittest.TestCase):
             self.generic_content,
             request_meta=RequestMeta(archive_payloads=True))
         dummy_archiver.archive.assert_called_once()
-        self.assertIn('dummy_archiver', response.results[0].dispatched_to)
+        self.assertIn('dummy_archiver', response.results[0].plugins['archivers'])
 
     def test_dont_archive_request(self):
         s = Stoq(base_dir=utils.get_data_dir(), archivers=['dummy_archiver'])
@@ -178,8 +178,8 @@ class TestCore(unittest.TestCase):
             add_start_dispatch=['extract_random'],
             request_meta=RequestMeta(archive_payloads=False))
         dummy_archiver.archive.assert_not_called()
-        self.assertNotIn('dummy_archiver', response.results[0].dispatched_to)
-        self.assertNotIn('dummy_archiver', response.results[1].dispatched_to)
+        self.assertNotIn('dummy_archiver', response.results[0].plugins['archivers'])
+        self.assertNotIn('dummy_archiver', response.results[1].plugins['archivers'])
 
     def test_dont_archive_payload(self):
         s = Stoq(base_dir=utils.get_data_dir(), archivers=['dummy_archiver'])
@@ -192,8 +192,8 @@ class TestCore(unittest.TestCase):
             add_start_dispatch=['extract_random'],
             request_meta=RequestMeta(archive_payloads=True))
         dummy_archiver.archive.assert_called_once()
-        self.assertNotIn('dummy_archiver', response.results[0].dispatched_to)
-        self.assertIn('dummy_archiver', response.results[1].dispatched_to)
+        self.assertNotIn('dummy_archiver', response.results[0].plugins['archivers'])
+        self.assertIn('dummy_archiver', response.results[1].plugins['archivers'])
 
     def test_dont_archive_yara(self):
         s = Stoq(base_dir=utils.get_data_dir(), archivers=['dummy_archiver'])
@@ -239,7 +239,7 @@ class TestCore(unittest.TestCase):
         simple_worker.RAISE_EXCEPTION = True
         response = s.scan(
             self.generic_content, add_start_dispatch=['simple_worker'])
-        self.assertIn('simple_worker', response.results[0].dispatched_to)
+        self.assertIn('simple_worker', response.results[0].plugins['workers'])
         self.assertEqual(len(response.errors), 1)
         self.assertIn('Test exception', response.errors[0])
 
@@ -249,7 +249,7 @@ class TestCore(unittest.TestCase):
         simple_worker.RETURN_ERRORS = True
         response = s.scan(
             self.generic_content, add_start_dispatch=['simple_worker'])
-        self.assertIn('simple_worker', response.results[0].dispatched_to)
+        self.assertIn('simple_worker', response.results[0].plugins['workers'])
         self.assertIn('simple_worker', response.results[0].workers)
         self.assertEqual(len(response.errors), 1)
         self.assertIn('Test error', response.errors[0])
@@ -259,7 +259,7 @@ class TestCore(unittest.TestCase):
         simple_archiver = s.load_plugin('simple_archiver')
         simple_archiver.RAISE_EXCEPTION = True
         response = s.scan(self.generic_content)
-        self.assertIn('simple_archiver', response.results[0].dispatched_to)
+        self.assertIn('simple_archiver', response.results[0].plugins['archivers'])
         self.assertEqual(len(response.errors), 1)
         self.assertIn('Test exception', response.errors[0])
 
@@ -268,7 +268,7 @@ class TestCore(unittest.TestCase):
         simple_archiver = s.load_plugin('simple_archiver')
         simple_archiver.RETURN_ERRORS = True
         response = s.scan(self.generic_content)
-        self.assertIn('simple_archiver', response.results[0].dispatched_to)
+        self.assertIn('simple_archiver', response.results[0].plugins['archivers'])
         self.assertIn('simple_archiver', response.results[0].archivers)
         self.assertEqual(len(response.errors), 1)
         self.assertIn('Test error', response.errors[0])
