@@ -7,10 +7,8 @@ import stoq.helpers as helpers
 
 class PayloadMeta():
     def __init__(self,
-                 filename: Optional[bytes] = None,
                  should_archive: bool = True,
                  extra_data: Optional[Dict] = None) -> None:
-        self.filename = filename
         self.should_archive = should_archive
         self.extra_data = {} if extra_data is None else extra_data
 
