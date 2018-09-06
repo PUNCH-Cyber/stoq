@@ -27,16 +27,15 @@ class SimpleDispatcher(DispatcherPlugin):
     RULE_COUNT = 1
 
     def dispatch(self, payload: Payload, request_meta: RequestMeta
-                ) -> Iterator[DispatcherResponse]:
+                ) -> DispatcherResponse:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')
+        dr = DispatcherResponse()
         for worker in self.WORKERS:
             for count in range(0, self.RULE_COUNT):
-                dr = DispatcherResponse(
-                    worker,
-                    meta={f'rule{count}': worker}
-                    )
+                dr.plugin_names.append(worker)
+                dr.meta[worker] = {f'rule{count}': worker}
                 payload.payload_meta.should_archive = self.SHOULD_ARCHIVE
                 if self.RETURN_ERRORS:
                     dr.errors += ['Test error please ignore']
-                yield dr
+        return dr

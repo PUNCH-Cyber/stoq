@@ -216,34 +216,32 @@ class Stoq(StoqPluginManager):
         payload_results = PayloadResults.from_payload(payload, id)
         extracted = []
         errors = []
-        for dispatch in self._get_dispatches(payload, add_dispatch, request_meta):
-            payload_results.plugins['workers'].append(dispatch.plugin_name)
+        dispatches, dispatch_errors = self._get_dispatches(
+            payload, add_dispatch, request_meta)
+        if dispatch_errors:
+            errors.extend(dispatch_errors)
+        for plugin_name in dispatches:
+            payload_results.plugins['workers'].append(plugin_name)
             try:
-                if dispatch.plugin_name:
-                    plugin = self.load_plugin(dispatch.plugin_name)
-                else:
-                    if dispatch.errors:
-                        errors.extend(dispatch.errors)
-                    continue
+                plugin = self.load_plugin(plugin_name)
             except Exception as e:
-                msg = f'Exception loading plugin {dispatch.plugin_name} for dispatch'
+                msg = f'Exception loading plugin {plugin_name} for dispatch'
                 self.log.exception(msg)
                 errors.append(msg)
                 continue
             try:
-                worker_response = plugin.scan(payload, dispatch.meta,
-                                              request_meta)
+                worker_response = plugin.scan(payload, request_meta)
             except Exception as e:
-                msg = f'Exception scanning with plugin {dispatch.plugin_name}: {str(e)}'
+                msg = f'Exception scanning with plugin {plugin_name}: {str(e)}'
                 self.log.exception(msg)
                 errors.append(msg)
                 continue
             if worker_response is None:
                 continue
             if worker_response.results is not None:
-                payload_results.workers[dispatch.plugin_name] = worker_response.results
+                payload_results.workers[plugin_name] = worker_response.results
             extracted.extend([
-                Payload(ex.content, ex.payload_meta, dispatch.plugin_name, id)
+                Payload(ex.content, ex.payload_meta, plugin_name, id)
                 for ex in worker_response.extracted
             ])
             if worker_response.errors is not None:
@@ -304,20 +302,21 @@ class Stoq(StoqPluginManager):
 
     def _get_dispatches(self, payload: Payload, add_dispatches: List[str],
                         request_meta: RequestMeta
-                        ) -> Iterator[DispatcherResponse]:
+                        ) -> Tuple[List[str], List[str]]:
+        errors = []
+        dispatchers = [d for d in add_dispatches] + \
+                      [d for d in self.always_dispatch]
 
         for dispatcher_name, dispatcher in self._loaded_dispatcher_plugins.items():
             try:
-                for dispatch in dispatcher.dispatch(payload, request_meta):
-                    yield dispatch
+                dispatcher_result = dispatcher.dispatch(payload, request_meta)
+                dispatchers.extend(dispatcher_result.plugin_names)
+                payload.dispatch_meta.update(
+                    {dispatcher_name: dispatcher_result.meta})
             except Exception as e:
                 msg = f'Exception with dispatcher {dispatcher_name}: {str(e)}'
                 self.log.exception(msg)
-                yield DispatcherResponse(errors=[msg])
+                errors.append(msg)
+                
+        return (dispatchers, errors)
 
-        additional_dispatches = [d for d in add_dispatches] + \
-                                [d for d in self.always_dispatch]
-
-        for plugin_name in additional_dispatches:
-            if plugin_name:
-                yield DispatcherResponse(plugin_name)

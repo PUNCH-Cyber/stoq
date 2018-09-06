@@ -22,6 +22,6 @@ from stoq.plugins import WorkerPlugin
 
 
 class ExtractRandom(WorkerPlugin):
-    def scan(self, payload: Payload, dispatch_rules: Optional[List[Dict]],
+    def scan(self, payload: Payload,
              request_meta: RequestMeta) -> Optional[WorkerResponse]:
         return WorkerResponse(extracted=[ExtractedPayload(os.urandom(50))])
