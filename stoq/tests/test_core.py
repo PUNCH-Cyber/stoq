@@ -99,7 +99,7 @@ class TestCore(unittest.TestCase):
         self.assertEqual(
             dummy_worker.scan.call_args[0][0].dispatch_meta['simple_dispatcher']['dummy_worker']['rule0'],
             'dummy_worker')
-        self.assertIn('dummy_worker', response.results[0].dispatched_to)
+        self.assertIn('dummy_worker', response.results[0].plugins['workers'])
 
     def test_dispatch_multiple_rules(self):
         s = Stoq(
