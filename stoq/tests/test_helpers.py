@@ -27,8 +27,12 @@ class TestHelpers(unittest.TestCase):
         self.assertTrue(helpers.dumps({'a': 1, 'b': 2}))
         self.assertTrue(helpers.dumps({1, 2, 3}))
         self.assertTrue(helpers.dumps(datetime.now()))
-        self.assertTrue(helpers.dumps(b'notunicode'))
+        self.assertTrue(helpers.dumps(b'somebytes'))
         self.assertTrue(helpers.dumps(ClassWithAttrs()))
+
+    def test_dumps_unicode(self):
+        self.assertEqual(helpers.dumps({'key': b'value'}, compactly=True), '{"key": "value"}')
+        self.assertEqual(helpers.dumps({'key': b'hi\xe7\x8c\xab'}, compactly=True), '{"key": "hi猫"}')
 
     def test_dumps_compactly(self):
         self.assertEqual(

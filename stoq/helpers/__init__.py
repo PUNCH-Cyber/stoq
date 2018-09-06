@@ -18,13 +18,17 @@ import datetime
 import hashlib
 import json
 
+from bs4 import UnicodeDammit
+
 
 class JsonComplexEncoder(json.JSONEncoder):
     """
     Extends the default JSON encoder to handle bytes and sets
     """
     def default(self, obj):
-        if isinstance(obj, (bytes, datetime.datetime)):
+        if isinstance(obj, bytes):
+            return UnicodeDammit(obj).unicode_markup
+        elif isinstance(obj, datetime.datetime):
             return str(obj)
         elif isinstance(obj, set):
             return list(obj)
@@ -38,7 +42,7 @@ class JsonComplexEncoder(json.JSONEncoder):
 def dumps(data, indent=4, compactly=False):
     if compactly is True or not indent:
         indent = None
-    return json.dumps(data, indent=indent, cls=JsonComplexEncoder)
+    return json.dumps(data, indent=indent, cls=JsonComplexEncoder, ensure_ascii=False)
 
 
 def get_md5(content: bytes) -> str:
