@@ -75,8 +75,8 @@ class TestCore(unittest.TestCase):
     def test_always_dispatch(self):
         s = Stoq(
             base_dir=utils.get_data_dir(), always_dispatch=['simple_worker'])
-        self.assertEqual(len(s._loaded_worker_plugins), 1)
         response = s.scan(self.generic_content)
+        self.assertIn('simple_worker', s._loaded_plugins)
         self.assertIn('simple_worker', response.results[0].plugins['workers'])
         self.assertIn('simple_worker', response.results[1].plugins['workers'])
 
@@ -327,6 +327,22 @@ class TestCore(unittest.TestCase):
         response = s.scan(self.generic_content)
         self.assertEqual(len(response.errors), 1)
         self.assertIn('Test exception', response.errors[0])
+
+    def test_multiclass_plugin(self):
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            dispatchers=['multiclass_plugin'])
+        multiclass_worker = s.load_plugin('multiclass_plugin')
+        multiclass_worker.scan = create_autospec(
+            multiclass_worker.scan, return_value=None)
+        response = s.scan(self.generic_content)
+        self.assertEqual(len(multiclass_worker.scan.call_args[0]), 2)
+        self.assertEqual(
+            multiclass_worker.scan.call_args[0][0].dispatch_meta['multiclass_plugin']['multiclass_plugin']['rule0'],
+            'multiclass_plugin')
+        self.assertIn('multiclass_plugin', response.results[0].plugins['workers'])
+        self.assertIn('multiclass_plugin', s._loaded_dispatcher_plugins)
+        self.assertIn('multiclass_plugin', s._loaded_plugins)
 
     ############ 'RUN' TESTS ############
 

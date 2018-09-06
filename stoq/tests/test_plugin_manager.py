@@ -69,18 +69,6 @@ class TestPluginManager(unittest.TestCase):
         self.assertNotIn('missing_module', collected_plugins)
         self.assertNotIn('invalid_config', collected_plugins)
 
-    def test_add_plugin(self):
-        pm = StoqPluginManager([])
-        example = ExampleExternalPlugin()
-        pm.add_plugin('example_external', example)
-        self.assertEqual(len(pm.list_plugins()), 1)
-
-    def test_add_non_plugin(self):
-        pm = StoqPluginManager([])
-        no_parent_class = NoParentClassPlugin()
-        with self.assertRaises(StoqException):
-            pm.add_plugin('no_parent_class', no_parent_class)
-
     def test_load_plugin(self):
         pm = StoqPluginManager([utils.get_plugins_dir()])
         for name in self.DUMMY_PLUGINS:
