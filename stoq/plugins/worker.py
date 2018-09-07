@@ -602,7 +602,9 @@ class StoqWorkerPlugin(StoqPluginBase):
             # subsequent plugins may not be able to retrieve the files. We are
             # however going to skip saving the payload if our source is the
             # same as the connector.
-            if self.archive_connector and self.archive_connector != archive_type:
+            if self.archive_connector and (
+                self.archive_connector != archive_type or
+                self.archive_connector == 'file'):
                 payload_hashes = self.save_payload(payload, self.archive_connector)
 
             # Some workers don't need a hash to be generated, so let's only
