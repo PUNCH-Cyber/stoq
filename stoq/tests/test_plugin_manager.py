@@ -115,6 +115,15 @@ class TestPluginManager(unittest.TestCase):
         plugin = pm.load_plugin('configurable_worker')
         self.assertEqual(plugin.get_crazy_runtime_option(), 16)
 
+    def test_min_stoq_version(self):
+        pm = StoqPluginManager([utils.get_invalid_plugins_dir()])
+        # We have to override the fact that all log calls are disabled in setUp()
+        # for the calls here to actually go through
+        logging.disable(logging.NOTSET)
+        with self.assertLogs(level='WARNING'):
+            plugin = pm.load_plugin('incompatible_min_stoq_version')
+        self.assertIsNotNone(plugin)
+
 
 class ExampleExternalPlugin(WorkerPlugin):
     # Intentionally override this method to not require the config argument
