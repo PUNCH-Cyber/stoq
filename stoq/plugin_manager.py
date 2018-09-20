@@ -5,6 +5,7 @@ import importlib.util
 import inspect
 import logging
 import os
+from pkg_resources import parse_version
 from typing import Dict, List, Optional, Set, Tuple
 
 from .exceptions import StoqException
@@ -81,6 +82,14 @@ class StoqPluginManager():
         if name in self._loaded_plugins:
             return self._loaded_plugins[name]
         module_path, config = self._plugin_name_to_info[name]
+        if config.has_option('options', 'min_stoq_version'):
+            min_stoq_version = config.get('options', 'min_stoq_version')
+            # Placing this import at the top of this file causes a circular
+            # import chain that causes stoq to crash on initialization
+            from stoq import __version__
+            if parse_version(__version__) < parse_version(min_stoq_version):
+                self.log.warning('Plugin not compatible with this version of '
+                                 'stoQ. Unpredictable results may occur!')
         spec = importlib.util.spec_from_file_location(
             config.get('Core', 'Module'), module_path)
         module = importlib.util.module_from_spec(spec)
