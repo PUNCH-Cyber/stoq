@@ -26,7 +26,6 @@ setup(
                       'requests',
                       'requests[security]',
                       'python-magic',
-                      'ssdeep',
                       'yara-python',
                       'python-json-logger'],
     keywords='malware-analysis, malware-analyzer, malware-detection, framework, automation',

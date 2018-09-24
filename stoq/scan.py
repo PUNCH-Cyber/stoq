@@ -36,7 +36,11 @@ API
 
 import magic
 import hashlib
-import ssdeep
+
+try:
+    import ssdeep
+except ImportError:
+    pass
 
 # This is silly. python-magic is the preferred library as it is maintained.
 # But, sometimes filemagic is used by other libraries. Let's determine which
