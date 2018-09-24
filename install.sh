@@ -109,6 +109,10 @@ install_prereqs() {
 
     pip3 install virtualenv --quiet
     echo "[stoQ] Done installing prerequisites."
+    echo "[stoQ] Setting up virtualenv..."
+    virtualenv $PYENV_DIR
+    source $PYENV_DIR/bin/activate
+    echo "[stoQ] virtualenv activated..."
 }
 
 build_dirs() {
@@ -134,11 +138,6 @@ install_core() {
 
     # Make sure directories are built
     build_dirs
-
-    echo "[stoQ] Setting up virtualenv..."
-    virtualenv $PYENV_DIR
-    source $PYENV_DIR/bin/activate
-    echo "[stoQ] virtualenv activated..."
 
     set +e
     groupadd -r $STOQ_GROUP
