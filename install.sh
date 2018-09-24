@@ -33,9 +33,9 @@ STOQ_USER=stoq
 STOQ_GROUP=stoq
 
 # Dependency versions
-YARA_VERSION=3.7.1
+YARA_VERSION=3.8.1
 XORSEARCH_VERSION=1_11_1
-EXIF_VERSION=10.94
+EXIF_VERSION=11.10
 FLOSS_VERSION=1.5.0
 
 # Make sure all output, to include STDERR is logged appropriately
