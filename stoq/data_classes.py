@@ -19,12 +19,14 @@ class Payload():
                  payload_meta: Optional[PayloadMeta] = None,
                  extracted_by: Optional[str] = None,
                  extracted_from: Optional[int] = None,
-                 dispatch_meta: Optional[Dict[str, Dict]] = None) -> None:
+                 dispatch_meta: Optional[Dict[str, Dict]] = None,
+                 worker_results: Optional[List[Dict[str, Dict]]] = None) -> None:
         self.content = content
         self.payload_meta = PayloadMeta() if payload_meta is None else payload_meta
         self.extracted_by = extracted_by
         self.extracted_from = extracted_from
         self.dispatch_meta = {} if dispatch_meta is None else dispatch_meta
+        self.worker_results = [] if worker_results is None else worker_results
 
 
 class RequestMeta():
@@ -49,8 +51,8 @@ class PayloadResults():
                  payload_meta: Optional[PayloadMeta] = None,
                  extracted_from: Optional[int] = None,
                  extracted_by: Optional[str] = None,
-                 workers: Optional[Dict[str, Dict]] = None,
-                 archivers: Optional[Dict[str, Dict]] = None,
+                 workers: Optional[List[Dict[str, Dict]]] = None,
+                 archivers: Optional[List[Dict[str, Dict]]] = None,
                  decorators: Optional[Dict[str, Dict]] = None) -> None:
         self.payload_id = payload_id
         self.md5 = md5
@@ -62,8 +64,8 @@ class PayloadResults():
         self.payload_meta = payload_meta
         self.extracted_from = extracted_from  # payload_id of parent payload
         self.extracted_by = extracted_by
-        self.workers = {} if workers is None else workers
-        self.archivers = {} if archivers is None else archivers
+        self.workers = [] if workers is None else workers
+        self.archivers = [] if archivers is None else archivers
 
     @classmethod
     def from_payload(cls, payload: Payload,
@@ -121,6 +123,16 @@ class ArchiverResponse():
 
 
 class DispatcherResponse():
+    def __init__(self,
+                 plugin_names: Optional[List[str]] = None,
+                 meta: Optional[Dict] = None,
+                 errors: List[str] = None) -> None:
+        self.plugin_names = [] if plugin_names is None else plugin_names
+        self.meta = {} if meta is None else meta
+        self.errors = [] if errors is None else errors
+
+
+class DeepDispatcherResponse():
     def __init__(self,
                  plugin_names: Optional[List[str]] = None,
                  meta: Optional[Dict] = None,

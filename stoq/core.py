@@ -29,7 +29,9 @@ from pythonjsonlogger import jsonlogger
 import yara
 
 from .exceptions import StoqException
-from stoq.data_classes import Payload, PayloadMeta, PayloadResults, RequestMeta, StoqResponse, DispatcherResponse
+from stoq.data_classes import (Payload, PayloadMeta, PayloadResults,
+                               RequestMeta, StoqResponse, DispatcherResponse,
+                               DeepDispatcherResponse)
 import stoq.helpers as helpers
 from stoq.plugin_manager import StoqPluginManager
 from stoq.utils import ratelimited
@@ -50,6 +52,7 @@ class Stoq(StoqPluginManager):
                  archivers: List[str] = None,
                  connectors: List[str] = None,
                  dispatchers: List[str] = None,
+                 deep_dispatchers: List[str] = None,
                  decorators: List[str] = None,
                  always_dispatch: List[str] = None) -> None:
         if not base_dir:
@@ -105,6 +108,11 @@ class Stoq(StoqPluginManager):
             dispatcher_str = config.get('core', 'dispatchers', fallback='')
             dispatchers = [d.strip() for d in dispatcher_str.split(',') if d.strip()]
         self._loaded_dispatcher_plugins = {d: self.load_plugin(d) for d in dispatchers if d}
+        if not dispatchers:
+            deep_dispatcher_str = config.get('core', 'deep_dispatchers', fallback='')
+            deep_dispatchers = [d.strip() for d in deep_dispatcher_str.split(',') if d.strip()]
+        self._loaded_deep_dispatcher_plugins = {d: self.load_plugin(d) for d in deep_dispatchers if d}
+
         if not decorators:
             decorator_str = config.get('core', 'decorators', fallback='')
             decorators = [d.strip() for d in decorator_str.split(',') if d.strip()]
@@ -125,30 +133,33 @@ class Stoq(StoqPluginManager):
              payload_meta: Optional[PayloadMeta] = None,
              request_meta: Optional[RequestMeta] = None,
              add_start_dispatch: Optional[List[str]] = None,
+             add_start_deep_dispatch: Optional[List[str]] = None,
              ratelimit: Optional[str] = None) -> StoqResponse:
         payload_meta = PayloadMeta() if payload_meta is None else payload_meta
         payload = Payload(content, payload_meta)
-        return self.scan_payload(payload, request_meta, add_start_dispatch)
+        return self.scan_payload(payload, request_meta, add_start_dispatch, add_start_deep_dispatch)
 
     def scan_payload(
             self,
             payload: Payload,
             request_meta: Optional[RequestMeta] = None,
-            add_start_dispatch: Optional[List[str]] = None) -> StoqResponse:
+            add_start_dispatch: Optional[List[str]] = None,
+            add_start_deep_dispatch: Optional[List[str]] = None) -> StoqResponse:
         request_meta = RequestMeta() if request_meta is None else request_meta
         add_start_dispatch = [] if add_start_dispatch is None else add_start_dispatch
+        add_start_deep_dispatch = [] if add_start_deep_dispatch is None else add_start_deep_dispatch
 
         scan_results = []
         errors = []
-        scan_queue = [(payload, add_start_dispatch)]
+        scan_queue = [(payload, add_start_dispatch, add_start_deep_dispatch)]
         hashes_seen: Set[str] = set(helpers.get_sha256(payload.content))
 
         num_payloads = 0
         for _recursion_level in range(self.max_recursion + 1):
             next_scan_queue: List[Tuple[Payload, List[str]]] = []
-            for payload, add_dispatch in scan_queue:
+            for payload, add_dispatch, add_deep_dispatch in scan_queue:
                 payload_results, extracted, p_errors = self._single_scan(
-                    payload, num_payloads, add_dispatch, request_meta)
+                    payload, num_payloads, add_dispatch, add_deep_dispatch, request_meta)
                 scan_results.append(payload_results)
                 # TODO: Add option for no-dedup
                 for ex in extracted:
@@ -213,7 +224,7 @@ class Stoq(StoqPluginManager):
                         raise StoqException(msg) from e
 
     def _single_scan(self, payload: Payload, id: int, add_dispatch: List[str],
-                     request_meta: RequestMeta,
+                     add_deep_dispatch: List[str], request_meta: RequestMeta,
                      ) -> Tuple[PayloadResults, List[Payload], List[str]]:
         payload_results = PayloadResults.from_payload(payload, id)
         extracted = []
@@ -241,7 +252,38 @@ class Stoq(StoqPluginManager):
             if worker_response is None:
                 continue
             if worker_response.results is not None:
-                payload_results.workers[plugin_name] = worker_response.results
+                payload_results.workers.append({plugin_name: worker_response.results})
+                payload.worker_results.append({plugin_name: worker_response.results})
+            extracted.extend([
+                Payload(ex.content, ex.payload_meta, plugin_name, id)
+                for ex in worker_response.extracted
+            ])
+            if worker_response.errors is not None:
+                errors.extend(worker_response.errors)
+        deep_dispatches, deep_dispatch_errors = self._get_deep_dispatches(
+            payload, add_deep_dispatch, request_meta)
+        if deep_dispatch_errors:
+            errors.extend(deep_dispatch_errors)
+        for plugin_name in deep_dispatches:
+            payload_results.plugins['workers'].append(plugin_name)
+            try:
+                plugin = self.load_plugin(plugin_name)
+            except Exception as e:
+                msg = f'Exception loading plugin {plugin_name} for deep dispatch'
+                self.log.exception(msg)
+                errors.append(msg)
+                continue
+            try:
+                worker_response = plugin.scan(payload, request_meta)
+            except Exception as e:
+                msg = f'Exception scanning with plugin {plugin_name}: {str(e)}'
+                self.log.exception(msg)
+                errors.append(msg)
+                continue
+            if worker_response is None:
+                continue
+            if worker_response.results is not None:
+                payload_results.workers.append({plugin_name: worker_response.results})
             extracted.extend([
                 Payload(ex.content, ex.payload_meta, plugin_name, id)
                 for ex in worker_response.extracted
@@ -261,8 +303,8 @@ class Stoq(StoqPluginManager):
                 if archiver_response is None:
                     continue
                 if archiver_response.results is not None:
-                    payload_results.archivers[
-                        plugin_name] = archiver_response.results
+                    payload_results.archivers.append(
+                        {plugin_name: archiver_response.results})
                 if archiver_response.errors is not None:
                     errors.extend(archiver_response.errors)
         return (payload_results, extracted, errors)
@@ -322,3 +364,21 @@ class Stoq(StoqPluginManager):
 
         return (dispatchers, errors)
 
+    def _get_deep_dispatches(self, payload: Payload, add_deep_dispatches: List[str],
+                        request_meta: RequestMeta
+                        ) -> Tuple[List[str], List[str]]:
+        errors = []
+        deep_dispatchers = [d for d in add_deep_dispatches]
+
+        for deep_dispatcher_name, deep_dispatcher in self._loaded_deep_dispatcher_plugins.items():
+            try:
+                deep_dispatcher_result = deep_dispatcher.deep_dispatch(payload, request_meta)
+                deep_dispatchers.extend(deep_dispatcher_result.plugin_names)
+                payload.dispatch_meta.update(
+                    {deep_dispatcher_name: deep_dispatcher_result.meta})
+            except Exception as e:
+                msg = f'Exception with deep_dispatcher {deep_dispatcher_name}: {str(e)}'
+                self.log.exception(msg)
+                errors.append(msg)
+
+        return (deep_dispatchers, errors)
