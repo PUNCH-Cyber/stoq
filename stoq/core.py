@@ -155,7 +155,7 @@ class Stoq(StoqPluginManager):
                     ex_hash = helpers.get_sha256(ex.content)
                     if ex_hash not in hashes_seen:
                         hashes_seen.add(ex_hash)
-                        next_scan_queue.append((ex, []))  # Empty list for no additional dispatches
+                        next_scan_queue.append((ex, ex.payload_meta.dispatch_to))
                 errors.extend(p_errors)
                 num_payloads += 1
             scan_queue = next_scan_queue

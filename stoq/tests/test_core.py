@@ -101,6 +101,15 @@ class TestCore(unittest.TestCase):
             'dummy_worker')
         self.assertIn('dummy_worker', response.results[0].plugins['workers'])
 
+    def test_dispatch_from_worker(self):
+        s = Stoq(base_dir=utils.get_data_dir())
+        simple_worker = s.load_plugin('simple_worker')
+        simple_worker.DISPATCH_TO = ['extract_random']
+        response = s.scan(self.generic_content, add_start_dispatch=['simple_worker'])
+        self.assertIn('simple_worker', response.results[0].plugins['workers'])
+        self.assertIn('extract_random', response.results[1].plugins['workers'])
+        self.assertEqual('extract_random', response.results[2].extracted_by)
+
     def test_dispatch_multiple_rules(self):
         s = Stoq(
             base_dir=utils.get_data_dir(),
