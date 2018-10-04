@@ -355,8 +355,9 @@ class Stoq(StoqPluginManager):
             try:
                 dispatcher_result = dispatcher.dispatch(payload, request_meta)
                 dispatchers.extend(dispatcher_result.plugin_names)
-                payload.dispatch_meta.update(
-                    {dispatcher_name: dispatcher_result.meta})
+                if dispatcher_result.meta is not None:
+                    payload.dispatch_meta.update(
+                        {dispatcher_name: dispatcher_result.meta})
             except Exception as e:
                 msg = f'Exception with dispatcher {dispatcher_name}: {str(e)}'
                 self.log.exception(msg)
@@ -374,8 +375,9 @@ class Stoq(StoqPluginManager):
             try:
                 deep_dispatcher_result = deep_dispatcher.deep_dispatch(payload, request_meta)
                 deep_dispatchers.extend(deep_dispatcher_result.plugin_names)
-                payload.dispatch_meta.update(
-                    {deep_dispatcher_name: deep_dispatcher_result.meta})
+                if deep_dispatcher_result.meta is not None:
+                    payload.dispatch_meta.update(
+                        {deep_dispatcher_name: deep_dispatcher_result.meta})
             except Exception as e:
                 msg = f'Exception with deep_dispatcher {deep_dispatcher_name}: {str(e)}'
                 self.log.exception(msg)
