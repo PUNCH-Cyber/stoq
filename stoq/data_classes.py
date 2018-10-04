@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import uuid
 from typing import Dict, List, Optional
 
 import stoq.helpers as helpers
@@ -41,7 +42,7 @@ class RequestMeta():
 
 class PayloadResults():
     def __init__(self,
-                 payload_id: int,
+                 payload_id: str,
                  md5: str,
                  sha1: str,
                  sha256: str,
@@ -49,12 +50,12 @@ class PayloadResults():
                  size: int,
                  plugins: Dict[str, List],
                  payload_meta: Optional[PayloadMeta] = None,
-                 extracted_from: Optional[int] = None,
+                 extracted_from: Optional[str] = None,
                  extracted_by: Optional[str] = None,
                  workers: Optional[Dict[str, Dict]] = None,
                  archivers: Optional[Dict[str, Dict]] = None,
                  decorators: Optional[Dict[str, Dict]] = None) -> None:
-        self.payload_id = payload_id
+        self.payload_id = str(uuid.uuid4()) if payload_id is None else payload_id
         self.md5 = md5
         self.sha1 = sha1
         self.sha256 = sha256
@@ -62,19 +63,19 @@ class PayloadResults():
         self.size = size
         self.plugins = plugins
         self.payload_meta = payload_meta
-        self.extracted_from = extracted_from  # payload_id of parent payload
+        self.extracted_from = extracted_from  # id of parent payload
         self.extracted_by = extracted_by
         self.workers = {} if workers is None else workers
         self.archivers = {} if archivers is None else archivers
 
     @classmethod
-    def from_payload(cls, payload: Payload,
-                     payload_id: int) -> 'PayloadResults':
+    def from_payload(cls, payload: Payload) -> 'PayloadResults':
         md5 = helpers.get_md5(payload.content)
         sha1 = helpers.get_sha1(payload.content)
         sha256 = helpers.get_sha256(payload.content)
         sha512 = helpers.get_sha512(payload.content)
         size = len(payload.content)
+        payload_id = str(uuid.uuid4())
         plugins = {'workers': [], 'archivers': []}
         return cls(payload_id, md5, sha1, sha256, sha512, size, plugins,
                    payload.payload_meta, payload.extracted_from,
@@ -88,12 +89,14 @@ class StoqResponse():
                  request_meta: RequestMeta,
                  errors: List[str],
                  decorators: Optional[Dict[str, Dict]] = None,
+                 scan_id: str = None
                  ) -> None:
         self.time = time
         self.results = results
         self.request_meta = request_meta
         self.errors = errors
         self.decorators = {} if decorators is None else decorators
+        self.scan_id = str(uuid.uuid4()) if scan_id is None else scan_id
 
 
 class ExtractedPayload():

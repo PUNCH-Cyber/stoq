@@ -143,12 +143,11 @@ class Stoq(StoqPluginManager):
         scan_queue = [(payload, add_start_dispatch)]
         hashes_seen: Set[str] = set(helpers.get_sha256(payload.content))
 
-        num_payloads = 0
         for _recursion_level in range(self.max_recursion + 1):
             next_scan_queue: List[Tuple[Payload, List[str]]] = []
             for payload, add_dispatch in scan_queue:
                 payload_results, extracted, p_errors = self._single_scan(
-                    payload, num_payloads, add_dispatch, request_meta)
+                    payload, add_dispatch, request_meta)
                 scan_results.append(payload_results)
                 # TODO: Add option for no-dedup
                 for ex in extracted:
@@ -157,7 +156,6 @@ class Stoq(StoqPluginManager):
                         hashes_seen.add(ex_hash)
                         next_scan_queue.append((ex, ex.payload_meta.dispatch_to))
                 errors.extend(p_errors)
-                num_payloads += 1
             scan_queue = next_scan_queue
 
         response = StoqResponse(datetime.now().isoformat(), scan_results, request_meta, errors)
@@ -212,10 +210,10 @@ class Stoq(StoqPluginManager):
                         self.log.exception(msg)
                         raise StoqException(msg) from e
 
-    def _single_scan(self, payload: Payload, id: int, add_dispatch: List[str],
+    def _single_scan(self, payload: Payload, add_dispatch: List[str],
                      request_meta: RequestMeta,
                      ) -> Tuple[PayloadResults, List[Payload], List[str]]:
-        payload_results = PayloadResults.from_payload(payload, id)
+        payload_results = PayloadResults.from_payload(payload)
         extracted = []
         errors = []
         dispatches, dispatch_errors = self._get_dispatches(
