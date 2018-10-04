@@ -252,7 +252,6 @@ class Stoq(StoqPluginManager):
             if worker_response is None:
                 continue
             if worker_response.results is not None:
-                payload_results.workers.append({plugin_name: worker_response.results})
                 payload.worker_results.append({plugin_name: worker_response.results})
             extracted.extend([
                 Payload(ex.content, ex.payload_meta, plugin_name, id)
@@ -283,13 +282,14 @@ class Stoq(StoqPluginManager):
             if worker_response is None:
                 continue
             if worker_response.results is not None:
-                payload_results.workers.append({plugin_name: worker_response.results})
+                payload.workers.append({plugin_name: worker_response.results})
             extracted.extend([
                 Payload(ex.content, ex.payload_meta, plugin_name, id)
                 for ex in worker_response.extracted
             ])
             if worker_response.errors is not None:
                 errors.extend(worker_response.errors)
+        payload_results.workers.extend(payload.worker_results)
         if request_meta.archive_payloads and payload.payload_meta.should_archive:
             for plugin_name, archiver in self._loaded_archiver_plugins.items():
                 payload_results.plugins['archivers'].append(plugin_name)
