@@ -108,7 +108,7 @@ class Stoq(StoqPluginManager):
             dispatcher_str = config.get('core', 'dispatchers', fallback='')
             dispatchers = [d.strip() for d in dispatcher_str.split(',') if d.strip()]
         self._loaded_dispatcher_plugins = {d: self.load_plugin(d) for d in dispatchers if d}
-        if not dispatchers:
+        if not deep_dispatchers:
             deep_dispatcher_str = config.get('core', 'deep_dispatchers', fallback='')
             deep_dispatchers = [d.strip() for d in deep_dispatcher_str.split(',') if d.strip()]
         self._loaded_deep_dispatcher_plugins = {d: self.load_plugin(d) for d in deep_dispatchers if d}
