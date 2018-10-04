@@ -376,7 +376,7 @@ class Stoq(StoqPluginManager):
                 deep_dispatcher_result = deep_dispatcher.get_deep_dispatches(payload, request_meta)
                 deep_dispatchers.extend(deep_dispatcher_result.plugin_names)
                 if deep_dispatcher_result.meta is not None:
-                    payload.dispatch_meta.update(
+                    payload.deep_dispatch_meta.update(
                         {deep_dispatcher_name: deep_dispatcher_result.meta})
             except Exception as e:
                 msg = f'Exception with deep_dispatcher {deep_dispatcher_name}: {str(e)}'

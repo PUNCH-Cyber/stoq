@@ -20,12 +20,14 @@ class Payload():
                  extracted_by: Optional[str] = None,
                  extracted_from: Optional[int] = None,
                  dispatch_meta: Optional[Dict[str, Dict]] = None,
+                 deep_dispatch_meta: Optional[Dict[str, Dict]] = None,
                  worker_results: Optional[List[Dict[str, Dict]]] = None) -> None:
         self.content = content
         self.payload_meta = PayloadMeta() if payload_meta is None else payload_meta
         self.extracted_by = extracted_by
         self.extracted_from = extracted_from
         self.dispatch_meta = {} if dispatch_meta is None else dispatch_meta
+        self.deep_dispatch_meta = {} if deep_dispatch_meta is None else dispatch_meta
         self.worker_results = [] if worker_results is None else worker_results
 
 
