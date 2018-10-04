@@ -26,7 +26,7 @@ class SimpleDispatcher(DispatcherPlugin):
     WORKERS = ['dummy_worker']
     RULE_COUNT = 1
 
-    def dispatch(self, payload: Payload, request_meta: RequestMeta
+    def get_dispatches(self, payload: Payload, request_meta: RequestMeta
                 ) -> DispatcherResponse:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')

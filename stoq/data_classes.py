@@ -52,7 +52,7 @@ class PayloadResults():
                  extracted_from: Optional[int] = None,
                  extracted_by: Optional[str] = None,
                  workers: Optional[List[Dict[str, Dict]]] = None,
-                 archivers: Optional[List[Dict[str, Dict]]] = None,
+                 archivers: Optional[Dict[str, Dict]] = None,
                  decorators: Optional[Dict[str, Dict]] = None) -> None:
         self.payload_id = payload_id
         self.md5 = md5
@@ -65,7 +65,7 @@ class PayloadResults():
         self.extracted_from = extracted_from  # payload_id of parent payload
         self.extracted_by = extracted_by
         self.workers = [] if workers is None else workers
-        self.archivers = [] if archivers is None else archivers
+        self.archivers = {} if archivers is None else archivers
 
     @classmethod
     def from_payload(cls, payload: Payload,

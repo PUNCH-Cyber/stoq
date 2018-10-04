@@ -156,7 +156,7 @@ class Stoq(StoqPluginManager):
 
         num_payloads = 0
         for _recursion_level in range(self.max_recursion + 1):
-            next_scan_queue: List[Tuple[Payload, List[str]]] = []
+            next_scan_queue: List[Tuple[Payload, List[str], List[str]]] = []
             for payload, add_dispatch, add_deep_dispatch in scan_queue:
                 payload_results, extracted, p_errors = self._single_scan(
                     payload, num_payloads, add_dispatch, add_deep_dispatch, request_meta)
@@ -166,7 +166,7 @@ class Stoq(StoqPluginManager):
                     ex_hash = helpers.get_sha256(ex.content)
                     if ex_hash not in hashes_seen:
                         hashes_seen.add(ex_hash)
-                        next_scan_queue.append((ex, []))  # Empty list for no additional dispatches
+                        next_scan_queue.append((ex, [], []))  # Empty list for no additional dispatches
                 errors.extend(p_errors)
                 num_payloads += 1
             scan_queue = next_scan_queue
@@ -303,7 +303,7 @@ class Stoq(StoqPluginManager):
                 if archiver_response is None:
                     continue
                 if archiver_response.results is not None:
-                    payload_results.archivers.append(
+                    payload_results.archivers.update(
                         {plugin_name: archiver_response.results})
                 if archiver_response.errors is not None:
                     errors.extend(archiver_response.errors)
@@ -353,7 +353,7 @@ class Stoq(StoqPluginManager):
 
         for dispatcher_name, dispatcher in self._loaded_dispatcher_plugins.items():
             try:
-                dispatcher_result = dispatcher.dispatch(payload, request_meta)
+                dispatcher_result = dispatcher.get_dispatches(payload, request_meta)
                 dispatchers.extend(dispatcher_result.plugin_names)
                 if dispatcher_result.meta is not None:
                     payload.dispatch_meta.update(
@@ -373,7 +373,7 @@ class Stoq(StoqPluginManager):
 
         for deep_dispatcher_name, deep_dispatcher in self._loaded_deep_dispatcher_plugins.items():
             try:
-                deep_dispatcher_result = deep_dispatcher.deep_dispatch(payload, request_meta)
+                deep_dispatcher_result = deep_dispatcher.get_deep_dispatches(payload, request_meta)
                 deep_dispatchers.extend(deep_dispatcher_result.plugin_names)
                 if deep_dispatcher_result.meta is not None:
                     payload.dispatch_meta.update(

@@ -207,9 +207,9 @@ class TestCore(unittest.TestCase):
         s = Stoq(base_dir=utils.get_data_dir())
         response = s.scan(
             self.generic_content, add_start_dispatch=['simple_worker'])
-        self.assertIn('simple_worker', response.results[0].workers)
+        self.assertIn('simple_worker', response.results[0].workers[0])
         self.assertIn('valuable_insight',
-                      response.results[0].workers['simple_worker'])
+                      response.results[0].workers[0]['simple_worker'])
 
     def test_worker_not_in_results(self):
         s = Stoq(base_dir=utils.get_data_dir())
@@ -250,7 +250,7 @@ class TestCore(unittest.TestCase):
         response = s.scan(
             self.generic_content, add_start_dispatch=['simple_worker'])
         self.assertIn('simple_worker', response.results[0].plugins['workers'])
-        self.assertIn('simple_worker', response.results[0].workers)
+        self.assertIn('simple_worker', response.results[0].workers[0])
         self.assertEqual(len(response.errors), 1)
         self.assertIn('Test error', response.errors[0])
 
