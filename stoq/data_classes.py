@@ -21,13 +21,15 @@ class Payload():
                  content: bytes,
                  payload_meta: Optional[PayloadMeta] = None,
                  extracted_by: Optional[str] = None,
-                 extracted_from: Optional[int] = None,
-                 dispatch_meta: Optional[Dict[str, Dict]] = None) -> None:
+                 extracted_from: Optional[str] = None,
+                 dispatch_meta: Optional[Dict[str, Dict]] = None,
+                 payload_id: Optional[str] = None) -> None:
         self.content = content
         self.payload_meta = PayloadMeta() if payload_meta is None else payload_meta
         self.extracted_by = extracted_by
         self.extracted_from = extracted_from
         self.dispatch_meta = {} if dispatch_meta is None else dispatch_meta
+        self.payload_id  = str(uuid.uuid4()) if payload_id is None else payload_id
 
 
 class RequestMeta():
@@ -55,7 +57,7 @@ class PayloadResults():
                  workers: Optional[Dict[str, Dict]] = None,
                  archivers: Optional[Dict[str, Dict]] = None,
                  decorators: Optional[Dict[str, Dict]] = None) -> None:
-        self.payload_id = str(uuid.uuid4()) if payload_id is None else payload_id
+        self.payload_id = payload_id
         self.md5 = md5
         self.sha1 = sha1
         self.sha256 = sha256
@@ -75,8 +77,8 @@ class PayloadResults():
         sha256 = helpers.get_sha256(payload.content)
         sha512 = helpers.get_sha512(payload.content)
         size = len(payload.content)
-        payload_id = str(uuid.uuid4())
         plugins = {'workers': [], 'archivers': []}
+        payload_id = payload.payload_id
         return cls(payload_id, md5, sha1, sha256, sha512, size, plugins,
                    payload.payload_meta, payload.extracted_from,
                    payload.extracted_by)

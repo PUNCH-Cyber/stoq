@@ -241,7 +241,7 @@ class Stoq(StoqPluginManager):
             if worker_response.results is not None:
                 payload_results.workers[plugin_name] = worker_response.results
             extracted.extend([
-                Payload(ex.content, ex.payload_meta, plugin_name)
+                Payload(ex.content, ex.payload_meta, plugin_name, payload.payload_id)
                 for ex in worker_response.extracted
             ])
             if worker_response.errors is not None:
