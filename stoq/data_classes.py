@@ -78,8 +78,7 @@ class PayloadResults():
         sha512 = helpers.get_sha512(payload.content)
         size = len(payload.content)
         plugins = {'workers': [], 'archivers': []}
-        payload_id = payload.payload_id
-        return cls(payload_id, md5, sha1, sha256, sha512, size, plugins,
+        return cls(payload.payload_id, md5, sha1, sha256, sha512, size, plugins,
                    payload.payload_meta, payload.extracted_from,
                    payload.extracted_by)
 
