@@ -14,7 +14,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from typing import Iterator
 from stoq.data_classes import Payload, DeepDispatcherResponse, RequestMeta
 from stoq.plugins import DeepDispatcherPlugin
 
@@ -27,7 +26,7 @@ class SimpleDeepDispatcher(DeepDispatcherPlugin):
     RULE_COUNT = 1
 
     def get_deep_dispatches(self, payload: Payload, request_meta: RequestMeta
-                ) -> DeepDispatcherResponse:
+                            ) -> DeepDispatcherResponse:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')
         dr = DeepDispatcherResponse()

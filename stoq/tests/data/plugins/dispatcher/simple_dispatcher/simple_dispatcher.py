@@ -14,7 +14,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from typing import Iterator
 from stoq.data_classes import Payload, DispatcherResponse, RequestMeta
 from stoq.plugins import DispatcherPlugin
 
@@ -26,8 +25,8 @@ class SimpleDispatcher(DispatcherPlugin):
     WORKERS = ['dummy_worker']
     RULE_COUNT = 1
 
-    def get_dispatches(self, payload: Payload, request_meta: RequestMeta
-                ) -> DispatcherResponse:
+    def get_dispatches(self, payload: Payload,
+                       request_meta: RequestMeta) -> DispatcherResponse:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')
         dr = DispatcherResponse()

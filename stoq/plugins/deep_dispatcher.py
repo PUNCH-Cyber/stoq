@@ -15,7 +15,7 @@
 #   limitations under the License.
 
 from abc import abstractmethod
-from typing import Optional, Iterator
+from typing import Optional
 
 from stoq.data_classes import Payload, DeepDispatcherResponse, RequestMeta
 from stoq.plugins import BasePlugin
@@ -24,5 +24,5 @@ from stoq.plugins import BasePlugin
 class DeepDispatcherPlugin(BasePlugin):
     @abstractmethod
     def get_deep_dispatches(self, payload: Payload, request_meta: RequestMeta
-        ) -> Optional[Iterator[DeepDispatcherResponse]]:
+                            ) -> Optional[DeepDispatcherResponse]:
         pass

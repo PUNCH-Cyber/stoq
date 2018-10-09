@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import stoq.helpers as helpers
 
@@ -18,17 +18,15 @@ class Payload():
                  content: bytes,
                  payload_meta: Optional[PayloadMeta] = None,
                  extracted_by: Optional[str] = None,
-                 extracted_from: Optional[int] = None,
-                 dispatch_meta: Optional[Dict[str, Dict]] = None,
-                 deep_dispatch_meta: Optional[Dict[str, Dict]] = None,
-                 worker_results: Optional[List[Dict[str, Dict]]] = None) -> None:
+                 extracted_from: Optional[int] = None) -> None:
         self.content = content
         self.payload_meta = PayloadMeta() if payload_meta is None else payload_meta
         self.extracted_by = extracted_by
         self.extracted_from = extracted_from
-        self.dispatch_meta = {} if dispatch_meta is None else dispatch_meta
-        self.deep_dispatch_meta = {} if deep_dispatch_meta is None else dispatch_meta
-        self.worker_results = [] if worker_results is None else worker_results
+        self.dispatch_meta: Dict[str, Dict] = {}
+        self.deep_dispatch_meta: Dict[str, Dict] = {}
+        self.worker_results: List[Dict[str, Dict]] = [{}]  # Empty dict for first round
+        self.plugins_run: Dict[str, Union[List[List[str]], List[str]]] = {'workers': [[]], 'archivers': []}
 
 
 class RequestMeta():
@@ -49,25 +47,24 @@ class PayloadResults():
                  sha256: str,
                  sha512: str,
                  size: int,
-                 plugins: Dict[str, List],
-                 payload_meta: Optional[PayloadMeta] = None,
+                 payload_meta: PayloadMeta,
+                 workers: List[Dict[str, Dict]],
+                 plugins_run: Dict[str, Union[List[List[str]], List[str]]],
                  extracted_from: Optional[int] = None,
-                 extracted_by: Optional[str] = None,
-                 workers: Optional[List[Dict[str, Dict]]] = None,
-                 archivers: Optional[Dict[str, Dict]] = None,
-                 decorators: Optional[Dict[str, Dict]] = None) -> None:
+                 extracted_by: Optional[str] = None) -> None:
         self.payload_id = payload_id
         self.md5 = md5
         self.sha1 = sha1
         self.sha256 = sha256
         self.sha512 = sha512
         self.size = size
-        self.plugins = plugins
+        self.extracted_from = extracted_from  # payload_id of parent payload, if applicable
+        self.extracted_by = extracted_by  # plugin name that extracted this payload, if applicable
         self.payload_meta = payload_meta
-        self.extracted_from = extracted_from  # payload_id of parent payload
-        self.extracted_by = extracted_by
-        self.workers = [] if workers is None else workers
-        self.archivers = {} if archivers is None else archivers
+        self.workers: List[Dict[str, Dict]] = workers
+        self.archivers: Dict[str, Dict] = {}
+        self.plugins_run = plugins_run
+
 
     @classmethod
     def from_payload(cls, payload: Payload,
@@ -77,9 +74,8 @@ class PayloadResults():
         sha256 = helpers.get_sha256(payload.content)
         sha512 = helpers.get_sha512(payload.content)
         size = len(payload.content)
-        plugins = {'workers': [], 'archivers': []}
-        return cls(payload_id, md5, sha1, sha256, sha512, size, plugins,
-                   payload.payload_meta, payload.extracted_from,
+        return cls(payload_id, md5, sha1, sha256, sha512, size, payload.payload_meta,
+                   payload.worker_results, payload.plugins_run, payload.extracted_from,
                    payload.extracted_by)
 
 
@@ -95,7 +91,7 @@ class StoqResponse():
         self.results = results
         self.request_meta = request_meta
         self.errors = errors
-        self.decorators = {} if decorators is None else decorators
+        self.decorators: Dict[str, Dict] = {} if decorators is None else decorators
 
 
 class ExtractedPayload():
@@ -103,7 +99,7 @@ class ExtractedPayload():
                  content: bytes,
                  payload_meta: Optional[PayloadMeta] = None) -> None:
         self.content = content
-        self.payload_meta = PayloadMeta() if payload_meta is None else payload_meta
+        self.payload_meta: PayloadMeta = PayloadMeta() if payload_meta is None else payload_meta
 
 
 class WorkerResponse():
