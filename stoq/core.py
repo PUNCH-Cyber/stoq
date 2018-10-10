@@ -288,7 +288,7 @@ class Stoq(StoqPluginManager):
             ])
             if worker_response.errors:
                 errors.extend(worker_response.errors)
-        payload_results = PayloadResults.from_payload(payload, id)
+        payload_results = PayloadResults.from_payload(payload)
         if request_meta.archive_payloads and payload.payload_meta.should_archive:
             for plugin_name, archiver in self._loaded_archiver_plugins.items():
                 payload.plugins_run['archivers'].append(plugin_name)
