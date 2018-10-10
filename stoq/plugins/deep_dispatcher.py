@@ -14,11 +14,15 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from .core import Stoq
-from .data_classes import (ArchiverResponse, ExtractedPayload, Payload,
-                           PayloadMeta, PayloadResults, RequestMeta,
-                           StoqResponse, WorkerResponse, DispatcherResponse,
-                           DeepDispatcherResponse, DecoratorResponse)
-from .exceptions import StoqException
+from abc import abstractmethod
+from typing import Optional
 
-__version__ = '2.0.0'
+from stoq.data_classes import Payload, DeepDispatcherResponse, RequestMeta
+from stoq.plugins import BasePlugin
+
+
+class DeepDispatcherPlugin(BasePlugin):
+    @abstractmethod
+    def get_deep_dispatches(self, payload: Payload, request_meta: RequestMeta
+                            ) -> Optional[DeepDispatcherResponse]:
+        pass

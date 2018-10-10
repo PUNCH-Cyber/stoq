@@ -81,6 +81,11 @@ Examples:
         '--start-dispatch',
         nargs='+',
         help='Worker plugins to add to the original payload dispatch')
+    scan.add_argument(
+        '-d',
+        '--start-deep-dispatch',
+        nargs='+',
+        help='Worker plugins to add to the deep dispatch')
 
     run = subparsers.add_parser(
         'run',
@@ -113,6 +118,11 @@ Examples:
             '--dispatchers',
             nargs='+',
             help='Dispatcher plugins to use send payloads to')
+        subparser.add_argument(
+            '-E',
+            '--deep-dispatchers',
+            nargs='+',
+            help='Deep dispatcher plugins to use send payloads and results to')
         subparser.add_argument(
             '-a',
             '--always-dispatch',
@@ -162,12 +172,14 @@ Examples:
             archivers=args.archivers,
             connectors=args.connectors,
             dispatchers=args.dispatchers,
+            deep_dispatchers=args.deep_dispatchers,
             decorators=args.decorators,
             always_dispatch=args.always_dispatch)
         response = stoq.scan(
             content,
             PayloadMeta(extra_data={'filename': filename}),
-            add_start_dispatch=args.start_dispatch)
+            add_start_dispatch=args.start_dispatch,
+            add_start_deep_dispatch=args.start_deep_dispatch)
         print(helpers.dumps(response))
     elif args.command == 'run':
         stoq = Stoq(

@@ -11,7 +11,7 @@ from typing import Dict, List, Optional, Set, Tuple
 from .exceptions import StoqException
 from stoq.plugins import (ArchiverPlugin, BasePlugin, ProviderPlugin,
                           WorkerPlugin, ConnectorPlugin, DispatcherPlugin,
-                          DecoratorPlugin)
+                          DeepDispatcherPlugin, DecoratorPlugin)
 
 
 class StoqPluginManager():
@@ -26,6 +26,7 @@ class StoqPluginManager():
         self._loaded_worker_plugins: Dict[str, WorkerPlugin] = {}
         self._loaded_archiver_plugins: Dict[str, ArchiverPlugin] = {}
         self._loaded_dispatcher_plugins: Dict[str, DispatcherPlugin] = {}
+        self._loaded_deep_dispatcher_plugins: Dict[str, DeepDispatcherPlugin] = {}
         self._loaded_connector_plugins: List[ConnectorPlugin] = []
         self._loaded_decorator_plugins: Dict[str, DecoratorPlugin] = {}
 
@@ -62,20 +63,6 @@ class StoqPluginManager():
                             exc_info=True)
                         continue
                     self._plugin_name_to_info[name] = (module_path, config)
-
-    def add_plugin(self, name: str, plugin: BasePlugin) -> None:
-        if isinstance(plugin, ProviderPlugin):
-            self._loaded_provider_plugins[name] = plugin
-        if isinstance(plugin, WorkerPlugin):
-            self._loaded_worker_plugins[name] = plugin
-        if isinstance(plugin, ArchiverPlugin):
-            self._loaded_archiver_plugins[name] = plugin
-        if isinstance(plugin, DispatcherPlugin):
-            self._loaded_dispatcher_plugins[name] = plugin
-        if isinstance(plugin, ConnectorPlugin):
-            self._loaded_connector_plugins.append(plugin)
-        if isinstance(plugin, DecoratorPlugin):
-            self._loaded_decorator_plugins[name] = plugin
 
     def load_plugin(self, name: str) -> BasePlugin:
         name = name.strip()

@@ -56,12 +56,14 @@ class TestCore(unittest.TestCase):
             archivers=['dummy_archiver'],
             connectors=['dummy_connector'],
             decorators=['dummy_decorator'],
-            dispatchers=['dummy_dispatcher'])
+            dispatchers=['dummy_dispatcher'],
+            deep_dispatcher=['dummy_deep_dispatcher'])
         self.assertEqual(len(s._loaded_provider_plugins), 1)
         self.assertEqual(len(s._loaded_archiver_plugins), 1)
         self.assertEqual(len(s._loaded_connector_plugins), 1)
         self.assertEqual(len(s._loaded_decorator_plugins), 1)
         self.assertEqual(len(s._loaded_dispatcher_plugins), 1)
+        self.assertEqual(len(s._loaded_deep_dispatcher_plugins), 1)
 
     ############ 'SCAN' TESTS ############
 
@@ -77,15 +79,15 @@ class TestCore(unittest.TestCase):
             base_dir=utils.get_data_dir(), always_dispatch=['simple_worker'])
         response = s.scan(self.generic_content)
         self.assertIn('simple_worker', s._loaded_plugins)
-        self.assertIn('simple_worker', response.results[0].plugins['workers'])
-        self.assertIn('simple_worker', response.results[1].plugins['workers'])
+        self.assertIn('simple_worker', response.results[0].plugins_run['workers'][0])
+        self.assertIn('simple_worker', response.results[1].plugins_run['workers'][0])
 
     def test_start_dispatch(self):
         s = Stoq(base_dir=utils.get_data_dir())
         response = s.scan(
             self.generic_content, add_start_dispatch=['extract_random'])
-        self.assertIn('extract_random', response.results[0].plugins['workers'])
-        self.assertNotIn('extract_random', response.results[1].plugins['workers'])
+        self.assertIn('extract_random', response.results[0].plugins_run['workers'][0])
+        self.assertNotIn('extract_random', response.results[1].plugins_run['workers'][0])
 
     def test_dispatch(self):
         s = Stoq(
@@ -97,10 +99,22 @@ class TestCore(unittest.TestCase):
         response = s.scan(self.generic_content)
         self.assertEqual(len(dummy_worker.scan.call_args[0]), 2)
         self.assertEqual(
-            dummy_worker.scan.call_args[0][0].dispatch_meta['simple_dispatcher']['dummy_worker']['rule0'],
-            'dummy_worker')
-        self.assertIn('dummy_worker', response.results[0].plugins['workers'])
+            dummy_worker.scan.call_args[0][0].dispatch_meta['simple_dispatcher'],
+            {'test_key': 'Useful metadata info'})
+        self.assertIn('dummy_worker', response.results[0].plugins_run['workers'][0])
 
+    def test_dispatch_duplicate(self):
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            dispatchers=['simple_dispatcher'])
+        s.load_plugin('simple_dispatcher').WORKERS = ['simple_worker', 'simple_worker']
+        simple_worker = s.load_plugin('simple_worker')
+        simple_worker.scan = create_autospec(
+            simple_worker.scan, return_value=None)
+        s.scan(self.generic_content)
+        self.assertEqual(simple_worker.scan.call_count, 1)
+        self.assertEqual(len(simple_worker.scan.call_args[0]), 2)
+        
     def test_dispatch_from_worker(self):
         s = Stoq(base_dir=utils.get_data_dir())
         simple_worker = s.load_plugin('simple_worker')
@@ -114,13 +128,12 @@ class TestCore(unittest.TestCase):
         s = Stoq(
             base_dir=utils.get_data_dir(),
             dispatchers=['simple_dispatcher'])
-        s._loaded_dispatcher_plugins['simple_dispatcher'].WORKERS = ['simple_worker']
-        s._loaded_dispatcher_plugins['simple_dispatcher'].RULE_COUNT = 2
+        s.load_plugin('simple_dispatcher').WORKERS = ['simple_worker', 'simple_worker']
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.scan = create_autospec(
             simple_worker.scan, return_value=None)
         s.scan(self.generic_content)
-        self.assertEqual(simple_worker.scan.call_count, 2)
+        self.assertEqual(simple_worker.scan.call_count, 1)
         self.assertEqual(len(simple_worker.scan.call_args[0]), 2)
 
     def test_dispatch_multiple_plugins(self):
@@ -128,7 +141,7 @@ class TestCore(unittest.TestCase):
         s = Stoq(
             base_dir=utils.get_data_dir(),
             dispatchers=['simple_dispatcher'])
-        s._loaded_dispatcher_plugins['simple_dispatcher'].WORKERS = ['simple_worker', 'dummy_worker']
+        s.load_plugin('simple_dispatcher').WORKERS = ['simple_worker', 'dummy_worker']
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.scan = create_autospec(
             simple_worker.scan, return_value=None)
@@ -146,7 +159,7 @@ class TestCore(unittest.TestCase):
         s = Stoq(
             base_dir=utils.get_data_dir(),
             dispatchers=['simple_dispatcher'])
-        s._loaded_dispatcher_plugins['simple_dispatcher'].WORKERS = ['simple_worker', 'dummy_worker']
+        s.load_plugin('simple_dispatcher').WORKERS = ['simple_worker', 'dummy_worker']
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.scan = create_autospec(
             simple_worker.scan, return_value=None)
@@ -164,7 +177,84 @@ class TestCore(unittest.TestCase):
         response = s.scan(
             self.generic_content,
             add_start_dispatch=['this_plugin_doesnt_exist'])
-        self.assertIn('this_plugin_doesnt_exist', response.results[0].plugins['workers'])
+        self.assertNotIn('this_plugin_doesnt_exist', response.results[0].plugins_run['workers'][0])
+        self.assertEqual(len(response.errors), 1)
+
+    def test_start_deep_dispatch(self):
+        s = Stoq(base_dir=utils.get_data_dir())
+        response = s.scan(
+            self.generic_content, add_start_deep_dispatch=['extract_random'])
+        self.assertIn('extract_random', response.results[0].plugins_run['workers'][1])
+        self.assertNotIn('extract_random', response.results[0].plugins_run['workers'][0])
+
+    def test_deep_dispatch(self):
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            deep_dispatchers=['simple_deep_dispatcher'])
+        dummy_worker = s.load_plugin('dummy_worker')
+        dummy_worker.scan = create_autospec(
+            dummy_worker.scan, return_value=None)
+        response = s.scan(self.generic_content)
+        self.assertEqual(len(dummy_worker.scan.call_args[0]), 2)
+        self.assertEqual(
+            dummy_worker.scan.call_args[0][0].deep_dispatch_meta['simple_deep_dispatcher'],
+            {'test_deep_key': 'Useful deep metadata info'})
+        self.assertIn('dummy_worker', response.results[0].plugins_run['workers'][1])
+
+    def test_deep_dispatch_duplicate(self):
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            deep_dispatchers=['simple_deep_dispatcher'])
+        s.load_plugin('simple_deep_dispatcher').WORKERS = ['simple_worker', 'simple_worker']
+        simple_worker = s.load_plugin('simple_worker')
+        simple_worker.scan = create_autospec(
+            simple_worker.scan, return_value=None)
+        s.scan(self.generic_content)
+        self.assertEqual(simple_worker.scan.call_count, 1)
+        self.assertEqual(len(simple_worker.scan.call_args[0]), 2)
+
+    def test_deep_dispatch_multiple_plugins(self):
+        multi_plugin_content = b'multi-plugin-content'
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            deep_dispatchers=['simple_deep_dispatcher'])
+        s.load_plugin('simple_deep_dispatcher').WORKERS = ['simple_worker', 'dummy_worker']
+        simple_worker = s.load_plugin('simple_worker')
+        simple_worker.scan = create_autospec(
+            simple_worker.scan, return_value=None)
+        dummy_worker = s.load_plugin('dummy_worker')
+        dummy_worker.scan = create_autospec(
+            dummy_worker.scan, return_value=None)
+        s.scan(multi_plugin_content)
+        simple_worker.scan.assert_called_once()
+        self.assertEqual(len(simple_worker.scan.call_args[0]), 2)
+        dummy_worker.scan.assert_called_once()
+        self.assertEqual(len(dummy_worker.scan.call_args[0]), 2)
+
+    def test_deep_dispatch_multiple_plugins2(self):
+        again_multi_plugin_content = b'again-multi-plugin-space-content'
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            deep_dispatchers=['simple_deep_dispatcher'])
+        s.load_plugin('simple_deep_dispatcher').WORKERS = ['simple_worker', 'dummy_worker']
+        simple_worker = s.load_plugin('simple_worker')
+        simple_worker.scan = create_autospec(
+            simple_worker.scan, return_value=None)
+        dummy_worker = s.load_plugin('dummy_worker')
+        dummy_worker.scan = create_autospec(
+            dummy_worker.scan, return_value=None)
+        s.scan(again_multi_plugin_content)
+        simple_worker.scan.assert_called_once()
+        self.assertEqual(len(simple_worker.scan.call_args[0]), 2)
+        dummy_worker.scan.assert_called_once()
+        self.assertEqual(len(dummy_worker.scan.call_args[0]), 2)
+
+    def test_deep_dispatch_nonexistent_plugin(self):
+        s = Stoq(base_dir=utils.get_data_dir())
+        response = s.scan(
+            self.generic_content,
+            add_start_deep_dispatch=['this_plugin_doesnt_exist'])
+        self.assertNotIn('this_plugin_doesnt_exist', response.results[0].plugins_run['workers'][0])
         self.assertEqual(len(response.errors), 1)
 
     def test_archive(self):
@@ -176,7 +266,7 @@ class TestCore(unittest.TestCase):
             self.generic_content,
             request_meta=RequestMeta(archive_payloads=True))
         dummy_archiver.archive.assert_called_once()
-        self.assertIn('dummy_archiver', response.results[0].plugins['archivers'])
+        self.assertIn('dummy_archiver', response.results[0].plugins_run['archivers'])
 
     def test_dont_archive_request(self):
         s = Stoq(base_dir=utils.get_data_dir(), archivers=['dummy_archiver'])
@@ -187,8 +277,8 @@ class TestCore(unittest.TestCase):
             add_start_dispatch=['extract_random'],
             request_meta=RequestMeta(archive_payloads=False))
         dummy_archiver.archive.assert_not_called()
-        self.assertNotIn('dummy_archiver', response.results[0].plugins['archivers'])
-        self.assertNotIn('dummy_archiver', response.results[1].plugins['archivers'])
+        self.assertNotIn('dummy_archiver', response.results[0].plugins_run['archivers'])
+        self.assertNotIn('dummy_archiver', response.results[1].plugins_run['archivers'])
 
     def test_dont_archive_payload(self):
         s = Stoq(base_dir=utils.get_data_dir(), archivers=['dummy_archiver'])
@@ -201,8 +291,8 @@ class TestCore(unittest.TestCase):
             add_start_dispatch=['extract_random'],
             request_meta=RequestMeta(archive_payloads=True))
         dummy_archiver.archive.assert_called_once()
-        self.assertNotIn('dummy_archiver', response.results[0].plugins['archivers'])
-        self.assertIn('dummy_archiver', response.results[1].plugins['archivers'])
+        self.assertNotIn('dummy_archiver', response.results[0].plugins_run['archivers'])
+        self.assertIn('dummy_archiver', response.results[1].plugins_run['archivers'])
 
     def test_dont_archive_yara(self):
         s = Stoq(base_dir=utils.get_data_dir(), archivers=['dummy_archiver'])
@@ -216,9 +306,9 @@ class TestCore(unittest.TestCase):
         s = Stoq(base_dir=utils.get_data_dir())
         response = s.scan(
             self.generic_content, add_start_dispatch=['simple_worker'])
-        self.assertIn('simple_worker', response.results[0].workers)
+        self.assertIn('simple_worker', response.results[0].workers[0])
         self.assertIn('valuable_insight',
-                      response.results[0].workers['simple_worker'])
+                      response.results[0].workers[0]['simple_worker'])
 
     def test_worker_not_in_results(self):
         s = Stoq(base_dir=utils.get_data_dir())
@@ -248,7 +338,7 @@ class TestCore(unittest.TestCase):
         simple_worker.RAISE_EXCEPTION = True
         response = s.scan(
             self.generic_content, add_start_dispatch=['simple_worker'])
-        self.assertIn('simple_worker', response.results[0].plugins['workers'])
+        self.assertIn('simple_worker', response.results[0].plugins_run['workers'][0])
         self.assertEqual(len(response.errors), 1)
         self.assertIn('Test exception', response.errors[0])
 
@@ -258,8 +348,8 @@ class TestCore(unittest.TestCase):
         simple_worker.RETURN_ERRORS = True
         response = s.scan(
             self.generic_content, add_start_dispatch=['simple_worker'])
-        self.assertIn('simple_worker', response.results[0].plugins['workers'])
-        self.assertIn('simple_worker', response.results[0].workers)
+        self.assertIn('simple_worker', response.results[0].plugins_run['workers'][0])
+        self.assertIn('simple_worker', response.results[0].workers[0])
         self.assertEqual(len(response.errors), 1)
         self.assertIn('Test error', response.errors[0])
 
@@ -268,7 +358,7 @@ class TestCore(unittest.TestCase):
         simple_archiver = s.load_plugin('simple_archiver')
         simple_archiver.RAISE_EXCEPTION = True
         response = s.scan(self.generic_content)
-        self.assertIn('simple_archiver', response.results[0].plugins['archivers'])
+        self.assertIn('simple_archiver', response.results[0].plugins_run['archivers'])
         self.assertEqual(len(response.errors), 1)
         self.assertIn('Test exception', response.errors[0])
 
@@ -277,7 +367,7 @@ class TestCore(unittest.TestCase):
         simple_archiver = s.load_plugin('simple_archiver')
         simple_archiver.RETURN_ERRORS = True
         response = s.scan(self.generic_content)
-        self.assertIn('simple_archiver', response.results[0].plugins['archivers'])
+        self.assertIn('simple_archiver', response.results[0].plugins_run['archivers'])
         self.assertIn('simple_archiver', response.results[0].archivers)
         self.assertEqual(len(response.errors), 1)
         self.assertIn('Test error', response.errors[0])
@@ -349,7 +439,7 @@ class TestCore(unittest.TestCase):
         self.assertEqual(
             multiclass_worker.scan.call_args[0][0].dispatch_meta['multiclass_plugin']['multiclass_plugin']['rule0'],
             'multiclass_plugin')
-        self.assertIn('multiclass_plugin', response.results[0].plugins['workers'])
+        self.assertIn('multiclass_plugin', response.results[0].plugins_run['workers'][0])
         self.assertIn('multiclass_plugin', s._loaded_dispatcher_plugins)
         self.assertIn('multiclass_plugin', s._loaded_plugins)
 

@@ -14,24 +14,24 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from stoq.data_classes import Payload, DispatcherResponse, RequestMeta
-from stoq.plugins import DispatcherPlugin
+from stoq.data_classes import Payload, DeepDispatcherResponse, RequestMeta
+from stoq.plugins import DeepDispatcherPlugin
 
 
-class SimpleDispatcher(DispatcherPlugin):
+class SimpleDeepDispatcher(DeepDispatcherPlugin):
     RAISE_EXCEPTION = False
     RETURN_ERRORS = False
     SHOULD_ARCHIVE = True
     WORKERS = ['dummy_worker']
 
-    def get_dispatches(self, payload: Payload,
-                       request_meta: RequestMeta) -> DispatcherResponse:
+    def get_deep_dispatches(self, payload: Payload, request_meta: RequestMeta
+                            ) -> DeepDispatcherResponse:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')
-        dr = DispatcherResponse()
+        dr = DeepDispatcherResponse()
         if self.RETURN_ERRORS:
             dr.errors.append('Test error please ignore')
         dr.plugin_names.extend(self.WORKERS)
-        dr.meta['test_key'] = 'Useful metadata info'
+        dr.meta['test_deep_key'] = 'Useful deep metadata info'
         payload.payload_meta.should_archive = self.SHOULD_ARCHIVE
         return dr

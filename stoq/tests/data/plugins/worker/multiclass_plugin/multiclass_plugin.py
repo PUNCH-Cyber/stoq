@@ -16,10 +16,10 @@
 
 from typing import Dict, List, Optional, Iterator
 
-from stoq.data_classes import Payload, DispatcherResponse, RequestMeta
 from stoq.plugins import DispatcherPlugin, WorkerPlugin
-from stoq.data_classes import (ExtractedPayload, Payload, RequestMeta,
-                               WorkerResponse, DispatcherResponse)
+from stoq.data_classes import (
+    Payload, ExtractedPayload, Payload,
+    RequestMeta, WorkerResponse, DispatcherResponse)
 
 
 class MultiClassPlugin(WorkerPlugin, DispatcherPlugin):
@@ -42,7 +42,7 @@ class MultiClassPlugin(WorkerPlugin, DispatcherPlugin):
             wr.errors += ['Test error please ignore']
         return wr
 
-    def dispatch(self, payload: Payload, request_meta: RequestMeta
+    def get_dispatches(self, payload: Payload, request_meta: RequestMeta
                 ) -> Optional[DispatcherResponse]:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')
