@@ -14,25 +14,32 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from typing import Dict, List, Optional
+from typing import List, Optional
 
-from stoq.data_classes import ExtractedPayload, Payload, RequestMeta, WorkerResponse
+from stoq.data_classes import (
+    ExtractedPayload, Payload, PayloadMeta, RequestMeta, WorkerResponse)
 from stoq.plugins import WorkerPlugin
 
 
 class SimpleWorker(WorkerPlugin):
     RAISE_EXCEPTION = False
     RETURN_ERRORS = False
+    DISPATCH_TO: List[str] = []
 
     def scan(self, payload: Payload,
              request_meta: RequestMeta) -> Optional[WorkerResponse]:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')
+        if self.DISPATCH_TO:
+            dispatch_meta = PayloadMeta(dispatch_to=self.DISPATCH_TO)
+            p = ExtractedPayload(b'Lorem ipsum', dispatch_meta)
+        else:
+            p = ExtractedPayload(b'Lorem ipsum')
         wr = WorkerResponse(
             {
                 'valuable_insight': 'wow'
             },
-            extracted=[ExtractedPayload(b'Lorem ipsum')])
+            extracted=[p])
         if self.RETURN_ERRORS:
             wr.errors += ['Test error please ignore']
         return wr

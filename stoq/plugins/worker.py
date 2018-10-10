@@ -15,7 +15,7 @@
 #   limitations under the License.
 
 from abc import abstractmethod
-from typing import Dict, List, Optional
+from typing import Optional
 
 from stoq.data_classes import Payload, RequestMeta, WorkerResponse
 from stoq.plugins import BasePlugin
@@ -24,6 +24,5 @@ from stoq.plugins import BasePlugin
 class WorkerPlugin(BasePlugin):
     @abstractmethod
     def scan(self, payload: Payload,
-             dispatch_rules: Optional[List[Dict]],
              request_meta: RequestMeta) -> Optional[WorkerResponse]:
         pass

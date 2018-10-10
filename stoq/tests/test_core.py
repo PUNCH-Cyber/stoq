@@ -112,6 +112,28 @@ class TestCore(unittest.TestCase):
         s.scan(self.generic_content)
         self.assertEqual(simple_worker.scan.call_count, 1)
         self.assertEqual(len(simple_worker.scan.call_args[0]), 2)
+        
+    def test_dispatch_from_worker(self):
+        s = Stoq(base_dir=utils.get_data_dir())
+        simple_worker = s.load_plugin('simple_worker')
+        simple_worker.DISPATCH_TO = ['extract_random']
+        response = s.scan(self.generic_content, add_start_dispatch=['simple_worker'])
+        self.assertIn('simple_worker', response.results[0].plugins['workers'])
+        self.assertIn('extract_random', response.results[1].plugins['workers'])
+        self.assertEqual('extract_random', response.results[2].extracted_by)
+
+    def test_dispatch_multiple_rules(self):
+
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            dispatchers=['simple_dispatcher'])
+        s.load_plugin('simple_dispatcher').WORKERS = ['simple_worker', 'simple_worker']
+        simple_worker = s.load_plugin('simple_worker')
+        simple_worker.scan = create_autospec(
+            simple_worker.scan, return_value=None)
+        s.scan(self.generic_content)
+        self.assertEqual(simple_worker.scan.call_count, 1)
+        self.assertEqual(len(simple_worker.scan.call_args[0]), 2)
 
     def test_dispatch_multiple_plugins(self):
         multi_plugin_content = b'multi-plugin-content'

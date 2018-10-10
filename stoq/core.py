@@ -14,24 +14,22 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import collections
 import concurrent.futures
 import configparser
 from datetime import datetime
-import itertools
 import logging
 from logging.handlers import RotatingFileHandler
 import os
-from typing import DefaultDict, Dict, List, Optional, Set, Tuple, Iterator
+from typing import Dict, List, Optional, Set, Tuple
 import queue
 
 from pythonjsonlogger import jsonlogger
-import yara
 
 from .exceptions import StoqException
 from stoq.data_classes import (Payload, PayloadMeta, PayloadResults,
                                RequestMeta, StoqResponse, DispatcherResponse,
                                DeepDispatcherResponse)
+
 import stoq.helpers as helpers
 from stoq.plugin_manager import StoqPluginManager
 from stoq.utils import ratelimited
@@ -81,7 +79,6 @@ class Stoq(StoqPluginManager):
         log_syntax = config.get('core', 'log_syntax', fallback='text')
         self._init_logger(log_dir, log_level, log_maxbytes, log_backup_count,
                           log_syntax)
-
 
         if not plugin_dir_list:
             plugin_dir_str = config.get(
@@ -153,21 +150,19 @@ class Stoq(StoqPluginManager):
         scan_queue = [(payload, add_start_dispatch, add_start_deep_dispatch)]
         hashes_seen: Set[str] = set(helpers.get_sha256(payload.content))
 
-        num_payloads = 0
         for _recursion_level in range(self.max_recursion + 1):
             next_scan_queue: List[Tuple[Payload, List[str], List[str]]] = []
             for payload, add_dispatch, add_deep_dispatch in scan_queue:
                 payload_results, extracted, p_errors = self._single_scan(
-                    payload, num_payloads, add_dispatch, add_deep_dispatch, request_meta)
+                    payload, add_dispatch, add_deep_dispatch, request_meta)
                 scan_results.append(payload_results)
                 # TODO: Add option for no-dedup
                 for ex in extracted:
                     ex_hash = helpers.get_sha256(ex.content)
                     if ex_hash not in hashes_seen:
                         hashes_seen.add(ex_hash)
-                        next_scan_queue.append((ex, [], []))  # Empty list for no additional dispatches
+                        next_scan_queue.append((ex, ex.payload_meta.dispatch_to, []))
                 errors.extend(p_errors)
-                num_payloads += 1
             scan_queue = next_scan_queue
 
         response = StoqResponse(datetime.now().isoformat(), scan_results, request_meta, errors)
@@ -222,7 +217,7 @@ class Stoq(StoqPluginManager):
                         self.log.exception(msg)
                         raise StoqException(msg) from e
 
-    def _single_scan(self, payload: Payload, id: int, add_dispatch: List[str],
+    def _single_scan(self, payload: Payload, add_dispatch: List[str],
                      add_deep_dispatch: List[str], request_meta: RequestMeta,
                      ) -> Tuple[PayloadResults, List[Payload], List[str]]:
         extracted = []
@@ -288,7 +283,7 @@ class Stoq(StoqPluginManager):
             if worker_response.results is not None:
                 payload.worker_results[1][plugin_name] = worker_response.results
             extracted.extend([
-                Payload(ex.content, ex.payload_meta, plugin_name, id)
+                Payload(ex.content, ex.payload_meta, plugin_name, payload.payload_id)
                 for ex in worker_response.extracted
             ])
             if worker_response.errors:
@@ -368,12 +363,12 @@ class Stoq(StoqPluginManager):
     def _get_deep_dispatches(self, payload: Payload, add_deep_dispatches: List[str],
                              request_meta: RequestMeta) -> Tuple[Set[str], List[str]]:
         errors = []
-        deep_dispatchers = set(add_deep_dispatches)
+        deep_dispatches = set(add_deep_dispatches)
 
         for deep_dispatcher_name, deep_dispatcher in self._loaded_deep_dispatcher_plugins.items():
             try:
                 deep_dispatcher_result = deep_dispatcher.get_deep_dispatches(payload, request_meta)
-                deep_dispatchers.update(deep_dispatcher_result.plugin_names)
+                deep_dispatches.update(deep_dispatcher_result.plugin_names)
                 if deep_dispatcher_result.meta is not None:
                     payload.deep_dispatch_meta[deep_dispatcher_name] = deep_dispatcher_result.meta
             except Exception as e:
@@ -381,4 +376,5 @@ class Stoq(StoqPluginManager):
                 self.log.exception(msg)
                 errors.append(msg)
 
-        return (deep_dispatchers, errors)
+        return (deep_dispatches, errors)
+
