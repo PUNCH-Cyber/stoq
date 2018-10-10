@@ -30,8 +30,13 @@ import stoq.tests as tests
 
 def main() -> None:
     # If $STOQ_HOME exists, set our base directory to that, otherwise
-    # use ~/.stoq
-    stoq_home = os.getenv('STOQ_HOME', '{}/.stoq'.format(str(Path.home())))
+    # use $HOME/.stoq
+    try:
+        stoq_home = Path(os.getenv('STOQ_HOME', f'{str(Path.home())}/.stoq'))
+        stoq_home.resolve(strict=True)
+    except FileNotFoundError as err:
+       print(f"$STOQ_HOME is invalid: {err}", file=sys.stderr)
+       sys.exit(1)
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
