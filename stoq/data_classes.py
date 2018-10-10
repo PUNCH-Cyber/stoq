@@ -13,7 +13,7 @@ class PayloadMeta():
                  dispatch_to: List[str] = None) -> None:
         self.should_archive = should_archive
         self.extra_data = extra_data
-        self.dispatch_to: [] if dispatch_to is None else dispatch_to
+        self.dispatch_to = [] if dispatch_to is None else dispatch_to
 
 
 class Payload():
@@ -32,7 +32,7 @@ class Payload():
         self.deep_dispatch_meta: Dict[str, Dict] = {}
         self.worker_results: List[Dict[str, Dict]] = [{}]  # Empty dict for first round
         self.plugins_run: Dict[str, Union[List[List[str]], List[str]]] = {'workers': [[]], 'archivers': []}
-        self.payload_id: str(uuid.uuid4()) if payload_id is None else payload_id
+        self.payload_id = str(uuid.uuid4()) if payload_id is None else payload_id
 
 
 class RequestMeta():
@@ -66,6 +66,7 @@ class PayloadResults():
         self.size = size
         self.payload_meta = payload_meta
         self.workers: List[Dict[str, Dict]] = workers
+        self.archivers: Dict[str, Dict] = {}
         self.plugins_run = plugins_run
         self.extracted_from = extracted_from  # payload_id of parent payload, if applicable
         self.extracted_by = extracted_by  # plugin name that extracted this payload, if applicable
