@@ -57,7 +57,7 @@ class TestCore(unittest.TestCase):
             connectors=['dummy_connector'],
             decorators=['dummy_decorator'],
             dispatchers=['dummy_dispatcher'],
-            deep_dispatcher=['dummy_deep_dispatcher'])
+            deep_dispatchers=['dummy_deep_dispatcher'])
         self.assertEqual(len(s._loaded_provider_plugins), 1)
         self.assertEqual(len(s._loaded_archiver_plugins), 1)
         self.assertEqual(len(s._loaded_connector_plugins), 1)
@@ -114,14 +114,14 @@ class TestCore(unittest.TestCase):
         s.scan(self.generic_content)
         self.assertEqual(simple_worker.scan.call_count, 1)
         self.assertEqual(len(simple_worker.scan.call_args[0]), 2)
-        
+
     def test_dispatch_from_worker(self):
         s = Stoq(base_dir=utils.get_data_dir())
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.DISPATCH_TO = ['extract_random']
         response = s.scan(self.generic_content, add_start_dispatch=['simple_worker'])
-        self.assertIn('simple_worker', response.results[0].plugins['workers'])
-        self.assertIn('extract_random', response.results[1].plugins['workers'])
+        self.assertIn('simple_worker', response.results[0].plugins_run['workers'][0])
+        self.assertIn('extract_random', response.results[1].plugins_run['workers'][0])
         self.assertEqual('extract_random', response.results[2].extracted_by)
 
     def test_dispatch_multiple_rules(self):
