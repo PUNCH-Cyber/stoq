@@ -14,22 +14,19 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import collections
 import concurrent.futures
 import configparser
 from datetime import datetime
-import itertools
 import logging
 from logging.handlers import RotatingFileHandler
 import os
-from typing import DefaultDict, Dict, List, Optional, Set, Tuple, Iterator
+from typing import Dict, List, Optional, Set, Tuple
 import queue
 
 from pythonjsonlogger import jsonlogger
-import yara
 
 from .exceptions import StoqException
-from stoq.data_classes import Payload, PayloadMeta, PayloadResults, RequestMeta, StoqResponse, DispatcherResponse
+from stoq.data_classes import Payload, PayloadMeta, PayloadResults, RequestMeta, StoqResponse
 import stoq.helpers as helpers
 from stoq.plugin_manager import StoqPluginManager
 from stoq.utils import ratelimited
@@ -78,7 +75,6 @@ class Stoq(StoqPluginManager):
         log_syntax = config.get('core', 'log_syntax', fallback='text')
         self._init_logger(log_dir, log_level, log_maxbytes, log_backup_count,
                           log_syntax)
-
 
         if not plugin_dir_list:
             plugin_dir_str = config.get(
@@ -319,4 +315,3 @@ class Stoq(StoqPluginManager):
                 errors.append(msg)
 
         return (dispatchers, errors)
-

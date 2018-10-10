@@ -14,7 +14,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from stoq.data_classes import (
     ExtractedPayload, Payload, PayloadMeta, RequestMeta, WorkerResponse)
@@ -24,7 +24,7 @@ from stoq.plugins import WorkerPlugin
 class SimpleWorker(WorkerPlugin):
     RAISE_EXCEPTION = False
     RETURN_ERRORS = False
-    DISPATCH_TO = False
+    DISPATCH_TO: List[str] = []
 
     def scan(self, payload: Payload,
              request_meta: RequestMeta) -> Optional[WorkerResponse]:
