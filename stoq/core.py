@@ -249,7 +249,7 @@ class Stoq(StoqPluginManager):
                 # Normal dispatches are the "1st round" of scanning
                 payload.worker_results[0][plugin_name] = worker_response.results
             extracted.extend([
-                Payload(ex.content, ex.payload_meta, plugin_name, id)
+                Payload(ex.content, ex.payload_meta, plugin_name, payload.payload_id)
                 for ex in worker_response.extracted
             ])
             if worker_response.errors:
