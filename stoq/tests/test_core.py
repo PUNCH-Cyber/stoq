@@ -195,7 +195,7 @@ class TestCore(unittest.TestCase):
         s = Stoq(
             base_dir=utils.get_data_dir(),
             deep_dispatchers=['simple_deep_dispatcher'])
-        self.load_plugin('simple_deep_dispatcher').WORKERS = ['simple_worker', 'dummy_worker']
+        s.load_plugin('simple_deep_dispatcher').WORKERS = ['simple_worker', 'dummy_worker']
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.scan = create_autospec(
             simple_worker.scan, return_value=None)
@@ -213,7 +213,7 @@ class TestCore(unittest.TestCase):
         s = Stoq(
             base_dir=utils.get_data_dir(),
             deep_dispatchers=['simple_deep_dispatcher'])
-        self.load_plugin('simple_deep_dispatcher').WORKERS = ['simple_worker', 'dummy_worker']
+        s.load_plugin('simple_deep_dispatcher').WORKERS = ['simple_worker', 'dummy_worker']
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.scan = create_autospec(
             simple_worker.scan, return_value=None)
