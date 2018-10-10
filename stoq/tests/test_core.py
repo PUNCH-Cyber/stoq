@@ -56,12 +56,14 @@ class TestCore(unittest.TestCase):
             archivers=['dummy_archiver'],
             connectors=['dummy_connector'],
             decorators=['dummy_decorator'],
-            dispatchers=['dummy_dispatcher'])
+            dispatchers=['dummy_dispatcher'],
+            deep_dispatcher=['dummy_deep_dispatcher'])
         self.assertEqual(len(s._loaded_provider_plugins), 1)
         self.assertEqual(len(s._loaded_archiver_plugins), 1)
         self.assertEqual(len(s._loaded_connector_plugins), 1)
         self.assertEqual(len(s._loaded_decorator_plugins), 1)
         self.assertEqual(len(s._loaded_dispatcher_plugins), 1)
+        self.assertEqual(len(s._loaded_deep_dispatcher_plugins), 1)
 
     ############ 'SCAN' TESTS ############
 
@@ -123,7 +125,6 @@ class TestCore(unittest.TestCase):
         self.assertEqual('extract_random', response.results[2].extracted_by)
 
     def test_dispatch_multiple_rules(self):
-
         s = Stoq(
             base_dir=utils.get_data_dir(),
             dispatchers=['simple_dispatcher'])
