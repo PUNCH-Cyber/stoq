@@ -14,13 +14,13 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from typing import Optional, Iterator
+from typing import Optional
 
 from stoq.data_classes import Payload, RequestMeta, DeepDispatcherResponse
 from stoq.plugins import DeepDispatcherPlugin
 
 
 class DummyDeepDispatcher(DeepDispatcherPlugin):
-    def get_deep_dispatches(self, payload: Payload,
-        request_meta: RequestMeta) -> Optional[DeepDispatcherResponse]:
-        pass
+    def get_deep_dispatches(self, payload: Payload, request_meta: RequestMeta
+                            ) -> Optional[DeepDispatcherResponse]:
+        return None

@@ -64,22 +64,6 @@ class StoqPluginManager():
                         continue
                     self._plugin_name_to_info[name] = (module_path, config)
 
-    def add_plugin(self, name: str, plugin: BasePlugin) -> None:
-        if isinstance(plugin, ProviderPlugin):
-            self._loaded_provider_plugins[name] = plugin
-        if isinstance(plugin, WorkerPlugin):
-            self._loaded_worker_plugins[name] = plugin
-        if isinstance(plugin, ArchiverPlugin):
-            self._loaded_archiver_plugins[name] = plugin
-        if isinstance(plugin, DispatcherPlugin):
-            self._loaded_dispatcher_plugins[name] = plugin
-        if isinstance(plugin, DeepDispatcherPlugin):
-            self._loaded_deep_dispatcher_plugins[name] = plugin
-        if isinstance(plugin, ConnectorPlugin):
-            self._loaded_connector_plugins.append(plugin)
-        if isinstance(plugin, DecoratorPlugin):
-            self._loaded_decorator_plugins[name] = plugin
-
     def load_plugin(self, name: str) -> BasePlugin:
         name = name.strip()
         if name in self._loaded_plugins:

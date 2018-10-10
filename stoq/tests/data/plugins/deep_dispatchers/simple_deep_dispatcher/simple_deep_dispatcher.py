@@ -14,7 +14,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from typing import Iterator
 from stoq.data_classes import Payload, DeepDispatcherResponse, RequestMeta
 from stoq.plugins import DeepDispatcherPlugin
 
@@ -24,18 +23,15 @@ class SimpleDeepDispatcher(DeepDispatcherPlugin):
     RETURN_ERRORS = False
     SHOULD_ARCHIVE = True
     WORKERS = ['dummy_worker']
-    RULE_COUNT = 1
 
     def get_deep_dispatches(self, payload: Payload, request_meta: RequestMeta
-                ) -> DeepDispatcherResponse:
+                            ) -> DeepDispatcherResponse:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')
         dr = DeepDispatcherResponse()
-        for worker in self.WORKERS:
-            for count in range(0, self.RULE_COUNT):
-                dr.plugin_names.append(worker)
-                dr.meta[worker] = {f'rule{count}': worker}
-                payload.payload_meta.should_archive = self.SHOULD_ARCHIVE
-                if self.RETURN_ERRORS:
-                    dr.errors += ['Test error please ignore']
+        if self.RETURN_ERRORS:
+            dr.errors.append('Test error please ignore')
+        dr.plugin_names.extend(self.WORKERS)
+        dr.meta['test_deep_key'] = 'Useful deep metadata info'
+        payload.payload_meta.should_archive = self.SHOULD_ARCHIVE
         return dr
