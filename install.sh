@@ -14,8 +14,7 @@
 #   limitations under the License.
 ###
 #
-# stoQ installation script.
-# Supports: Ubuntu, Redhat 7, and CentOS
+# stoQ installation script
 #
 ###
 
@@ -23,8 +22,8 @@
 set -e
 
 PREFIX=$HOME
-export STOQ_HOME=$PREFIX/.stoq
-STAGE_DIR=$PREFIX/stage
+export STOQ_HOME=${PREFIX}/.stoq
+STAGE_DIR=${PREFIX}/stage
 
 install_core() {
     apt-get update -y && apt-get install -yq python3-setuptools python3-pip
@@ -45,19 +44,19 @@ install_core() {
     git checkout v2
     for plugin in `ls v2/`
     do
-        stoq install v2/$plugin
+        stoq install v2/${plugin}
     done
 }
 
 build_dirs() {
-    if [ ! -d $STOQ_HOME/plugins ]; then
-        echo "[stoQ] Creating stoQ directory ($STOQ_HOME)"
-        mkdir -p $STOQ_HOME/plugins
+    if [ ! -d ${STOQ_HOME}/plugins ]; then
+        echo "[stoQ] Creating stoQ directory (${STOQ_HOME})"
+        mkdir -p ${STOQ_HOME}/plugins
     fi
 
-    if [ ! -d $STAGE_DIR ]; then
-        echo "[stoQ] Creating stoQ tmp directory ($STAGE_DIR)"
-        mkdir -p $STAGE_DIR
+    if [ ! -d ${STAGE_DIR} ]; then
+        echo "[stoQ] Creating stoQ tmp directory (${STAGE_DIR})"
+        mkdir -p ${STAGE_DIR}
     fi
 }
 
