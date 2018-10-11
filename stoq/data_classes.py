@@ -22,7 +22,6 @@ class Payload():
                  payload_meta: Optional[PayloadMeta] = None,
                  extracted_by: Optional[str] = None,
                  extracted_from: Optional[str] = None,
-                 dispatch_meta: Optional[Dict[str, Dict]] = None,
                  payload_id: Optional[str] = None) -> None:
         self.content = content
         self.payload_meta = PayloadMeta() if payload_meta is None else payload_meta
