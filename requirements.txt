@@ -1,2 +1,2 @@
-bs4==4.6.3
+beautifulsoup4==4.6.3
 python-json-logger==0.1.9
