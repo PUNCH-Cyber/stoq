@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#   Copyright 2014-2017 PUNCH Cyber Analytics Group
+#   Copyright 2014-2018 PUNCH Cyber Analytics Group
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -29,9 +29,12 @@ import stoq.tests.utils as utils
 
 class TestPluginManager(unittest.TestCase):
     DUMMY_PLUGINS = [
-        'dummy_archiver', 'dummy_connector', 'dummy_provider',
-        'dummy_worker', 'dummy_decorator'
-        ]
+        'dummy_archiver',
+        'dummy_connector',
+        'dummy_provider',
+        'dummy_worker',
+        'dummy_decorator',
+    ]
 
     def setUp(self):
         logging.disable(logging.CRITICAL)
@@ -50,17 +53,14 @@ class TestPluginManager(unittest.TestCase):
             self.assertIn(name, collected_plugins)
 
     def test_multiple_dirs(self):
-        pm = StoqPluginManager(
-            [utils.get_plugins_dir(),
-             utils.get_plugins2_dir()])
+        pm = StoqPluginManager([utils.get_plugins_dir(), utils.get_plugins2_dir()])
         collected_plugins = pm.list_plugins()
         for name in self.DUMMY_PLUGINS + ['dummy_worker2']:
             self.assertIn(name, collected_plugins)
 
     def test_collect_one_invalid_dir(self):
         # Verify that the invalid directory doesn't cause an exception
-        pm = StoqPluginManager(
-            [utils.get_plugins_dir(), '/no/way/this/exists'])
+        pm = StoqPluginManager([utils.get_plugins_dir(), '/no/way/this/exists'])
         self.assertGreater(len(pm.list_plugins()), 0)
 
     def test_collect_invalid_config(self):
@@ -95,11 +95,10 @@ class TestPluginManager(unittest.TestCase):
         self.assertEqual(plugin.get_important_option(), 'cybercybercyber')
 
     def test_plugin_opts(self):
-        pm = StoqPluginManager([utils.get_plugins_dir()], {
-            'configurable_worker': {
-                'crazy_runtime_option': 16
-            }
-        })
+        pm = StoqPluginManager(
+            [utils.get_plugins_dir()],
+            {'configurable_worker': {'crazy_runtime_option': 16}},
+        )
         plugin = pm.load_plugin('configurable_worker')
         self.assertEqual(plugin.get_crazy_runtime_option(), 16)
 
@@ -122,6 +121,6 @@ class ExampleExternalPlugin(WorkerPlugin):
         pass
 
 
-class NoParentClassPlugin():
+class NoParentClassPlugin:
     def scan(self, payload: Payload, *args) -> Optional[WorkerResponse]:
         pass

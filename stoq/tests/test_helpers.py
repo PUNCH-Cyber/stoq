@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#   Copyright 2014-2017 PUNCH Cyber Analytics Group
+#   Copyright 2014-2018 PUNCH Cyber Analytics Group
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -31,17 +31,19 @@ class TestHelpers(unittest.TestCase):
         self.assertTrue(helpers.dumps(ClassWithAttrs()))
 
     def test_dumps_unicode(self):
-        self.assertEqual(helpers.dumps({'key': b'value'}, compactly=True), '{"key": "value"}')
-        self.assertEqual(helpers.dumps({'key': b'hi\xe7\x8c\xab'}, compactly=True), '{"key": "hi猫"}')
+        self.assertEqual(
+            helpers.dumps({'key': b'value'}, compactly=True), '{"key": "value"}'
+        )
+        self.assertEqual(
+            helpers.dumps({'key': b'hi\xe7\x8c\xab'}, compactly=True), '{"key": "hi猫"}'
+        )
 
     def test_dumps_compactly(self):
         self.assertEqual(
-            helpers.dumps({
-                'a': 1,
-                'b': 2
-            }, compactly=True), '{"a": 1, "b": 2}')
+            helpers.dumps({'a': 1, 'b': 2}, compactly=True), '{"a": 1, "b": 2}'
+        )
 
 
-class ClassWithAttrs():
+class ClassWithAttrs:
     def __init__(self):
         self.a = 1
