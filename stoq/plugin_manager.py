@@ -56,13 +56,17 @@ class StoqPluginManager():
                             f'Error parsing config file: {plugin_conf_path}',
                             exc_info=True)
                         continue
-                    module_path = os.path.join(root_path, module_name) + '.py'
-                    if not os.path.isfile(module_path):
+                    module_path_pyc = os.path.join(root_path, module_name) + '.pyc'
+                    module_path_py = os.path.join(root_path, module_name) + '.py'
+                    if os.path.isfile(module_path_pyc):
+                        self._plugin_name_to_info[name] = (module_path_pyc, config)
+                    elif os.path.isfile(module_path_py):
+                        self._plugin_name_to_info[name] = (module_path_py, config)
+                    else:
                         self.log.warning(
-                            f'Unable to find module at: {module_path}',
+                            f'Unable to find module at: {module_path_pyc} or {module_path_py}',
                             exc_info=True)
                         continue
-                    self._plugin_name_to_info[name] = (module_path, config)
 
     def load_plugin(self, name: str) -> BasePlugin:
         name = name.strip()
