@@ -160,7 +160,6 @@ class Stoq(StoqPluginManager):
         add_start_deep_dispatch = (
             [] if add_start_deep_dispatch is None else add_start_deep_dispatch
         )
-
         scan_results = []
         errors = []
         scan_queue = [(payload, add_start_dispatch, add_start_deep_dispatch)]
@@ -227,7 +226,7 @@ class Stoq(StoqPluginManager):
                     try:
                         future.result()
                         self.log.info(
-                            'Provider plugin ' f'{future_to_name[future]} exited'
+                            f'Provider plugin {future_to_name[future]} exited'
                         )
                         del future_to_name[future]
                     except Exception as e:
@@ -284,6 +283,7 @@ class Stoq(StoqPluginManager):
             )
             if worker_response.errors:
                 errors.extend(worker_response.errors)
+
         deep_dispatches, deep_dispatch_errors = self._get_deep_dispatches(
             payload, add_deep_dispatch, request_meta
         )
@@ -323,6 +323,7 @@ class Stoq(StoqPluginManager):
             )
             if worker_response.errors:
                 errors.extend(worker_response.errors)
+
         payload_results = PayloadResults.from_payload(payload)
         if request_meta.archive_payloads and payload.payload_meta.should_archive:
             for plugin_name, archiver in self._loaded_archiver_plugins.items():
