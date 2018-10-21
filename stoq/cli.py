@@ -24,7 +24,6 @@ import unittest
 from stoq import Stoq, PayloadMeta
 import stoq.helpers as helpers
 from stoq.installer import StoqPluginInstaller
-from stoq.logo import get_logo
 import stoq.tests as tests
 
 
@@ -35,16 +34,14 @@ def main() -> None:
         stoq_home = Path(os.getenv('STOQ_HOME', f'{str(Path.home())}/.stoq'))
         stoq_home.resolve(strict=True)
     except FileNotFoundError as err:
-       print(f"$STOQ_HOME is invalid: {err}", file=sys.stderr)
-       sys.exit(1)
+        print(f"$STOQ_HOME is invalid: {err}", file=sys.stderr)
+        sys.exit(1)
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description='''
     stoQ - an automated analysis framework
-
-            {}
-            '''.format(get_logo()),
+        ''',
         epilog='''
 Examples:
 
@@ -70,7 +67,8 @@ Examples:
 
     $ %(prog)s install path/to/plugin_directory
 
-    ''')
+    ''',
+    )
     subparsers = parser.add_subparsers(title='commands', dest='command')
     subparsers.required = True
 
@@ -80,73 +78,75 @@ Examples:
         nargs='?',
         type=argparse.FileType('rb'),
         default=sys.stdin.buffer,
-        help='File to scan, can also be provided from stdin')
+        help='File to scan, can also be provided from stdin',
+    )
     scan.add_argument(
         '-s',
         '--start-dispatch',
         nargs='+',
-        help='Worker plugins to add to the original payload dispatch')
+        help='Worker plugins to add to the original payload dispatch',
+    )
     scan.add_argument(
         '-d',
         '--start-deep-dispatch',
         nargs='+',
-        help='Worker plugins to add to the deep dispatch')
+        help='Worker plugins to add to the deep dispatch',
+    )
 
     run = subparsers.add_parser(
-        'run',
-        help='Continually ingest and scan payloads from Provider plugins')
+        'run', help='Continually ingest and scan payloads from Provider plugins'
+    )
     run.add_argument(
-        '-P',
-        '--providers',
-        nargs='+',
-        help='Provider plugins to ingest payloads from')
+        '-P', '--providers', nargs='+', help='Provider plugins to ingest payloads from'
+    )
 
     # Add shared arguments so they still show up in the help dialog
     for subparser in [scan, run]:
         subparser.add_argument(
-            '-A',
-            '--archivers',
-            nargs='+',
-            help='Archiver plugins to send payloads to')
+            '-A', '--archivers', nargs='+', help='Archiver plugins to send payloads to'
+        )
         subparser.add_argument(
             '-D',
             '--decorators',
             nargs='+',
-            help='Decorator plugins to send results to before saving')
+            help='Decorator plugins to send results to before saving',
+        )
         subparser.add_argument(
-            '-C',
-            '--connectors',
-            nargs='+',
-            help='Connector plugins to send results to')
+            '-C', '--connectors', nargs='+', help='Connector plugins to send results to'
+        )
         subparser.add_argument(
             '-R',
             '--dispatchers',
             nargs='+',
-            help='Dispatcher plugins to use send payloads to')
+            help='Dispatcher plugins to use send payloads to',
+        )
         subparser.add_argument(
             '-E',
             '--deep-dispatchers',
             nargs='+',
-            help='Deep dispatcher plugins to use send payloads and results to')
+            help='Deep dispatcher plugins to use send payloads and results to',
+        )
         subparser.add_argument(
             '-a',
             '--always-dispatch',
             nargs='+',
-            help='Worker plugins to always dispatch plugins to')
+            help='Worker plugins to always dispatch plugins to',
+        )
 
     subparsers.add_parser('list', help='List available plugins')
 
     install = subparsers.add_parser('install', help='Install a given plugin')
-    install.add_argument(
-        'plugin_dir', help='Directory of the plugin to install')
+    install.add_argument('plugin_dir', help='Directory of the plugin to install')
     install.add_argument(
         '--install_dir',
         default=os.path.join(stoq_home, 'plugins'),
-        help='Override the default plugin installation directory')
+        help='Override the default plugin installation directory',
+    )
     install.add_argument(
         '--upgrade',
         action='store_true',
-        help='Force the plugin to be upgraded if it already exists')
+        help='Force the plugin to be upgraded if it already exists',
+    )
 
     subparsers.add_parser('test', help='Run stoQ tests')
 
@@ -179,12 +179,14 @@ Examples:
             dispatchers=args.dispatchers,
             deep_dispatchers=args.deep_dispatchers,
             decorators=args.decorators,
-            always_dispatch=args.always_dispatch)
+            always_dispatch=args.always_dispatch,
+        )
         response = stoq.scan(
             content,
             PayloadMeta(extra_data={'filename': filename}),
             add_start_dispatch=args.start_dispatch,
-            add_start_deep_dispatch=args.start_deep_dispatch)
+            add_start_deep_dispatch=args.start_deep_dispatch,
+        )
         print(helpers.dumps(response))
     elif args.command == 'run':
         stoq = Stoq(
@@ -194,7 +196,8 @@ Examples:
             connectors=args.connectors,
             dispatchers=args.dispatchers,
             decorators=args.decorators,
-            always_dispatch=args.always_dispatch)
+            always_dispatch=args.always_dispatch,
+        )
         stoq.run()
     elif args.command == 'list':
         stoq = Stoq(base_dir=stoq_home)
