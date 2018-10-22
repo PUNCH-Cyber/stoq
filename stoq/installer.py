@@ -80,20 +80,20 @@ class StoqPluginInstaller:
     def parse_config(config_path: str) -> Dict[str, Any]:
         config = configparser.ConfigParser()
         config.read(config_path)
-        plugin_name = config.get('Core', 'Name', fallback=None)
+        plugin_name = config.get('Core', 'Name', fallback='')
         if not plugin_name:
             raise StoqException('Config file must contain a Name in the Core section')
         # We are going to use this to dynamically define data points in
         # setup.py
         plugin_info = {}
         plugin_info['NAME'] = plugin_name
-        if config.get('Documentation', 'Author', fallback=None):
+        if config.get('Documentation', 'Author', fallback=''):
             plugin_info['AUTHOR'] = config['Documentation']['Author']
-        if config.get('Documentation', 'Version', fallback=None):
+        if config.get('Documentation', 'Version', fallback=''):
             plugin_info['VERSION'] = config['Documentation']['Version']
-        if config.get('Documentation', 'Website', fallback=None):
+        if config.get('Documentation', 'Website', fallback=''):
             plugin_info['WEBSITE'] = config['Documentation']['Website']
-        if config.get('Documentation', 'Description', fallback=None):
+        if config.get('Documentation', 'Description', fallback=''):
             plugin_info['DESCRIPTION'] = config['Documentation']['Description']
         return plugin_info
 

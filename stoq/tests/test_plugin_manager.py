@@ -21,7 +21,7 @@ import unittest
 
 
 from stoq import StoqException
-from stoq.data_classes import Payload, WorkerResponse
+from stoq.data_classes import Payload, WorkerResponse, RequestMeta
 from stoq.plugin_manager import StoqPluginManager
 from stoq.plugins import WorkerPlugin
 import stoq.tests.utils as utils
@@ -36,10 +36,10 @@ class TestPluginManager(unittest.TestCase):
         'dummy_decorator',
     ]
 
-    def setUp(self):
+    def setUp(self) -> None:
         logging.disable(logging.CRITICAL)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         logging.disable(logging.NOTSET)
 
     def test_no_plugins(self):
@@ -117,10 +117,14 @@ class ExampleExternalPlugin(WorkerPlugin):
     def __init__(self):
         pass
 
-    def scan(self, payload: Payload, *args) -> Optional[WorkerResponse]:
+    def scan(
+        self, payload: Payload, request_meta: RequestMeta, *args
+    ) -> Optional[WorkerResponse]:
         pass
 
 
 class NoParentClassPlugin:
-    def scan(self, payload: Payload, *args) -> Optional[WorkerResponse]:
+    def scan(
+        self, payload: Payload, request_meta: RequestMeta, *args
+    ) -> Optional[WorkerResponse]:
         pass

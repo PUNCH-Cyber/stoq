@@ -31,6 +31,9 @@ class PayloadMeta:
         self.extra_data = extra_data
         self.dispatch_to = [] if dispatch_to is None else dispatch_to
 
+    def __str__(self) -> str:
+        return helpers.dumps(self)
+
 
 class Payload:
     def __init__(
@@ -65,6 +68,9 @@ class RequestMeta:
         self.archive_payloads = archive_payloads
         self.source = source
         self.extra_data = {} if extra_data is None else extra_data
+
+    def __str__(self) -> str:
+        return helpers.dumps(self)
 
 
 class PayloadResults:
@@ -120,6 +126,9 @@ class PayloadResults:
             payload.extracted_by,
         )
 
+    def __str__(self) -> str:
+        return helpers.dumps(self)
+
 
 class StoqResponse:
     def __init__(
@@ -136,6 +145,9 @@ class StoqResponse:
         self.errors = errors
         self.decorators: Dict[str, Dict] = {} if decorators is None else decorators
         self.scan_id = str(uuid.uuid4())
+
+    def __str__(self) -> str:
+        return helpers.dumps(self)
 
 
 class ExtractedPayload:
@@ -157,6 +169,9 @@ class WorkerResponse:
         self.extracted = [] if extracted is None else extracted
         self.errors = [] if errors is None else errors
 
+    def __str__(self) -> str:
+        return helpers.dumps(self)
+
 
 class ArchiverResponse:
     def __init__(
@@ -164,6 +179,9 @@ class ArchiverResponse:
     ) -> None:
         self.results = results
         self.errors = [] if errors is None else errors
+
+    def __str__(self) -> str:
+        return helpers.dumps(self)
 
 
 class DispatcherResponse:
@@ -177,6 +195,9 @@ class DispatcherResponse:
         self.meta = {} if meta is None else meta
         self.errors = [] if errors is None else errors
 
+    def __str__(self) -> str:
+        return helpers.dumps(self)
+
 
 class DeepDispatcherResponse:
     def __init__(
@@ -189,6 +210,9 @@ class DeepDispatcherResponse:
         self.meta = {} if meta is None else meta
         self.errors = [] if errors is None else errors
 
+    def __str__(self) -> str:
+        return helpers.dumps(self)
+
 
 class DecoratorResponse:
     def __init__(
@@ -196,3 +220,6 @@ class DecoratorResponse:
     ) -> None:
         self.results = results
         self.errors = [] if errors is None else errors
+
+    def __str__(self) -> str:
+        return helpers.dumps(self)

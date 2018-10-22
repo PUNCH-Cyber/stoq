@@ -22,7 +22,6 @@ import sys
 import unittest
 
 from stoq import Stoq, PayloadMeta
-import stoq.helpers as helpers
 from stoq.installer import StoqPluginInstaller
 import stoq.tests as tests
 
@@ -31,8 +30,11 @@ def main() -> None:
     # If $STOQ_HOME exists, set our base directory to that, otherwise
     # use $HOME/.stoq
     try:
-        stoq_home = Path(os.getenv('STOQ_HOME', f'{str(Path.home())}/.stoq'))
-        stoq_home.resolve(strict=True)
+        stoq_home = str(
+            Path(os.getenv('STOQ_HOME', f'{str(Path.home())}/.stoq')).resolve(
+                strict=True
+            )
+        )
     except FileNotFoundError as err:
         print(f"$STOQ_HOME is invalid: {err}", file=sys.stderr)
         sys.exit(1)
@@ -187,7 +189,7 @@ Examples:
             add_start_dispatch=args.start_dispatch,
             add_start_deep_dispatch=args.start_deep_dispatch,
         )
-        print(helpers.dumps(response))
+        print(response)
     elif args.command == 'run':
         stoq = Stoq(
             base_dir=stoq_home,

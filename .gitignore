@@ -47,6 +47,7 @@ nosetests.xml
 coverage.xml
 *,cover
 coverage
+.pyre
 
 # Translations
 *.mo

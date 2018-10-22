@@ -18,7 +18,7 @@ import datetime
 import hashlib
 import json
 
-from bs4 import UnicodeDammit
+from bs4 import UnicodeDammit  # pyre-ignore
 
 
 class JsonComplexEncoder(json.JSONEncoder):

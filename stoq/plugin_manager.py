@@ -111,7 +111,7 @@ class StoqPluginManager:
             config.get('Core', 'Module'), module_path
         )
         module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+        spec.loader.exec_module(module)  # pyre-ignore
         plugin_classes = inspect.getmembers(
             module,
             predicate=lambda mem: inspect.isclass(mem)

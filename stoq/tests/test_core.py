@@ -24,11 +24,11 @@ import stoq.tests.utils as utils
 
 
 class TestCore(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         logging.disable(logging.CRITICAL)
         self.generic_content = b'The quick brown fox'
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         logging.disable(logging.NOTSET)
 
     def test_no_base_dir(self):

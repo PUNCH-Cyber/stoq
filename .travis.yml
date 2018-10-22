@@ -9,14 +9,15 @@ before_install:
   - sudo apt-add-repository -y multiverse
   - sudo apt-get -yq update
   - sudo apt-get -yq install automake build-essential libyaml-dev
-  - pip3 install -r requirements.txt
-  - pip3 install coveralls
+  - pip install -r requirements.txt
+  - pip install coveralls pyre-check
   - mkdir plugins
 
 install:
   - python3 setup.py install
 
 script:
+  - pyre check
   - coverage run setup.py test
 
 after_success: coveralls
