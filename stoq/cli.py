@@ -24,7 +24,6 @@ import unittest
 from stoq import Stoq, PayloadMeta
 import stoq.helpers as helpers
 from stoq.installer import StoqPluginInstaller
-from stoq.logo import get_logo
 import stoq.tests as tests
 
 
@@ -42,11 +41,7 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description='''
     stoQ - an automated analysis framework
-
-            {}
-            '''.format(
-            get_logo()
-        ),
+        ''',
         epilog='''
 Examples:
 
