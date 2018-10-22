@@ -23,6 +23,7 @@ from stoq.plugins import BasePlugin
 
 class DeepDispatcherPlugin(BasePlugin):
     @abstractmethod
-    def get_deep_dispatches(self, payload: Payload, request_meta: RequestMeta
-                            ) -> Optional[DeepDispatcherResponse]:
+    def get_deep_dispatches(
+        self, payload: Payload, request_meta: RequestMeta
+    ) -> Optional[DeepDispatcherResponse]:
         pass

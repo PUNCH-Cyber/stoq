@@ -33,36 +33,29 @@ class StoqPluginInstaller:
         plugin_dir = os.path.abspath(plugin_dir)
         install_dir = os.path.abspath(install_dir)
         if not os.path.isdir(plugin_dir):
-            raise StoqException(
-                f'Given plugin directory does not exist: {plugin_dir}')
+            raise StoqException(f'Given plugin directory does not exist: {plugin_dir}')
         if not os.path.isdir(install_dir):
             raise StoqException(
-                f'Given install directory does not exist: {install_dir}')
+                f'Given install directory does not exist: {install_dir}'
+            )
         # Find the stoQ configuration file
         config_path_glob = '{}/*/*.stoq'.format(plugin_dir)
         config_path = glob.glob(config_path_glob)
         if len(config_path) == 0:
             raise StoqException(
-                f'No config file found matching glob {config_path_glob}')
+                f'No config file found matching glob {config_path_glob}'
+            )
         elif len(config_path) > 1:
-            raise StoqException('More than one config file found matching '
-                                f'glob {config_path_glob}')
+            raise StoqException(
+                'More than one config file found matching ' f'glob {config_path_glob}'
+            )
         plugin_info = StoqPluginInstaller.parse_config(config_path[0])
         StoqPluginInstaller.save_plugin_info(plugin_info, plugin_dir)
         StoqPluginInstaller.setup_package(plugin_dir, install_dir, upgrade)
 
     @staticmethod
-    def setup_package(plugin_dir: str, install_dir: str,
-                      upgrade: bool) -> None:
-        cmd = [
-            sys.executable,
-            '-m',
-            'pip',
-            'install',
-            plugin_dir,
-            '-t',
-            install_dir,
-        ]
+    def setup_package(plugin_dir: str, install_dir: str, upgrade: bool) -> None:
+        cmd = [sys.executable, '-m', 'pip', 'install', plugin_dir, '-t', install_dir]
         if upgrade:
             cmd.append('--upgrade')
 
@@ -71,20 +64,17 @@ class StoqPluginInstaller:
             raise StoqException(
                 'There is an existing version of this plugin '
                 'already installed. You must specify "upgrade" '
-                'to force replacement')
+                'to force replacement'
+            )
 
-        # TODO: Is it correct to do this install after the setup.py one? requirements.txt contains specific library versions (or githubs), whereas setup.py doesn't
+        # TODO: Is it correct to do this install after the setup.py one?
+        # requirements.txt contains specific library versions (or githubs),
+        # whereas setup.py doesn't
         requirements = '{}/requirements.txt'.format(plugin_dir)
         if os.path.isfile(requirements):
-            subprocess.check_call([
-                sys.executable,
-                '-m',
-                'pip',
-                'install',
-                '--quiet',
-                '-r',
-                requirements,
-            ])
+            subprocess.check_call(
+                [sys.executable, '-m', 'pip', 'install', '--quiet', '-r', requirements]
+            )
 
     @staticmethod
     def parse_config(config_path: str) -> Dict[str, Any]:
@@ -92,8 +82,7 @@ class StoqPluginInstaller:
         config.read(config_path)
         plugin_name = config.get('Core', 'Name', fallback=None)
         if not plugin_name:
-            raise StoqException(
-                'Config file must contain a Name in the Core section')
+            raise StoqException('Config file must contain a Name in the Core section')
         # We are going to use this to dynamically define data points in
         # setup.py
         plugin_info = {}

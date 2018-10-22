@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#   Copyright 2014-2017 PUNCH Cyber Analytics Group
+#   Copyright 2014-2018 PUNCH Cyber Analytics Group
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -14,15 +14,16 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from typing import Dict, List, Optional
+from typing import Optional
 
 from stoq.data_classes import Payload, RequestMeta, WorkerResponse
 from stoq.plugins import WorkerPlugin
 
 
 class ConfigurableWorker(WorkerPlugin):
-    def scan(self, payload: Payload,
-             request_meta: RequestMeta) -> Optional[WorkerResponse]:
+    def scan(
+        self, payload: Payload, request_meta: RequestMeta
+    ) -> Optional[WorkerResponse]:
         pass
 
     def get_important_option(self):
