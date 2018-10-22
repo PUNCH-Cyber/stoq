@@ -22,7 +22,6 @@ import sys
 import unittest
 
 from stoq import Stoq, PayloadMeta
-import stoq.helpers as helpers
 from stoq.installer import StoqPluginInstaller
 import stoq.tests as tests
 
@@ -187,7 +186,7 @@ Examples:
             add_start_dispatch=args.start_dispatch,
             add_start_deep_dispatch=args.start_deep_dispatch,
         )
-        print(helpers.dumps(response))
+        print(response)
     elif args.command == 'run':
         stoq = Stoq(
             base_dir=stoq_home,
