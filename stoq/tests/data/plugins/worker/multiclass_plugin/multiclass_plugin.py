@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#   Copyright 2014-2017 PUNCH Cyber Analytics Group
+#   Copyright 2014-2018 PUNCH Cyber Analytics Group
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -14,12 +14,17 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from typing import Dict, List, Optional, Iterator
+from typing import Optional
 
 from stoq.plugins import DispatcherPlugin, WorkerPlugin
 from stoq.data_classes import (
-    Payload, ExtractedPayload, Payload,
-    RequestMeta, WorkerResponse, DispatcherResponse)
+    Payload,
+    ExtractedPayload,
+    Payload,
+    RequestMeta,
+    WorkerResponse,
+    DispatcherResponse,
+)
 
 
 class MultiClassPlugin(WorkerPlugin, DispatcherPlugin):
@@ -29,21 +34,21 @@ class MultiClassPlugin(WorkerPlugin, DispatcherPlugin):
     WORKERS = ['multiclass_plugin']
     RULE_COUNT = 1
 
-    def scan(self, payload: Payload,
-             request_meta: RequestMeta) -> Optional[WorkerResponse]:
+    def scan(
+        self, payload: Payload, request_meta: RequestMeta
+    ) -> Optional[WorkerResponse]:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')
         wr = WorkerResponse(
-            {
-                'valuable_insight': 'wow'
-            },
-            extracted=[ExtractedPayload(b'Lorem ipsum')])
+            {'valuable_insight': 'wow'}, extracted=[ExtractedPayload(b'Lorem ipsum')]
+        )
         if self.RETURN_ERRORS:
             wr.errors += ['Test error please ignore']
         return wr
 
-    def get_dispatches(self, payload: Payload, request_meta: RequestMeta
-                ) -> Optional[DispatcherResponse]:
+    def get_dispatches(
+        self, payload: Payload, request_meta: RequestMeta
+    ) -> Optional[DispatcherResponse]:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')
         dr = DispatcherResponse()

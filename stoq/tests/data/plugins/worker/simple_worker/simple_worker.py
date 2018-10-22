@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#   Copyright 2014-2017 PUNCH Cyber Analytics Group
+#   Copyright 2014-2018 PUNCH Cyber Analytics Group
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,7 +17,12 @@
 from typing import List, Optional
 
 from stoq.data_classes import (
-    ExtractedPayload, Payload, PayloadMeta, RequestMeta, WorkerResponse)
+    ExtractedPayload,
+    Payload,
+    PayloadMeta,
+    RequestMeta,
+    WorkerResponse,
+)
 from stoq.plugins import WorkerPlugin
 
 
@@ -26,8 +31,9 @@ class SimpleWorker(WorkerPlugin):
     RETURN_ERRORS = False
     DISPATCH_TO: List[str] = []
 
-    def scan(self, payload: Payload,
-             request_meta: RequestMeta) -> Optional[WorkerResponse]:
+    def scan(
+        self, payload: Payload, request_meta: RequestMeta
+    ) -> Optional[WorkerResponse]:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')
         if self.DISPATCH_TO:
@@ -35,11 +41,7 @@ class SimpleWorker(WorkerPlugin):
             p = ExtractedPayload(b'Lorem ipsum', dispatch_meta)
         else:
             p = ExtractedPayload(b'Lorem ipsum')
-        wr = WorkerResponse(
-            {
-                'valuable_insight': 'wow'
-            },
-            extracted=[p])
+        wr = WorkerResponse({'valuable_insight': 'wow'}, extracted=[p])
         if self.RETURN_ERRORS:
             wr.errors += ['Test error please ignore']
         return wr

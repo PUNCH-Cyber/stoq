@@ -1,5 +1,19 @@
 #!/usr/bin/env python3
 
+#   Copyright 2014-2018 PUNCH Cyber Analytics Group
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
 import configparser
 import importlib.util
 import inspect
@@ -45,7 +59,7 @@ class StoqPluginManager:
             abs_plugin_dir = os.path.abspath(plugin_dir.strip())
             if not os.path.isdir(abs_plugin_dir):
                 self.log.warning(
-                    'Invalid plugin directory specified, ' f'skipping: {abs_plugin_dir}'
+                    f'Invalid plugin directory specified, skipping: {abs_plugin_dir}'
                 )
                 continue
             for root_path, _, files in os.walk(abs_plugin_dir):
@@ -106,7 +120,7 @@ class StoqPluginManager:
         )
         if len(plugin_classes) == 0:
             raise StoqException(
-                'No valid plugin classes found in the module ' f'for {name}'
+                f'No valid plugin classes found in the module for {name}'
             )
         _, plugin_class = plugin_classes[0]
         plugin = plugin_class(config, self._plugin_opts.get(name))

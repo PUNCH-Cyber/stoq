@@ -67,7 +67,9 @@ class StoqPluginInstaller:
                 'to force replacement'
             )
 
-        # TODO: Is it correct to do this install after the setup.py one? requirements.txt contains specific library versions (or githubs), whereas setup.py doesn't
+        # TODO: Is it correct to do this install after the setup.py one?
+        # requirements.txt contains specific library versions (or githubs),
+        # whereas setup.py doesn't
         requirements = '{}/requirements.txt'.format(plugin_dir)
         if os.path.isfile(requirements):
             subprocess.check_call(

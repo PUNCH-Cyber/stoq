@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#   Copyright 2014-2017 PUNCH Cyber Analytics Group
+#   Copyright 2014-2018 PUNCH Cyber Analytics Group
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -24,8 +24,9 @@ class SimpleArchiver(ArchiverPlugin):
     RAISE_EXCEPTION = False
     RETURN_ERRORS = False
 
-    def archive(self, payload: Payload,
-                request_meta: RequestMeta) -> Optional[ArchiverResponse]:
+    def archive(
+        self, payload: Payload, request_meta: RequestMeta
+    ) -> Optional[ArchiverResponse]:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')
         ar = ArchiverResponse({'file_save_id': 12345})
