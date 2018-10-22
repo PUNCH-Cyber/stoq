@@ -30,8 +30,11 @@ def main() -> None:
     # If $STOQ_HOME exists, set our base directory to that, otherwise
     # use $HOME/.stoq
     try:
-        stoq_home = Path(os.getenv('STOQ_HOME', f'{str(Path.home())}/.stoq'))
-        stoq_home.resolve(strict=True)
+        stoq_home = str(
+            Path(os.getenv('STOQ_HOME', f'{str(Path.home())}/.stoq')).resolve(
+                strict=True
+            )
+        )
     except FileNotFoundError as err:
         print(f"$STOQ_HOME is invalid: {err}", file=sys.stderr)
         sys.exit(1)

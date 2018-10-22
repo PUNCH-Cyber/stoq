@@ -18,13 +18,14 @@ import datetime
 import hashlib
 import json
 
-from bs4 import UnicodeDammit
+from bs4 import UnicodeDammit  # pyre-ignore
 
 
 class JsonComplexEncoder(json.JSONEncoder):
     """
     Extends the default JSON encoder to handle bytes and sets
     """
+
     def default(self, obj):
         if isinstance(obj, bytes):
             return UnicodeDammit(obj).unicode_markup

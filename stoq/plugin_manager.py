@@ -9,18 +9,24 @@ from pkg_resources import parse_version
 from typing import Dict, List, Optional, Set, Tuple
 
 from .exceptions import StoqException
-from stoq.plugins import (ArchiverPlugin, BasePlugin, ProviderPlugin,
-                          WorkerPlugin, ConnectorPlugin, DispatcherPlugin,
-                          DeepDispatcherPlugin, DecoratorPlugin)
+from stoq.plugins import (
+    ArchiverPlugin,
+    BasePlugin,
+    ProviderPlugin,
+    WorkerPlugin,
+    ConnectorPlugin,
+    DispatcherPlugin,
+    DeepDispatcherPlugin,
+    DecoratorPlugin,
+)
 
 
-class StoqPluginManager():
-    def __init__(self,
-                 plugin_dir_list: List[str],
-                 plugin_opts: Optional[Dict[str, Dict]] = None) -> None:
+class StoqPluginManager:
+    def __init__(
+        self, plugin_dir_list: List[str], plugin_opts: Optional[Dict[str, Dict]] = None
+    ) -> None:
         self._plugin_opts = {} if plugin_opts is None else plugin_opts
-        self._plugin_name_to_info: Dict[str, Tuple[
-            str, configparser.ConfigParser]] = {}
+        self._plugin_name_to_info: Dict[str, Tuple[str, configparser.ConfigParser]] = {}
         self._loaded_plugins: Dict[str, BasePlugin] = {}
         self._loaded_provider_plugins: Dict[str, ProviderPlugin] = {}
         self._loaded_worker_plugins: Dict[str, WorkerPlugin] = {}
@@ -38,8 +44,9 @@ class StoqPluginManager():
         for plugin_dir in plugin_dir_list:
             abs_plugin_dir = os.path.abspath(plugin_dir.strip())
             if not os.path.isdir(abs_plugin_dir):
-                self.log.warning('Invalid plugin directory specified, '
-                                 f'skipping: {abs_plugin_dir}')
+                self.log.warning(
+                    'Invalid plugin directory specified, ' f'skipping: {abs_plugin_dir}'
+                )
                 continue
             for root_path, _, files in os.walk(abs_plugin_dir):
                 for file in files:
@@ -54,7 +61,8 @@ class StoqPluginManager():
                     except Exception:
                         self.log.warning(
                             f'Error parsing config file: {plugin_conf_path}',
-                            exc_info=True)
+                            exc_info=True,
+                        )
                         continue
                     module_path_pyc = os.path.join(root_path, module_name) + '.pyc'
                     module_path_py = os.path.join(root_path, module_name) + '.py'
@@ -65,7 +73,8 @@ class StoqPluginManager():
                     else:
                         self.log.warning(
                             f'Unable to find module at: {module_path_pyc} or {module_path_py}',
-                            exc_info=True)
+                            exc_info=True,
+                        )
                         continue
 
     def load_plugin(self, name: str) -> BasePlugin:
@@ -78,26 +87,33 @@ class StoqPluginManager():
             # Placing this import at the top of this file causes a circular
             # import chain that causes stoq to crash on initialization
             from stoq import __version__
+
             if parse_version(__version__) < parse_version(min_stoq_version):
-                self.log.warning('Plugin not compatible with this version of '
-                                 'stoQ. Unpredictable results may occur!')
+                self.log.warning(
+                    'Plugin not compatible with this version of '
+                    'stoQ. Unpredictable results may occur!'
+                )
         spec = importlib.util.spec_from_file_location(
-            config.get('Core', 'Module'), module_path)
+            config.get('Core', 'Module'), module_path
+        )
         module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+        spec.loader.exec_module(module)  # pyre-ignore
         plugin_classes = inspect.getmembers(
             module,
-            predicate=
-            lambda mem: inspect.isclass(mem) and issubclass(mem, BasePlugin) and not inspect.isabstract(mem)
+            predicate=lambda mem: inspect.isclass(mem)
+            and issubclass(mem, BasePlugin)
+            and not inspect.isabstract(mem),
         )
         if len(plugin_classes) == 0:
-            raise StoqException('No valid plugin classes found in the module '
-                                f'for {name}')
+            raise StoqException(
+                'No valid plugin classes found in the module ' f'for {name}'
+            )
         _, plugin_class = plugin_classes[0]
         plugin = plugin_class(config, self._plugin_opts.get(name))
         self._loaded_plugins[name] = plugin
         return plugin
 
     def list_plugins(self) -> Set[str]:
-        return set().union(self._plugin_name_to_info.keys(),
-                           self._loaded_plugins.keys())
+        return set().union(
+            self._plugin_name_to_info.keys(), self._loaded_plugins.keys()
+        )

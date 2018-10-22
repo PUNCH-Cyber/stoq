@@ -23,7 +23,7 @@ import os
 from typing import Dict, List, Optional, Set, Tuple
 import queue
 
-from pythonjsonlogger import jsonlogger
+from pythonjsonlogger import jsonlogger  # pyre-ignore[21]
 
 from .exceptions import StoqException
 from stoq.data_classes import (
@@ -209,17 +209,17 @@ class Stoq(StoqPluginManager):
         # initialized on stoq start-up or via load_plugin()
         if not self._loaded_provider_plugins:
             raise StoqException('No activated provider plugins')
-        self.payload_queue: queue.Queue = queue.Queue(self.max_queue)
+        payload_queue: queue.Queue = queue.Queue(self.max_queue)
         with concurrent.futures.ThreadPoolExecutor() as executor:
             # Start the load operations and mark each future with its URL
             future_to_name = {
-                executor.submit(plugin.ingest, self.payload_queue): name
+                executor.submit(plugin.ingest, payload_queue): name
                 for name, plugin in self._loaded_provider_plugins.items()
             }
-            while len(future_to_name) > 0 or self.payload_queue.qsize() > 0:
+            while len(future_to_name) > 0 or payload_queue.qsize() > 0:
                 try:
                     # Using get_nowait results in high CPU churn
-                    self.scan_payload(self.payload_queue.get(timeout=0.1))
+                    self.scan_payload(payload_queue.get(timeout=0.1))
                 except queue.Empty:
                     pass
                 for future in [fut for fut in future_to_name if fut.done()]:
@@ -262,7 +262,7 @@ class Stoq(StoqPluginManager):
             # Normal dispatches are the "1st round" of scanning
             payload.plugins_run['workers'][0].append(plugin_name)
             try:
-                worker_response = plugin.scan(payload, request_meta)
+                worker_response = plugin.scan(payload, request_meta)  # pyre-ignore[16]
             except Exception as e:
                 msg = f'Exception scanning with plugin {plugin_name}: {str(e)}'
                 self.log.exception(msg)
@@ -303,7 +303,7 @@ class Stoq(StoqPluginManager):
                 continue
             payload.plugins_run['workers'][1].append(plugin_name)
             try:
-                worker_response = plugin.scan(payload, request_meta)
+                worker_response = plugin.scan(payload, request_meta)  # pyre-ignore[16]
             except Exception as e:
                 msg = f'Exception scanning with plugin {plugin_name}: {str(e)}'
                 self.log.exception(msg)

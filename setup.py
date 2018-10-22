@@ -1,7 +1,7 @@
 import os
 import re
 
-from setuptools import setup
+from setuptools import setup  # pyre-ignore
 
 
 def version():
@@ -22,14 +22,11 @@ setup(
     url='https://github.com/PUNCH-Cyber/stoq',
     include_package_data=True,
     packages=['stoq'],
-    install_requires=['bs4',
-                      'python-json-logger', ],
+    install_requires=['beautifulsoup4', 'python-json-logger'],
     keywords='malware-analysis, malware-analyzer, malware-detection, framework, automation',
     python_requires='>=3.6',
     test_suite='stoq.tests',
-    entry_points={
-        'console_scripts': ['stoq=stoq.cli:main']
-    },
+    entry_points={'console_scripts': ['stoq=stoq.cli:main']},
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Information Technology',
