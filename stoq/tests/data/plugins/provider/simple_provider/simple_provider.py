@@ -22,8 +22,12 @@ from stoq.plugins import ProviderPlugin
 
 class SimpleProvider(ProviderPlugin):
     RAISE_EXCEPTION = False
+    RETURN_PAYLOAD = True
 
     def ingest(self, queue: Queue) -> None:
         if self.RAISE_EXCEPTION:
             raise RuntimeError('Test exception, please ignore')
-        queue.put(Payload(b'Important stuff'))
+        if self.RETURN_PAYLOAD:
+            queue.put(Payload(b'Important stuff'))
+        else:
+            queue.put('This is a task from provider')
