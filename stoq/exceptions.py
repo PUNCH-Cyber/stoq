@@ -17,3 +17,7 @@
 
 class StoqException(Exception):
     pass
+
+
+class StoqPluginException(Exception):
+    pass
