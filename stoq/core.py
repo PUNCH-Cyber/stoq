@@ -70,6 +70,9 @@ class Stoq(StoqPluginManager):
 
         self.max_queue = int(config.get('core', 'max_queue', fallback='100'))
         self.max_recursion = int(config.get('core', 'max_recursion', fallback='3'))
+        self.max_dispatch_passes = int(
+            config.get('core', 'max_dispatch_passes', fallback='3')
+        )
 
         if log_dir is _UNSET:
             log_dir = config.get(
@@ -244,8 +247,11 @@ class Stoq(StoqPluginManager):
         add_deep_dispatch: List[str],
         request_meta: RequestMeta,
     ) -> Tuple[PayloadResults, List[Payload], List[str]]:
+
         extracted = []
         errors = []
+        dispatch_pass = 0
+
         dispatches, dispatch_errors = self._get_dispatches(
             payload, add_dispatch, request_meta
         )
@@ -284,45 +290,51 @@ class Stoq(StoqPluginManager):
             if worker_response.errors:
                 errors.extend(worker_response.errors)
 
-        deep_dispatches, deep_dispatch_errors = self._get_deep_dispatches(
-            payload, add_deep_dispatch, request_meta
-        )
-        if deep_dispatch_errors:
-            errors.extend(deep_dispatch_errors)
-        if deep_dispatches:
-            # Add another entry for this round
-            payload.plugins_run['workers'].append([])
-            payload.worker_results.append({})
-        for plugin_name in deep_dispatches:
-            try:
-                plugin = self.load_plugin(plugin_name)
-            except Exception as e:
-                msg = f'Exception loading plugin {plugin_name} for deep dispatch'
-                self.log.exception(msg)
-                errors.append(msg)
-                continue
-            payload.plugins_run['workers'][1].append(plugin_name)
-            try:
-                worker_response = plugin.scan(payload, request_meta)  # pyre-ignore[16]
-            except Exception as e:
-                msg = f'Exception scanning with plugin {plugin_name}: {str(e)}'
-                self.log.exception(msg)
-                errors.append(msg)
-                continue
-            if worker_response is None:
-                continue
-            if worker_response.results is not None:
-                payload.worker_results[1][plugin_name] = worker_response.results
-            extracted.extend(
-                [
-                    Payload(
-                        ex.content, ex.payload_meta, plugin_name, payload.payload_id
-                    )
-                    for ex in worker_response.extracted
-                ]
+        while dispatch_pass < self.max_dispatch_passes - 1:
+            dispatch_pass += 1
+            deep_dispatches, deep_dispatch_errors = self._get_deep_dispatches(
+                payload, add_deep_dispatch, request_meta
             )
-            if worker_response.errors:
-                errors.extend(worker_response.errors)
+            if deep_dispatch_errors:
+                errors.extend(deep_dispatch_errors)
+            if deep_dispatches:
+                # Add another entry for this round
+                payload.plugins_run['workers'].append([])
+                payload.worker_results.append({})
+            for plugin_name in deep_dispatches:
+                try:
+                    plugin = self.load_plugin(plugin_name)
+                except Exception as e:
+                    msg = f'Exception loading plugin {plugin_name} for deep dispatch (pass {dispatch_pass}/{self.max_dispatch_passes})'
+                    self.log.exception(msg)
+                    errors.append(msg)
+                    continue
+                payload.plugins_run['workers'][dispatch_pass].append(plugin_name)
+                try:
+                    worker_response = plugin.scan(
+                        payload, request_meta
+                    )  # pyre-ignore[16]
+                except Exception as e:
+                    msg = f'Exception scanning with plugin {plugin_name} (pass {dispatch_pass}/{self.max_dispatch_passes}): {str(e)}'
+                    self.log.exception(msg)
+                    errors.append(msg)
+                    continue
+                if worker_response is None:
+                    continue
+                if worker_response.results is not None:
+                    payload.worker_results[dispatch_pass][
+                        plugin_name
+                    ] = worker_response.results
+                extracted.extend(
+                    [
+                        Payload(
+                            ex.content, ex.payload_meta, plugin_name, payload.payload_id
+                        )
+                        for ex in worker_response.extracted
+                    ]
+                )
+                if worker_response.errors:
+                    errors.extend(worker_response.errors)
 
         payload_results = PayloadResults.from_payload(payload)
         if request_meta.archive_payloads and payload.payload_meta.should_archive:
