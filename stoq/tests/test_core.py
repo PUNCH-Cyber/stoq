@@ -72,7 +72,7 @@ class TestCore(unittest.TestCase):
         s = Stoq(base_dir=utils.get_data_dir())
         response = s.scan(self.generic_content)
         self.assertEqual(len(response.results), 1)
-        self.assertEqual(response.results[0].md5, 'a2004f37730b9445670a738fa0fc9ee5')
+        self.assertEqual(response.results[0].size, len(self.generic_content))
 
     def test_always_dispatch(self):
         s = Stoq(base_dir=utils.get_data_dir(), always_dispatch=['simple_worker'])
