@@ -127,7 +127,16 @@ class StoqPluginManager:
         self._loaded_plugins[name] = plugin
         return plugin
 
-    def list_plugins(self) -> Set[str]:
-        return set().union(
-            self._plugin_name_to_info.keys(), self._loaded_plugins.keys()
-        )
+    def list_plugins(self) -> Dict[str, Dict[str, str]]:
+        plugins = {}
+        for plugin in self._plugin_name_to_info.keys():
+            plugins[plugin] = {
+                'version': self._plugin_name_to_info[plugin][1].get(
+                    'Documentation', 'version'
+                ),
+                'description': self._plugin_name_to_info[plugin][1].get(
+                    'Documentation', 'description'
+                ),
+            }
+        return plugins
+

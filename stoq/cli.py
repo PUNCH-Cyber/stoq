@@ -203,7 +203,8 @@ Examples:
         stoq.run()
     elif args.command == 'list':
         stoq = Stoq(base_dir=stoq_home)
-        print(stoq.list_plugins())
+        for name, info in stoq.list_plugins().items():
+            print(f'{name:<30s}v{info["version"]:<10s}{info["description"]}')
     elif args.command == 'install':
         StoqPluginInstaller.install(args.plugin_dir, args.install_dir, args.upgrade)
         print(f'Successfully installed to {args.install_dir}')
