@@ -21,12 +21,13 @@ import select
 import sys
 import unittest
 
-from stoq import Stoq, PayloadMeta
+from stoq import Stoq, PayloadMeta, __version__
 from stoq.installer import StoqPluginInstaller
 import stoq.tests as tests
 
 
 def main() -> None:
+    about = f'stoQ :: v{__version__} :: an automated analysis framework'
     # If $STOQ_HOME exists, set our base directory to that, otherwise
     # use $HOME/.stoq
     try:
@@ -41,9 +42,7 @@ def main() -> None:
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description='''
-    stoQ - an automated analysis framework
-        ''',
+        description=about,
         epilog='''
 Examples:
 
@@ -203,6 +202,8 @@ Examples:
         stoq.run()
     elif args.command == 'list':
         stoq = Stoq(base_dir=stoq_home)
+        print(about)
+        print('-' * len(about))
         for name, info in stoq.list_plugins().items():
             print(f'{name:<30s}v{info["version"]:<10s}{info["description"]}')
     elif args.command == 'install':
