@@ -71,7 +71,7 @@ class Stoq(StoqPluginManager):
         self.max_queue = int(config.get('core', 'max_queue', fallback='100'))
         self.max_recursion = int(config.get('core', 'max_recursion', fallback='3'))
         self.max_dispatch_passes = int(
-            config.get('core', 'max_dispatch_passes', fallback='3')
+            config.get('core', 'max_dispatch_passes', fallback='1')
         )
 
         if log_dir is _UNSET:
@@ -290,7 +290,7 @@ class Stoq(StoqPluginManager):
             if worker_response.errors:
                 errors.extend(worker_response.errors)
 
-        while dispatch_pass < self.max_dispatch_passes - 1:
+        while dispatch_pass < self.max_dispatch_passes:
             dispatch_pass += 1
             deep_dispatches, deep_dispatch_errors = self._get_deep_dispatches(
                 payload, add_deep_dispatch, request_meta
@@ -315,7 +315,7 @@ class Stoq(StoqPluginManager):
                         payload, request_meta
                     )  # pyre-ignore[16]
                 except Exception as e:
-                    msg = f'Exception scanning with plugin {plugin_name} (pass {dispatch_pass}/{self.max_dispatch_passes}): {str(e)}'
+                    msg = f'Exception scanning with plugin {plugin_name} for deep dispatch (pass {dispatch_pass}/{self.max_dispatch_passes}): {str(e)}'
                     self.log.exception(msg)
                     errors.append(msg)
                     continue
