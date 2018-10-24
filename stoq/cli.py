@@ -14,16 +14,16 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import argparse
 import os
-from pathlib import Path
-import select
 import sys
+import select
+import argparse
 import unittest
+from pathlib import Path
 
-from stoq import Stoq, PayloadMeta, __version__
-from stoq.installer import StoqPluginInstaller
 import stoq.tests as tests
+from stoq.installer import StoqPluginInstaller
+from stoq import Stoq, PayloadMeta, __version__
 
 
 def main() -> None:
@@ -133,6 +133,7 @@ Examples:
             nargs='+',
             help='Worker plugins to always dispatch plugins to',
         )
+        subparser.add_argument('--plugin-opts', nargs='+', help='Plugin options')
 
     subparsers.add_parser('list', help='List available plugins')
 
@@ -152,6 +153,20 @@ Examples:
     subparsers.add_parser('test', help='Run stoQ tests')
 
     args = parser.parse_args()
+
+    plugin_opts = {}
+    if args.plugin_opts:
+        for arg in args.plugin_opts:
+            plugin_name, plugin_option = arg.split(':')
+            opt, value = plugin_option.split('=')
+            if value == 'True':
+                value = True
+            elif value == 'False':
+                value = False
+            if plugin_name in plugin_opts:
+                plugin_opts[plugin_name].update({opt: value})
+            else:
+                plugin_opts[plugin_name] = {opt: value}
 
     if args.command == 'scan':
         with args.file as f:
@@ -175,6 +190,7 @@ Examples:
 
         stoq = Stoq(
             base_dir=stoq_home,
+            plugin_opts=plugin_opts,
             archivers=args.archivers,
             connectors=args.connectors,
             dispatchers=args.dispatchers,
@@ -192,6 +208,7 @@ Examples:
     elif args.command == 'run':
         stoq = Stoq(
             base_dir=stoq_home,
+            plugin_opts=plugin_opts,
             providers=args.providers,
             archivers=args.archivers,
             connectors=args.connectors,
