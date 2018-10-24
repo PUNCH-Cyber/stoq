@@ -52,7 +52,8 @@ class Stoq(StoqPluginManager):
         plugin_dir_list: List[str] = None,
         plugin_opts: Dict[str, Dict] = None,
         providers: List[str] = None,
-        archivers: List[str] = None,
+        source_archivers: List[str] = None,
+        dest_archivers: List[str] = None,
         connectors: List[str] = None,
         dispatchers: List[str] = None,
         deep_dispatchers: List[str] = None,
@@ -99,10 +100,20 @@ class Stoq(StoqPluginManager):
             providers_str = config.get('core', 'providers', fallback='')
             providers = [d.strip() for d in providers_str.split(',') if d.strip()]
         self._loaded_provider_plugins = {d: self.load_plugin(d) for d in providers if d}
-        if not archivers:
-            arch_str = config.get('core', 'archivers', fallback='')
-            archivers = [d.strip() for d in arch_str.split(',') if d.strip()]
-        self._loaded_archiver_plugins = {d: self.load_plugin(d) for d in archivers if d}
+        if not source_archivers:
+            source_arch_str = config.get('core', 'source_archivers', fallback='')
+            source_archivers = [
+                d.strip() for d in source_arch_str.split(',') if d.strip()
+            ]
+        self._loaded_source_archiver_plugins = {
+            d: self.load_plugin(d) for d in source_archivers if d
+        }
+        if not dest_archivers:
+            dest_arch_str = config.get('core', 'dest_archivers', fallback='')
+            dest_archivers = [d.strip() for d in dest_arch_str.split(',') if d.strip()]
+        self._loaded_dest_archiver_plugins = {
+            d: self.load_plugin(d) for d in dest_archivers if d
+        }
         if not connectors:
             conn_str = config.get('core', 'connectors', fallback='')
             connectors = [d.strip() for d in conn_str.split(',') if d.strip()]
@@ -222,7 +233,29 @@ class Stoq(StoqPluginManager):
             while len(future_to_name) > 0 or payload_queue.qsize() > 0:
                 try:
                     # Using get_nowait results in high CPU churn
-                    self.scan_payload(payload_queue.get(timeout=0.1))
+                    task = payload_queue.get(timeout=0.1)
+                    payload = None
+                    # Determine whether the provider has returned a `Payload`, or a task.
+                    # If it is a task, load the defined archiver plugin to load the
+                    # `Payload`, otherwise, simply continue on with the scanning.
+                    if isinstance(task, Payload):
+                        payload = task
+                    else:
+                        for (
+                            source_name,
+                            source_archiver,
+                        ) in self._loaded_source_archiver_plugins.items():
+                            try:
+                                payload = source_archiver.get(task)
+                                if isinstance(payload, Payload):
+                                    break
+                            except Exception as e:
+                                self.log.warn(
+                                    f'{task} not found in archive {source_name}'
+                                )
+                    if not payload:
+                        raise StoqException('Unable to determine Payload from {task}')
+                    self.scan_payload(payload)
                 except queue.Empty:
                     pass
                 for future in [fut for fut in future_to_name if fut.done()]:
@@ -340,7 +373,7 @@ class Stoq(StoqPluginManager):
 
         payload_results = PayloadResults.from_payload(payload)
         if request_meta.archive_payloads and payload.payload_meta.should_archive:
-            for plugin_name, archiver in self._loaded_archiver_plugins.items():
+            for plugin_name, archiver in self._loaded_dest_archiver_plugins.items():
                 payload.plugins_run['archivers'].append(plugin_name)
                 try:
                     archiver_response = archiver.archive(payload, request_meta)

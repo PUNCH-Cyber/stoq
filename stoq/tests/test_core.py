@@ -53,14 +53,16 @@ class TestCore(unittest.TestCase):
         s = Stoq(
             base_dir=utils.get_data_dir(),
             providers=['dummy_provider'],
-            archivers=['dummy_archiver'],
+            source_archivers=['dummy_archiver'],
+            dest_archivers=['dummy_archiver'],
             connectors=['dummy_connector'],
             decorators=['dummy_decorator'],
             dispatchers=['dummy_dispatcher'],
             deep_dispatchers=['dummy_deep_dispatcher'],
         )
         self.assertEqual(len(s._loaded_provider_plugins), 1)
-        self.assertEqual(len(s._loaded_archiver_plugins), 1)
+        self.assertEqual(len(s._loaded_source_archiver_plugins), 1)
+        self.assertEqual(len(s._loaded_dest_archiver_plugins), 1)
         self.assertEqual(len(s._loaded_connector_plugins), 1)
         self.assertEqual(len(s._loaded_decorator_plugins), 1)
         self.assertEqual(len(s._loaded_dispatcher_plugins), 1)
@@ -254,8 +256,18 @@ class TestCore(unittest.TestCase):
         )
         self.assertEqual(len(response.errors), 1)
 
-    def test_archive(self):
-        s = Stoq(base_dir=utils.get_data_dir(), archivers=['dummy_archiver'])
+    def test_source_archive(self):
+        s = Stoq(base_dir=utils.get_data_dir(), source_archivers=['simple_archiver'])
+        simple_archiver = s.load_plugin('simple_archiver')
+        simple_archiver.PAYLOAD = b'This is a payload'
+        task = 'this is a task message'
+        payload = simple_archiver.get(task)
+        self.assertIn('task', payload.payload_meta.extra_data)
+        self.assertEqual(payload.payload_meta.extra_data['task'], task)
+        self.assertEqual(payload.content, simple_archiver.PAYLOAD)
+
+    def test_dest_archive(self):
+        s = Stoq(base_dir=utils.get_data_dir(), dest_archivers=['dummy_archiver'])
         dummy_archiver = s.load_plugin('dummy_archiver')
         dummy_archiver.archive = create_autospec(
             dummy_archiver.archive, return_value=None
@@ -266,8 +278,8 @@ class TestCore(unittest.TestCase):
         dummy_archiver.archive.assert_called_once()
         self.assertIn('dummy_archiver', response.results[0].plugins_run['archivers'])
 
-    def test_dont_archive_request(self):
-        s = Stoq(base_dir=utils.get_data_dir(), archivers=['dummy_archiver'])
+    def test_dont_dest_archive_request(self):
+        s = Stoq(base_dir=utils.get_data_dir(), dest_archivers=['dummy_archiver'])
         dummy_archiver = s.load_plugin('dummy_archiver')
         dummy_archiver.archive = Mock(return_value=None)
         response = s.scan(
@@ -279,8 +291,8 @@ class TestCore(unittest.TestCase):
         self.assertNotIn('dummy_archiver', response.results[0].plugins_run['archivers'])
         self.assertNotIn('dummy_archiver', response.results[1].plugins_run['archivers'])
 
-    def test_dont_archive_payload(self):
-        s = Stoq(base_dir=utils.get_data_dir(), archivers=['dummy_archiver'])
+    def test_dont_dest_archive_payload(self):
+        s = Stoq(base_dir=utils.get_data_dir(), dest_archivers=['dummy_archiver'])
         dummy_archiver = s.load_plugin('dummy_archiver')
         dummy_archiver.archive = create_autospec(
             dummy_archiver.archive, return_value=None
@@ -295,8 +307,8 @@ class TestCore(unittest.TestCase):
         self.assertNotIn('dummy_archiver', response.results[0].plugins_run['archivers'])
         self.assertIn('dummy_archiver', response.results[1].plugins_run['archivers'])
 
-    def test_dont_archive_yara(self):
-        s = Stoq(base_dir=utils.get_data_dir(), archivers=['dummy_archiver'])
+    def test_dont_dest_archive_yara(self):
+        s = Stoq(base_dir=utils.get_data_dir(), dest_archivers=['dummy_archiver'])
         response = s.scan(
             self.generic_content, request_meta=RequestMeta(archive_payloads=True)
         )
@@ -317,7 +329,7 @@ class TestCore(unittest.TestCase):
         self.assertNotIn('dummy_worker', response.results[0].workers)
 
     def test_archiver_in_results(self):
-        s = Stoq(base_dir=utils.get_data_dir(), archivers=['simple_archiver'])
+        s = Stoq(base_dir=utils.get_data_dir(), dest_archivers=['simple_archiver'])
         response = s.scan(
             self.generic_content, request_meta=RequestMeta(archive_payloads=True)
         )
@@ -325,7 +337,7 @@ class TestCore(unittest.TestCase):
         self.assertIn('file_save_id', response.results[0].archivers['simple_archiver'])
 
     def test_archiver_not_in_results(self):
-        s = Stoq(base_dir=utils.get_data_dir(), archivers=['dummy_archiver'])
+        s = Stoq(base_dir=utils.get_data_dir(), dest_archivers=['dummy_archiver'])
         response = s.scan(
             self.generic_content, request_meta=RequestMeta(archive_payloads=True)
         )
@@ -350,8 +362,17 @@ class TestCore(unittest.TestCase):
         self.assertEqual(len(response.errors), 1)
         self.assertIn('Test error', response.errors[0])
 
-    def test_archiver_exception(self):
-        s = Stoq(base_dir=utils.get_data_dir(), archivers=['simple_archiver'])
+    def test_source_archiver_exception(self):
+        s = Stoq(base_dir=utils.get_data_dir(), source_archivers=['simple_archiver'])
+        simple_archiver = s.load_plugin('simple_archiver')
+        simple_archiver.RAISE_EXCEPTION = True
+        task = "This will fail"
+        with self.assertRaises(Exception) as context:
+            simple_archiver.get(task)
+        self.assertTrue('Test exception', context.exception)
+
+    def test_dest_archiver_exception(self):
+        s = Stoq(base_dir=utils.get_data_dir(), dest_archivers=['simple_archiver'])
         simple_archiver = s.load_plugin('simple_archiver')
         simple_archiver.RAISE_EXCEPTION = True
         response = s.scan(self.generic_content)
@@ -359,8 +380,8 @@ class TestCore(unittest.TestCase):
         self.assertEqual(len(response.errors), 1)
         self.assertIn('Test exception', response.errors[0])
 
-    def test_archiver_errors(self):
-        s = Stoq(base_dir=utils.get_data_dir(), archivers=['simple_archiver'])
+    def test_dest_archiver_errors(self):
+        s = Stoq(base_dir=utils.get_data_dir(), dest_archivers=['simple_archiver'])
         simple_archiver = s.load_plugin('simple_archiver')
         simple_archiver.RETURN_ERRORS = True
         response = s.scan(self.generic_content)
@@ -477,3 +498,19 @@ class TestCore(unittest.TestCase):
         simple_provider.RAISE_EXCEPTION = True
         with self.assertRaises(StoqException):
             s.run()
+
+    def test_provider_with_task(self):
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            source_archivers=['simple_archiver'],
+            providers=['simple_provider'],
+            connectors=['dummy_connector'],
+        )
+        dummy_connector = s.load_plugin('dummy_connector')
+        dummy_connector.save = create_autospec(dummy_connector.save)
+        simple_provider = s.load_plugin('simple_provider')
+        simple_provider.RETURN_PAYLOAD = False
+        simple_archiver = s.load_plugin('simple_archiver')
+        simple_archiver.PAYLOAD = b'This is a payload'
+        s.run()
+        dummy_connector.save.assert_called_once()

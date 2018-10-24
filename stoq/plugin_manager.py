@@ -44,7 +44,8 @@ class StoqPluginManager:
         self._loaded_plugins: Dict[str, BasePlugin] = {}
         self._loaded_provider_plugins: Dict[str, ProviderPlugin] = {}
         self._loaded_worker_plugins: Dict[str, WorkerPlugin] = {}
-        self._loaded_archiver_plugins: Dict[str, ArchiverPlugin] = {}
+        self._loaded_source_archiver_plugins: Dict[str, ArchiverPlugin] = {}
+        self._loaded_dest_archiver_plugins: Dict[str, ArchiverPlugin] = {}
         self._loaded_dispatcher_plugins: Dict[str, DispatcherPlugin] = {}
         self._loaded_deep_dispatcher_plugins: Dict[str, DeepDispatcherPlugin] = {}
         self._loaded_connector_plugins: List[ConnectorPlugin] = []

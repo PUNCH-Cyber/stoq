@@ -25,3 +25,6 @@ class DummyArchiver(ArchiverPlugin):
         self, payload: Payload, request_meta: RequestMeta
     ) -> Optional[ArchiverResponse]:
         return None
+
+    def get(self, task: str) -> Optional[Payload]:
+        return None
