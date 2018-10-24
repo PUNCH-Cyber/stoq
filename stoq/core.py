@@ -313,9 +313,9 @@ class Stoq(StoqPluginManager):
                     continue
                 payload.plugins_run['workers'][dispatch_pass].append(plugin_name)
                 try:
-                    worker_response = plugin.scan(
+                    worker_response = plugin.scan(  # pyre-ignore[16]
                         payload, request_meta
-                    )  # pyre-ignore[16]
+                    )
                 except Exception as e:
                     msg = f'Exception scanning with plugin {plugin_name} for deep dispatch (pass {dispatch_pass}/{self.max_dispatch_passes}): {str(e)}'
                     self.log.exception(msg)
