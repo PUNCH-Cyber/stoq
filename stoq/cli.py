@@ -104,7 +104,16 @@ Examples:
     # Add shared arguments so they still show up in the help dialog
     for subparser in [scan, run]:
         subparser.add_argument(
-            '-A', '--archivers', nargs='+', help='Archiver plugins to send payloads to'
+            '-A',
+            '--dest-archivers',
+            nargs='+',
+            help='Archiver plugins to send payloads to',
+        )
+        subparser.add_argument(
+            '-S',
+            '--source-archivers',
+            nargs='+',
+            help='Archiver plugins to read payload from',
         )
         subparser.add_argument(
             '-D',
@@ -191,7 +200,8 @@ Examples:
         stoq = Stoq(
             base_dir=stoq_home,
             plugin_opts=plugin_opts,
-            archivers=args.archivers,
+            source_archivers=args.source_archivers,
+            dest_archivers=args.dest_archivers,
             connectors=args.connectors,
             dispatchers=args.dispatchers,
             deep_dispatchers=args.deep_dispatchers,
@@ -210,7 +220,8 @@ Examples:
             base_dir=stoq_home,
             plugin_opts=plugin_opts,
             providers=args.providers,
-            archivers=args.archivers,
+            source_archivers=args.source_archivers,
+            dest_archivers=args.dest_archivers,
             connectors=args.connectors,
             dispatchers=args.dispatchers,
             decorators=args.decorators,
