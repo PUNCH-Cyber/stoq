@@ -45,6 +45,7 @@ class Payload:
         payload_id: Optional[str] = None,
     ) -> None:
         self.content = content
+        self.size: int = len(content)
         self.payload_meta = PayloadMeta() if payload_meta is None else payload_meta
         self.extracted_by = extracted_by
         self.extracted_from = extracted_from
@@ -77,10 +78,6 @@ class PayloadResults:
     def __init__(
         self,
         payload_id: str,
-        md5: str,
-        sha1: str,
-        sha256: str,
-        sha512: str,
         size: int,
         payload_meta: PayloadMeta,
         workers: List[Dict[str, Dict]],
@@ -89,10 +86,6 @@ class PayloadResults:
         extracted_by: Optional[str] = None,
     ) -> None:
         self.payload_id = payload_id
-        self.md5 = md5
-        self.sha1 = sha1
-        self.sha256 = sha256
-        self.sha512 = sha512
         self.size = size
         self.payload_meta = payload_meta
         self.workers: List[Dict[str, Dict]] = workers
@@ -107,18 +100,9 @@ class PayloadResults:
 
     @classmethod
     def from_payload(cls, payload: Payload) -> 'PayloadResults':
-        md5 = helpers.get_md5(payload.content)
-        sha1 = helpers.get_sha1(payload.content)
-        sha256 = helpers.get_sha256(payload.content)
-        sha512 = helpers.get_sha512(payload.content)
-        size = len(payload.content)
         return cls(
             payload.payload_id,
-            md5,
-            sha1,
-            sha256,
-            sha512,
-            size,
+            payload.size,
             payload.payload_meta,
             payload.worker_results,
             payload.plugins_run,
