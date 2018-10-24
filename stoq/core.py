@@ -301,6 +301,8 @@ class Stoq(StoqPluginManager):
                 # Add another entry for this round
                 payload.plugins_run['workers'].append([])
                 payload.worker_results.append({})
+            else:
+                break
             for plugin_name in deep_dispatches:
                 try:
                     plugin = self.load_plugin(plugin_name)
