@@ -168,9 +168,9 @@ Examples:
         for arg in args.plugin_opts:
             plugin_name, plugin_option = arg.split(':')
             opt, value = plugin_option.split('=')
-            if value == 'True':
+            if value.lower() == 'true':
                 value = True
-            elif value == 'False':
+            elif value.lower() == 'false':
                 value = False
             if plugin_name in plugin_opts:
                 plugin_opts[plugin_name].update({opt: value})
