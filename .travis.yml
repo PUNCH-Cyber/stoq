@@ -17,7 +17,7 @@ install:
   - python3 setup.py install
 
 script:
-  - pyre check --noninteractive
+  - pyre --noninteractive check
   - coverage run setup.py test
 
 after_success: coveralls
