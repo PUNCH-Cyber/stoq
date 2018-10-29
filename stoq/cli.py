@@ -163,8 +163,8 @@ Examples:
 
     args = parser.parse_args()
 
+    plugin_opts = {}
     try:
-        plugin_opts = {}
         if args.plugin_opts:
             for arg in args.plugin_opts:
                 plugin_name, plugin_option = arg.split(':')
