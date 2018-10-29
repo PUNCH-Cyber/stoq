@@ -163,19 +163,22 @@ Examples:
 
     args = parser.parse_args()
 
-    plugin_opts = {}
-    if args.plugin_opts:
-        for arg in args.plugin_opts:
-            plugin_name, plugin_option = arg.split(':')
-            opt, value = plugin_option.split('=')
-            if value.lower() == 'true':
-                value = True
-            elif value.lower() == 'false':
-                value = False
-            if plugin_name in plugin_opts:
-                plugin_opts[plugin_name].update({opt: value})
-            else:
-                plugin_opts[plugin_name] = {opt: value}
+    try:
+        plugin_opts = {}
+        if args.plugin_opts:
+            for arg in args.plugin_opts:
+                plugin_name, plugin_option = arg.split(':')
+                opt, value = plugin_option.split('=')
+                if value.lower() == 'true':
+                    value = True
+                elif value.lower() == 'false':
+                    value = False
+                if plugin_name in plugin_opts:
+                    plugin_opts[plugin_name].update({opt: value})
+                else:
+                    plugin_opts[plugin_name] = {opt: value}
+    except AttributeError:
+        pass
 
     if args.command == 'scan':
         with args.file as f:
