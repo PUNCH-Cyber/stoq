@@ -24,11 +24,11 @@ class PayloadMeta:
     def __init__(
         self,
         should_archive: bool = True,
-        extra_data: Optional[Dict] = None,
+        extra_data: Dict = None,
         dispatch_to: List[str] = None,
     ) -> None:
         self.should_archive = should_archive
-        self.extra_data = extra_data
+        self.extra_data = {} if extra_data is None else extra_data
         self.dispatch_to = [] if dispatch_to is None else dispatch_to
 
     def __str__(self) -> str:
@@ -64,7 +64,7 @@ class RequestMeta:
         self,
         archive_payloads: bool = True,
         source: Optional[str] = None,
-        extra_data: Optional[Dict] = None,
+        extra_data: Dict = None,
     ) -> None:
         self.archive_payloads = archive_payloads
         self.source = source
