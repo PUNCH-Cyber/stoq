@@ -20,7 +20,6 @@ from pathlib import Path
 
 from argparse import RawDescriptionHelpFormatter, ArgumentParser
 
-import stoq
 from stoq import __version__
 from stoq.core import Stoq
 from stoq.shell import StoqShell
@@ -33,7 +32,10 @@ def main():
 
     # If $STOQ_HOME exists, set our base directory to that, otherwise
     # use ~/.stoq
-    homedir = os.getenv("STOQ_HOME", "{}/.stoq".format(str(Path.home())))
+    try:
+        homedir = os.getenv("STOQ_HOME", "{}/.stoq".format(str(Path.home())))
+    except AttributeError:
+        homedir = os.getenv("STOQ_HOME", "{}/.stoq".format(os.path.expanduser('~')))
 
     s = Stoq(argv=sys.argv, base_dir=homedir)
 
@@ -53,7 +55,9 @@ def main():
         install  Install a stoQ plugin
         test     Run stoQ tests
 
-            '''.format(logo),
+            '''.format(
+            logo
+        ),
         usage='%(prog)s [command] [<args>]',
         epilog='''
     Examples:
@@ -81,7 +85,8 @@ def main():
 
         $ %(prog)s yara -h
 
-    ''')
+    ''',
+    )
 
     parser.add_argument(dest="command", help="Commands")
     options = parser.parse_args(s.argv[1:2])
@@ -112,7 +117,9 @@ def main():
                 run_plugin_tests(s, plugin=s.argv[2:])
         except IndexError:
             parser.print_usage()
-            print("No test type provided. Valid options are: {stoq|all|plugin name ...}")
+            print(
+                "No test type provided. Valid options are: {stoq|all|plugin name ...}"
+            )
     else:
         # Initialize and load the worker plugin and make it an object of our
         # stoq class
