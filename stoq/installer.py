@@ -38,6 +38,8 @@ class StoqPluginInstaller:
                 plugin_path = f'{StoqPluginInstaller.DEFAULT_REPO}#egg={plugin_name}&subdirectory=v2/{plugin_name}'
             else:
                 raise StoqException('Invalid git repository specified.')
+            if PIP_VER <= 18.1:
+                print('Warning: dependencies in requirements.txt will not be installed')
         else:
             plugin_path = os.path.abspath(plugin_path)
             if not os.path.isdir(plugin_path):
