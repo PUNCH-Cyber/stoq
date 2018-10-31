@@ -15,10 +15,13 @@
 #   limitations under the License.
 
 import os
-import subprocess
+import pip
 import sys
+import subprocess
 
 from .exceptions import StoqException
+
+PIP_VER = float(sys.modules[pip.__package__].__version__)
 
 
 class StoqPluginInstaller:
@@ -52,7 +55,7 @@ class StoqPluginInstaller:
     def setup_package(
         plugin_path: str, install_dir: str, upgrade: bool, git: bool
     ) -> None:
-        if not git:
+        if not git and PIP_VER <= 18.1:
             requirements = '{}/requirements.txt'.format(plugin_path)
             if os.path.isfile(requirements):
                 subprocess.check_call(
@@ -68,6 +71,10 @@ class StoqPluginInstaller:
                 )
 
         cmd = [sys.executable, '-m', 'pip', 'install', plugin_path, '-t', install_dir]
+        if PIP_VER >= 18.2:
+            # Check to ensure pip isn't a broken version, if not, add the `-e` arg
+            # https://github.com/pypa/pip/issues/4390
+            cmd.insert(4, '-e')
         if upgrade:
             cmd.append('--upgrade')
 
