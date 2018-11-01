@@ -15,7 +15,7 @@
 #   limitations under the License.
 
 import os
-import pip
+import pip  # pyre-ignore[21]
 import sys
 import subprocess
 
