@@ -22,7 +22,7 @@ setup(
     url='https://github.com/PUNCH-Cyber/stoq',
     include_package_data=True,
     packages=['stoq'],
-    install_requires=['beautifulsoup4', 'python-json-logger'],
+    install_requires=open('requirements.txt').read().split(),
     keywords='malware-analysis, malware-analyzer, malware-detection, framework, automation',
     python_requires='>=3.6',
     test_suite='stoq.tests',
