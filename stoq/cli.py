@@ -148,7 +148,7 @@ Examples:
 
     install = subparsers.add_parser('install', help='Install a given plugin')
     install.add_argument(
-        'plugin_path', help='Directory or git repo of the plugin to install'
+        'plugin_path', help='Directory or Github repo of the plugin to install'
     )
     install.add_argument(
         '--install_dir',
@@ -161,7 +161,7 @@ Examples:
         help='Force the plugin to be upgraded if it already exists',
     )
     install.add_argument(
-        '--git', action='store_true', help='Install plugin from git repository'
+        '--github', action='store_true', help='Install plugin from Github repository'
     )
 
     subparsers.add_parser('test', help='Run stoQ tests')
@@ -244,7 +244,7 @@ Examples:
             print(f'{name:<30s}v{info["version"]:<10s}{info["description"]}')
     elif args.command == 'install':
         StoqPluginInstaller.install(
-            args.plugin_path, args.install_dir, args.upgrade, args.git
+            args.plugin_path, args.install_dir, args.upgrade, args.github
         )
         print(f'Successfully installed to {args.install_dir}')
     elif args.command == 'test':

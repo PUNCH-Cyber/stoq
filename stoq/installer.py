@@ -15,13 +15,12 @@
 #   limitations under the License.
 
 import os
-import pip  # pyre-ignore[21]
 import sys
+import requests
 import subprocess
+from tempfile import NamedTemporaryFile
 
 from .exceptions import StoqException
-
-PIP_VER = float(sys.modules[pip.__package__].__version__)
 
 
 class StoqPluginInstaller:
@@ -29,19 +28,17 @@ class StoqPluginInstaller:
     DEFAULT_REPO = 'git+https://github.com/PUNCH-Cyber/stoq-plugins-public.git@v2'
 
     @staticmethod
-    def install(plugin_path: str, install_dir: str, upgrade: bool, git: bool) -> None:
-        if git:
+    def install(
+        plugin_path: str, install_dir: str, upgrade: bool, github: bool
+    ) -> None:
+        if github:
             if plugin_path.startswith('git+http'):
                 pass
             elif plugin_path.startswith('stoq:'):
                 plugin_name = plugin_path.split(':')[1]
                 plugin_path = f'{StoqPluginInstaller.DEFAULT_REPO}#egg={plugin_name}&subdirectory=v2/{plugin_name}'
             else:
-                raise StoqException('Invalid git repository specified.')
-            if PIP_VER <= 18.1:
-                print(
-                    'Warning: dependencies in requirements.txt will not be installed. Please upgraded pip to >= 18.2'
-                )
+                raise StoqException('Invalid Github repository specified.')
         else:
             plugin_path = os.path.abspath(plugin_path)
             if not os.path.isdir(plugin_path):
@@ -53,14 +50,40 @@ class StoqPluginInstaller:
             raise StoqException(
                 f'Given install directory does not exist: {install_dir}'
             )
-        StoqPluginInstaller.setup_package(plugin_path, install_dir, upgrade, git)
+        StoqPluginInstaller.setup_package(plugin_path, install_dir, upgrade, github)
 
     @staticmethod
     def setup_package(
-        plugin_path: str, install_dir: str, upgrade: bool, git: bool
+        plugin_path: str, install_dir: str, upgrade: bool, github: bool
     ) -> None:
-        if not git and PIP_VER <= 18.1:
-            requirements = '{}/requirements.txt'.format(plugin_path)
+        if github:
+            url = (
+                plugin_path.split('+')[1]
+                .split('#')[0]
+                .replace('.git', '')
+                .replace('github.com', 'raw.githubusercontent.com')
+                .replace('@', '/')
+            )
+            path = plugin_path.split('subdirectory=')[1]
+            requirements = f'{url}/{path}/requirements.txt'
+            with NamedTemporaryFile() as temp_file:
+                response = requests.get(requirements)
+                if response.status_code == 200:
+                    temp_file.write(response.content)
+                    temp_file.flush()
+                    subprocess.check_call(
+                        [
+                            sys.executable,
+                            '-m',
+                            'pip',
+                            'install',
+                            '--quiet',
+                            '-r',
+                            temp_file.name,
+                        ]
+                    )
+        else:
+            requirements = f'{plugin_path}/requirements.txt'
             if os.path.isfile(requirements):
                 subprocess.check_call(
                     [
@@ -75,13 +98,8 @@ class StoqPluginInstaller:
                 )
 
         cmd = [sys.executable, '-m', 'pip', 'install', plugin_path, '-t', install_dir]
-        if PIP_VER >= 18.2:
-            # Check to ensure pip isn't a broken version, if not, add the `-e` arg
-            # https://github.com/pypa/pip/issues/4390
-            cmd.insert(4, '-e')
         if upgrade:
             cmd.append('--upgrade')
-
         try:
             output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as err:
