@@ -3,6 +3,9 @@ import re
 
 from setuptools import setup  # pyre-ignore
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 
 def version():
     version_pattern = r"__version__\W*=\W*'([^']+)'"
@@ -13,11 +16,13 @@ def version():
 
 
 setup(
-    name='stoq',
+    name='stoq-framework',
     version=version(),
     author='Marcus LaFerrera',
     author_email='marcus@punchcyber.com',
     description='A framework for simplifying analysis.',
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     license='Apache License 2.0',
     url='https://github.com/PUNCH-Cyber/stoq',
     include_package_data=True,
