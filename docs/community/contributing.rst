@@ -1,0 +1,6 @@
+Contributing
+============
+
+- formatting
+- tests
+- pyre

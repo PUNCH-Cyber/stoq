@@ -21,6 +21,8 @@ import stoq.helpers as helpers
 
 
 class PayloadMeta:
+    """ Object to store metadata pertaining to a payload """
+
     def __init__(
         self,
         should_archive: bool = True,
@@ -36,6 +38,8 @@ class PayloadMeta:
 
 
 class Payload:
+    """ Object to store payload and related information """
+
     def __init__(
         self,
         content: bytes,
@@ -60,6 +64,8 @@ class Payload:
 
 
 class RequestMeta:
+    """ Origin source request metadata """
+
     def __init__(
         self,
         archive_payloads: bool = True,
@@ -75,6 +81,8 @@ class RequestMeta:
 
 
 class PayloadResults:
+    """ Results from worker plugins from the scanning of a payload """
+
     def __init__(
         self,
         payload_id: str,
@@ -115,6 +123,8 @@ class PayloadResults:
 
 
 class StoqResponse:
+    """ Response object of a completed scan """
+
     def __init__(
         self,
         time: str,
@@ -135,6 +145,8 @@ class StoqResponse:
 
 
 class ExtractedPayload:
+    """ Object to store extracted payloads from worker plugins """
+
     def __init__(
         self, content: bytes, payload_meta: Optional[PayloadMeta] = None
     ) -> None:
@@ -143,6 +155,8 @@ class ExtractedPayload:
 
 
 class WorkerResponse:
+    """ Object containing response from worker plugins """
+
     def __init__(
         self,
         results: Optional[Dict] = None,
@@ -158,6 +172,8 @@ class WorkerResponse:
 
 
 class ArchiverResponse:
+    """ Object containing response from archiver plugins """
+
     def __init__(
         self, results: Optional[Dict] = None, errors: List[str] = None
     ) -> None:
@@ -169,6 +185,8 @@ class ArchiverResponse:
 
 
 class DispatcherResponse:
+    """ Object containing response from dispatcher plugins """
+
     def __init__(
         self,
         plugin_names: Optional[List[str]] = None,
@@ -184,6 +202,8 @@ class DispatcherResponse:
 
 
 class DeepDispatcherResponse:
+    """ Object containing response from deep dispatcher plugins """
+
     def __init__(
         self,
         plugin_names: Optional[List[str]] = None,

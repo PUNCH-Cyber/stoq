@@ -156,6 +156,9 @@ class Stoq(StoqPluginManager):
         add_start_deep_dispatch: Optional[List[str]] = None,
         ratelimit: Optional[str] = None,
     ) -> StoqResponse:
+        """ Wrapper for `scan_payload` that creates a `Payload` object
+            from bytes
+        """
         payload_meta = PayloadMeta() if payload_meta is None else payload_meta
         payload = Payload(content, payload_meta)
         return self.scan_payload(
@@ -169,6 +172,10 @@ class Stoq(StoqPluginManager):
         add_start_dispatch: Optional[List[str]] = None,
         add_start_deep_dispatch: Optional[List[str]] = None,
     ) -> StoqResponse:
+        """
+        Scan an individual payload
+
+        """
         request_meta = RequestMeta() if request_meta is None else request_meta
         add_start_dispatch = [] if add_start_dispatch is None else add_start_dispatch
         add_start_deep_dispatch = (
@@ -219,6 +226,10 @@ class Stoq(StoqPluginManager):
         return response
 
     def run(self) -> None:
+        """
+        Run stoQ using a provider plugin to scan multiple files until exhaustion
+
+        """
         # Don't initialize any (provider) plugins here! They should be
         # initialized on stoq start-up or via load_plugin()
         if not self._loaded_provider_plugins:

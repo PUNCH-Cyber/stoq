@@ -25,16 +25,22 @@ Want to learn more? Read some of the [blog posts](https://medium.com/stoq) we've
 # Plugins
 
 stoQ currently has over 40 publicly available plugins. These plugins are
-available separately in the [plugin repository](https://github.com/PUNCH-Cyber/stoq-plugins-public/v2)
+available separately in the [plugin repository](https://github.com/PUNCH-Cyber/stoq-plugins-public/tree/v2)
 
 Don't see a plugin you need? Check out the [plugin development](https://stoq-framework.readthedocs.io/en/latest/PluginDevelopment.html) documentation, or contact us.
 
 # Installation and Documenation
 
-Want to get started quickly? Check out the [docker image](https://hub.docker.com/r/punchcyber/stoq/).
+stoQ requires a minimum of python 3.6.
 
-stoQ requires a minimum of python 3.6. Installation on Debian based systems is
-as simple as running a script. For detailed instructions on how to install stoQ,
-to include the installation script, please visit stoQ's [install documentation](https://stoq-framework.readthedocs.io/en/latest/Installation.html). If you're
-interested in learning more about stoQ, to include how to develop your own plugins,
+Installation via pip:
+
+    pip install stoq-framework
+
+Or, you can install the lastest master:
+
+    git clone --single-branch -b v2 https://github.com/PUNCH-Cyber/stoq
+    cd stoq && python3 setup.py install
+
+If you're interested in learning more about stoQ, to include how to develop your own plugins,
 checkout the [full documentation](http://stoq-framework.readthedocs.io/).
