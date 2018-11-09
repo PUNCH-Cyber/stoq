@@ -78,9 +78,9 @@ Basic Usage via Command Line
 
 In order to use |stoQ| via the command line, at least two options must be
 defined. The worker plugin that should be loaded, and the source of input.
-In order to see a basic usage help, simply execute ``stoq-cli.py``::
+In order to see a basic usage help, simply execute ``stoq``::
 
-    bash$ stoq-cli.py
+    bash$ stoq
 
         .------..------..------..------.
         |S.--. ||T.--. ||O.--. ||Q.--. |
@@ -92,7 +92,7 @@ In order to see a basic usage help, simply execute ``stoq-cli.py``::
                     v0.9.7
 
     usage:
-        stoq-cli.py [command] [<args>]
+        stoq [command] [<args>]
 
         Available Commands:
             help    Display help message
@@ -103,11 +103,11 @@ In order to see a basic usage help, simply execute ``stoq-cli.py``::
 
 
 
-To view a complete listing of available plugins simply call ``stoq-cli.py`` with the
+To view a complete listing of available plugins simply call ``stoq`` with the
 ``list`` command line argument::
 
 
-    bash$ stoq-cli.py list
+    bash$ stoq list
 
         _______ _______  _____   _____
         |______    |    |     | |   __|
@@ -175,7 +175,7 @@ process with the *yara* worker plugin. We also want the results to be displayed 
 We can simply run |stoQ| with the following command line arguments::
 
 
-    bash$ stoq-cli.py yara -F bad.exe
+    bash$ stoq yara -F bad.exe
     {
     "date" : "2015-10-29T15:22:55.824563",
     "payloads" : 1,
@@ -239,7 +239,7 @@ Let's assume that we have a directory in our current working directory named
 for any new files that are created, archive them to MongoDB, and then process
 them with our default workers listed above::
 
-    bash$ stoq-cli.py publisher -I dirmon -F malicious -A mongodb
+    bash$ stoq publisher -I dirmon -F malicious -A mongodb
 
 Once a file is placed into this directory, the newly created file will be
 ingested, saved into our MongoDB instance, and a message will be sent to the
@@ -249,10 +249,10 @@ Now, we need to make sure our worker plugins are running so they can processes
 their newly identified file. In this scenario, since we are saving the file
 itself into MongoDB, we will also save our worker plugin results into MongoDB::
 
-    bash$ stoq-cli.py yara -I rabbitmq -C mongodb &
-    bash$ stoq-cli.py exif -I rabbitmq -C mongodb &
-    bash$ stoq-cli.py peinfo -I rabbitmq -C mongodb &
-    bash$ stoq-cli.py trid -I rabbitmq -C mongodb &
+    bash$ stoq yara -I rabbitmq -C mongodb &
+    bash$ stoq exif -I rabbitmq -C mongodb &
+    bash$ stoq peinfo -I rabbitmq -C mongodb &
+    bash$ stoq trid -I rabbitmq -C mongodb &
 
 
 Indices and tables
