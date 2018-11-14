@@ -3,7 +3,7 @@
 Plugin Overview
 ===============
 
-`stoQ` is a highly flexible framework because of it's ability to leverage plugins for each layer of operations. One of the biggest benefits to this is that is ensures the user is able to quickly and easily pivot to and from different technologies in their stack, without having to drastically alter worklow.
+`stoQ` is a highly flexible framework because of its ability to leverage plugins for each layer of operations. One of the biggest benefits to this approach is that it ensures the user is able to quickly and easily pivot to and from different technologies in their stack, without having to drastically alter workflow.
 
 For a full listing of all publicly available plugins, check out the `stoQ public plugins <https://github.com/PUNCH-Cyber/stoq-plugins-public>`_ repository.
 
@@ -11,7 +11,7 @@ Providers
 ---------
 .. _provider:
 
-Provider plugins are designed for passing multiple payloads, or locations of payloads, to `stoQ`. They allow for multiple payloads to be run again `stoQ` until the source is exhausted. As such, they are useful for monitoring directories for new files, subscribing to a queue (i.e., RabbitMQ, Google PubSub, ZeroMQ), or scanning entire directories recursively. Multiple provider plugins can be provided allowing for even more flexibility. Provider plugins may either send a payload to `stoQ` for scanning, or send a message that an :ref:`Archiver plugin <archiver>` is able to handle for loading of a payload.
+Provider plugins are designed for passing multiple payloads, or locations of payloads, to `stoQ`. They allow for multiple payloads to be run against `stoQ` until the source is exhausted. As such, they are useful for monitoring directories for new files, subscribing to a queue (i.e., RabbitMQ, Google PubSub, ZeroMQ), or scanning entire directories recursively. Multiple provider plugins can be provided allowing for even more flexibility. Provider plugins may either send a payload to `stoQ` for scanning, or send a message that an :ref:`Archiver plugin <archiver>` is able to handle for loading of a payload.
 
 .. note:: Provider plugins are not available when using `scan mode`. This is due to `scan mode` being designed for individual scans, not multiple payloads.
 
