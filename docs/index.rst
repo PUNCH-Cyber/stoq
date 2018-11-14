@@ -448,7 +448,7 @@ If you're just getting started with stoQ or want to learn how to maximize its us
 
    user/installation
    user/usecases
-   user/quickstart
+   user/gettingstarted
    user/advanced
    user/plugins
 

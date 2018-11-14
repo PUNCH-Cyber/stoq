@@ -1,5 +1,5 @@
-Quick Start
-===========
+Getting Started
+===============
 
 Now that stoQ is installed, getting up and running is extremly simple. stoQ can be run a few different ways, depending on what your requirements are.
 
@@ -237,5 +237,5 @@ When running ``stoq`` from the command line, simply add ``--plugin-opts`` to you
 
 For example, if we want to tell the plugin ``dirmon`` to monitor the directory ``/tmp/monitor`` for new files by setting the option ``source_dir``, the syntax would be::
 
-    dirmon::source_dir=/tmp/monitor
+    dirmon:source_dir=/tmp/monitor
 
