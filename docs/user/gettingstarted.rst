@@ -1,16 +1,51 @@
+.. _gettingstarted:
+
 Getting Started
 ===============
 
 Now that stoQ is installed, getting up and running is extremly simple. stoQ can be run a few different ways, depending on what your requirements are.
 
+.. _workflow:
+
+Workflow
+********
+
+Below are the individual steps and order for how plugins are handled within `stoQ`.
+
+#. :ref:`Provider Plugin <provider>`:
+    Provider plugins add a payload to the stoQ queue for processing
+#. :ref:`Archiver Plugin <archiver>` :ref:`(source archiver) <archiversource>`:
+    If the provider plugin passes a message, such as a file path or url, the source archiver retrieves the payload and provides it to stoQ
+#. :ref:`Dispatcher Plugin <dispatcher>`:
+    Once a payload is provided, it is passed to the dispatcher plugin that decides which worker plugins are used to scan the payload
+#. :ref:`Worker Plugin <worker>`:
+    The payload is scanned by the worker plugin, and any extracted payloads are passed back to stoQ for additional processing
+#. :ref:`Deep Dispatcher Plugin <deepdispatcher>`:
+    Once each worker completes their scanning, the payloads as well as the worker results are passed to the deep dispatcher plugins. The Deep Dispatchers will then decided which worker plugins the payload and results are passed.
+#. :ref:`Archiver Plugin <archiver>` :ref:`(destination archiver) <archiverdest>`:
+    If a payload or extracted payload should be archived, they will be passed along to the destional archiver for saving.
+#. :ref:`Decorator Plugin <decorator>`:
+    Once all dispatching, scanning, archiving, and decorating has completed, the final results are passed to the decorator plugins in order for it to analyze the completed and correlated results.
+#. :ref:`Connector Plugin <connector>`:
+    The final step is handled by the connector plugin. If results should be saved or handled otherwise (i.e., added to a queue, emailed, etc..), the connector plugin will handle it.
+
+.. note: Each plugin class is optional. They can all be mix and matched as required. Additionally, multiple plugins of each class can be used simultaneously.
+
+
+.. _configure:
+
 Configuring stoQ
 ****************
+
+.. _stoqcfg:
 
 stoq.cfg
 --------
 
 stoQ's configuration file is not required, but does offer the convenience of overriding the default configuration. An example configuration file can be found `here <https://github.com/PUNCH-Cyber/stoq/blob/v2/extras/stoq.cfg>`_. By default, stoQ will look for ``stoq.cfg`` in ``$STOQ_HOME`` if running from the command line, or ``$CWD`` if being used as a library.
 
+
+.. _stoqhome:
 
 $STOQ_HOME
 ----------
@@ -23,6 +58,8 @@ to ``/opt/stoq`` like so::
 Now, stoQ will look for plugins in ``/opt/stoq/plugins`` and the ``stoq.cfg`` configuration file in ``/opt/stoq/stoq.cfg``.
 
 One thing to note is, ``$STOQ_HOME`` is only valid when using the ``stoq`` command. If you are using stoQ as a library, the default path will be ``$CWD``.
+
+.. _runningstoq:
 
 Running stoQ
 ************
@@ -56,6 +93,8 @@ Installed plugins can be easily listed by using the ``stoq`` command::
     exif                          v2.0.0     Processes a payload using ExifTool
     pecarve                       v2.0.0     Carve portable executable files from a data stream
     swfcarve                      v2.0.0     Carve and decompress SWF files from a data stream
+
+.. _scanmode:
 
 Scan Mode
 ---------
@@ -188,6 +227,8 @@ Now, you've run the payload with two different plugins simply by adding it to yo
     $ stoq scan -h
 
 
+.. _runmode:
+
 Run Mode
 --------
 
@@ -225,6 +266,8 @@ Ok, stoQ should have detected ``bad.exe`` was created in ``/tmp/monitor`` and th
 Great! We have successfully monitored a directory for new files, scanned them with two plugins, and then saved the results to disk. Again, we've only scratched the surface as to what stoQ can do. For more command line options in `run` mode, simply run::
 
     $ stoq run -h
+
+.. _pluginoptions:
 
 Plugin Options
 --------------
