@@ -8,8 +8,6 @@ Archiver Plugins
     :members:
     :undoc-members:
 
-
-
 Response
 --------
 
