@@ -14,6 +14,91 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+"""
+    .. _archiver:
+
+    Overview
+    --------
+
+    Archiver plugins are used for retrieving or saving scanned payloads. A payload
+    can be anything from the initial payload scanned, or extracted payloads from
+    previous scans. There are two types of archivers, :ref:`source <archiversource>`
+    and :ref:`destination <archiverdest>`.
+
+    .. _archiversource:
+
+    source
+    ^^^^^^
+
+    Archiver plugins used as a source retrieve payloads for scanning. This is useful
+    in several use cases, such as when using a provider plugin that isn't able to pass
+    a payload to `stoQ`. For example, if the provider plugin being used leverages a
+    queueing system, such as RabbitMQ, there may be problems placing multiple payloads
+    onto a queue as it is inefficient, prone to failure, and does not scale well. With
+    archiver plugins as a source, the queuing system can be leveraged by sending a
+    message with a payload location, and the archiver plugin can then retrieve the
+    payload for scanning.
+
+    Source archiver plugins can be defined multiple ways. In these examples, we will
+    use the ``filedir`` archiver plugin.
+
+    From ``stoq.cfg``::
+
+        [core]
+        source_archivers = filedir
+
+
+    .. note:: Multiple plugins can be defined separated by a comma
+
+    From the command line::
+
+        $ stoq run -S filedir [...]
+
+    .. note:: Multiple plugins can be defined by simply adding the plugin name
+
+    Or, when instantiating the ``Stoq()`` class::
+
+        import stoq
+        source_archivers = ['filedir']
+        s = Stoq(source_archivers=source_archivers, [...])
+
+    .. _archiverdest:
+
+    destination
+    ^^^^^^^^^^^
+
+    Archiver plugins used as a destination useful for saving payloads, be it the original
+    scanned payload or any extracted payloads. Multiple destination archivers can be
+    defined, allowing for a payload to be saved in a single or multiple locations.
+
+    Destination archiver plugins can be defined multiple ways. In these examples, we will
+    use the ``filedir`` archiver plugin.
+
+    From ``stoq.cfg``::
+
+        [core]
+        dest_archivers = filedir
+
+    .. note:: Multiple plugins can be defined separated by a comma
+
+    From the command line::
+
+        $ stoq run -A filedir [...]
+
+    .. note:: Multiple plugins can be defined by simply adding the plugin name
+
+    Or, when instantiating the ``Stoq()`` class::
+
+        import stoq
+        dest_archivers = ['filedir']
+        s = Stoq(dest_archivers=dest_archivers, [...])
+
+
+    API
+    ===
+
+"""
+
 from abc import abstractmethod
 from typing import Optional
 

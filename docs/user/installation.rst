@@ -1,24 +1,32 @@
+.. _install:
+
 Installation
 ============
 
 stoQ is extremly lightweight and strives for minimal dependecies. It can be installed either via `pip` or directly from source. Once you have stoQ installed, it's just a matter of installing the required plugins for your use case. stoQ has over 40 publicly available plugins that can be found in their own repository `here <https://github.com/PUNCH-Cyber/stoq-plugins-public>`_.
 
 
+.. _minreq:
+
 Minimum requirements
 ********************
 stoQ requires at a minimum Python v3.6.
 
 
-Latest stable release
-*********************
+.. _installlateststable:
+
+Stable
+******
 
 The simplest way to get started is to install stoQ from pip::
 
     $ pip install stoq-framework
 
 
-Latest development release
-**************************
+.. _installlatestdev:
+
+Development
+***********
 
 If you would rather use the latest development version, you can simply clone the repository and install from there::
 
@@ -31,8 +39,17 @@ Then, simply open the `stoq` directory and install::
     $ python3 setup.py install
 
 
-Installing core plugins from GitHub
-***********************************
+.. _installplugins:
+
+Installing Plugins
+******************
+
+There are two ways of installing `stoQ` plugins. All core public plugins can be installed via the command line directly from GitHub. Additionally, plugins can be installed from a local directory.
+
+.. _installplugingithub:
+
+From GitHub
+-----------
 
 Once you have stoQ installed, you can start installing the `publicly available plugins <https://github.com/PUNCH-Cyber/stoq-plugins-public>`_. For a full listing of plugins and a description of their functionality, you can visit the stoQ public plugins repository `here <https://github.com/PUNCH-Cyber/stoq-plugins-public>`_.
 
@@ -53,8 +70,10 @@ Now, let's install the stdout plugin::
     Successfully installed to ~/.stoq/plugins/stdout
 
 
-Installing plugins from directory
-*********************************
+.. _installplugingitdir:
+
+From directory
+--------------
 
 Plugins can also be installed from a local directory. This is useful if you have custom or third party plugins. Additionally, plugins can be install from a cloned version of stoQ's public plugin repository::
 
@@ -62,8 +81,10 @@ Plugins can also be installed from a local directory. This is useful if you have
     $ stoq install path/to/plugin
 
 
-Development Environment
-***********************
+.. _devenv:
+
+Dev Environment
+***************
 
 Want to try stoQ out or setup a development environment? It's simple. Just clone the stoQ repository then startup a virtual machine using `Vagrant`.
 

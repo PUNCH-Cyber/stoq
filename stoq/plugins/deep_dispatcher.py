@@ -14,6 +14,53 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+"""
+    .. _deepdispatcher:
+
+    Overview
+    ========
+
+    Deep Dispatcher plugins are similar to :ref:`dispatcher plugins <dispatcher>`, but there
+    are some significant differences in their utility. One of the primary differences between
+    them is deep dispatchers can be run 0 to N times per payload, where dispatcher plugins
+    are only run once per payload. Additionally, deep dispatchers are run after dispatcher
+    plugins and after the worker plugins has scanned the payload, but before continuing on
+    to any additional payloads. Because deep dispatchers are handled after the worker plugins
+    scan the payload, deep dispatchers are passed the original payload in addition to the
+    scan results from the workers. This allows for additional and deeper dispatching based
+    on not only the payload, but also any results from the workers. This concept can become
+    somewhat complex, so it is recommended the reader review the
+    :ref:`workflow section <workflow>` to better understand the full workflow.
+
+    Deep Dispatcher plugins can be defined multiple ways. In these examples, we will use
+    the ``test_deep_dispatcher`` deep dispatcher plugin.
+
+    From ``stoq.cfg``::
+
+        [core]
+        deep_dispatchers = test_deep_dispatcher
+        max_dispatch_passes = 3
+
+    .. note:: Multiple plugins can be defined separated by a comma. Additionally, ``max_dispatch_passes``
+              can be defined in ``stoq.cfg`` to ensure Deep Dispatchers do not end up in an endless loop.
+
+    From the command line::
+
+        $ stoq run -E test_deep_dispatcher [...]
+
+    .. note:: Multiple plugins can be defined by simply adding the plugin name
+
+    Or, when instantiating the ``Stoq()`` class::
+
+        import stoq
+        deep_dispatchers = ['test_deep_dispatcher']
+        s = Stoq(deep_dispatchers=deep_dispatchers, [...])
+
+    API
+    ===
+
+"""
+
 from abc import abstractmethod
 from typing import Optional
 

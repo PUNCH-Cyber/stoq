@@ -14,6 +14,45 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+"""
+    .. _connector:
+
+    Overview
+    ========
+
+    The last plugin class is the Connector plugin. This plugin class allows for the
+    saving or passing off of the final result. Once all other plugins have completed
+    their tasks, the final result is sent to the loaded connector plugins for handling.
+    For example, a connector plugin may save results to disk, ElasticSearch, or even
+    pass them off to a queueing system such as RabbitMQ.
+
+    Connector plugins can be defined multiple ways. In these examples, we will use the
+    ``filedir`` connector plugin, allowing results to be saved to disk.
+
+    From ``stoq.cfg``::
+
+        [core]
+        connectors = filedir
+
+    .. note:: Multiple plugins can be defined separated by a comma.
+
+    From the command line::
+
+        $ stoq run -C filedir [...]
+
+    .. note:: Multiple plugins can be defined by simply adding the plugin name
+
+    Or, when instantiating the ``Stoq()`` class::
+
+        import stoq
+        connectors = ['filedir']
+        s = Stoq(connectors=connectors, [...])
+
+    API
+    ===
+
+"""
+
 from abc import abstractmethod
 
 from stoq.data_classes import StoqResponse

@@ -444,22 +444,21 @@ User Guide
 If you're just getting started with stoQ or want to learn how to maximize its use, start here.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 3
 
    user/installation
-   user/usecases
    user/gettingstarted
    user/advanced
-   user/plugins
 
 Developer Guide
 ---------------
 Want to get started writing your own plugins for stoQ? This is for you.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 3
 
-   dev/overview
+   dev/core
+   dev/plugin_overview
    dev/providers
    dev/dispatchers
    dev/deepdispatchers
@@ -468,22 +467,14 @@ Want to get started writing your own plugins for stoQ? This is for you.
    dev/decorators
    dev/connectors
    dev/packaging
-
-API Guide
----------
-Learn more about the internals of stoQ here.
-
-.. toctree::
-   :maxdepth: 1
-
-   api
+   dev/multiclass
 
 Community Guide
 ---------------
 Looking at learning more about the project and how to contribute? Read on.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    community/faq
    community/contributing

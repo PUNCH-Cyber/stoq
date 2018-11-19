@@ -1,10 +1,18 @@
+.. _pluginarchiver:
+.. module:: stoq
+
 Archiver Plugins
 ================
 
+.. automodule:: stoq.plugins.archiver
+    :members:
+    :undoc-members:
 
-Source Archivers
-----------------
 
 
-Destination Archivers
----------------------
+Response
+--------
+
+.. autoclass:: stoq.data_classes.ArchiverResponse
+    :members:
+    :undoc-members:
