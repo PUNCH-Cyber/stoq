@@ -28,6 +28,5 @@ class ArchiverPlugin(BasePlugin):
     ) -> Optional[ArchiverResponse]:
         pass
 
-    @abstractmethod
     def get(self, task: str) -> Optional[Payload]:
         pass
