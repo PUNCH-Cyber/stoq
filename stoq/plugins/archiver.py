@@ -22,12 +22,10 @@ from stoq.plugins import BasePlugin
 
 
 class ArchiverPlugin(BasePlugin):
-    @abstractmethod
     def archive(
         self, payload: Payload, request_meta: RequestMeta
     ) -> Optional[ArchiverResponse]:
         pass
 
-    @abstractmethod
     def get(self, task: str) -> Optional[Payload]:
         pass
