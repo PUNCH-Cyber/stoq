@@ -251,10 +251,12 @@ class Stoq(StoqPluginManager):
                                     break
                             except Exception as e:
                                 self.log.warn(
-                                    f'{task} not found in archive {source_name}'
+                                    f'"{task}" not found in archive "{source_name}": {str(e)}'
                                 )
-                    if not payload:
-                        raise StoqException('Unable to determine Payload from {task}')
+                        if not payload:
+                            raise StoqException(
+                                'Unable to determine Payload from task: "{task}"'
+                            )
                     self.scan_payload(payload)
                 except queue.Empty:
                     pass
