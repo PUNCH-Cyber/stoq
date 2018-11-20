@@ -1,1 +1,2 @@
-sphinx
+Sphinx~=1.8.1
+sphinx-autodoc-typehints~=1.3.0
