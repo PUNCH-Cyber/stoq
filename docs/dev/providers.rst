@@ -4,7 +4,6 @@
 Provider Plugins
 ================
 
-
 .. automodule:: stoq.plugins.provider
     :members:
     :undoc-members:
