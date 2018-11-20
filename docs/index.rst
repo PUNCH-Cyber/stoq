@@ -452,7 +452,6 @@ Want to get started using `stoQ` or write your own plugins? Start reading here.
    user/advanced
    dev/core
    dev/plugin_overview
-   dev/multiclass
    dev/packaging
 
 Community Guide

@@ -19,32 +19,37 @@
     ========
 
     ``Stoq`` is the primary class for interacting with `stoQ` and its plugins.
-    All options, except for plugins, must be defined upon instantiation.
-    Plugins can be loaded at any time, however, to ensure consistent
-    behavior, it is recommended that all required plugins are loaded
-    prior to scanning payloads.
+    All arguments, except for plugins to be used, must be defined upon instantiation.
+    Plugins can be loaded at any time. However, to ensure consistent
+    behavior, it is recommended that all required plugins be loaded
+    upon instantiation.
 
     Individual Scan
     ***************
 
-    First, import the required class:
+    Individual scans are useful for scanning single payloads at a time. The user is
+    responsible for ensuring a payload is passed to ``Stoq``.
+
+    .. note:: ``Provider`` plugins are ignored when conducting an individual scan.
+
+    1. First, import the required class:
 
     >>> from stoq import Stoq
 
-    We will now define the plugins we want to us. In this case, we will be
+    2. We will now define the plugins we want to us. In this case, we will be
     loading the ``hash``, and ``exif`` plugins.
 
     >>> workers = ['hash', 'exif']
     >>> plugin_dirs = ['/opt/plugins']
 
-    Now that we have our environment defined, lets instantiate the ``Stoq`` class:
+    3. Now that we have our environment defined, lets instantiate the ``Stoq`` class:
 
     >>> s = Stoq(
     ...     plugin_dir_list=plugin_dirs,
     ...     always_dispatch=workers
     ... )
 
-    We can now load a payload, and scan it individually with `stoQ`:
+    4. We can now load a payload, and scan it individually with `stoQ`:
 
     >>> src = '/tmp/bad.exe'
     >>> with open(src, 'rb') as src_payload:
@@ -76,11 +81,16 @@
     Using Providers
     ***************
 
-    First, import the required class:
+    Using stoQ with providers allows for the scanning of multiple payloads from
+    multiple sources. This method will instantiate a `Queue` which payloads
+    are published to for scanning by `stoQ`. Additionally, payloads may be
+    retrieved from multiple disparate data sources using `Archiver` plugins.
+
+    1. First, import the required class:
 
     >>> from stoq import Stoq
 
-    We will now define the plugins we want to us. In this case, we will be
+    2. We will now define the plugins we want to us. In this case, we will be
     loading the ``dirmon``, ``filedir``, ``hash``, and ``exif`` plugins. We
     will also set the ``base_dir`` to a specific directory. Additionally,
     we will also set some plugin options to ensure the plugins are
@@ -100,7 +110,7 @@
     .. note:: Any plugin options available in the plugin's ``.stoq`` configuration
               file can be set via the ``plugin_opts`` argument.
 
-    Now that we have our environment defined, lets instantiate the ``Stoq`` class,
+    3. Now that we have our environment defined, lets instantiate the ``Stoq`` class,
     and run:
 
     >>> s = Stoq(
