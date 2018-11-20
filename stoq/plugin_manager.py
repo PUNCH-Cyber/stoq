@@ -117,11 +117,24 @@ class StoqPluginManager:
             module,
             predicate=lambda mem: inspect.isclass(mem)
             and issubclass(mem, BasePlugin)
+            and mem not in [ArchiverPlugin,
+                            BasePlugin,
+                            ProviderPlugin,
+                            WorkerPlugin,
+                            ConnectorPlugin,
+                            DispatcherPlugin,
+                            DeepDispatcherPlugin,
+                            DecoratorPlugin]
             and not inspect.isabstract(mem),
         )
         if len(plugin_classes) == 0:
             raise StoqException(
                 f'No valid plugin classes found in the module for {name}'
+            )
+        if len(plugin_classes) > 1:
+            raise StoqException(
+                f'Multiple possible plugin classes found in the module for {name},'
+                ' unable to distinguish which to use.'
             )
         _, plugin_class = plugin_classes[0]
         plugin = plugin_class(config, self._plugin_opts.get(name))
@@ -140,4 +153,3 @@ class StoqPluginManager:
                 ),
             }
         return plugins
-

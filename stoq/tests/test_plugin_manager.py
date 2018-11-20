@@ -82,6 +82,14 @@ class TestPluginManager(unittest.TestCase):
         with self.assertRaises(StoqException):
             pm.load_plugin('missing_plugin')
 
+    def test_load_multiple_plugins_in_module(self):
+        pm = StoqPluginManager([utils.get_invalid_plugins_dir()])
+        collected_plugins = pm.list_plugins()
+        # The plugin should be collected even though it is invalid at load time
+        self.assertIn('multiple_plugins_in_module', collected_plugins)
+        with self.assertRaises(StoqException):
+            pm.load_plugin('multiple_plugins_in_module')
+
     def test_no_reload(self):
         pm = StoqPluginManager([utils.get_plugins_dir()])
         worker = pm.load_plugin('dummy_worker')
