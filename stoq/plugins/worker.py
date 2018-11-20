@@ -59,6 +59,9 @@
     Lastly, worker plugins can be defined by dispatcher plugins. As mentioned previously,
     more information on them can be found in the :ref:`dispatcher plugin section <dispatcher>`
 
+    Writing a plugin
+    ================
+
 
     Extracted Payloads
     ------------------

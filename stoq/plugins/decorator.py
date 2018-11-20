@@ -48,6 +48,11 @@
         decorators = ['test_decorator']
         s = Stoq(decorators=decorators, [...])
 
+
+    Writing a plugin
+    ================
+
+
     API
     ===
 

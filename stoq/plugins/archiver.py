@@ -18,7 +18,7 @@
     .. _archiver:
 
     Overview
-    --------
+    ========
 
     Archiver plugins are used for retrieving or saving scanned payloads. A payload
     can be anything from the initial payload scanned, or extracted payloads from
@@ -94,6 +94,10 @@
         s = Stoq(dest_archivers=dest_archivers, [...])
 
 
+    Writing a plugin
+    ================
+
+
     API
     ===
 
@@ -107,12 +111,37 @@ from stoq.plugins import BasePlugin
 
 
 class ArchiverPlugin(BasePlugin):
-    @abstractmethod
     def archive(
         self, payload: Payload, request_meta: RequestMeta
     ) -> Optional[ArchiverResponse]:
+        """
+        Archive payload
+
+        :param payload: Payload object to archive
+        :param request_meta: Originating request metadata
+
+        >>> from stoq import Stoq, Payload
+        >>> payload = Payload(b'this is going to be saved')
+        >>> s = Stoq()
+        >>> archiver = s.load_plugin('filedir')
+        >>> payload = archiver.archive(payload)
+
+        """
         pass
 
-    @abstractmethod
     def get(self, task: str) -> Optional[Payload]:
+        """
+        Retrieve payload for processing
+
+        :param task: Task to be processed for loading of payload
+
+        :return: Payload object for scanning
+
+        >>> from stoq import Stoq
+        >>> task = '/data/bad.exe'
+        >>> s = Stoq()
+        >>> archiver = s.load_plugin('filedir')
+        >>> payload = archiver.get(task)
+
+        """
         pass

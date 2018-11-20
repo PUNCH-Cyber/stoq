@@ -48,6 +48,11 @@
         connectors = ['filedir']
         s = Stoq(connectors=connectors, [...])
 
+
+    Writing a plugin
+    ================
+
+
     API
     ===
 

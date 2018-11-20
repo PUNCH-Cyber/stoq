@@ -439,35 +439,21 @@ Or, carve a few executable files out of a Microsoft Word document::
 Guides
 ******
 
-User Guide
-----------
-If you're just getting started with stoQ or want to learn how to maximize its use, start here.
+User and Development Guide
+--------------------------
+
+Want to get started using `stoQ` or write your own plugins? Start reading here.
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
 
    user/installation
    user/gettingstarted
    user/advanced
-
-Developer Guide
----------------
-Want to get started writing your own plugins for stoQ? This is for you.
-
-.. toctree::
-   :maxdepth: 3
-
    dev/core
    dev/plugin_overview
-   dev/providers
-   dev/dispatchers
-   dev/deepdispatchers
-   dev/workers
-   dev/archivers
-   dev/decorators
-   dev/connectors
-   dev/packaging
    dev/multiclass
+   dev/packaging
 
 Community Guide
 ---------------

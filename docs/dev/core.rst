@@ -1,8 +1,8 @@
 .. _core:
 .. module:: stoq
 
-Stoq Core
-=========
+Core
+====
 
 .. automodule:: stoq.core
     :members:

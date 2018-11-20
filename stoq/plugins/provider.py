@@ -55,6 +55,11 @@
         providers = ['dirmon']
         s = Stoq(providers=providers, [...])
 
+
+    Writing a plugin
+    ================
+
+
     API
     ===
 

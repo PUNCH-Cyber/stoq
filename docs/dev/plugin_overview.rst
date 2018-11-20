@@ -1,7 +1,10 @@
 .. _pluginoverview:
 
-Plugin Overview
-===============
+Plugins
+=======
+
+Overview
+********
 
 `stoQ` is a highly flexible framework because of its ability to leverage plugins for each
 layer of operations. One of the biggest benefits to this approach is that it ensures the
@@ -11,10 +14,11 @@ how each of the below plugins are used, check out the :ref:`stoQ workflow sectio
 
 For a full listing of all publicly available plugins, check out the `stoQ public plugins <https://github.com/PUNCH-Cyber/stoq-plugins-public>`_ repository.
 
-Plugins
-=======
+Classes
+*******
+
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    archivers
    connectors

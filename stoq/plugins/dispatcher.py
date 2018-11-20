@@ -73,6 +73,10 @@
     defined.
 
 
+    Writing a plugin
+    ================
+
+
     API
     ===
 

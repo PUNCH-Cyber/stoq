@@ -56,6 +56,11 @@
         deep_dispatchers = ['test_deep_dispatcher']
         s = Stoq(deep_dispatchers=deep_dispatchers, [...])
 
+
+    Writing a plugin
+    ================
+
+
     API
     ===
 
