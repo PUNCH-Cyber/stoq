@@ -185,7 +185,7 @@ class StoqResponse:
         results: List[PayloadResults],
         request_meta: RequestMeta,
         errors: List[str],
-        time: Optional[str],
+        time: Optional[str] = None,
         decorators: Optional[Dict[str, Dict]] = None,
     ) -> None:
         """

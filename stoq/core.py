@@ -361,7 +361,7 @@ class Stoq(StoqPluginManager):
             scan_queue = next_scan_queue
 
         response = StoqResponse(
-            result=scan_results, request_meta=request_meta, errors=errors
+            results=scan_results, request_meta=request_meta, errors=errors
         )
 
         for plugin_name, decorator in self._loaded_decorator_plugins.items():
