@@ -18,18 +18,6 @@ import sys
 sys.path.insert(0, os.path.abspath('..'))
 import stoq
 
-from unittest.mock import MagicMock
-
-# Mock imports so module builds will pass
-class Mock(MagicMock):
-    @classmethod
-    def __getattr__(cls, name):
-        return MagicMock()
-
-
-MOCK_MODULES = ['bs4', 'pythonjsonlogger']
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-
 # -- Project information -----------------------------------------------------
 
 project = 'stoQ'
