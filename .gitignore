@@ -48,6 +48,7 @@ coverage.xml
 *,cover
 coverage
 .pyre
+.mypy_cache
 
 # Translations
 *.mo
