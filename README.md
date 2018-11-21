@@ -3,9 +3,7 @@
 </p>
 
 [![Build Status](https://travis-ci.org/PUNCH-Cyber/stoq.svg?branch=v2)](https://travis-ci.org/PUNCH-Cyber/stoq)
-
 [![Coverage Status](https://coveralls.io/repos/github/PUNCH-Cyber/stoq/badge.svg?branch=v2)](https://coveralls.io/github/PUNCH-Cyber/stoq?branch=v2)
-
 [![Documentation Status](https://readthedocs.org/projects/stoq-framework/badge/?version=documentation)](https://stoq-framework.readthedocs.io/en/documentation/)
 
 # Overview
