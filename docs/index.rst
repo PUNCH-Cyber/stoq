@@ -73,9 +73,9 @@ when compared to many of the other solutions available. Some key differences are
       Kubernetes, AWS Lambda, Google Cloud Functions, Azure Functions, and just about anything
       else.
     - Written to be easily and quickly extended. All you need is a plugin.
-    - Can be used in an enterprise environment or by individuals without any client/server
-      infrastructure configured and operational.
-    - Over 93% of the code has test coverage.
+    - Can be used in an enterprise environment or by individuals without the need for client/server
+      infrastructure
+    - Overwhelming majority of code is covered by unit tests.
     - All core functions and plugins leverage typing and are type checked at commit.
     - Actively developed since 2011, open source since 2015.
     - Extensive up-to-date documentation.
