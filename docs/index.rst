@@ -447,9 +447,8 @@ Want to get started using `stoQ` or write your own plugins? Start reading here.
 .. toctree::
    :maxdepth: 4
 
-   user/installation
-   user/gettingstarted
-   user/advanced
+   installation
+   gettingstarted
    dev/core
    dev/plugin_overview
    dev/packaging
