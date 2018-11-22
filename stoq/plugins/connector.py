@@ -44,14 +44,31 @@
 
     Or, when instantiating the ``Stoq()`` class::
 
-        import stoq
-        connectors = ['filedir']
-        s = Stoq(connectors=connectors, [...])
+        >>> import stoq
+        >>> connectors = ['filedir']
+        >>> s = Stoq(connectors=connectors, [...])
 
 
     Writing a plugin
     ================
 
+    A `connector` plugin must be a subclass of the ``ConnectorPlugin`` class.
+
+    As with any plugin, a :ref:`configuration file <pluginconfig>` must also exist
+    and be properly configured.
+
+    Example
+    -------
+
+    ::
+
+        from stoq.data_classes import StoqResponse
+        from stoq.plugins import ConnectorPlugin
+
+        class ExampleConnector(ConnectorPlugin):
+            def save(self, response: StoqResponse) -> None:
+                with open('/tmp/stoqresult.txt', 'w') as result:
+                    result.write(response)
 
     API
     ===

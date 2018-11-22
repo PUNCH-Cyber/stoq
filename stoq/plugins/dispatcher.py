@@ -43,11 +43,11 @@
 
     .. note:: Multiple plugins can be defined by simply adding the plugin name
 
-    Or, when instantiating the ``Stoq()`` class::
+    Or, when instantiating the ``Stoq()`` class:
 
-        import stoq
-        dispatchers = ['yara']
-        s = Stoq(dispatchers=dispatchers, [...])
+        >>> import stoq
+        >>> dispatchers = ['yara']
+        >>> s = Stoq(dispatchers=dispatchers, [...])
 
     Now, let's write a simple yara rule to pass a payload to the ``pecarve`` plugin if a
     DOS stub is found::
@@ -66,6 +66,7 @@
                 ($MZ or $ZM) and ($dos_stub or $win32_stub)
         }
 
+
     In this case, if this yara signature hits on a payload, the payload will be passed to
     the ``pecarve`` plugin, which will then extract the PE file as a payload, and send it
     to `stoQ` for continued scanning. Additionally, because ``save = "True"``, the extracted
@@ -75,6 +76,29 @@
 
     Writing a plugin
     ================
+
+    A `dispatcher` plugin must be a subclass of the ``DispatcherPlugin`` class.
+
+    As with any plugin, a :ref:`configuration file <pluginconfig>` must also exist
+    and be properly configured.
+
+    Example
+    -------
+    ::
+
+        from typing import Optional
+        from stoq.data_classes import Payload, DispatcherResponse, RequestMeta
+        from stoq.plugins import DispatcherPlugin
+
+
+        class ExampleDispatcher(DispatcherPlugin):
+            def get_dispatches(
+                self, payload: Payload, request_meta: RequestMeta
+            ) -> Optional[DispatcherResponse]:
+                dr = DispatcherResponse()
+                dr.errors.append('This is an example error and is completely optional')
+                dr.meta['example_key'] = 'Useful metadata info'
+                return dr
 
 
     API

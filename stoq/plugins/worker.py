@@ -52,9 +52,9 @@
 
     Or, when instantiating the ``Stoq()`` class::
 
-        import stoq
-        workers= ['yara']
-        s = Stoq(always_dispatch=workers, [...])
+        >>> import stoq
+        >>> workers= ['yara']
+        >>> s = Stoq(always_dispatch=workers, [...])
 
     Lastly, worker plugins can be defined by dispatcher plugins. As mentioned previously,
     more information on them can be found in the :ref:`dispatcher plugin section <dispatcher>`
@@ -62,10 +62,91 @@
     Writing a plugin
     ================
 
+    A `worker` plugin must be a subclass of the ``WorkerPlugin`` class.
+
+    As with any plugin, a :ref:`configuration file <pluginconfig>` must also exist
+    and be properly configured.
+
+    Example
+    -------
+
+    ::
+
+        from typing import List, Optional
+
+        from stoq.data_classes import (
+            Payload,
+            RequestMeta,
+            WorkerResponse,
+        )
+        from stoq.plugins import WorkerPlugin
+
+
+        class ExampleWorker(WorkerPlugin):
+            def scan(
+                self, payload: Payload, request_meta: RequestMeta
+            ) -> Optional[WorkerResponse]:
+                wr = WorkerResponse({'worker_results': 'something useful'})
+                return wr
 
     Extracted Payloads
     ------------------
 
+    Worker plugins may also extract payloads, and return them to ``Stoq`` for
+    further analysis. Each extracted payload that is returned will be inserted
+    into the same workflow as the original payload.
+
+    ::
+
+        from typing import List, Optional
+
+        from stoq.data_classes import (
+            ExtractedPayload,
+            Payload,
+            PayloadMeta,
+            RequestMeta,
+            WorkerResponse,
+        )
+        from stoq.plugins import WorkerPlugin
+
+
+        class ExampleWorker(WorkerPlugin):
+            def scan(
+                self, payload: Payload, request_meta: RequestMeta
+            ) -> Optional[WorkerResponse]:
+                p = ExtractedPayload(b'Lorem ipsum')
+                wr = WorkerResponse({'worker_results': 'something useful'}, extracted=[p])
+                return wr
+
+
+    Dispatch To
+    -----------
+
+    In some cases it may be useful for a worker plugin to dicate which plugins an extracted
+    payload is scanned with.
+
+    ::
+
+        from typing import List, Optional
+
+        from stoq.data_classes import (
+            ExtractedPayload,
+            Payload,
+            PayloadMeta,
+            RequestMeta,
+            WorkerResponse,
+        )
+        from stoq.plugins import WorkerPlugin
+
+
+        class ExampleWorker(WorkerPlugin):
+            def scan(
+                self, payload: Payload, request_meta: RequestMeta
+            ) -> Optional[WorkerResponse]:
+                dispatch_meta = PayloadMeta(dispatch_to='yara')
+                p = ExtractedPayload(b'this is a payload with bad stuff', dispatch_meta)
+                wr = WorkerResponse({'worker_results': 'something useful'}, extracted=[p])
+                return wr
 
     API
     ===

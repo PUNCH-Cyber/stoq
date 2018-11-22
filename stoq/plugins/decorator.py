@@ -44,14 +44,39 @@
 
     Or, when instantiating the ``Stoq()`` class::
 
-        import stoq
-        decorators = ['test_decorator']
-        s = Stoq(decorators=decorators, [...])
+        >>> import stoq
+        >>> decorators = ['test_decorator']
+        >>> s = Stoq(decorators=decorators, [...])
 
 
     Writing a plugin
     ================
 
+    A `decorator` plugin must be a subclass of the ``DecoratorPlugin`` class. Results
+    from a decorator are appended to the final ``StoqResponse`` object.
+
+    As with any plugin, a :ref:`configuration file <pluginconfig>` must also exist
+    and be properly configured.
+
+    Example
+    -------
+
+    ::
+
+        from typing import Optional
+
+        from stoq.data_classes import StoqResponse, DecoratorResponse
+        from stoq.plugins import DecoratorPlugin
+
+
+        class ExampleDecorator(DecoratorPlugin):
+
+            def decorate(self, response: StoqResponse) -> Optional[DecoratorResponse]:
+                do_more = False
+                if 'yara' in response.results[0].plugins_run:
+                    do_more = True
+                dr = DecoratorResponse({'do_more': do_more})
+                return dr
 
     API
     ===

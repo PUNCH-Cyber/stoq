@@ -83,20 +83,60 @@
 
     From the command line::
 
-        $ stoq run -A filedir [...]
+    $ stoq run -A filedir [...]
 
     .. note:: Multiple plugins can be defined by simply adding the plugin name
 
-    Or, when instantiating the ``Stoq()`` class::
+    Or, when instantiating the ``Stoq()`` class:
 
-        import stoq
-        dest_archivers = ['filedir']
-        s = Stoq(dest_archivers=dest_archivers, [...])
+        >>> import stoq
+        >>> dest_archivers = ['filedir']
+        >>> s = Stoq(dest_archivers=dest_archivers, [...])
 
 
     Writing a plugin
     ================
 
+    Unlike most other `stoQ` plugins, `archiver` plugins have two core methods, of which at
+    least one of the below is required.
+        - archive
+        - get
+
+    The ``archive`` method is used to archive payloads that are passed to `stoQ` or extracted
+    from other plugins. In order for a payload to be archived, that attribute ``should_archive``
+    must be set to ``True`` in the payloads ``PayloadMeta`` object. If set to ``False``, the
+    payload will not be archived.
+
+    An `archiver` plugin must be a subclass of the ``ArchiverPlugin`` class.
+
+    As with any plugin, a :ref:`configuration file <pluginconfig>` must also exist
+    and be properly configured.
+
+
+    Example
+    -------
+
+    ::
+
+        from typing import Optional
+
+        from stoq.data_classes import ArchiverResponse, Payload, RequestMeta, PayloadMeta
+        from stoq.plugins import ArchiverPlugin
+
+
+        class ExampleArchiver(ArchiverPlugin):
+            def archive(
+                self, payload: Payload, request_meta: RequestMeta
+            ) -> Optional[ArchiverResponse]:
+                with open('/tmp/archived_payload', 'wb) as out:
+                    out.write(payload.content)
+                ar = ArchiverResponse({'dest_file': '/tmp/archive_payload'})
+                return ar
+
+            def get(self, task: str) -> Optional[Payload]:
+                # We assume `task` is a file path
+                with open(task, 'rb') as infile:
+                    return Payload(infile.read(), PayloadMeta(extra_data={'path': task}))
 
     API
     ===

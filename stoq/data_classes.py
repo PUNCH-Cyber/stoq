@@ -250,7 +250,7 @@ class WorkerResponse:
 
         >>> results = {'is_bad': True, 'filetype': 'executable'}
         >>> extracted_payload = ExtractedPayload(content=data, payload_meta=extracted_meta)
-        >>> response = WorkerResponse(results=results, extracted=extracted_payload)
+        >>> response = WorkerResponse(results=results, extracted=[extracted_payload])
 
         """
         self.results = results

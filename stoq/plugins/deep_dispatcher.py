@@ -41,8 +41,10 @@
         deep_dispatchers = test_deep_dispatcher
         max_dispatch_passes = 3
 
+
     .. note:: Multiple plugins can be defined separated by a comma. Additionally, ``max_dispatch_passes``
               can be defined in ``stoq.cfg`` to ensure Deep Dispatchers do not end up in an endless loop.
+
 
     From the command line::
 
@@ -50,16 +52,40 @@
 
     .. note:: Multiple plugins can be defined by simply adding the plugin name
 
-    Or, when instantiating the ``Stoq()`` class::
+    Or, when instantiating the ``Stoq()`` class:
 
-        import stoq
-        deep_dispatchers = ['test_deep_dispatcher']
-        s = Stoq(deep_dispatchers=deep_dispatchers, [...])
+        >>> import stoq
+        >>> deep_dispatchers = ['test_deep_dispatcher']
+        >>> s = Stoq(deep_dispatchers=deep_dispatchers, [...])
 
 
     Writing a plugin
     ================
 
+    A `deep dispatcher` plugin must be a subclass of the ``DeepDispatcherPlugin`` class.
+
+    As with any plugin, a :ref:`configuration file <pluginconfig>` must also exist
+    and be properly configured.
+
+    Example
+    -------
+
+    ::
+
+        from typing import Optional
+
+        from stoq.data_classes import Payload, DeepDispatcherResponse, RequestMeta
+        from stoq.plugins import DeepDispatcherPlugin
+
+
+        class ExampleDeepDispatcher(DeepDispatcherPlugin):
+            def get_deep_dispatches(
+                self, payload: Payload, request_meta: RequestMeta
+            ) -> Optional[DeepDispatcherResponse]:
+                dr = DeepDispatcherResponse()
+                dr.errors.append('This is an example error and is completely optional')
+                dr.meta['deep_key'] = 'Useful deep metadata info'
+                return dr
 
     API
     ===

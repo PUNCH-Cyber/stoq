@@ -51,14 +51,38 @@
 
     Or, when instantiating the ``Stoq()`` class::
 
-        import stoq
-        providers = ['dirmon']
-        s = Stoq(providers=providers, [...])
+        >>> import stoq
+        >>> providers = ['dirmon']
+        >>> s = Stoq(providers=providers, [...])
 
 
     Writing a plugin
     ================
 
+    Provider plugins add either ``Payload`` objects to the `stoQ` queue, or a ``str``.
+    If a ``Payload`` object is added, `stoQ` will begin processing the payload. However,
+    if a ``str`` is added, `stoQ` will pass it to ``Archiver`` plugins that were
+    loaded when ``Stoq`` was instantiated with the ``source_archivers`` argument.
+
+    A `provider` plugin must be a subclass of the ``ProviderPlugin`` class.
+
+    As with any plugin, a :ref:`configuration file <pluginconfig>` must also exist
+    and be properly configured.
+
+    Example
+    -------
+
+    ::
+
+        from queue import Queue
+
+        from stoq import Payload
+        from stoq.plugins import ProviderPlugin
+
+
+        class ExampleProvider(ProviderPlugin):
+            def ingest(self, queue: Queue) -> None:
+                queue.put(Payload(b'This is a payload'))
 
     API
     ===
