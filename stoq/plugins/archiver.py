@@ -83,7 +83,7 @@
 
     From the command line::
 
-    $ stoq run -A filedir [...]
+        $ stoq run -A filedir [...]
 
     .. note:: Multiple plugins can be defined by simply adding the plugin name
 
@@ -94,11 +94,15 @@
         >>> s = Stoq(dest_archivers=dest_archivers, [...])
 
 
+    .. _writingplugin:
+
     Writing a plugin
     ================
 
+
     Unlike most other `stoQ` plugins, `archiver` plugins have two core methods, of which at
     least one of the below is required.
+
         - archive
         - get
 
@@ -114,7 +118,7 @@
 
 
     Example
-    -------
+    ^^^^^^^
 
     ::
 
