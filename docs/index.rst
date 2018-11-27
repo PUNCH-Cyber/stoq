@@ -38,7 +38,7 @@ What is stoQ?
 stoQ was initially a collection of scripts that helped us solve problems we were
 confronted with on a daily basis. These tasks, such as parsing an SMTP session,
 extracting attachments, scanning them with a multitude of custom and open source
-tools, saving the results, and then finally analyze them took up an increasing
+tools, saving the results, and then finally analyzing them took up an increasing
 amount of our teams resources. We found ourselves spending an ever increasing amount of
 time simply attempting to collect and extract data. This took valuable resources away
 from our ability to actually find and analyze adversaries targeting our networks.
@@ -63,7 +63,7 @@ Why use stoQ?
 
 Over the years, there have been several other open source solutions that have been released
 that have similar capabilities to stoQ. However, stoQ is fundamentally different in many ways
-when compared to many of the other solutions available. Some key differences are:
+when compared to other solutions available. Some key differences are:
 
     - Extremely lightweight and designed with simplicity in mind.
     - Over 40 `publicly available plugins <https://github.com/PUNCH-Cyber/stoq-plugins-public>`_.
