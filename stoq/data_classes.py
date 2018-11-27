@@ -49,6 +49,9 @@ class PayloadMeta:
     def __str__(self) -> str:
         return helpers.dumps(self)
 
+    def __repr__(self):
+        return repr(self.__dict__)
+
 
 class Payload:
     def __init__(
@@ -88,6 +91,9 @@ class Payload:
         }
         self.payload_id = str(uuid.uuid4()) if payload_id is None else payload_id
 
+    def __repr__(self):
+        return repr(self.__dict__)
+
 
 class RequestMeta:
     def __init__(
@@ -114,6 +120,9 @@ class RequestMeta:
 
     def __str__(self) -> str:
         return helpers.dumps(self)
+
+    def __repr__(self):
+        return repr(self.__dict__)
 
 
 class PayloadResults:
@@ -178,6 +187,9 @@ class PayloadResults:
     def __str__(self) -> str:
         return helpers.dumps(self)
 
+    def __repr__(self):
+        return repr(self.__dict__)
+
 
 class StoqResponse:
     def __init__(
@@ -208,6 +220,9 @@ class StoqResponse:
 
     def __str__(self) -> str:
         return helpers.dumps(self)
+
+    def __repr__(self):
+        return repr(self.__dict__)
 
 
 class ExtractedPayload:
@@ -260,6 +275,9 @@ class WorkerResponse:
     def __str__(self) -> str:
         return helpers.dumps(self)
 
+    def __repr__(self):
+        return repr(self.__dict__)
+
 
 class ArchiverResponse:
     def __init__(
@@ -281,6 +299,9 @@ class ArchiverResponse:
 
     def __str__(self) -> str:
         return helpers.dumps(self)
+
+    def __repr__(self):
+        return repr(self.__dict__)
 
 
 class DispatcherResponse:
@@ -310,6 +331,9 @@ class DispatcherResponse:
     def __str__(self) -> str:
         return helpers.dumps(self)
 
+    def __repr__(self):
+        return repr(self.__dict__)
+
 
 class DeepDispatcherResponse:
     def __init__(
@@ -338,6 +362,9 @@ class DeepDispatcherResponse:
     def __str__(self) -> str:
         return helpers.dumps(self)
 
+    def __repr__(self):
+        return repr(self.__dict__)
+
 
 class DecoratorResponse:
     def __init__(
@@ -360,3 +387,5 @@ class DecoratorResponse:
     def __str__(self) -> str:
         return helpers.dumps(self)
 
+    def __repr__(self):
+        return repr(self.__dict__)
