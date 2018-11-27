@@ -25,7 +25,7 @@ Expectations
 Keep in mind that repository maintainers and community contributors for stoQ
 are volunteers. Respect amongst participants must be maintained at all times
 and collaboration should be constructive. Everyone is expected to act in
-accordance with the project's :ref:`Code of Conduct <_codeofconduct>`
+accordance with the project's :ref:`Code of Conduct <codeofconduct>`
 
 
 How to report a bug
