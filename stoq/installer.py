@@ -36,7 +36,7 @@ class StoqPluginInstaller:
                 pass
             elif plugin_path.startswith('stoq:'):
                 plugin_name = plugin_path.split(':')[1]
-                plugin_path = f'{StoqPluginInstaller.DEFAULT_REPO}#egg={plugin_name}&subdirectory=v2/{plugin_name}'
+                plugin_path = f'{StoqPluginInstaller.DEFAULT_REPO}#egg={plugin_name}&subdirectory={plugin_name}'
             else:
                 raise StoqException('Invalid Github repository specified.')
         else:
