@@ -14,9 +14,276 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+"""
+    .. _stoqoverview:
+
+    Overview
+    ========
+
+    `stoQ` is an extremely flexible framework. In this section we will go over some of
+    the most advanced uses and show examples of how it can be used as a framework.
+
+    .. _framework:
+
+    Framework
+    =========
+
+    stoQ is much more than simply a command to be run. First and foremost, stoQ is a
+    framework. The command `stoq` is simply a means of interacting with the framework.
+    For more detailed and robust information on APIs available for stoQ, please check
+    out the :ref:`plugin documentation <pluginoverview>`.
+
+    ``Stoq`` is the primary class for interacting with `stoQ` and its plugins.
+    All arguments, except for plugins to be used, must be defined upon instantiation.
+    Plugins can be loaded at any time. However, to ensure consistent
+    behavior, it is recommended that all required plugins be loaded
+    upon instantiation.
+
+    For these examples, it is assumed the below :ref:`plugins have been installed <installplugins>`:
+        - dirmon
+        - exif
+        - filedir
+        - hash
+        - yara
+
+
+    .. _individualscan:
+
+    Individual Scan
+    ---------------
+
+    Individual scans are useful for scanning single payloads at a time. The user is
+    responsible for ensuring a payload is passed to ``Stoq``.
+
+    .. note:: ``Provider`` plugins are ignored when conducting an individual scan.
+
+    1. First, import the required class:
+
+        >>> from stoq import Stoq
+
+
+    2. We will now define the plugins we want to us. In this case, we will be
+       loading the ``hash``, and ``exif`` plugins:
+
+        >>> workers = ['hash', 'exif']
+        >>> plugin_dirs = ['/opt/plugins']
+
+
+    3. Now that we have our environment defined, lets instantiate the ``Stoq`` class:
+
+        >>> s = Stoq(
+        ...     plugin_dir_list=plugin_dirs,
+        ...     always_dispatch=workers
+        ... )
+
+
+    4. We can now load a payload, and scan it individually with `stoQ`:
+
+        >>> src = '/tmp/bad.exe'
+        >>> with open(src, 'rb') as src_payload:
+        ...     s = Stoq()
+        ...     meta = {'filename': src}
+        ...     results = s.scan(
+        ...             content=src_payload.read(),
+        ...             request_meta=meta,
+        ...             add_start_dispatch=plugins)
+        >>> print(results)
+        ...    {
+        ...        "time": "...",
+        ...        "results": [
+        ...            {
+        ...                "payload_id": "...",
+        ...                "size": 507904,
+        ...                "payload_meta": {
+        ...                    "should_archive": true,
+        ...                    "extra_data": {
+        ...                        "filename": "/tmp/bad.exe"
+        ...                    },
+        ...                    "dispatch_to": []
+        ...                },
+        ...                "workers": [
+        ...                    {
+        ...                        "hash": {
+        ... [...]
+
+
+    .. _providerscan:
+
+    Using Providers
+    ---------------
+
+    Using stoQ with providers allows for the scanning of multiple payloads from
+    multiple sources. This method will instantiate a `Queue` which payloads
+    are published to for scanning by `stoQ`. Additionally, payloads may be
+    retrieved from multiple disparate data sources using `Archiver` plugins.
+
+    1. First, import the required class:
+
+        >>> from stoq import Stoq
+
+
+    2. We will now define the plugins we want to us. In this case, we will be
+       loading the ``dirmon``, ``filedir``, ``hash``, and ``exif`` plugins. We
+       will also set the ``base_dir`` to a specific directory. Additionally,
+       we will also set some plugin options to ensure the plugins are
+       operating the way we'd like them:
+
+        >>> always_dispatch = ['hash']
+        >>> providers = ['dirmon']
+        >>> connectors = ['filedir']
+        >>> dispatchers = ['yara']
+        >>> plugin_opts = {
+        ...     'dirmon': {'source_dir': '/tmp/datadump'},
+        ...     'filedir': {'results_dir': '/tmp/stoq-results'}
+        ... }
+        >>> base_dir = '/usr/local/stoq'
+        >>> plugin_dirs = ['/opt/plugins']
+
+
+    .. note:: Any plugin options available in the plugin's ``.stoq`` configuration
+              file can be set via the ``plugin_opts`` argument.
+
+    3. Now that we have our environment defined, lets instantiate the ``Stoq`` class,
+    and run:
+
+        >>> s = Stoq(
+        ...     base_dir=base_dir,
+        ...     plugin_dir_list=plugin_dirs,
+        ...     dispatchers=dispatchers,
+        ...     providers=providers,
+        ...     connectors=connectors,
+        ...     plugins_opts=plugins_opts,
+        ...     always_dispatch=always_dispatch
+        ... )
+        >>> s.run()
+
+
+    A few things are happening here:
+        #. The ``/tmp/datadump`` directory is being monitored for newly created files
+        #. Each file is opened, and the payload is loaded into ``Stoq``
+        #. The payload is scanned with the ``yara`` dispatcher plugin
+        #. The yara dispatcher plugin returns a list of plugins that the payload should
+           be scanned with
+        #. The plugins identified by the ``yara`` dispatcher are loaded, and the payload is
+           sent to them
+        #. Each payload will always be sent to the ``hash`` plugin because it was defined
+           in ``always_dispatch``
+        #. The results from all plugins are collected, and sent to the ``filedir``
+           connector plugin
+        #. The ``filedir`` plugin saves each result to disk in ``/tmp/stoq-results``
+
+    .. _manualscan:
+
+    Manual Interaction
+    ==================
+
+    ``Stoq`` may also be interacted with manually, rather than relying on the normal workflow.
+    In this section, we will touch on how this can be done.
+
+    Instantiating stoQ
+    ------------------
+
+    Let's start by simply instantiating ``Stoq`` with no options. There are several arguments
+    available when instantiating ``Stoq``, please refer to the :ref:`plugin documentation <pluginoverview>`
+    for more information and options available.:
+
+        >>> from stoq import Stoq
+        >>> s = Stoq()
+
+
+    Loading plugins
+    ---------------
+
+    `stoQ` plugins can be loaded using a simple helper function. The framework will
+    automatically detect the type of plugin is it based on the ``class`` of the plugin.
+    There is no need to define the plugin type, `stoQ` will handle that once it is loaded.:
+
+        >>> plugin = s.load_plugin('yara')
+
+
+    Instantiate Payload Object
+    --------------------------
+
+    In order to scan a payload, a ``Payload`` object must first be instantiated. The
+    ``Payload`` object houses all information related to a payload, to include the
+    content of the payload and metadata (i.e., size, originating plugin information,
+    dispatch metadata, among others) pertaining to the payload. Optionally, a ``Payload``
+    object can be instantiated with a ``PayloadMeta`` object to ensure the originating
+    metadata (i.e., filename, source path, etc...) is also made available:
+
+        >>> import os
+        >>> from stoq.data_classes import PayloadMeta, Payload
+        >>> filename = '/tmp/test_file.exe'
+        >>> with open(filename, 'rb') as src:
+        ...    meta = PayloadMeta(
+        ...        extra_data={
+        ...            'filename': os.path.basename(filename),
+        ...            'source_dir': os.path.dirname(filename),
+        ...        }
+        ...    )
+        >>> payload = Payload(src.read(), meta)
+
+
+    Scan payload
+    ------------
+    There are two helper functions available for scanning a payload. If a dispatcher
+    plugin is not being used, then a worker plugin must be defined by passing the
+    ``add_start_dispatch`` argument. This tells `stoQ` to send the ``Payload`` object
+    to the specified worker plugins.
+
+    From raw bytes
+    ^^^^^^^^^^^^^^
+
+    If a `Payload` object has not been created yet, the content of the raw payload can
+    simply be passed to the `Stoq.scan` function. A ``Payload`` object will automatically
+    be created.:
+
+        >>> start_dispatch = ['yara']
+        >>> results = s.scan('raw bytes', add_start_dispatch=start_dispatch)
+
+
+    From ``Payload`` object
+    ^^^^^^^^^^^^^^^^^^^^^^^
+
+    If a ``Payload`` object has already been instatiated, as detailed above, the
+    ``scan_payload`` function may be called:
+
+        >>> start_dispatch = ['yara']
+        >>> results = s.scan_payload(payload, add_start_dispatch=start_dispatch)
+
+
+    Save Results
+    ------------
+
+    Finally, results may be saved using the desired ``Connector`` plugin. `stoQ` stores
+    results from the framework as a ``StoqResponse`` object. The results will be saved
+    to all connector plugins that have been loaded. In this example, we will only load
+    the ``filedir`` plugin which will save the results to a specified directory.:
+
+        >>> connector = s.load_plugin('filedir')
+        >>> connector.save(results)
+
+
+    .. _multiplugindir:
+
+    Multiple Plugin directories
+    ===========================
+
+    When instantiating ``Stoq``, multiple plugins directories may be defined. For more
+    information on default paths, please refer to the :ref:`getting started documentation <stoqhome>`::
+
+        >>> from stoq import Stoq
+        >>> plugins_directories = ['/usr/local/stoq/plugins', '/home/.stoq/plugins']
+        >>> s = Stoq(plugin_dir_list=plugins_directories)
+
+
+    API
+    ===
+
+"""
+
 import concurrent.futures
 import configparser
-from datetime import datetime
 import logging
 from logging.handlers import RotatingFileHandler
 import os
@@ -60,6 +327,26 @@ class Stoq(StoqPluginManager):
         decorators: List[str] = None,
         always_dispatch: List[str] = None,
     ) -> None:
+        """
+
+        Core Stoq Class
+
+        :param base_dir: Base directory for stoQ
+        :param config_file: stoQ Configuration file
+        :param log_dir: Path to log directory
+        :param log_level: Log level for logging events
+        :param plugin_dir_list: Paths to search for stoQ plugins
+        :param plugin_opts: Plugin specific options that are passed once a plugin is loaded
+        :param providers: Provider plugins to be loaded and run for sending payloads to scan
+        :param source_archivers: Archiver plugins to be used for loading payloads for analysis
+        :param dest_archiver: Archiver plugins to be used for archiving payloads and extracted payloads
+        :param connectors: Connectors to be loaded and run for saving results
+        :param dispatchers: Dispatcher plugins to be used
+        :param deep_dispatchers: Deep Dispatcher plugins to be used
+        :param decorators: Decorators to be used
+        :param always_dispatch: Plugins to always send payloads to, no matter what
+
+        """
         if not base_dir:
             base_dir = os.getcwd()
         base_dir = os.path.realpath(base_dir)
@@ -138,7 +425,6 @@ class Stoq(StoqPluginManager):
         self._loaded_decorator_plugins = {
             d: self.load_plugin(d) for d in decorators if d
         }
-
         self.always_dispatch = always_dispatch
         if not self.always_dispatch:
             ad_str = config.get('core', 'always_dispatch', fallback='')
@@ -156,6 +442,21 @@ class Stoq(StoqPluginManager):
         add_start_deep_dispatch: Optional[List[str]] = None,
         ratelimit: Optional[str] = None,
     ) -> StoqResponse:
+        """
+
+        Wrapper for `scan_payload` that creates a `Payload` object from bytes
+
+        :param content: Raw bytes to be scanned
+        :param payload_meta: Metadata pertaining to originating source
+        :param request_meta: Metadata pertaining to the originating request
+        :param add_start_dispatch: Force first round of scanning to use specified plugins
+        :param add_start_deep_dispatch: Force second round of scanning to use specified plugins
+        :param ratelimit: Rate limit calls to scan
+
+        :return: Complete scan results
+        :rtype: StoqResponse
+
+        """
         payload_meta = PayloadMeta() if payload_meta is None else payload_meta
         payload = Payload(content, payload_meta)
         return self.scan_payload(
@@ -169,6 +470,19 @@ class Stoq(StoqPluginManager):
         add_start_dispatch: Optional[List[str]] = None,
         add_start_deep_dispatch: Optional[List[str]] = None,
     ) -> StoqResponse:
+        """
+
+        Scan an individual payload
+
+        :param payload: ``Payload`` object of data to be scanned
+        :param request_meta: Metadata pertaining to the originating request
+        :param add_start_dispatch: Force first round of scanning to use specified plugins
+        :param add_start_deep_dispatch: Force second round of scanning to use specified plugins
+
+        :return: Complete scan results
+        :rtype: StoqResponse
+
+        """
         request_meta = RequestMeta() if request_meta is None else request_meta
         add_start_dispatch = [] if add_start_dispatch is None else add_start_dispatch
         add_start_deep_dispatch = (
@@ -196,7 +510,7 @@ class Stoq(StoqPluginManager):
             scan_queue = next_scan_queue
 
         response = StoqResponse(
-            datetime.now().isoformat(), scan_results, request_meta, errors
+            results=scan_results, request_meta=request_meta, errors=errors
         )
 
         for plugin_name, decorator in self._loaded_decorator_plugins.items():
@@ -219,6 +533,11 @@ class Stoq(StoqPluginManager):
         return response
 
     def run(self) -> None:
+        """
+
+        Run stoQ using a provider plugin to scan multiple files until exhaustion
+
+        """
         # Don't initialize any (provider) plugins here! They should be
         # initialized on stoq start-up or via load_plugin()
         if not self._loaded_provider_plugins:
