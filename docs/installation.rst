@@ -87,7 +87,7 @@ From directory
 
 Plugins can also be installed from a local directory. This is useful if you have custom
 or third party plugins. Additionally, plugins can be install from a cloned version of
-stoQ's public plugin repository::
+`stoQ's` public plugin repository::
 
 
     $ stoq install path/to/plugin

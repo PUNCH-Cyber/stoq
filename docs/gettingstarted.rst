@@ -56,7 +56,7 @@ stoq.cfg
 
 stoQ's configuration file is not required, but does offer the convenience of overriding the
 default configuration. An example configuration file can be found
-`here <https://github.com/PUNCH-Cyber/stoq/blob/v2/extras/stoq.cfg>`_. By default, stoQ will
+`here <https://github.com/PUNCH-Cyber/stoq/blob/master/extras/stoq.cfg>`_. By default, stoQ will
 look for ``stoq.cfg`` in ``$STOQ_HOME`` if running from the command line, or ``$CWD`` if being
 used as a library.
 
