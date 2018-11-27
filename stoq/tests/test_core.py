@@ -76,6 +76,19 @@ class TestCore(unittest.TestCase):
         self.assertEqual(len(response.results), 1)
         self.assertEqual(response.results[0].size, len(self.generic_content))
 
+    def test_split_results(self):
+        s = Stoq(base_dir=utils.get_data_dir())
+        response = s.scan(self.generic_content, add_start_dispatch=['multiclass_plugin', 'simple_worker'])
+        split_response = response.split()
+        self.assertEqual(len(split_response), 2)
+        for r in split_response:
+            if 'simple_worker' in r['results'][0]['workers'][0]:
+                self.assertNotIn('multiclass_plugin', r['results'][0]['workers'][0])
+            elif 'multiclass_plugin' in r['results'][0]['workers'][0]:
+                self.assertNotIn('simple_worker', r['results'][0]['workers'][0])
+            else:
+                raise Exception('required plugin not found in results')
+
     def test_always_dispatch(self):
         s = Stoq(base_dir=utils.get_data_dir(), always_dispatch=['simple_worker'])
         response = s.scan(self.generic_content)

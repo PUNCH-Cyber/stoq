@@ -263,6 +263,14 @@
         >>> connector = s.load_plugin('filedir')
         >>> connector.save(results)
 
+    Split Results
+    -------------
+
+    In some cases it may be required to split results out individually. For example, when
+    saving results to different indexes depending on plugin name, such as with ElasticSearch or Splunk.
+
+        >>> results = s.scan_payload(payload)
+        >>> results.split()
 
     .. _multiplugindir:
 

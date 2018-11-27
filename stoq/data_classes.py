@@ -15,6 +15,7 @@
 #   limitations under the License.
 
 import uuid
+from copy import deepcopy
 from datetime import datetime
 from typing import Dict, List, Optional, Union
 
@@ -143,8 +144,8 @@ class PayloadResults:
         :param payload_id: Unique ID of payload
         :param size: Size of raw payload
         :param payload_meta: `PayloadMeta` object for payload
-        :param workers: Plugins that attempted to scan payload
-        :param plugins_run: Plugins that successfully scanned payload
+        :param workers: Results from worker plugins
+        :param plugins_run: Plugins used to scan payload
         :param extracted_by: Name of plugin that extracted the payload
         :param extracted_from: Unique payload ID the payload was extracted from
 
@@ -217,6 +218,21 @@ class StoqResponse:
         self.time: str = datetime.now().isoformat() if time is None else time
         self.decorators: Dict[str, Dict] = {} if decorators is None else decorators
         self.scan_id = str(uuid.uuid4())
+
+    def split(self) -> List[Dict]:
+        """
+        Split worker results individually
+
+        """
+        split_results = []
+        for result in self.results:
+            for workers in result.workers:
+                for k, v in workers.items():
+                    rcopy = deepcopy(self.__dict__)
+                    rcopy['results'] = [deepcopy(result.__dict__)]
+                    rcopy['results'][0]['workers'] = [{k: v}]
+                    split_results.append(rcopy)
+        return split_results
 
     def __str__(self) -> str:
         return helpers.dumps(self)
