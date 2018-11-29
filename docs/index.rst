@@ -25,12 +25,12 @@ Release |release|
 Overview
 ========
 
-    `stoQ is a automation framework that helps to simplify the more mundane and
-    repetitive tasks an analyst is required to do. It allows analysts and
-    DevSecOps teams the ability to quickly transition from different data sources,
-    databases, decoders/encoders, and numerous other tasks. stoQ was designed to be
-    enterprise ready and scalable, while also being lean enough for individual security
-    researchers.`
+    `stoQ is a automation framework that helps to simplify the mundane and repetitive
+    tasks an analyst is required to do. It allows analysts and DevSecOps teams the
+    ability to quickly transition between different data sources, databases,
+    decoders/encoders, and numerous other tasks using enriched and consistent data
+    structures. stoQ was designed to be enterprise ready and scalable, while also being
+    lean enough for individual security researchers.`
 
 What is stoQ?
 *************
