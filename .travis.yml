@@ -1,8 +1,9 @@
-sudo: enabled
-dist: trusty
+sudo: required
+dist: xenial
 language: python
 python:
   - 3.6
+  - 3.7
 
 before_install:
   - sudo apt-get -yq install software-properties-common
