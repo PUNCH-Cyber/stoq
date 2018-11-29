@@ -26,8 +26,8 @@ class PayloadMeta:
     def __init__(
         self,
         should_archive: bool = True,
-        extra_data: Dict = None,
-        dispatch_to: List[str] = None,
+        extra_data: Optional[Dict] = None,
+        dispatch_to: Optional[List[str]] = None,
     ) -> None:
         """
 
@@ -101,7 +101,7 @@ class RequestMeta:
         self,
         archive_payloads: bool = True,
         source: Optional[str] = None,
-        extra_data: Dict = None,
+        extra_data: Optional[Dict] = None,
     ) -> None:
         """
 
@@ -268,8 +268,8 @@ class WorkerResponse:
     def __init__(
         self,
         results: Optional[Dict] = None,
-        extracted: List[ExtractedPayload] = None,
-        errors: List[str] = None,
+        extracted: Optional[List[ExtractedPayload]] = None,
+        errors: Optional[List[str]] = None,
     ) -> None:
         """
 
@@ -297,7 +297,7 @@ class WorkerResponse:
 
 class ArchiverResponse:
     def __init__(
-        self, results: Optional[Dict] = None, errors: List[str] = None
+        self, results: Optional[Dict] = None, errors: Optional[List[str]] = None
     ) -> None:
         """
 
@@ -325,7 +325,7 @@ class DispatcherResponse:
         self,
         plugin_names: Optional[List[str]] = None,
         meta: Optional[Dict] = None,
-        errors: List[str] = None,
+        errors: Optional[List[str]] = None,
     ) -> None:
         """
 
@@ -356,7 +356,7 @@ class DeepDispatcherResponse:
         self,
         plugin_names: Optional[List[str]] = None,
         meta: Optional[Dict] = None,
-        errors: List[str] = None,
+        errors: Optional[List[str]] = None,
     ) -> None:
         """
 
@@ -384,7 +384,7 @@ class DeepDispatcherResponse:
 
 class DecoratorResponse:
     def __init__(
-        self, results: Optional[Dict] = None, errors: List[str] = None
+        self, results: Optional[Dict] = None, errors: Optional[List[str]] = None
     ) -> None:
         """
          Object containing response from decorator plugins
