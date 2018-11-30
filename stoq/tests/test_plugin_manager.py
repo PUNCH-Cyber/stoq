@@ -119,6 +119,22 @@ class TestPluginManager(unittest.TestCase):
             plugin = pm.load_plugin('incompatible_min_stoq_version')
         self.assertIsNotNone(plugin)
 
+    def test_plugin_override(self):
+        """Verify that if plugin directories have plugins with duplicate names,
+        the one in the last specified directory will be used"""
+        pm = StoqPluginManager([utils.get_plugins_dir(), utils.get_plugins2_dir()])
+        collected_plugins = pm.list_plugins()
+        self.assertIn('dummy_worker', collected_plugins)
+        worker = pm.load_plugin('dummy_worker')
+        self.assertTrue(worker.PLUGINS2_DUP_MARKER)
+
+        pm = StoqPluginManager([utils.get_plugins2_dir(), utils.get_plugins_dir()])
+        self.assertIn('dummy_worker', collected_plugins)
+        worker = pm.load_plugin('dummy_worker')
+        with self.assertRaises(Exception):
+            worker.PLUGINS2_DUP_MARKER
+
+
 
 class ExampleExternalPlugin(WorkerPlugin):
     # Intentionally override this method to not require the config argument
