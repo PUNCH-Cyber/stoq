@@ -20,7 +20,7 @@ import inspect
 import logging
 import os
 from pkg_resources import parse_version
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, Sequence, Any
 
 from .exceptions import StoqException
 from stoq.plugins import (
@@ -52,7 +52,7 @@ class StoqPluginManager:
         self._loaded_decorator_plugins: Dict[str, DecoratorPlugin] = {}
 
         if not hasattr(self, 'log') or self.log is None:
-            self.log = logging.getLogger('stoq')
+            self.log: logging.Logger = logging.getLogger('stoq')
         self._collect_plugins(plugin_dir_list)
 
     def _collect_plugins(self, plugin_dir_list: List[str]) -> None:
@@ -117,14 +117,17 @@ class StoqPluginManager:
             module,
             predicate=lambda mem: inspect.isclass(mem)
             and issubclass(mem, BasePlugin)
-            and mem not in [ArchiverPlugin,
-                            BasePlugin,
-                            ProviderPlugin,
-                            WorkerPlugin,
-                            ConnectorPlugin,
-                            DispatcherPlugin,
-                            DeepDispatcherPlugin,
-                            DecoratorPlugin]
+            and mem
+            not in [
+                ArchiverPlugin,
+                BasePlugin,
+                ProviderPlugin,
+                WorkerPlugin,
+                ConnectorPlugin,
+                DispatcherPlugin,
+                DeepDispatcherPlugin,
+                DecoratorPlugin,
+            ]
             and not inspect.isabstract(mem),
         )
         if len(plugin_classes) == 0:
@@ -141,10 +144,31 @@ class StoqPluginManager:
         self._loaded_plugins[name] = plugin
         return plugin
 
-    def list_plugins(self) -> Dict[str, Dict[str, str]]:
+    def list_plugins(self) -> Dict[str, Dict[str, Sequence[Any]]]:
+        import ast
+
+        valid_classes = [
+            'ArchiverPlugin',
+            'BasePlugin',
+            'ProviderPlugin',
+            'WorkerPlugin',
+            'ConnectorPlugin',
+            'DispatcherPlugin',
+            'DeepDispatcherPlugin',
+            'DecoratorPlugin',
+        ]
         plugins = {}
         for plugin in self._plugin_name_to_info.keys():
+            with open(self._plugin_name_to_info[plugin][0]) as f:
+                parsed_plugin = ast.parse(f.read())
+            classes = [n for n in parsed_plugin.body if isinstance(n, ast.ClassDef)]
+            plugin_classes = []
+            for c in classes:
+                for base in c.bases:
+                    if base.id in valid_classes:
+                        plugin_classes.append(base.id.replace('Plugin', ''))
             plugins[plugin] = {
+                'classes': plugin_classes,
                 'version': self._plugin_name_to_info[plugin][1].get(
                     'Documentation', 'version'
                 ),

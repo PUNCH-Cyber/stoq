@@ -20,6 +20,7 @@ import select
 import argparse
 import unittest
 from pathlib import Path
+from typing import Dict
 
 import stoq.tests as tests
 from stoq.installer import StoqPluginInstaller
@@ -168,7 +169,7 @@ Examples:
 
     args = parser.parse_args()
 
-    plugin_opts = {}
+    plugin_opts: Dict = {}
     try:
         if args.plugin_opts:
             for arg in args.plugin_opts:
@@ -241,7 +242,9 @@ Examples:
         print(about)
         print('-' * len(about))
         for name, info in stoq.list_plugins().items():
-            print(f'{name:<30s}v{info["version"]:<10s}{info["description"]}')
+            print(f'{name:<20s} v{info["version"]:<10s}{info["description"]}')
+            print(f'\t\t\t\t- {", ".join(info["classes"]):<20s}')
+
     elif args.command == 'install':
         StoqPluginInstaller.install(
             args.plugin_path, args.install_dir, args.upgrade, args.github
