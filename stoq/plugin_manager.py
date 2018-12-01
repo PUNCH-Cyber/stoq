@@ -165,8 +165,10 @@ class StoqPluginManager:
             plugin_classes = []
             for c in classes:
                 for base in c.bases:
-                    if base.id in valid_classes:
-                        plugin_classes.append(base.id.replace('Plugin', ''))
+                    if base.id in valid_classes:  # pyre-ignore[16]
+                        plugin_classes.append(
+                            base.id.replace('Plugin', '')  # pyre-ignore[16]
+                        )
             plugins[plugin] = {
                 'classes': plugin_classes,
                 'version': self._plugin_name_to_info[plugin][1].get(
