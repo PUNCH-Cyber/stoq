@@ -4,7 +4,9 @@ LABEL maintainer="marcus@punchcyber.com"
 ENV USER stoq
 ENV GROUP stoq
 ENV STOQ_HOME /home/$USER/.stoq
-ENV STOQ_TMP /tmp
+ENV STOQ_TMP /tmp/stoq
+ENV XORSEARCH_VER 1_11_1
+ENV EXIFTOOL_VER 11.20
 
 RUN groupadd -r $USER && useradd -r -g $GROUP $USER && \
     mkdir -p /home/$USER/.stoq/plugins
@@ -22,7 +24,9 @@ RUN apt-get update && \
     unace-nonfree \
     unzip \
     wget \
-    curl && \
+    curl \
+    libc6-i386 \
+    lib32ncurses5 && \
     apt-get clean -y && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -30,5 +34,29 @@ RUN pip install stoq-framework && \
     git clone --single-branch --branch v2 https://github.com/PUNCH-Cyber/stoq-plugins-public ${STOQ_TMP}/stoq-plugins-public && \
     cd ${STOQ_TMP}/stoq-plugins-public && \
     for plugin in `ls -d */`; do stoq install $plugin; done
+
+WORKDIR ${STOQ_TMP}
+# Install xorsearch
+RUN wget -O XORSearch.zip "https://didierstevens.com/files/software/XORSearch_V${XORSEARCH_VER}.zip" && \
+    unzip -qq XORSearch -d XORSearch && \
+    gcc -o /usr/local/bin/xorsearch XORSearch/XORSearch.c
+
+# Install exiftool
+RUN wget -O exif.tgz "https://www.sno.phy.queensu.ca/~phil/exiftool/Image-ExifTool-${EXIFTOOL_VER}.tar.gz" && \
+    tar -xvf exif.tgz && \
+    cd Image-ExifTool-${EXIFTOOL_VER} && \
+    perl Makefile.PL && \
+    make && \
+    make test && \
+    make install
+
+# Install TRiD
+RUN wget -O trid_linux_64.zip "http://mark0.net/download/trid_linux_64.zip" && \
+    unzip -qq trid_linux_64 -d /usr/local/bin && \
+    chmod +x /usr/local/bin/trid && \
+    wget -O triddefs.zip "http://mark0.net/download/triddefs.zip" && \
+    unzip -qq triddefs -d /usr/local/bin
+
+RUN rm -rf $STOQ_TMP
 
 ENTRYPOINT ["stoq"]
