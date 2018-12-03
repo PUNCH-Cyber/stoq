@@ -105,7 +105,7 @@ class StoqPluginManager:
 
             if parse_version(__version__) < parse_version(min_stoq_version):
                 self.log.warning(
-                    'Plugin not compatible with this version of '
+                    f'Plugin {name} not compatible with this version of '
                     'stoQ. Unpredictable results may occur!'
                 )
         spec = importlib.util.spec_from_file_location(
