@@ -3,7 +3,7 @@
 Getting Started
 ===============
 
-Now that stoQ is installed, getting up and running is extremly simple. stoQ can
+Now that stoQ is installed, getting up and running is extremely simple. stoQ can
 be run a few different ways, depending on what your requirements are.
 
 .. _workflow:
@@ -68,7 +68,7 @@ $STOQ_HOME
 
 When using the ``stoq`` command, stoQ will default to using $HOME/.stoq as it's home directory.
 This path is important as it is used as the default path for plugins and configuration files.
-You can easily overide this by setting the ``$STOQ_HOME`` environment variable. For example,
+You can easily override this by setting the ``$STOQ_HOME`` environment variable. For example,
 we can set stoQ's home directory to ``/opt/stoq`` like so::
 
     $ export $STOQ_HOME=/opt/stoq
@@ -122,7 +122,7 @@ Scan Mode
 ---------
 
 `Scan mode` is designed for scanning an individual payload from the command line. This
-is especially useful for lightweight tasks or one off scans.
+is especially useful for lightweight tasks or one-off scans.
 
 Let's get started. In this example, let's simply generate the MD5, SHA1, and SHA256
 hashes of a file.
@@ -179,7 +179,7 @@ Now, let's run ``stoq`` with the ``hash`` plugin::
         "scan_id": "5699d5ac-df3b-4ba1-bb38-296813d14d19"
     }
 
-Great, now we've generated the needed hashes. But stoQ allows us to do way more
+Great, now we've generated the needed hashes; but stoQ allows us to do way more
 than just generate hashes. Let's also tell stoQ to use the ``peinfo`` plugin.
 First, let's make sure the plugin is installed::
 
@@ -262,10 +262,10 @@ available in `scan mode`, just run::
 Run Mode
 --------
 
-`Run mode` is similar to `scan mode`, but is meant for handling of multiple payloads or
+`Run mode` is similar to `scan mode`, but is meant for handling multiple payloads or
 for long running tasks. This mode requires the use of a `provider` plugin.
 
-For this example, we will will monitor a directory for new files. When new files are created,
+For this example, we will monitor a directory for new files. When new files are created,
 the plugin will detect this and send the payload to stoQ for scanning. Chances are we won't
 want the results to simply be displayed to the console, so we will also save the results to
 disk.
@@ -314,7 +314,7 @@ Plugin Options
 --------------
 
 Plugin options allows for configuration settings of plugins to be modified upon instantiation.
-This is extemely useful when you need to change a configuration options on the fly, such as
+This is extremely useful when you need to change a configuration options on the fly, such as
 our `run` mode example above.
 
 When running ``stoq`` from the command line, simply add ``--plugin-opts`` to your arguments

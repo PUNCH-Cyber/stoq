@@ -53,7 +53,7 @@
     ---------------
 
     Individual scans are useful for scanning single payloads at a time. The user is
-    responsible for ensuring a payload is passed to ``Stoq``.
+    responsible for ensuring a payload is passed to the ``Stoq`` class.
 
     .. note:: ``Provider`` plugins are ignored when conducting an individual scan.
 

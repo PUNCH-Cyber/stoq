@@ -59,7 +59,7 @@
     Writing a plugin
     ================
 
-    Provider plugins add either ``Payload`` objects to the `stoQ` queue, or a ``str``.
+    `Provider plugins` add either ``Payload`` objects to the `stoQ` queue, or a ``str``.
     If a ``Payload`` object is added, `stoQ` will begin processing the payload. However,
     if a ``str`` is added, `stoQ` will pass it to ``Archiver`` plugins that were
     loaded when ``Stoq`` was instantiated with the ``source_archivers`` argument.

@@ -30,7 +30,7 @@ Frequently Asked Questions
 
 - **How does stoQ work at scale?**
 
-    As with anything that "scales", it depends. Infrastructure, location, resources, and many other things come into play. In our experience, it is possible to scan 100's of millions of per day with the right setup. Overall, we have been very pleased with it's ability to scale to fit all of our needs without issue.
+    As with anything that "scales", it depends. Infrastructure, location, resources, and many other things come into play. In our experience, it is possible to scan hundreds of millions of payloads per day with the right setup. Overall, we have been very pleased with it's ability to scale to fit all of our needs without issue.
 
 - **Do you plan on maintaining this project long term?**
 

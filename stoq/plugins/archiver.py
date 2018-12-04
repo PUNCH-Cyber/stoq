@@ -69,7 +69,7 @@
 
     Archiver plugins used as a destination useful for saving payloads, be it the original
     scanned payload or any extracted payloads. Multiple destination archivers can be
-    defined, allowing for a payload to be saved in a single or multiple locations.
+    defined, allowing for a payload to be saved in either a single or multiple locations.
 
     Destination archiver plugins can be defined multiple ways. In these examples, we will
     use the ``filedir`` archiver plugin.

@@ -5,7 +5,7 @@ Packaging Plugins
 
 `stoQ` has a built-in plugin installation and upgrade capability. `stoQ` plugins may
 be packaged to allow for a simple and consistent installation process. Though packaging
-plugins isn't a neccessity, it is highly recommended to do so for simplicity and reproducibility.
+plugins isn't a necessity, it is highly recommended to do so for simplicity and reproducibility.
 
 Let's take a look at a basic directory structure for a `stoQ` plugin::
 

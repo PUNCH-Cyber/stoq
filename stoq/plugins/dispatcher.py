@@ -21,7 +21,7 @@
     ========
 
     Dispatcher plugins allow for dynamic routing and loading of worker plugins. These
-    plugins are extremly powerful in that they allow for an extremely flexible scanning
+    plugins are extremely powerful in that they allow for an extremely flexible scanning
     flow based on characteristics of the payload itself. For instance, routing a payload
     to a worker plugin for scanning can be done by yara signatures, TRiD results, simple
     regex matching, or just about anything else. Each loaded dispatcher plugin is run

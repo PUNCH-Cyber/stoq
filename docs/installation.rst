@@ -3,7 +3,7 @@
 Installation
 ============
 
-stoQ is extremly lightweight and strives for minimal dependecies. It can be
+stoQ is extremely lightweight and strives for minimal dependencies. It can be
 installed either via `pip` or directly from source. Once you have stoQ installed,
 it's just a matter of installing the required plugins for your use case. stoQ has
 over 40 publicly available plugins that can be found in their own repository
@@ -86,7 +86,7 @@ From directory
 --------------
 
 Plugins can also be installed from a local directory. This is useful if you have custom
-or third party plugins. Additionally, plugins can be install from a cloned version of
+or third party plugins. Additionally, plugins can be installed from a cloned version of
 `stoQ's` public plugin repository::
 
 

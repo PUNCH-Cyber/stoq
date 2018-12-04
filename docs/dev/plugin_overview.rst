@@ -19,7 +19,7 @@ For a full listing of all publicly available plugins, check out the `stoQ public
 Configuration
 *************
 
-Each plugin must have a ``.stoq`` configuration file. The configuration file resides in
+Each plugin must have an ``.stoq`` configuration file. The configuration file resides in
 the same directory as the plugin module. The plugin's configuration file allows for
 configuring a plugin with default or static settings. The configuration file is a standard
 YAML file and is parsed using the ``configparser`` module. The following is an example
@@ -82,7 +82,7 @@ setting under the ``worker`` section of the configuration file::
             self.source = config.get('worker', 'source')
 
 
-First, we are checking of any plugin options were provided to ``Stoq`` at instantiation or at the
+First, we are checking for any plugin options were provided to ``Stoq`` at instantiation or at the
 :ref:`command line <pluginoptions>`. If not, it will check the plugin's configuration file for
 the ``source`` setting under the ``worker`` section. If ``source`` is defined in either, the
 setting will be made available to the plugin by defining ``self.source``.

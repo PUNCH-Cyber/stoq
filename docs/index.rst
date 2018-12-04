@@ -26,22 +26,22 @@ Overview
 ========
 
     `stoQ is a automation framework that helps to simplify the mundane and repetitive
-    tasks an analyst is required to do. It allows analysts and DevSecOps teams the
-    ability to quickly transition between different data sources, databases,
-    decoders/encoders, and numerous other tasks using enriched and consistent data
-    structures. stoQ was designed to be enterprise ready and scalable, while also being
-    lean enough for individual security researchers.`
+    tasks an analyst is required to do. It enables analysts and DevSecOps teams to
+    quickly transition between different data sources, databases, decoders/encoders,
+    and numerous other tasks using enriched and consistent data structures. stoQ was
+    designed to be enterprise ready and scalable, while also being lean enough for
+    individual security researchers.`
 
 What is stoQ?
 *************
 
-stoQ was initially a collection of scripts that helped us solve problems we were
-confronted with on a daily basis. These tasks, such as parsing an SMTP session,
-extracting attachments, scanning them with a multitude of custom and open source
-tools, saving the results, and then finally analyzing them took up an increasing
-amount of our teams resources. We found ourselves spending an ever increasing amount of
-time simply attempting to collect and extract data. This took valuable resources away
-from our ability to actually find and analyze adversaries targeting our networks.
+stoQ was initially a collection of scripts that helped us solve problems we encountered
+daily. These tasks, such as parsing an SMTP session, extracting attachments, scanning
+them with a multitude of custom and open source tools, saving the results, and then
+finally analyzing them took up an increasing amount of our team's resources. We spent
+an ever increasing amount of time simply attempting to collect and extract data. This
+took valuable resources away from our ability to actually find and analyze adversaries
+targeting our networks.
 
 We grew tired of being the hamster in a wheel and decided to do something about it.
 In 2011, we began development of a framework that would not only tackle the problem
@@ -67,16 +67,15 @@ when compared to other solutions available. Some key differences are:
 
     - Extremely lightweight and designed with simplicity in mind.
     - Over 40 `publicly available plugins <https://github.com/PUNCH-Cyber/stoq-plugins-public>`_.
-    - It makes no assumptions about your workflow. Analysts decide everything, from where data comes
-      from, how it is scanned/decoded/processed, to where it is saved.
+    - `stoQ` no assumptions about your workflow. Analysts decide everything, from where data
+      originates, how it is scanned/decoded/processed, to where it is saved.
     - Scalable in not only native/bare metal environments, but also using solutions such as
-      Kubernetes, AWS Lambda, Google Cloud Functions, Azure Functions, and just about anything
-      else.
+      Kubernetes, AWS Lambda, Google Cloud Functions, Azure Functions, and many more.
     - Written to be easily and quickly extended. All you need is a plugin.
     - Can be used in an enterprise environment or by individuals without the need for client/server
       infrastructure
     - Overwhelming majority of code is covered by unit tests.
-    - All core functions and plugins leverage typing and are type checked at commit.
+    - All core functions and plugins leverage typing and are type-checked at commit.
     - Actively developed since 2011, open source since 2015.
     - Extensive up-to-date documentation.
 
@@ -85,7 +84,7 @@ Philosophy
 **********
 
 Our goal with stoQ has always been to simplify the mundane and automate the repetitive, ultimately
-enabling network defenders to do what they do best -- defend their networks. Since we began development,
+enabling network defenders to do what they do best -- focus on the threats. Since we began development,
 this philosophy has not shifted. Our core philosophy for both design and development can be best
 summarized by the `Zen of Python <https://www.python.org/dev/peps/pep-0020/>`_::
 
@@ -101,7 +100,7 @@ summarized by the `Zen of Python <https://www.python.org/dev/peps/pep-0020/>`_::
 Architecture
 *************
 
-One of the most powerful features to stoQ is its flexibility. Because stoQ is a framework, the majority
+One of the most powerful features in stoQ is its flexibility. Because stoQ is a framework, the majority
 of the work actually happens within the plugins. stoQ itself is meant to orchestrate the communication
 between the various plugins and normalize their results. stoQ makes no assumptions on the architecture
 that works best for the user. Because of this, stoQ allows for a highly configurable and flexible
