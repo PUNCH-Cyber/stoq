@@ -18,9 +18,10 @@ import json
 import hashlib
 import datetime
 import traceback
+import collections
 
-from typing import Optional
 from bs4 import UnicodeDammit  # pyre-ignore
+from typing import Optional, Dict, DefaultDict, Union, List
 
 
 class JsonComplexEncoder(json.JSONEncoder):
@@ -70,3 +71,12 @@ def format_exc(exc: Exception, limit: int = -1, msg: Optional[str] = None):
     if msg:
         e = f'Exception: {msg}: {e}'
     return e
+
+
+def merge_dicts(
+    d1: DefaultDict[str, List[str]],
+    d2: Union[DefaultDict[str, List[str]], Dict[str, List[str]]],
+) -> DefaultDict[str, List[str]]:
+    for k, v in d2.items():
+        d1[k].extend(v)
+    return d1

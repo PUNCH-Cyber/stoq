@@ -298,7 +298,7 @@ import concurrent.futures
 from collections import defaultdict
 from pythonjsonlogger import jsonlogger  # pyre-ignore[21]
 from logging.handlers import RotatingFileHandler
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, DefaultDict
 
 
 from .exceptions import StoqException
@@ -498,7 +498,7 @@ class Stoq(StoqPluginManager):
             [] if add_start_deep_dispatch is None else add_start_deep_dispatch
         )
         scan_results: List = []
-        errors: List[Tuple[str, str]] = []
+        errors: DefaultDict[str, List[str]] = defaultdict(list)
         scan_queue = [(payload, add_start_dispatch, add_start_deep_dispatch)]
         hashes_seen: Set[str] = set(helpers.get_sha256(payload.content))
 
@@ -515,7 +515,7 @@ class Stoq(StoqPluginManager):
                     if ex_hash not in hashes_seen:
                         hashes_seen.add(ex_hash)
                         next_scan_queue.append((ex, ex.payload_meta.dispatch_to, []))
-                errors.extend(p_errors)
+                errors = helpers.merge_dicts(errors, p_errors)
             scan_queue = next_scan_queue
 
         response = StoqResponse(
@@ -526,17 +526,18 @@ class Stoq(StoqPluginManager):
             try:
                 decorator_response = decorator.decorate(response)
             except Exception as e:
-                msg = helpers.format_exc(e, msg='decorator')
+                msg = 'decorator'
                 self.log.exception(msg)
-                response.errors[plugin_name].append(msg)
+                response.errors[plugin_name].append(
+                    helpers.format_exc(e, msg='decorator')
+                )
                 continue
             if decorator_response is None:
                 continue
             if decorator_response.results is not None:
                 response.decorators[plugin_name] = decorator_response.results
             if decorator_response.errors is not None:
-                for err in decorator_response.errors:
-                    response.errors[plugin_name].append(err)
+                response.errors[plugin_name].extend(decorator_response.errors)
 
         for connector in self._loaded_connector_plugins:
             connector.save(response)
@@ -597,9 +598,7 @@ class Stoq(StoqPluginManager):
                         )
                         del future_to_name[future]
                     except Exception as e:
-                        msg = helpers.format_exc(
-                            e, msg=f'provider:{future_to_name[future]} exited'
-                        )
+                        msg = f'provider:{future_to_name[future]} exited'
                         self.log.exception(msg)
                         raise StoqException(msg) from e
 
@@ -609,33 +608,37 @@ class Stoq(StoqPluginManager):
         add_dispatch: List[str],
         add_deep_dispatch: List[str],
         request_meta: RequestMeta,
-    ) -> Tuple[PayloadResults, List[Payload], List[Tuple[str, str]]]:
+    ) -> Tuple[PayloadResults, List[Payload], DefaultDict[str, List[str]]]:
 
         extracted = []
-        errors: List[Tuple[str, str]] = []
+        errors: DefaultDict[str, List[str]] = defaultdict(list)
         dispatch_pass = 0
 
         dispatches, dispatch_errors = self._get_dispatches(
             payload, add_dispatch, request_meta
         )
         if dispatch_errors:
-            errors.extend(dispatch_errors)
+            errors = helpers.merge_dicts(errors, dispatch_errors)
         for plugin_name in dispatches:
             try:
                 plugin = self.load_plugin(plugin_name)
             except Exception as e:
-                msg = helpers.format_exc(e, msg=f'worker:failed to load')
+                msg = 'worker:failed to load'
                 self.log.exception(msg)
-                errors.append((plugin_name, msg))
+                errors = helpers.merge_dicts(
+                    errors, {plugin_name: [helpers.format_exc(e, msg=msg)]}
+                )
                 continue
             # Normal dispatches are the "1st round" of scanning
             payload.plugins_run['workers'][0].append(plugin_name)
             try:
                 worker_response = plugin.scan(payload, request_meta)  # pyre-ignore[16]
             except Exception as e:
-                msg = helpers.format_exc(e, msg=f'worker:failed to scan')
+                msg = 'worker:failed to scan'
                 self.log.exception(msg)
-                errors.append((plugin_name, msg))
+                errors = helpers.merge_dicts(
+                    errors, {plugin_name: [helpers.format_exc(e, msg=msg)]}
+                )
                 continue
             if worker_response is None:
                 continue
@@ -651,7 +654,7 @@ class Stoq(StoqPluginManager):
                 ]
             )
             if worker_response.errors:
-                errors.extend([(plugin_name, e) for e in worker_response.errors])
+                errors[plugin_name].extend(worker_response.errors)
 
         while dispatch_pass < self.max_dispatch_passes:
             dispatch_pass += 1
@@ -659,7 +662,7 @@ class Stoq(StoqPluginManager):
                 payload, add_deep_dispatch, request_meta
             )
             if deep_dispatch_errors:
-                errors.extend(deep_dispatch_errors)
+                errors = helpers.merge_dicts(errors, deep_dispatch_errors)
             if deep_dispatches:
                 # Add another entry for this round
                 payload.plugins_run['workers'].append([])
@@ -670,12 +673,11 @@ class Stoq(StoqPluginManager):
                 try:
                     plugin = self.load_plugin(plugin_name)
                 except Exception as e:
-                    msg = helpers.format_exc(
-                        e,
-                        msg=f'deep dispatch:failed to load (pass {dispatch_pass}/{self.max_dispatch_passes})',
-                    )
+                    msg = f'deep dispatch:failed to load (pass {dispatch_pass}/{self.max_dispatch_passes})'
                     self.log.exception(msg)
-                    errors.append((plugin_name, msg))
+                    errors = helpers.merge_dicts(
+                        errors, {plugin_name: [helpers.format_exc(e, msg=msg)]}
+                    )
                     continue
                 payload.plugins_run['workers'][dispatch_pass].append(plugin_name)
                 try:
@@ -683,12 +685,11 @@ class Stoq(StoqPluginManager):
                         payload, request_meta
                     )
                 except Exception as e:
-                    msg = helpers.format_exc(
-                        e,
-                        msg=f'deep dispatch:failed to scan (pass {dispatch_pass}/{self.max_dispatch_passes})',
-                    )
+                    msg = f'deep dispatch:failed to scan (pass {dispatch_pass}/{self.max_dispatch_passes})'
                     self.log.exception(msg)
-                    errors.append((plugin_name, msg))
+                    errors = helpers.merge_dicts(
+                        errors, {plugin_name: [helpers.format_exc(e, msg=msg)]}
+                    )
                     continue
                 if worker_response is None:
                     continue
@@ -705,7 +706,7 @@ class Stoq(StoqPluginManager):
                     ]
                 )
                 if worker_response.errors:
-                    errors.extend([(plugin_name, e) for e in worker_response.errors])
+                    errors[plugin_name].extend(worker_response.errors)
 
         payload_results = PayloadResults.from_payload(payload)
         if request_meta.archive_payloads and payload.payload_meta.should_archive:
@@ -714,16 +715,18 @@ class Stoq(StoqPluginManager):
                 try:
                     archiver_response = archiver.archive(payload, request_meta)
                 except Exception as e:
-                    msg = helpers.format_exc(e, msg=f'archiver:failed to archive')
+                    msg = 'archiver:failed to archive'
                     self.log.exception(msg)
-                    errors.append((plugin_name, msg))
+                    errors = helpers.merge_dicts(
+                        errors, {plugin_name: [helpers.format_exc(e, msg=msg)]}
+                    )
                     continue
                 if archiver_response is None:
                     continue
                 if archiver_response.results is not None:
                     payload_results.archivers[plugin_name] = archiver_response.results
                 if archiver_response.errors is not None:
-                    errors.extend([(plugin_name, e) for e in archiver_response.errors])
+                    errors[plugin_name].extend(archiver_response.errors)
         return (payload_results, extracted, errors)
 
     def _init_logger(
@@ -771,8 +774,9 @@ class Stoq(StoqPluginManager):
 
     def _get_dispatches(
         self, payload: Payload, add_dispatches: List[str], request_meta: RequestMeta
-    ) -> Tuple[Set[str], List[Tuple[str, str]]]:
-        errors: List[Tuple[str, str]] = []
+    ) -> Tuple[Set[str], DefaultDict[str, List[str]]]:
+
+        errors: DefaultDict[str, List[str]] = defaultdict(list)
         dispatches: Set[str] = set().union(add_dispatches, self.always_dispatch)
 
         for dispatcher_name, dispatcher in self._loaded_dispatcher_plugins.items():
@@ -782,9 +786,11 @@ class Stoq(StoqPluginManager):
                 if dispatcher_result.meta is not None:
                     payload.dispatch_meta[dispatcher_name] = dispatcher_result.meta
             except Exception as e:
-                msg = helpers.format_exc(e, msg=f'dispatcher:failed to dispatch')
+                msg = 'dispatcher:failed to dispatch'
                 self.log.exception(msg)
-                errors.append((dispatcher_name, msg))
+                errors = helpers.merge_dicts(
+                    errors, {dispatcher_name: [helpers.format_exc(e, msg=msg)]}
+                )
 
         return (dispatches, errors)
 
@@ -793,9 +799,9 @@ class Stoq(StoqPluginManager):
         payload: Payload,
         add_deep_dispatches: List[str],
         request_meta: RequestMeta,
-    ) -> Tuple[Set[str], List[Tuple[str, str]]]:
+    ) -> Tuple[Set[str], DefaultDict[str, List[str]]]:
 
-        errors: List[Tuple[str, str]] = []
+        errors: DefaultDict[str, List[str]] = defaultdict(list)
         deep_dispatches = set(add_deep_dispatches)
 
         for (
@@ -812,11 +818,11 @@ class Stoq(StoqPluginManager):
                         deep_dispatcher_name
                     ] = deep_dispatcher_result.meta
             except Exception as e:
-                msg = helpers.format_exc(
-                    e, msg=f'deep dispatcher:failed to deep dispatch'
-                )
+                msg = 'deep dispatcher:failed to deep dispatch'
                 self.log.exception(msg)
-                errors.append((deep_dispatcher_name, msg))
+                errors = helpers.merge_dicts(
+                    errors, {deep_dispatcher_name: [helpers.format_exc(e, msg=msg)]}
+                )
 
         return (deep_dispatches, errors)
 
