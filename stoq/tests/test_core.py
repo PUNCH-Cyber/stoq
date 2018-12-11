@@ -363,7 +363,7 @@ class TestCore(unittest.TestCase):
         response = s.scan(self.generic_content, add_start_dispatch=['simple_worker'])
         self.assertIn('simple_worker', response.results[0].plugins_run['workers'][0])
         self.assertEqual(len(response.errors), 1)
-        self.assertIn('Test exception', response.errors[0])
+        self.assertIn('Test exception', response.errors['simple_worker'][0])
 
     def test_worker_errors(self):
         s = Stoq(base_dir=utils.get_data_dir())
@@ -373,7 +373,7 @@ class TestCore(unittest.TestCase):
         self.assertIn('simple_worker', response.results[0].plugins_run['workers'][0])
         self.assertIn('simple_worker', response.results[0].workers[0])
         self.assertEqual(len(response.errors), 1)
-        self.assertIn('Test error', response.errors[0])
+        self.assertIn('Test error', response.errors['simple_worker'][0])
 
     def test_source_archiver_exception(self):
         s = Stoq(base_dir=utils.get_data_dir(), source_archivers=['simple_archiver'])
@@ -391,7 +391,7 @@ class TestCore(unittest.TestCase):
         response = s.scan(self.generic_content)
         self.assertIn('simple_archiver', response.results[0].plugins_run['archivers'])
         self.assertEqual(len(response.errors), 1)
-        self.assertIn('Test exception', response.errors[0])
+        self.assertIn('Test exception', response.errors['simple_archiver'][0])
 
     def test_dest_archiver_errors(self):
         s = Stoq(base_dir=utils.get_data_dir(), dest_archivers=['simple_archiver'])
@@ -401,7 +401,7 @@ class TestCore(unittest.TestCase):
         self.assertIn('simple_archiver', response.results[0].plugins_run['archivers'])
         self.assertIn('simple_archiver', response.results[0].archivers)
         self.assertEqual(len(response.errors), 1)
-        self.assertIn('Test error', response.errors[0])
+        self.assertIn('Test error', response.errors['simple_archiver'][0])
 
     def test_max_recursion(self):
         max_rec_depth = 4  # defined in stoq.cfg
@@ -446,7 +446,7 @@ class TestCore(unittest.TestCase):
         self.assertIn('simple_decorator', response.decorators)
         self.assertIn('simple_decoration', response.decorators['simple_decorator'])
         self.assertEqual(len(response.errors), 1)
-        self.assertIn('Test error', response.errors[0])
+        self.assertIn('Test error', response.errors['simple_decorator'][0])
 
     def test_decorator_exception(self):
         s = Stoq(base_dir=utils.get_data_dir(), decorators=['simple_decorator'])
@@ -454,7 +454,7 @@ class TestCore(unittest.TestCase):
         simple_decorator.RAISE_EXCEPTION = True
         response = s.scan(self.generic_content)
         self.assertEqual(len(response.errors), 1)
-        self.assertIn('Test exception', response.errors[0])
+        self.assertIn('Test exception', response.errors['simple_decorator'][0])
 
     def test_multiclass_plugin(self):
         s = Stoq(base_dir=utils.get_data_dir(), dispatchers=['multiclass_plugin'])

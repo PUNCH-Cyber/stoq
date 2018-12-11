@@ -17,7 +17,8 @@
 import uuid
 from copy import deepcopy
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from collections import defaultdict
+from typing import Dict, List, Optional, Union, Tuple
 
 import stoq.helpers as helpers
 
@@ -197,7 +198,7 @@ class StoqResponse:
         self,
         results: List[PayloadResults],
         request_meta: RequestMeta,
-        errors: List[str],
+        errors: List[Tuple[str, str]],
         time: Optional[str] = None,
         decorators: Optional[Dict[str, Dict]] = None,
     ) -> None:
@@ -214,10 +215,12 @@ class StoqResponse:
         """
         self.results = results
         self.request_meta = request_meta
-        self.errors = errors
         self.time: str = datetime.now().isoformat() if time is None else time
         self.decorators: Dict[str, Dict] = {} if decorators is None else decorators
         self.scan_id = str(uuid.uuid4())
+        self.errors: Dict[str, List[str]] = defaultdict(list)
+        for err in errors:
+            self.errors[err[0]].append(err[1])
 
     def split(self) -> List[Dict]:
         """
