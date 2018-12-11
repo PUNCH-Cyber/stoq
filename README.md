@@ -189,7 +189,7 @@ the hashes of the payload:
             "source": null,
             "extra_data": {}
         },
-        "errors": [],
+        "errors": {},
         "decorators": {},
         "scan_id": "4d053d5e-9f4e-417b-8f0e-deea0d45449d"
     }
@@ -423,7 +423,7 @@ Or, carve a few executable files out of a Microsoft Word document:
             "source": null,
             "extra_data": {}
         },
-        "errors": [],
+        "errors": {},
         "decorators": {},
         "scan_id": "04f9aec3-afc7-4fa1-b179-73e46c074e81"
     }

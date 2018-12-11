@@ -174,7 +174,7 @@ Now, let's run ``stoq`` with the ``hash`` plugin::
             "source": null,
             "extra_data": {}
         },
-        "errors": [],
+        "errors": {},
         "decorators": {},
         "scan_id": "5699d5ac-df3b-4ba1-bb38-296813d14d19"
     }
@@ -243,7 +243,7 @@ Ok, now let's scan the payload again, but this time we will use both plugins::
             "source": null,
             "extra_data": {}
         },
-        "errors": [],
+        "errors": {},
         "decorators": {},
         "scan_id": "43f3210b-b4ce-41e5-b39a-5fb8dbbc45ac"
     }

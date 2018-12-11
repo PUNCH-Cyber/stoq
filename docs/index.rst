@@ -11,13 +11,10 @@ Release |release|
 
 .. image:: https://img.shields.io/pypi/l/stoq-framework.svg
     :target: https://pypi.org/project/stoq-framework/
-
 .. image:: https://img.shields.io/pypi/pyversions/stoq-framework.svg
     :target: https://pypi.org/project/stoq-framework/
-
 .. image:: https://travis-ci.org/PUNCH-Cyber/stoq.svg?branch=v2
     :target: https://travis-ci.org/PUNCH-Cyber/stoq
-
 .. image:: https://coveralls.io/repos/github/PUNCH-Cyber/stoq/badge.svg?branch=v2
     :target: https://coveralls.io/github/PUNCH-Cyber/stoq?branch=master
 
@@ -189,7 +186,7 @@ the hashes of the payload::
             "source": null,
             "extra_data": {}
         },
-        "errors": [],
+        "errors": {},
         "decorators": {},
         "scan_id": "4d053d5e-9f4e-417b-8f0e-deea0d45449d"
     }
@@ -425,7 +422,7 @@ Or, carve a few executable files out of a Microsoft Word document::
             "source": null,
             "extra_data": {}
         },
-        "errors": [],
+        "errors": {},
         "decorators": {},
         "scan_id": "04f9aec3-afc7-4fa1-b179-73e46c074e81"
     }
