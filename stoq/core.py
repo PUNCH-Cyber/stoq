@@ -625,9 +625,7 @@ class Stoq(StoqPluginManager):
             except Exception as e:
                 msg = 'worker:failed to load'
                 self.log.exception(msg)
-                errors = helpers.merge_dicts(
-                    errors, {plugin_name: [helpers.format_exc(e, msg=msg)]}
-                )
+                errors[plugin_name].append(helpers.format_exc(e, msg=msg))
                 continue
             # Normal dispatches are the "1st round" of scanning
             payload.plugins_run['workers'][0].append(plugin_name)
@@ -636,9 +634,7 @@ class Stoq(StoqPluginManager):
             except Exception as e:
                 msg = 'worker:failed to scan'
                 self.log.exception(msg)
-                errors = helpers.merge_dicts(
-                    errors, {plugin_name: [helpers.format_exc(e, msg=msg)]}
-                )
+                errors[plugin_name].append(helpers.format_exc(e, msg=msg))
                 continue
             if worker_response is None:
                 continue
@@ -675,9 +671,7 @@ class Stoq(StoqPluginManager):
                 except Exception as e:
                     msg = f'deep dispatch:failed to load (pass {dispatch_pass}/{self.max_dispatch_passes})'
                     self.log.exception(msg)
-                    errors = helpers.merge_dicts(
-                        errors, {plugin_name: [helpers.format_exc(e, msg=msg)]}
-                    )
+                    errors[plugin_name].append(helpers.format_exc(e, msg=msg))
                     continue
                 payload.plugins_run['workers'][dispatch_pass].append(plugin_name)
                 try:
@@ -687,9 +681,7 @@ class Stoq(StoqPluginManager):
                 except Exception as e:
                     msg = f'deep dispatch:failed to scan (pass {dispatch_pass}/{self.max_dispatch_passes})'
                     self.log.exception(msg)
-                    errors = helpers.merge_dicts(
-                        errors, {plugin_name: [helpers.format_exc(e, msg=msg)]}
-                    )
+                    errors[plugin_name].append(helpers.format_exc(e, msg=msg))
                     continue
                 if worker_response is None:
                     continue
@@ -717,9 +709,7 @@ class Stoq(StoqPluginManager):
                 except Exception as e:
                     msg = 'archiver:failed to archive'
                     self.log.exception(msg)
-                    errors = helpers.merge_dicts(
-                        errors, {plugin_name: [helpers.format_exc(e, msg=msg)]}
-                    )
+                    errors[plugin_name].append(helpers.format_exc(e, msg=msg))
                     continue
                 if archiver_response is None:
                     continue
@@ -788,9 +778,7 @@ class Stoq(StoqPluginManager):
             except Exception as e:
                 msg = 'dispatcher:failed to dispatch'
                 self.log.exception(msg)
-                errors = helpers.merge_dicts(
-                    errors, {dispatcher_name: [helpers.format_exc(e, msg=msg)]}
-                )
+                errors[dispatcher_name].append(helpers.format_exc(e, msg=msg))
 
         return (dispatches, errors)
 
@@ -820,9 +808,7 @@ class Stoq(StoqPluginManager):
             except Exception as e:
                 msg = 'deep dispatcher:failed to deep dispatch'
                 self.log.exception(msg)
-                errors = helpers.merge_dicts(
-                    errors, {deep_dispatcher_name: [helpers.format_exc(e, msg=msg)]}
-                )
+                errors[deep_dispatcher_name].append(helpers.format_exc(e, msg=msg))
 
         return (deep_dispatches, errors)
 
