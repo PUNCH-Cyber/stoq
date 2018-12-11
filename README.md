@@ -71,19 +71,19 @@ Over the years, there have been several other open source solutions that have be
 that have similar capabilities to stoQ. However, stoQ is fundamentally different in many ways
 when compared to other solutions available. Some key differences are:
 
-    - Extremely lightweight and designed with simplicity in mind.
-    - Over 40 [publicly available plugins](https://github.com/PUNCH-Cyber/stoq-plugins-public).
-    - `stoQ` makes no assumptions about your workflow. Analysts decide everything, from where data
-      originates, how it is scanned/decoded/processed, to where it is saved.
-    - Scalable in not only native/bare metal environments, but also using solutions such as
-      Kubernetes, AWS Lambda, Google Cloud Functions, Azure Functions, and many more.
-    - Written to be easily and quickly extended. All you need is a plugin.
-    - Can be used in an enterprise environment or by individuals without the need for client/server
-      infrastructure
-    - Overwhelming majority of code is covered by unit tests.
-    - All core functions and plugins leverage typing and are type-checked at commit.
-    - Actively developed since 2011, open source since 2015.
-    - Extensive up-to-date documentation.
+- Extremely lightweight and designed with simplicity in mind.
+- Over 40 [publicly available plugins](https://github.com/PUNCH-Cyber/stoq-plugins-public).
+- `stoQ` makes no assumptions about your workflow. Analysts decide everything, from where data
+  originates, how it is scanned/decoded/processed, to where it is saved.
+- Scalable in not only native/bare metal environments, but also using solutions such as
+  Kubernetes, AWS Lambda, Google Cloud Functions, Azure Functions, and many more.
+- Written to be easily and quickly extended. All you need is a plugin.
+- Can be used in an enterprise environment or by individuals without the need for client/server
+  infrastructure
+- Overwhelming majority of code is covered by unit tests.
+- All core functions and plugins leverage typing and are type-checked at commit.
+- Actively developed since 2011, open source since 2015.
+- Extensive up-to-date documentation.
 
 # Philosophy
 
