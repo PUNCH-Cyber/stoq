@@ -15,6 +15,7 @@
 #   limitations under the License.
 
 from datetime import datetime
+from collections import defaultdict
 import unittest
 
 import stoq.helpers as helpers
@@ -41,6 +42,21 @@ class TestHelpers(unittest.TestCase):
     def test_dumps_compactly(self):
         self.assertEqual(
             helpers.dumps({'a': 1, 'b': 2}, compactly=True), '{"a": 1, "b": 2}'
+        )
+
+    def test_dict_merge(self):
+        d1 = defaultdict(list)
+        d1['testkey'].append('test value')
+        d1['anotherkey'].append('another value')
+        d2 = defaultdict(list)
+        d2['testkey'].append('merged test value')
+        d2['anotherkey'].append('merged another value')
+        self.assertEqual(
+            helpers.merge_dicts(d1, d2),
+            {
+                'testkey': ['test value', 'merged test value'],
+                'anotherkey': ['another value', 'merged another value'],
+            },
         )
 
 

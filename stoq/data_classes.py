@@ -17,7 +17,8 @@
 import uuid
 from copy import deepcopy
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from collections import defaultdict
+from typing import Dict, List, Optional, Union, Tuple, DefaultDict
 
 import stoq.helpers as helpers
 
@@ -197,7 +198,7 @@ class StoqResponse:
         self,
         results: List[PayloadResults],
         request_meta: RequestMeta,
-        errors: List[str],
+        errors: DefaultDict[str, List[str]],
         time: Optional[str] = None,
         decorators: Optional[Dict[str, Dict]] = None,
     ) -> None:

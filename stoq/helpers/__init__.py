@@ -14,11 +14,14 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import datetime
-import hashlib
 import json
+import hashlib
+import datetime
+import traceback
+import collections
 
 from bs4 import UnicodeDammit  # pyre-ignore
+from typing import Optional, Dict, DefaultDict, Union, List
 
 
 class JsonComplexEncoder(json.JSONEncoder):
@@ -60,3 +63,20 @@ def get_sha256(content: bytes) -> str:
 
 def get_sha512(content: bytes) -> str:
     return hashlib.sha512(content).hexdigest()
+
+
+def format_exc(exc: Exception, limit: int = -1, msg: Optional[str] = None):
+    tb = traceback.format_tb(exc.__traceback__, limit=limit)[0].split('\n')[0].strip()
+    e = f'{tb} ; {repr(exc)}'
+    if msg:
+        e = f'Exception: {msg}: {e}'
+    return e
+
+
+def merge_dicts(
+    d1: DefaultDict[str, List[str]],
+    d2: Union[DefaultDict[str, List[str]], Dict[str, List[str]]],
+) -> DefaultDict[str, List[str]]:
+    for k, v in d2.items():
+        d1[k].extend(v)
+    return d1
