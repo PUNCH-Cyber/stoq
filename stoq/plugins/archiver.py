@@ -43,15 +43,17 @@
         [core]
         dest_archivers = filedir
 
+
     .. note:: Multiple plugins can be defined separated by a comma
 
     From the command line::
 
         $ stoq run -A filedir [...]
 
+
     .. note:: Multiple plugins can be defined by simply adding the plugin name
 
-    Or, when instantiating the ``Stoq()`` class:
+    Or, when instantiating the ``Stoq()`` class::
 
         >>> import stoq
         >>> dest_archivers = ['filedir']
@@ -89,6 +91,7 @@
 
         $ stoq run -S filedir [...]
 
+
     .. note:: Multiple plugins can be defined by simply adding the plugin name
 
     Or, when instantiating the ``Stoq()`` class::
@@ -110,6 +113,7 @@
         - archive
         - get
 
+
     The ``archive`` method is used to archive payloads that are passed to `stoQ` or extracted
     from other plugins. In order for a payload to be archived, that attribute ``should_archive``
     must be set to ``True`` in the payloads ``PayloadMeta`` object. If set to ``False``, the
@@ -123,7 +127,6 @@
 
     Example
     ^^^^^^^
-
     ::
 
         from typing import Optional
@@ -143,14 +146,14 @@
 
             def get(self, task: ArchiverResponse) -> Optional[Payload]:
                 with open(task.results['path'], 'rb') as infile:
-                    return Payload(infile.read(), PayloadMeta(extra_data={'path': task.results['path']}))
+                    return Payload(
+                        infile.read(),
+                        PayloadMeta(
+                            extra_data={'path': task.results['path']}))
 
-    .. note: `ArchiverPlugin.archive()` returns an `ArchiverResponse` object, which contains metadata
-    that is later used by `ArchiverPlugin.get()` to load the payload.:
 
-        >>> response = archiver.archive(payload, request_meta)
-        ... ArchiverResponse(results={'path': '/tmp/bad.exe'})
-        >>> payload = archiver.get(response)
+    .. note:: `ArchiverPlugin.archive()` returns an `ArchiverResponse` object, which contains metadata that is
+              later used by `ArchiverPlugin.get()` to load the payload.
 
     API
     ===
