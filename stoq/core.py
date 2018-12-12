@@ -573,22 +573,21 @@ class Stoq(StoqPluginManager):
                     if isinstance(task, Payload):
                         payload = task
                     else:
-                        for (
-                            source_name,
-                            source_archiver,
-                        ) in self._loaded_source_archiver_plugins.items():
+                        for source_archiver, task_meta in task.items():
                             try:
-                                ar = ArchiverResponse(task)
-                                payload = source_archiver.get(ar)
+                                ar = ArchiverResponse(task_meta)
+                                payload = self._loaded_source_archiver_plugins[
+                                    source_archiver
+                                ].get(ar)
                                 if isinstance(payload, Payload):
                                     break
                             except Exception as e:
                                 self.log.warn(
-                                    f'"{task}" not found in archive "{source_name}": {str(e)}'
+                                    f'"{task_meta}" not found in archive "{source_archiver}": {str(e)}'
                                 )
                         if not payload:
                             raise StoqException(
-                                f'Unable to determine Payload from task: "{task}"'
+                                f'Unable to determine Payload from task: "{task_meta}"'
                             )
                     self.scan_payload(payload)
                 except queue.Empty:
