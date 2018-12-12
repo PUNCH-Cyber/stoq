@@ -291,6 +291,7 @@
 """
 
 import os
+import json
 import queue
 import logging
 import configparser
@@ -308,6 +309,7 @@ from stoq.data_classes import (
     PayloadResults,
     RequestMeta,
     StoqResponse,
+    ArchiverResponse,
 )
 
 import stoq.helpers as helpers
@@ -571,17 +573,17 @@ class Stoq(StoqPluginManager):
                     if isinstance(task, Payload):
                         payload = task
                     else:
-                        for (
-                            source_name,
-                            source_archiver,
-                        ) in self._loaded_source_archiver_plugins.items():
+                        for source_archiver, task_meta in task.items():
                             try:
-                                payload = source_archiver.get(task)
+                                ar = ArchiverResponse(task_meta)
+                                payload = self._loaded_source_archiver_plugins[
+                                    source_archiver
+                                ].get(ar)
                                 if isinstance(payload, Payload):
                                     break
                             except Exception as e:
                                 self.log.warn(
-                                    f'"{task}" not found in archive "{source_name}": {str(e)}'
+                                    f'"{task_meta}" not found in archive "{source_archiver}": {str(e)}'
                                 )
                         if not payload:
                             raise StoqException(
@@ -717,6 +719,7 @@ class Stoq(StoqPluginManager):
                     payload_results.archivers[plugin_name] = archiver_response.results
                 if archiver_response.errors is not None:
                     errors[plugin_name].extend(archiver_response.errors)
+
         return (payload_results, extracted, errors)
 
     def _init_logger(

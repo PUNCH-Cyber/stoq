@@ -16,8 +16,8 @@
 
 from typing import Optional
 
-from stoq.data_classes import ArchiverResponse, Payload, RequestMeta
 from stoq.plugins import ArchiverPlugin
+from stoq.data_classes import ArchiverResponse, Payload, RequestMeta
 
 
 class DummyArchiver(ArchiverPlugin):
@@ -26,5 +26,5 @@ class DummyArchiver(ArchiverPlugin):
     ) -> Optional[ArchiverResponse]:
         return None
 
-    def get(self, task: str) -> Optional[Payload]:
+    def get(self, task: ArchiverResponse) -> Optional[Payload]:
         return None

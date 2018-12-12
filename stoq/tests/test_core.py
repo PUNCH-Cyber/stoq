@@ -19,7 +19,7 @@ import tempfile
 import unittest
 from unittest.mock import create_autospec, Mock
 
-from stoq import PayloadMeta, RequestMeta, Stoq, StoqException
+from stoq import PayloadMeta, RequestMeta, Stoq, StoqException, ArchiverResponse, Payload
 import stoq.tests.utils as utils
 
 
@@ -273,10 +273,9 @@ class TestCore(unittest.TestCase):
         s = Stoq(base_dir=utils.get_data_dir(), source_archivers=['simple_archiver'])
         simple_archiver = s.load_plugin('simple_archiver')
         simple_archiver.PAYLOAD = b'This is a payload'
-        task = 'this is a task message'
+        task = ArchiverResponse(results={'path': '/tmp/123'})
         payload = simple_archiver.get(task)
-        self.assertIn('task', payload.payload_meta.extra_data)
-        self.assertEqual(payload.payload_meta.extra_data['task'], task)
+        self.assertEqual('/tmp/123', payload.payload_meta.extra_data['path'])
         self.assertEqual(payload.content, simple_archiver.PAYLOAD)
 
     def test_dest_archive(self):
