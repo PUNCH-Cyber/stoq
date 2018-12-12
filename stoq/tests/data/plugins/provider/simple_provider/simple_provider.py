@@ -30,4 +30,4 @@ class SimpleProvider(ProviderPlugin):
         if self.RETURN_PAYLOAD:
             queue.put(Payload(b'Important stuff'))
         else:
-            queue.put('This is a task from provider')
+            queue.put({"task": "This is a task from provider"})

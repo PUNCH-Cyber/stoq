@@ -25,43 +25,6 @@
     previous scans. There are two types of archivers, :ref:`source <archiversource>`
     and :ref:`destination <archiverdest>`.
 
-    .. _archiversource:
-
-    source
-    ^^^^^^
-
-    Archiver plugins used as a source retrieve payloads for scanning. This is useful
-    in several use cases, such as when using a provider plugin that isn't able to pass
-    a payload to `stoQ`. For example, if the provider plugin being used leverages a
-    queueing system, such as RabbitMQ, there may be problems placing multiple payloads
-    onto a queue as it is inefficient, prone to failure, and does not scale well. With
-    archiver plugins as a source, the queuing system can be leveraged by sending a
-    message with a payload location, and the archiver plugin can then retrieve the
-    payload for scanning.
-
-    Source archiver plugins can be defined multiple ways. In these examples, we will
-    use the ``filedir`` archiver plugin.
-
-    From ``stoq.cfg``::
-
-        [core]
-        source_archivers = filedir
-
-
-    .. note:: Multiple plugins can be defined separated by a comma
-
-    From the command line::
-
-        $ stoq run -S filedir [...]
-
-    .. note:: Multiple plugins can be defined by simply adding the plugin name
-
-    Or, when instantiating the ``Stoq()`` class::
-
-        import stoq
-        source_archivers = ['filedir']
-        s = Stoq(source_archivers=source_archivers, [...])
-
     .. _archiverdest:
 
     destination
@@ -70,6 +33,7 @@
     Archiver plugins used as a destination useful for saving payloads, be it the original
     scanned payload or any extracted payloads. Multiple destination archivers can be
     defined, allowing for a payload to be saved in either a single or multiple locations.
+    The results from this plugin method may be used to subsequently load the payload again.
 
     Destination archiver plugins can be defined multiple ways. In these examples, we will
     use the ``filedir`` archiver plugin.
@@ -92,6 +56,46 @@
         >>> import stoq
         >>> dest_archivers = ['filedir']
         >>> s = Stoq(dest_archivers=dest_archivers, [...])
+
+
+    .. _archiversource:
+
+    source
+    ^^^^^^
+
+    Archiver plugins used as a source retrieve payloads for scanning. This is useful
+    in several use cases, such as when using a provider plugin that isn't able to pass
+    a payload to `stoQ`. For example, if the provider plugin being used leverages a
+    queueing system, such as RabbitMQ, there may be problems placing multiple payloads
+    onto a queue as it is inefficient, prone to failure, and does not scale well. With
+    archiver plugins as a source, the queuing system can be leveraged by sending a
+    message with a payload location, and the archiver plugin can then retrieve the
+    payload for scanning. The `ArchiverResponse` results returned from
+    `ArchiverPlugin.archive()` is used to load the payload.
+
+
+    Source archiver plugins can be defined multiple ways. In these examples, we will
+    use the ``filedir`` archiver plugin.
+
+    From ``stoq.cfg``::
+
+        [core]
+        source_archivers = filedir
+
+
+    .. note:: Multiple plugins can be defined separated by a comma
+
+    From the command line::
+
+        $ stoq run -S filedir [...]
+
+    .. note:: Multiple plugins can be defined by simply adding the plugin name
+
+    Or, when instantiating the ``Stoq()`` class::
+
+        >>> import stoq
+        >>> source_archivers = ['filedir']
+        >>> s = Stoq(source_archivers=source_archivers, [...])
 
 
     .. _writingplugin:
@@ -124,8 +128,8 @@
 
         from typing import Optional
 
-        from stoq.data_classes import ArchiverResponse, Payload, RequestMeta, PayloadMeta
         from stoq.plugins import ArchiverPlugin
+        from stoq.data_classes import ArchiverResponse, Payload, RequestMeta, PayloadMeta
 
 
         class ExampleArchiver(ArchiverPlugin):
@@ -134,13 +138,19 @@
             ) -> Optional[ArchiverResponse]:
                 with open('/tmp/archived_payload', 'wb) as out:
                     out.write(payload.content)
-                ar = ArchiverResponse({'dest_file': '/tmp/archive_payload'})
+                ar = ArchiverResponse({'path': '/tmp/archive_payload'})
                 return ar
 
-            def get(self, task: str) -> Optional[Payload]:
-                # We assume `task` is a file path
-                with open(task, 'rb') as infile:
-                    return Payload(infile.read(), PayloadMeta(extra_data={'path': task}))
+            def get(self, task: ArchiverResponse) -> Optional[Payload]:
+                with open(task.results['path'], 'rb') as infile:
+                    return Payload(infile.read(), PayloadMeta(extra_data={'path': task.results['path']}))
+
+    .. note: `ArchiverPlugin.archive()` returns an `ArchiverResponse` object, which contains metadata
+    that is later used by `ArchiverPlugin.get()` to load the payload.:
+
+        >>> response = archiver.archive(payload, request_meta)
+        ... ArchiverResponse(results={'path': '/tmp/bad.exe'})
+        >>> payload = archiver.get(response)
 
     API
     ===
@@ -164,27 +174,31 @@ class ArchiverPlugin(BasePlugin):
         :param payload: Payload object to archive
         :param request_meta: Originating request metadata
 
+        :return: ArchiverResponse object. Results are used to retrieve payload.
+
         >>> from stoq import Stoq, Payload
         >>> payload = Payload(b'this is going to be saved')
         >>> s = Stoq()
         >>> archiver = s.load_plugin('filedir')
-        >>> payload = archiver.archive(payload)
+        >>> archiver.archive(payload)
+        ... {'path': '/tmp/bad.exe'}
 
         """
         pass
 
-    def get(self, task: str) -> Optional[Payload]:
+    def get(self, task: ArchiverResponse) -> Optional[Payload]:
         """
         Retrieve payload for processing
 
-        :param task: Task to be processed for loading of payload
+        :param task: Task to be processed to load payload. Must contain `ArchiverResponse`
+        results from `ArchiverPlugin.archive()`
 
         :return: Payload object for scanning
 
         >>> from stoq import Stoq
-        >>> task = '/data/bad.exe'
         >>> s = Stoq()
         >>> archiver = s.load_plugin('filedir')
+        >>> task = ArchiverResponse(results={'path': '/tmp/bad.exe'})
         >>> payload = archiver.get(task)
 
         """
