@@ -587,7 +587,7 @@ class Stoq(StoqPluginManager):
                                 )
                         if not payload:
                             raise StoqException(
-                                f'Unable to determine Payload from task: "{task_meta}"'
+                                f'Unable to determine Payload from task: "{task}"'
                             )
                     self.scan_payload(payload)
                 except queue.Empty:
