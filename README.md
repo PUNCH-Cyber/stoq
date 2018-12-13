@@ -36,7 +36,7 @@ Or, you can install the lastest master:
 
 # Plugins
 
-stoQ currently has over 40 publicly available plugins. These plugins are
+stoQ currently has a wide range of publicly available plugins. These plugins are
 available separately in the [plugin repository](https://github.com/PUNCH-Cyber/stoq-plugins-public/tree/v2) and can be [easily installed](https://stoq-framework.readthedocs.io/en/documentation/user/installation.html#installing-plugins) from stoQ.
 
 Don't see a plugin you need? Check out the [plugin](https://stoq-framework.readthedocs.io/en/documentation/dev/plugin_overview.html) documentation, or contact us.
@@ -72,7 +72,7 @@ that have similar capabilities to stoQ. However, stoQ is fundamentally different
 when compared to other solutions available. Some key differences are:
 
 - Extremely lightweight and designed with simplicity in mind.
-- Over 40 [publicly available plugins](https://github.com/PUNCH-Cyber/stoq-plugins-public).
+- A wide range of [publicly available plugins](https://github.com/PUNCH-Cyber/stoq-plugins-public).
 - `stoQ` makes no assumptions about your workflow. Analysts decide everything, from where data
   originates, how it is scanned/decoded/processed, to where it is saved.
 - Scalable in not only native/bare metal environments, but also using solutions such as

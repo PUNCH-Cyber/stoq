@@ -63,7 +63,7 @@ that have similar capabilities to stoQ. However, stoQ is fundamentally different
 when compared to other solutions available. Some key differences are:
 
     - Extremely lightweight and designed with simplicity in mind.
-    - Over 40 `publicly available plugins <https://github.com/PUNCH-Cyber/stoq-plugins-public>`_.
+    - A wide range of `publicly available plugins <https://github.com/PUNCH-Cyber/stoq-plugins-public>`_.
     - `stoQ` makes no assumptions about your workflow. Analysts decide everything, from where data
       originates, how it is scanned/decoded/processed, to where it is saved.
     - Scalable in not only native/bare metal environments, but also using solutions such as
