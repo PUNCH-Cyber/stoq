@@ -27,24 +27,14 @@ STAGE_DIR=${PREFIX}/stage
 
 install_core() {
     apt-get update -y && apt-get install -yq python3-setuptools python3-pip
-
     build_dirs
-
-    if [ ! -d ${STAGE_DIR}/stoq ]; then
-        git clone https://github.com/PUNCH-Cyber/stoq ${STAGE_DIR}/stoq
-    fi
-    cd ${STAGE_DIR}/stoq
-    git checkout v2
-    python3 setup.py install
-
+    pip install stoq-framework
     if [ ! -d ${STAGE_DIR}/stoq-plugins-public ]; then
-        git clone https://github.com/PUNCH-Cyber/stoq-plugins-public ${STAGE_DIR}/stoq-plugins-public
+        git clone --single-branch --branch v2 https://github.com/PUNCH-Cyber/stoq-plugins-public ${STAGE_DIR}/stoq-plugins-public
     fi
     cd ${STAGE_DIR}/stoq-plugins-public
-    git checkout v2
-    for plugin in `ls v2/`
-    do
-        stoq install v2/${plugin}
+    for plugin in `ls -d */`; do
+        stoq install $plugin
     done
 }
 
