@@ -22,6 +22,9 @@ import stoq.helpers as helpers
 
 
 class TestHelpers(unittest.TestCase):
+    def setUp(self) -> None:
+        self.generic_content = b'The quick brown fox'
+
     def test_dumps_types(self):
         # Verify that all of these come back with some content and don't raise
         self.assertTrue(helpers.dumps([1, 2, 3]))
@@ -58,6 +61,22 @@ class TestHelpers(unittest.TestCase):
                 'anotherkey': ['another value', 'merged another value'],
             },
         )
+
+    def test_get_md5(self):
+       h = helpers.get_md5(self.generic_content)
+       self.assertEqual(h, 'a2004f37730b9445670a738fa0fc9ee5')
+
+    def test_get_sha1(self):
+       h = helpers.get_sha1(self.generic_content)
+       self.assertEqual(h, 'c519c1a06cdbeb2bc499e22137fb48683858b345')
+
+    def test_get_sha256(self):
+       h = helpers.get_sha256(self.generic_content)
+       self.assertEqual(h, '5cac4f980fedc3d3f1f99b4be3472c9b30d56523e632d151237ec9309048bda9')
+
+    def test_get_sha512(self):
+       h = helpers.get_sha512(self.generic_content)
+       self.assertEqual(h, '015e6d23e760f612cca616c54f110cb12dd54213f1e046c7607081372402eff4936b379296ed549236020afb37bd3e728a044a4243754f095498c98bc24f77e0')
 
 
 class ClassWithAttrs:

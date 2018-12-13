@@ -14,12 +14,24 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import json
 import logging
 import tempfile
 import unittest
 from unittest.mock import create_autospec, Mock
 
 from stoq import PayloadMeta, RequestMeta, Stoq, StoqException, ArchiverResponse, Payload
+from stoq.data_classes import (
+    StoqResponse,
+    PayloadMeta,
+    RequestMeta,
+    PayloadResults,
+    WorkerResponse,
+    ArchiverResponse,
+    DispatcherResponse,
+    DeepDispatcherResponse,
+    DecoratorResponse
+)
 import stoq.tests.utils as utils
 
 
@@ -116,6 +128,14 @@ class TestCore(unittest.TestCase):
         )
         self.assertIn('dummy_worker', response.results[0].plugins_run['workers'][0])
 
+    def test_dispatcher_exception(self):
+        s = Stoq(base_dir=utils.get_data_dir(), dispatchers=['simple_dispatcher'])
+        simple_dispatcher = s.load_plugin('simple_dispatcher')
+        simple_dispatcher.RAISE_EXCEPTION = True
+        with self.assertRaises(Exception) as context:
+            simple_dispatcher.get_dispatches(task)
+        self.assertTrue('Test exception', context.exception)
+
     def test_dispatch_duplicate(self):
         s = Stoq(base_dir=utils.get_data_dir(), dispatchers=['simple_dispatcher'])
         s.load_plugin('simple_dispatcher').WORKERS = ['simple_worker', 'simple_worker']
@@ -206,6 +226,16 @@ class TestCore(unittest.TestCase):
             {'test_deep_key': 'Useful deep metadata info'},
         )
         self.assertIn('dummy_worker', response.results[0].plugins_run['workers'][1])
+
+    def test_deep_dispatcher_exception(self):
+        s = Stoq(
+            base_dir=utils.get_data_dir(), deep_dispatchers=['simple_deep_dispatcher']
+        )
+        simple_deep_dispatcher = s.load_plugin('simple_deep_dispatcher')
+        simple_deep_dispatcher.RAISE_EXCEPTION = True
+        with self.assertRaises(Exception) as context:
+            simple_deep_dispatcher.get_dispatches(task)
+        self.assertTrue('Test exception', context.exception)
 
     def test_deep_dispatch_duplicate(self):
         s = Stoq(
@@ -526,3 +556,67 @@ class TestCore(unittest.TestCase):
         simple_archiver.PAYLOAD = b'This is a payload'
         s.run()
         dummy_connector.save.assert_called_once()
+
+    def test_stoqresponse_to_str(self):
+        response = StoqResponse({}, RequestMeta(), [])
+        response_str = str(response)
+        response_dict = json.loads(response_str)
+        self.assertIsInstance(response_str, str)
+        self.assertIsInstance(response_dict, dict)
+
+    def test_payloadmeta_to_str(self):
+        response = PayloadMeta()
+        response_str = str(response)
+        response_dict = json.loads(response_str)
+        self.assertIsInstance(response_str, str)
+        self.assertIsInstance(response_dict, dict)
+
+    def test_requestmeta_to_str(self):
+        response = RequestMeta()
+        response_str = str(response)
+        response_dict = json.loads(response_str)
+        self.assertIsInstance(response_str, str)
+        self.assertIsInstance(response_dict, dict)
+
+    def test_payloadresults_to_str(self):
+        payload = Payload(self.generic_content)
+        response = PayloadResults.from_payload(payload)
+        response_str = str(response)
+        response_dict = json.loads(response_str)
+        self.assertIsInstance(response_str, str)
+        self.assertIsInstance(response_dict, dict)
+
+    def test_workerresponse_to_str(self):
+        response = WorkerResponse()
+        response_str = str(response)
+        response_dict = json.loads(response_str)
+        self.assertIsInstance(response_str, str)
+        self.assertIsInstance(response_dict, dict)
+
+    def test_archiverresponse_to_str(self):
+        response = ArchiverResponse()
+        response_str = str(response)
+        response_dict = json.loads(response_str)
+        self.assertIsInstance(response_str, str)
+        self.assertIsInstance(response_dict, dict)
+
+    def test_dispatcherresponse_to_str(self):
+        response = DispatcherResponse()
+        response_str = str(response)
+        response_dict = json.loads(response_str)
+        self.assertIsInstance(response_str, str)
+        self.assertIsInstance(response_dict, dict)
+
+    def test_deepdispatcherresponse_to_str(self):
+        response = DeepDispatcherResponse()
+        response_str = str(response)
+        response_dict = json.loads(response_str)
+        self.assertIsInstance(response_str, str)
+        self.assertIsInstance(response_dict, dict)
+
+    def test_decoratorresponse_to_str(self):
+        response = DecoratorResponse()
+        response_str = str(response)
+        response_dict = json.loads(response_str)
+        self.assertIsInstance(response_str, str)
+        self.assertIsInstance(response_dict, dict)
