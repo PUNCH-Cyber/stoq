@@ -585,24 +585,23 @@ class Stoq(StoqPluginManager):
                                 self.log.warn(
                                     f'"{task_meta}" not found in archive "{source_archiver}": {str(e)}'
                                 )
-                        if not payload:
-                            raise StoqException(
-                                f'Unable to determine Payload from task: "{task}"'
-                            )
-                    self.scan_payload(payload)
+                    if payload:
+                        self.scan_payload(payload)
                 except queue.Empty:
                     pass
-                for future in [fut for fut in future_to_name if fut.done()]:
-                    try:
-                        future.result()
-                        self.log.info(
-                            f'Provider plugin {future_to_name[future]} exited'
-                        )
-                        del future_to_name[future]
-                    except Exception as e:
-                        msg = f'provider:{future_to_name[future]} exited'
-                        self.log.exception(msg)
-                        raise StoqException(msg) from e
+                except Exception as err:
+                    self.log.warn(f'Unable to scan payload: {err}')
+            for future in [fut for fut in future_to_name if fut.done()]:
+                try:
+                    future.result()
+                    self.log.info(f'Provider plugin {future_to_name[future]} exited')
+                    del future_to_name[future]
+                except Exception as e:
+                    msg = f'provider:{future_to_name[future]} exited'
+                    self.log.exception(msg)
+                    raise StoqException(msg) from e
+                finally:
+                    break
 
     def _single_scan(
         self,
