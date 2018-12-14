@@ -19,7 +19,7 @@ tutorials, posts, documentation improvements, bug reports, feature requests, etc
 Keep in mind that repository maintainers and community contributors for stoQ
 are volunteers. Respect amongst participants must be maintained at all times
 and collaboration should be constructive. Everyone is expected to act in
-accordance with the project's [Code of Conduct](CODE_OF_CONDUCT.MD)
+accordance with the project's [Code of Conduct](CODE_OF_CONDUCT.md)
 
 ## How to report a bug
 
