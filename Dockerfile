@@ -25,12 +25,15 @@ RUN apt-get update && \
     unzip \
     wget \
     curl \
+    libfuzzy-dev \
     libc6-i386 \
+    libssl-dev \
+    swig \
     lib32ncurses5 && \
     apt-get clean -y && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN pip install stoq-framework && \
+RUN pip install stoq-framework six && \
     git clone --single-branch --branch v2 https://github.com/PUNCH-Cyber/stoq-plugins-public ${STOQ_TMP}/stoq-plugins-public && \
     cd ${STOQ_TMP}/stoq-plugins-public && \
     for plugin in `ls -d */`; do stoq install $plugin; done
