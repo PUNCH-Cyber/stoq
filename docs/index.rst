@@ -459,3 +459,10 @@ Looking at learning more about the project and how to contribute? Read on.
    community/faq
    community/contributing
    community/codeofconduct
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
