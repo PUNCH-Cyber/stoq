@@ -566,12 +566,11 @@ class Stoq(StoqPluginManager):
                 try:
                     # Using get_nowait results in high CPU churn
                     task = payload_queue.get(timeout=0.1)
-                    payload = None
                     # Determine whether the provider has returned a `Payload`, or a task.
                     # If it is a task, load the defined archiver plugin to load the
                     # `Payload`, otherwise, simply continue on with the scanning.
                     if isinstance(task, Payload):
-                        payload = task
+                        self.scan_payload(task)
                     else:
                         for source_archiver, task_meta in task.items():
                             try:
@@ -579,29 +578,25 @@ class Stoq(StoqPluginManager):
                                 payload = self._loaded_source_archiver_plugins[
                                     source_archiver
                                 ].get(ar)
-                                if isinstance(payload, Payload):
-                                    break
+                                if payload:
+                                    self.scan_payload(payload)
                             except Exception as e:
                                 self.log.warn(
-                                    f'"{task_meta}" not found in archive "{source_archiver}": {str(e)}'
+                                    f'"{task_meta}" failed with archiver "{source_archiver}": {str(e)}'
                                 )
-                    if payload:
-                        self.scan_payload(payload)
                 except queue.Empty:
                     pass
-                except Exception as err:
-                    self.log.warn(f'Unable to scan payload: {err}')
-            for future in [fut for fut in future_to_name if fut.done()]:
-                try:
-                    future.result()
-                    self.log.info(f'Provider plugin {future_to_name[future]} exited')
-                    del future_to_name[future]
-                except Exception as e:
-                    msg = f'provider:{future_to_name[future]} exited'
-                    self.log.exception(msg)
-                    raise StoqException(msg) from e
-                finally:
-                    break
+                for future in [fut for fut in future_to_name if fut.done()]:
+                    try:
+                        future.result()
+                        self.log.info(
+                            f'Provider plugin {future_to_name[future]} successfully completed'
+                        )
+                        del future_to_name[future]
+                    except Exception as e:
+                        msg = f'provider:{future_to_name[future]} failed'
+                        self.log.exception(msg)
+                        raise StoqException(msg) from e
 
     def _single_scan(
         self,
