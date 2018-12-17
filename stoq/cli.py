@@ -82,18 +82,6 @@ Examples:
         default=sys.stdin.buffer,
         help='File to scan, can also be provided from stdin',
     )
-    scan.add_argument(
-        '-s',
-        '--start-dispatch',
-        nargs='+',
-        help='Worker plugins to add to the original payload dispatch',
-    )
-    scan.add_argument(
-        '-d',
-        '--start-deep-dispatch',
-        nargs='+',
-        help='Worker plugins to add to the deep dispatch',
-    )
 
     run = subparsers.add_parser(
         'run', help='Continually ingest and scan payloads from Provider plugins'
@@ -142,6 +130,18 @@ Examples:
             '--always-dispatch',
             nargs='+',
             help='Worker plugins to always dispatch plugins to',
+        )
+        subparser.add_argument(
+            '-s',
+            '--start-dispatch',
+            nargs='+',
+            help='Worker plugins to add to the original payload dispatch',
+        )
+        subparser.add_argument(
+            '-d',
+            '--start-deep-dispatch',
+            nargs='+',
+            help='Worker plugins to add to the deep dispatch',
         )
         subparser.add_argument('--plugin-opts', nargs='+', help='Plugin options')
 
@@ -236,7 +236,10 @@ Examples:
             decorators=args.decorators,
             always_dispatch=args.always_dispatch,
         )
-        stoq.run()
+        stoq.run(
+            add_start_dispatch=args.start_dispatch,
+            add_start_deep_dispatch=args.start_deep_dispatch,
+        )
     elif args.command == 'list':
         stoq = Stoq(base_dir=stoq_home)
         print(about)

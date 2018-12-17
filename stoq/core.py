@@ -545,7 +545,11 @@ class Stoq(StoqPluginManager):
             connector.save(response)
         return response
 
-    def run(self) -> None:
+    def run(
+        self,
+        add_start_dispatch: Optional[List[str]] = None,
+        add_start_deep_dispatch: Optional[List[str]] = None,
+    ) -> None:
         """
 
         Run stoQ using a provider plugin to scan multiple files until exhaustion
@@ -570,7 +574,11 @@ class Stoq(StoqPluginManager):
                     # If it is a task, load the defined archiver plugin to load the
                     # `Payload`, otherwise, simply continue on with the scanning.
                     if isinstance(task, Payload):
-                        self.scan_payload(task)
+                        self.scan_payload(
+                            task,
+                            add_start_dispatch=add_start_dispatch,
+                            add_start_deep_dispatch=add_start_deep_dispatch,
+                        )
                     else:
                         for source_archiver, task_meta in task.items():
                             try:
@@ -579,7 +587,11 @@ class Stoq(StoqPluginManager):
                                     source_archiver
                                 ].get(ar)
                                 if payload:
-                                    self.scan_payload(payload)
+                                    self.scan_payload(
+                                        payload,
+                                        add_start_dispatch=add_start_dispatch,
+                                        add_start_deep_dispatch=add_start_deep_dispatch,
+                                    )
                             except Exception as e:
                                 self.log.warn(
                                     f'"{task_meta}" failed with archiver "{source_archiver}": {str(e)}'

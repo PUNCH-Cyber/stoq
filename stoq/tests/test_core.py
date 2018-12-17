@@ -557,6 +557,66 @@ class TestCore(unittest.TestCase):
         s.run()
         dummy_connector.save.assert_called_once()
 
+    def test_provider_with_start_dispatch(self):
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            source_archivers=['simple_archiver'],
+            providers=['simple_provider'],
+            connectors=['dummy_connector'],
+        )
+        dummy_connector = s.load_plugin('dummy_connector')
+        dummy_connector.save = create_autospec(dummy_connector.save)
+        simple_provider = s.load_plugin('simple_provider')
+        simple_provider.RETURN_PAYLOAD = True
+        simple_archiver = s.load_plugin('simple_archiver')
+        simple_archiver.PAYLOAD = b'This is a payload'
+        dummy_worker = s.load_plugin('dummy_worker')
+        dummy_worker.scan = create_autospec(dummy_worker.scan)
+        s.run(add_start_dispatch=['dummy_worker'])
+        dummy_worker.scan.assert_called_once()
+        dummy_connector.save.assert_called_once()
+
+    def test_provider_with_start_deep_dispatch(self):
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            source_archivers=['simple_archiver'],
+            providers=['simple_provider'],
+            connectors=['dummy_connector'],
+        )
+        dummy_connector = s.load_plugin('dummy_connector')
+        dummy_connector.save = create_autospec(dummy_connector.save)
+        simple_provider = s.load_plugin('simple_provider')
+        simple_provider.RETURN_PAYLOAD = True
+        simple_archiver = s.load_plugin('simple_archiver')
+        simple_archiver.PAYLOAD = b'This is a payload'
+        dummy_worker = s.load_plugin('dummy_worker')
+        dummy_worker.scan = create_autospec(dummy_worker.scan)
+        s.run(add_start_deep_dispatch=['dummy_worker'])
+        dummy_worker.scan.assert_called_once()
+        dummy_connector.save.assert_called_once()
+
+    def test_provider_with_start_dispatch_and_start_deep_dispatch(self):
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            source_archivers=['simple_archiver'],
+            providers=['simple_provider'],
+            connectors=['dummy_connector'],
+        )
+        dummy_connector = s.load_plugin('dummy_connector')
+        dummy_connector.save = create_autospec(dummy_connector.save)
+        simple_provider = s.load_plugin('simple_provider')
+        simple_provider.RETURN_PAYLOAD = True
+        simple_archiver = s.load_plugin('simple_archiver')
+        simple_archiver.PAYLOAD = b'This is a payload'
+        dummy_worker = s.load_plugin('dummy_worker')
+        dummy_worker.scan = create_autospec(dummy_worker.scan)
+        simple_worker = s.load_plugin('simple_worker')
+        simple_worker.scan = create_autospec(simple_worker.scan)
+        s.run(add_start_dispatch=['simple_worker'], add_start_deep_dispatch=['dummy_worker'])
+        dummy_worker.scan.assert_called_once()
+        simple_worker.scan.assert_called_once()
+        dummy_connector.save.assert_called_once()
+
     def test_stoqresponse_to_str(self):
         response = StoqResponse({}, RequestMeta(), [])
         response_str = str(response)
