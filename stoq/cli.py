@@ -223,7 +223,8 @@ Examples:
             add_start_dispatch=args.start_dispatch,
             add_start_deep_dispatch=args.start_deep_dispatch,
         )
-        print(response)
+        if not args.connectors:
+            print(response)
     elif args.command == 'run':
         stoq = Stoq(
             base_dir=stoq_home,
