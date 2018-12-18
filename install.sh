@@ -30,7 +30,7 @@ install_core() {
     build_dirs
     pip install stoq-framework
     if [ ! -d ${STAGE_DIR}/stoq-plugins-public ]; then
-        git clone --single-branch --branch v2 https://github.com/PUNCH-Cyber/stoq-plugins-public ${STAGE_DIR}/stoq-plugins-public
+        git clone https://github.com/PUNCH-Cyber/stoq-plugins-public ${STAGE_DIR}/stoq-plugins-public
     fi
     cd ${STAGE_DIR}/stoq-plugins-public
     for plugin in `ls -d */`; do

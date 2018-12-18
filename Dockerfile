@@ -34,7 +34,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN pip install stoq-framework six && \
-    git clone --single-branch --branch v2 https://github.com/PUNCH-Cyber/stoq-plugins-public ${STOQ_TMP}/stoq-plugins-public && \
+    git clone https://github.com/PUNCH-Cyber/stoq-plugins-public ${STOQ_TMP}/stoq-plugins-public && \
     cd ${STOQ_TMP}/stoq-plugins-public && \
     for plugin in `ls -d */`; do stoq install $plugin; done
 
