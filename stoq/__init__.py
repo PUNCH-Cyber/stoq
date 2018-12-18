@@ -28,6 +28,6 @@ from .data_classes import (
     DeepDispatcherResponse,
     DecoratorResponse,
 )
-from .exceptions import StoqException
+from .exceptions import StoqException, StoqPluginException
 
 __version__ = '2.0.0'
