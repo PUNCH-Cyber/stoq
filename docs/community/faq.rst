@@ -12,6 +12,10 @@ Frequently Asked Questions
 
     Unfortunately, no. However, porting plugins to version 2 is very simple.
 
+- **Is v1 of stoQ still available?**
+
+    Absolutely, though it is no longer maintained (minus major bug fixes or security issues) in favor of v2. You can get the `framework here <https://github.com/PUNCH-Cyber/stoq/tree/v1>`_ and the `plugins here <https://github.com/PUNCH-Cyber/stoq-plugins-public/tree/v1>`_.
+
 - **Why should I use stoQ?**
 
     Because your time is valuable and there are better things to do with it than run the same tools over and over again. stoQ allows you to automate most of the mundane tasks analysts do on a daily basis. It also allows you to do this scanning at scale, against a few to hundreds of millions of payloads daily.
