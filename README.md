@@ -4,9 +4,9 @@
 </p>
 
 
-[![Build Status](https://travis-ci.org/PUNCH-Cyber/stoq.svg?branch=master)](https://travis-ci.org/PUNCH-Cyber/stoq)
-[![Coverage Status](https://coveralls.io/repos/github/PUNCH-Cyber/stoq/badge.svg?branch=master)](https://coveralls.io/github/PUNCH-Cyber/stoq?branch=master)
-[![Documentation Status](https://readthedocs.org/projects/stoq-framework/badge/?version=latest)](https://stoq-framework.readthedocs.io/en/latest/?badge=latest)
+[![Build Status](https://travis-ci.org/PUNCH-Cyber/stoq.svg?branch=v1)](https://travis-ci.org/PUNCH-Cyber/stoq)
+[![Coverage Status](https://coveralls.io/repos/github/PUNCH-Cyber/stoq/badge.svg?branch=v1)](https://coveralls.io/github/PUNCH-Cyber/stoq?branch=v1)
+[![Documentation Status](https://readthedocs.org/projects/stoq-framework/badge/?version=v1)](https://stoq-framework.readthedocs.io/en/latest/?badge=v1)
 
 # Overview
 
@@ -26,9 +26,9 @@ Want to learn more? Read some of the [blog posts](https://medium.com/stoq) we've
 # Plugins
 
 stoQ currently has over 40 publicly available plugins. These plugins are
-available separately in the [plugin repository](https://github.com/PUNCH-Cyber/stoq-plugins-public)
+available separately in the [plugin repository](https://github.com/PUNCH-Cyber/stoq-plugins-public/tree/v1)
 
-Don't see a plugin you need? Check out the [plugin development](https://stoq-framework.readthedocs.io/en/latest/PluginDevelopment.html) documentation, or contact us.
+Don't see a plugin you need? Check out the [plugin development](https://stoq-framework.readthedocs.io/en/v1/PluginDevelopment.html) documentation, or contact us.
 
 # Installation and Documenation
 
@@ -36,7 +36,7 @@ Want to get started quickly? Check out the [docker image](https://hub.docker.com
 
 stoQ requires a minimum of python 3.4. Installation on Debian based systems is
 as simple as running a script. For detailed instructions on how to install stoQ,
-to include the installation script, please visit stoQ's [install documentation](https://stoq-framework.readthedocs.io/en/latest/Installation.html). If you're
+to include the installation script, please visit stoQ's [install documentation](https://stoq-framework.readthedocs.io/en/v1/Installation.html). If you're
 interested in learning more about stoQ, to include how to develop your own plugins,
-checkout the [full documentation](https://stoq-framework.readthedocs.io/).
+checkout the [full documentation](https://stoq-framework.readthedocs.io/en/v1).
 
