@@ -2,9 +2,9 @@
 <img src="http://stoq.punchcyber.com/i/stoq.png" width="300"><br />
 </p>
 
-[![Build Status](https://travis-ci.org/PUNCH-Cyber/stoq.svg?branch=v2)](https://travis-ci.org/PUNCH-Cyber/stoq)
-[![Coverage Status](https://coveralls.io/repos/github/PUNCH-Cyber/stoq/badge.svg?branch=v2)](https://coveralls.io/github/PUNCH-Cyber/stoq?branch=v2)
-[![Documentation Status](https://readthedocs.org/projects/stoq-framework/badge/?version=v2)](https://stoq-framework.readthedocs.io/en/v2/)
+[![Build Status](https://travis-ci.org/PUNCH-Cyber/stoq.svg?branch=master)](https://travis-ci.org/PUNCH-Cyber/stoq)
+[![Coverage Status](https://coveralls.io/repos/github/PUNCH-Cyber/stoq/badge.svg?branch=master)](https://coveralls.io/github/PUNCH-Cyber/stoq?branch=master)
+[![Documentation Status](https://readthedocs.org/projects/stoq-framework/badge/?version=latest)](https://stoq-framework.readthedocs.io/en/latest/?badge=latest)
 [![License](https://img.shields.io/pypi/l/stoq-framework.svg)](https://pypi.org/project/stoq-framework/)
 
 # Overview
@@ -31,13 +31,12 @@ Installation via pip:
 
 Or, you can install the lastest master:
 
-    $ git clone --single-branch -b v2 https://github.com/PUNCH-Cyber/stoq
+    $ git clone https://github.com/PUNCH-Cyber/stoq
     $ cd stoq && python3 setup.py install
 
 # Plugins
 
-stoQ currently has a wide range of publicly available plugins. These plugins are
-available separately in the [plugin repository](https://github.com/PUNCH-Cyber/stoq-plugins-public/tree/v2) and can be [easily installed](https://stoq-framework.readthedocs.io/en/latest/user/installation.html#installing-plugins) from stoQ.
+stoQ currently has a wide range of publicly available plugins. These plugins are available separately in the [plugin repository](https://github.com/PUNCH-Cyber/stoq-plugins-public/tree/v2) and can be [easily installed](https://stoq-framework.readthedocs.io/en/latest/user/installation.html#installing-plugins) from stoQ.
 
 Don't see a plugin you need? Check out the [plugin](https://stoq-framework.readthedocs.io/en/latest/dev/plugin_overview.html) documentation, or contact us.
 

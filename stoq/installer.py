@@ -25,7 +25,7 @@ from .exceptions import StoqException
 
 class StoqPluginInstaller:
 
-    DEFAULT_REPO = 'git+https://github.com/PUNCH-Cyber/stoq-plugins-public.git@v2'
+    DEFAULT_REPO = 'git+https://github.com/PUNCH-Cyber/stoq-plugins-public.git'
 
     @staticmethod
     def install(

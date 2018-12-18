@@ -13,9 +13,9 @@ Release |release|
     :target: https://pypi.org/project/stoq-framework/
 .. image:: https://img.shields.io/pypi/pyversions/stoq-framework.svg
     :target: https://pypi.org/project/stoq-framework/
-.. image:: https://travis-ci.org/PUNCH-Cyber/stoq.svg?branch=v2
+.. image:: https://travis-ci.org/PUNCH-Cyber/stoq.svg?branch=master
     :target: https://travis-ci.org/PUNCH-Cyber/stoq
-.. image:: https://coveralls.io/repos/github/PUNCH-Cyber/stoq/badge.svg?branch=v2
+.. image:: https://coveralls.io/repos/github/PUNCH-Cyber/stoq/badge.svg?branch=master
     :target: https://coveralls.io/github/PUNCH-Cyber/stoq?branch=master
 
 
