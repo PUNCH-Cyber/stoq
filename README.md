@@ -36,10 +36,9 @@ Or, you can install the lastest master:
 
 # Plugins
 
-stoQ currently has a wide range of publicly available plugins. These plugins are
-available separately in the [plugin repository](https://github.com/PUNCH-Cyber/stoq-plugins-public) and can be [easily installed](https://stoq-framework.readthedocs.io/en/documentation/user/installation.html#installing-plugins) from stoQ.
+stoQ currently has a wide range of publicly available plugins. These plugins are available separately in the [plugin repository](https://github.com/PUNCH-Cyber/stoq-plugins-public/tree/v2) and can be [easily installed](https://stoq-framework.readthedocs.io/en/latest/user/installation.html#installing-plugins) from stoQ.
 
-Don't see a plugin you need? Check out the [plugin](https://stoq-framework.readthedocs.io/en/documentation/dev/plugin_overview.html) documentation, or contact us.
+Don't see a plugin you need? Check out the [plugin](https://stoq-framework.readthedocs.io/en/latest/dev/plugin_overview.html) documentation, or contact us.
 
 # What is stoQ
 
