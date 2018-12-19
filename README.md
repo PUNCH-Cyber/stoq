@@ -5,6 +5,8 @@
 [![Build Status](https://travis-ci.org/PUNCH-Cyber/stoq.svg?branch=master)](https://travis-ci.org/PUNCH-Cyber/stoq)
 [![Coverage Status](https://coveralls.io/repos/github/PUNCH-Cyber/stoq/badge.svg?branch=master)](https://coveralls.io/github/PUNCH-Cyber/stoq?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/stoq-framework/badge/?version=latest)](https://stoq-framework.readthedocs.io/en/latest/?badge=latest)
+[![Docker Build](https://img.shields.io/docker/build/punchcyber/stoq.svg)](https://hub.docker.com/r/punchcyber/stoq/)
+[![pypi](https://img.shields.io/pypi/v/stoq-framework.svg)](https://pypi.org/project/stoq-framework/)
 [![License](https://img.shields.io/pypi/l/stoq-framework.svg)](https://pypi.org/project/stoq-framework/)
 
 # Overview
