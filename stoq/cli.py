@@ -143,6 +143,12 @@ Examples:
             nargs='+',
             help='Worker plugins to add to the deep dispatch',
         )
+        subparser.add_argument(
+            '--max-recursion',
+            type=int,
+            default=3,
+            help='Maximum level of recursion into a payload and extracted payloads',
+        )
         subparser.add_argument('--plugin-opts', nargs='+', help='Plugin options')
 
     subparsers.add_parser('list', help='List available plugins')
@@ -216,6 +222,7 @@ Examples:
             deep_dispatchers=args.deep_dispatchers,
             decorators=args.decorators,
             always_dispatch=args.always_dispatch,
+            max_recursion=args.max_recursion,
         )
         response = stoq.scan(
             content,
@@ -236,6 +243,7 @@ Examples:
             dispatchers=args.dispatchers,
             decorators=args.decorators,
             always_dispatch=args.always_dispatch,
+            max_recursion=args.max_recursion,
         )
         stoq.run(
             add_start_dispatch=args.start_dispatch,

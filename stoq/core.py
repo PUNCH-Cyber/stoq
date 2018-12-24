@@ -337,6 +337,8 @@ class Stoq(StoqPluginManager):
         deep_dispatchers: Optional[List[str]] = None,
         decorators: Optional[List[str]] = None,
         always_dispatch: Optional[List[str]] = None,
+        max_recursion: Optional[int] = 3,
+        max_dispatch_passes: Optional[int] = 1,
     ) -> None:
         """
 
@@ -356,7 +358,8 @@ class Stoq(StoqPluginManager):
         :param deep_dispatchers: Deep Dispatcher plugins to be used
         :param decorators: Decorators to be used
         :param always_dispatch: Plugins to always send payloads to, no matter what
-
+        :param max_recursion: Maximum level of recursion into a payload and extracted payloads
+        :param max_dispatch_passes: Maximum number of times the same payload will be deep dispatched
         """
         if not base_dir:
             base_dir = os.getcwd()
@@ -367,10 +370,12 @@ class Stoq(StoqPluginManager):
         if os.path.exists(config_file):
             config.read(config_file)
 
-        self.max_queue = int(config.get('core', 'max_queue', fallback='100'))
-        self.max_recursion = int(config.get('core', 'max_recursion', fallback='3'))
-        self.max_dispatch_passes = int(
-            config.get('core', 'max_dispatch_passes', fallback='1')
+        self.max_queue = config.getint('core', 'max_queue', fallback=100)
+        self.max_recursion = config.getint(
+            'core', 'max_recursion', fallback=max_recursion
+        )
+        self.max_dispatch_passes = config.getint(
+            'core', 'max_dispatch_passes', fallback=max_dispatch_passes
         )
 
         if log_dir is _UNSET:
