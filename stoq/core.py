@@ -337,8 +337,8 @@ class Stoq(StoqPluginManager):
         deep_dispatchers: Optional[List[str]] = None,
         decorators: Optional[List[str]] = None,
         always_dispatch: Optional[List[str]] = None,
-        max_recursion: Optional[int] = 3,
-        max_dispatch_passes: Optional[int] = 1,
+        max_recursion: int = 3,
+        max_dispatch_passes: int = 1,
     ) -> None:
         """
 
