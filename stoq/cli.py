@@ -20,11 +20,11 @@ import select
 import argparse
 import unittest
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Union
 
 import stoq.tests as tests
 from stoq.installer import StoqPluginInstaller
-from stoq import Stoq, PayloadMeta, __version__
+from stoq import Stoq, PayloadMeta, RequestMeta, __version__
 
 
 def main() -> None:
@@ -150,6 +150,16 @@ Examples:
             help='Maximum level of recursion into a payload and extracted payloads',
         )
         subparser.add_argument('--plugin-opts', nargs='+', help='Plugin options')
+        subparser.add_argument(
+            '--request-source',
+            default=None,
+            help='Source name to add to initial scan request',
+        )
+        subparser.add_argument(
+            '--request-extra',
+            nargs='+',
+            help='Key/value pair to add to initial scan request metadata',
+        )
 
     subparsers.add_parser('list', help='List available plugins')
 
@@ -172,12 +182,12 @@ Examples:
     )
 
     subparsers.add_parser('test', help='Run stoQ tests')
-
     args = parser.parse_args()
 
-    plugin_opts: Dict = {}
+    plugin_opts: Union[Dict, None] = None
     try:
         if args.plugin_opts:
+            plugin_opts = {}
             for arg in args.plugin_opts:
                 plugin_name, plugin_option = arg.split(':')
                 opt, value = plugin_option.split('=')
@@ -189,8 +199,23 @@ Examples:
                     plugin_opts[plugin_name].update({opt: value})
                 else:
                     plugin_opts[plugin_name] = {opt: value}
-    except AttributeError:
-        pass
+    except (AttributeError, ValueError) as err:
+        print(f'Failed parsing plugin option: {err}')
+
+    try:
+        request_meta = RequestMeta()
+        if args.request_source:
+            request_meta.source = args.request_source
+        if args.request_extra:
+            for arg in args.request_extra:
+                extra_key, extra_value = arg.split('=')
+                if extra_value.lower() == 'true':
+                    extra_value = True
+                elif extra_value.lower() == 'false':
+                    extra_value = False
+                request_meta.extra_data[extra_key] = extra_value
+    except (AttributeError, ValueError) as err:
+        print(f'Failed parsing request metadata option: {err}')
 
     if args.command == 'scan':
         with args.file as f:
@@ -227,6 +252,7 @@ Examples:
         response = stoq.scan(
             content,
             PayloadMeta(extra_data={'filename': filename}),
+            request_meta=request_meta,
             add_start_dispatch=args.start_dispatch,
             add_start_deep_dispatch=args.start_deep_dispatch,
         )
@@ -246,6 +272,7 @@ Examples:
             max_recursion=args.max_recursion,
         )
         stoq.run(
+            request_meta=request_meta,
             add_start_dispatch=args.start_dispatch,
             add_start_deep_dispatch=args.start_deep_dispatch,
         )

@@ -327,3 +327,75 @@ for new files by setting the option ``source_dir``, the syntax would be::
 
     dirmon:source_dir=/tmp/monitor
 
+Additionally, plugin options may be defined when instantiating ``Stoq`` using the ``plugin_opts``
+argument::
+
+    >>> from stoq import Stoq
+    >>> plugin_options = {'dirmon': {'source_dir': '/tmp/monitor'}}
+    >>> s = Stoq(plugin_opts=plugin_options)
+
+
+RequestMeta Options
+-------------------
+
+RequestMeta options sets metadata associated with the initial request `stoQ` receives. This is
+useful when certain metadata, such as the source name of the payload, must be saved alongside
+the results of the scan.
+
+There are two command line options avaiable for RequestMeta.
+
+    - ``--request-source``
+    - ``--request-extra``
+
+To set ``--request-source`` simply add the argument to the `stoq` command::
+
+    $ stoq scan [...] --request-source my_mail
+    {
+        "results": [
+            {
+                "payload_id": "27774a9a-5a03-4d59-b51b-37583683b666",
+                [...]
+            }
+        ],
+        "request_meta": {
+            "archive_payloads": true,
+            "source": "my_mail",
+            "extra_data": {}
+        },
+        "errors": {},
+        "time": "...",
+        "decorators": {},
+        "scan_id": "e107f362-0b40-455e-bfef-da7c606637ca"
+    }
+
+Additionally, extra data may be added to RequestMeta by using the ``--request-extra`` command
+line argument. This option requires key/value pairs separated by an ``=``::
+
+    $ stoq scan [...] --request-source my_mail --request-extra server=mail-server-01 postfix=true
+    {
+        "results": [
+            {
+                "payload_id": "27774a9a-5a03-4d59-b51b-37583683b666",
+                [...]
+            }
+        ],
+        "request_meta": {
+            "archive_payloads": true,
+            "source": "my_mail",
+            "extra_data": {
+                "server": "mail-server-01",
+                "postfix": true
+            }
+        },
+        "errors": {},
+        "time": "...",
+        "decorators": {},
+        "scan_id": "e107f362-0b40-455e-bfef-da7c606637ca"
+    }
+
+Additionally, RequestMeta may be defined when scanning a payload using a ``Stoq`` object
+
+    >>> from stoq import Stoq, RequestMeta
+    >>> s = Stoq()
+    >>> request_meta = RequestMeta(source='my_mail', extra_data={'server': 'mail-server-01', 'postfix': True})
+    >>> s.scan(b'this is a test payload', request_meta=request_meta)

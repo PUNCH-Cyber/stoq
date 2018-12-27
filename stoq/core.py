@@ -552,12 +552,17 @@ class Stoq(StoqPluginManager):
 
     def run(
         self,
+        request_meta: Optional[RequestMeta] = None,
         add_start_dispatch: Optional[List[str]] = None,
         add_start_deep_dispatch: Optional[List[str]] = None,
     ) -> None:
         """
 
         Run stoQ using a provider plugin to scan multiple files until exhaustion
+
+        :param request_meta: Metadata pertaining to the originating request
+        :param add_start_dispatch: Force first round of scanning to use specified plugins
+        :param add_start_deep_dispatch: Force second round of scanning to use specified plugins
 
         """
         # Don't initialize any (provider) plugins here! They should be
@@ -581,6 +586,7 @@ class Stoq(StoqPluginManager):
                     if isinstance(task, Payload):
                         self.scan_payload(
                             task,
+                            request_meta=request_meta,
                             add_start_dispatch=add_start_dispatch,
                             add_start_deep_dispatch=add_start_deep_dispatch,
                         )
@@ -594,6 +600,7 @@ class Stoq(StoqPluginManager):
                                 if payload:
                                     self.scan_payload(
                                         payload,
+                                        request_meta=request_meta,
                                         add_start_dispatch=add_start_dispatch,
                                         add_start_deep_dispatch=add_start_deep_dispatch,
                                     )
