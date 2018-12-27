@@ -202,8 +202,8 @@ Examples:
     except (AttributeError, ValueError) as err:
         print(f'Failed parsing plugin option: {err}')
 
+    request_meta = RequestMeta()
     try:
-        request_meta = RequestMeta()
         if args.request_source:
             request_meta.source = args.request_source
         if args.request_extra:
