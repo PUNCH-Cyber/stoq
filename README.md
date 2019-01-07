@@ -2,6 +2,8 @@
 <img src="http://stoq.punchcyber.com/i/stoq.png" width="300"><br />
 </p>
 
+[![Join the community on Spectrum](https://withspectrum.github.io/badge/badge.svg)](https://spectrum.chat/stoq)
+
 [![Build Status](https://travis-ci.org/PUNCH-Cyber/stoq.svg?branch=master)](https://travis-ci.org/PUNCH-Cyber/stoq)
 [![Coverage Status](https://coveralls.io/repos/github/PUNCH-Cyber/stoq/badge.svg?branch=master)](https://coveralls.io/github/PUNCH-Cyber/stoq?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/stoq-framework/badge/?version=latest)](https://stoq-framework.readthedocs.io/en/latest/?badge=latest)
