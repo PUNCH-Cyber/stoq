@@ -335,9 +335,9 @@ Or, carve a few executable files out of a Microsoft Word document:
                             "FileDescription": "Windows Calculator",
                             "FileVersion": "10.0.14393.0 (rs1_release.160715-1616)",
                             "InternalName": "CALC",
-                            "LegalCopyright": "© Microsoft Corporation. All rights reserved.",
+                            "LegalCopyright": "Microsoft Corporation. All rights reserved.",
                             "OriginalFileName": "CALC.EXE",
-                            "ProductName": "Microsoft® Windows® Operating System",
+                            "ProductName": "Microsoft Windows Operating System",
                             "ProductVersion": "10.0.14393.0",
                             "Warning": "Possibly corrupt Version resource"
                         },
