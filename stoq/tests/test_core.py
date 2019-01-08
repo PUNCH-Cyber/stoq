@@ -364,6 +364,7 @@ class TestCore(unittest.TestCase):
         self.assertIn(
             'valuable_insight', response.results[0].workers[0]['simple_worker']
         )
+        self.assertEqual(len(response.errors), 0)
 
     def test_worker_not_in_results(self):
         s = Stoq(base_dir=utils.get_data_dir())
@@ -377,6 +378,7 @@ class TestCore(unittest.TestCase):
         )
         self.assertIn('simple_archiver', response.results[0].archivers)
         self.assertIn('file_save_id', response.results[0].archivers['simple_archiver'])
+        self.assertEqual(len(response.errors), 0)
 
     def test_archiver_not_in_results(self):
         s = Stoq(base_dir=utils.get_data_dir(), dest_archivers=['dummy_archiver'])
@@ -466,6 +468,7 @@ class TestCore(unittest.TestCase):
         response = s.scan(self.generic_content)
         self.assertIn('simple_decorator', response.decorators)
         self.assertIn('simple_decoration', response.decorators['simple_decorator'])
+        self.assertEqual(len(response.errors), 0)
 
     def test_decorator_errors(self):
         s = Stoq(base_dir=utils.get_data_dir(), decorators=['simple_decorator'])
