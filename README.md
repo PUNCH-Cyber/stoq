@@ -249,7 +249,7 @@ Or, carve a few executable files out of a Microsoft Word document:
                             "HyperlinksChanged": 0,
                             "TitleOfParts": "",
                             "HeadingPairs": [
-                                "Título",
+                                "Titulo",
                                 1
                             ],
                             "CompObjUserTypeLen": 36,
