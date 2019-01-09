@@ -14,13 +14,13 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import configparser
-import importlib.util
+import os
 import inspect
 import logging
-import os
+import configparser
+import importlib.util
 from pkg_resources import parse_version
-from typing import Dict, List, Optional, Set, Tuple, Sequence, Any
+from typing import Dict, List, Optional, Set, Tuple, Any
 
 from .exceptions import StoqException
 from stoq.plugins import (
@@ -144,7 +144,7 @@ class StoqPluginManager:
         self._loaded_plugins[name] = plugin
         return plugin
 
-    def list_plugins(self) -> Dict[str, Dict[str, Sequence[Any]]]:
+    def list_plugins(self) -> Dict[str, Dict[str, Any]]:
         import ast
 
         valid_classes = [
@@ -159,16 +159,19 @@ class StoqPluginManager:
         ]
         plugins = {}
         for plugin in self._plugin_name_to_info.keys():
-            with open(self._plugin_name_to_info[plugin][0]) as f:
-                parsed_plugin = ast.parse(f.read())
-            classes = [n for n in parsed_plugin.body if isinstance(n, ast.ClassDef)]
             plugin_classes = []
-            for c in classes:
-                for base in c.bases:
-                    if base.id in valid_classes:  # pyre-ignore[16]
-                        plugin_classes.append(
-                            base.id.replace('Plugin', '')  # pyre-ignore[16]
-                        )
+            try:
+                with open(self._plugin_name_to_info[plugin][0]) as f:
+                    parsed_plugin = ast.parse(f.read())
+                classes = [n for n in parsed_plugin.body if isinstance(n, ast.ClassDef)]
+                for c in classes:
+                    for base in c.bases:
+                        if base.id in valid_classes:  # pyre-ignore[16]
+                            plugin_classes.append(
+                                base.id.replace('Plugin', '')  # pyre-ignore[16]
+                            )
+            except (UnicodeDecodeError, ValueError):
+                plugin_classes = ['UNKNOWN']
             plugins[plugin] = {
                 'classes': plugin_classes,
                 'version': self._plugin_name_to_info[plugin][1].get(
