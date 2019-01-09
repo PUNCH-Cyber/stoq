@@ -543,7 +543,7 @@ class Stoq(StoqPluginManager):
                 continue
             if decorator_response.results is not None:
                 response.decorators[plugin_name] = decorator_response.results
-            if decorator_response.errors is not None:
+            if decorator_response.errors:
                 response.errors[plugin_name].extend(decorator_response.errors)
 
         for connector in self._loaded_connector_plugins:
@@ -735,7 +735,7 @@ class Stoq(StoqPluginManager):
                     continue
                 if archiver_response.results is not None:
                     payload_results.archivers[plugin_name] = archiver_response.results
-                if archiver_response.errors is not None:
+                if archiver_response.errors:
                     errors[plugin_name].extend(archiver_response.errors)
 
         return (payload_results, extracted, errors)
@@ -832,4 +832,3 @@ class Stoq(StoqPluginManager):
                 errors[deep_dispatcher_name].append(helpers.format_exc(e, msg=msg))
 
         return (deep_dispatches, errors)
-
