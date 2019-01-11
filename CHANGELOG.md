@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Allow `max_dispatch_passes` when instantiating `Stoq()`.
 - Allow `--request-source` and `--request-extra` from command line.
 
+### Changed
+
+- Fix requirements URL when installing plugins from stoQ plugin repository
+
 ## [2.0.0] - 2018-12-21
 
 ### Added
