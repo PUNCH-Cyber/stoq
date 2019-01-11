@@ -27,7 +27,13 @@ checkout the [full documentation](https://stoq-framework.readthedocs.io/).
 
 # Installation
 
-stoQ requires a minimum of python 3.6.
+stoQ requires a minimum of python 3.6 and is recommended to be run in a [python venv](https://docs.python.org/3/library/venv.html).
+
+Setup a \$STOQ_HOME (defaults to ~/.stoq/plugins) folder and virtual environment:
+
+    $ mkdir -p ~/.stoq/plugins
+    $ python3 -m venv ~/.stoq/.venv
+    $ source~/.stoq/.venv/bin/activate
 
 Installation via pip:
 
