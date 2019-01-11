@@ -31,7 +31,7 @@ stoQ requires a minimum of python 3.6.
 
 Installation via pip:
 
-    $ pip install stoq-framework
+    $ pip3 install stoq-framework
 
 Or, you can install the lastest master:
 

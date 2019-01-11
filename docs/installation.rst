@@ -24,7 +24,7 @@ Stable
 
 The simplest way to get started is to install stoQ from pip::
 
-    $ pip install stoq-framework
+    $ pip3 install stoq-framework
 
 
 .. _installlatestdev:
