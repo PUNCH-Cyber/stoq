@@ -24,7 +24,7 @@ Setup a \$STOQ_HOME (defaults to ~/.stoq/plugins) folder and virtual environment
 
     $ mkdir -p ~/.stoq/plugins
     $ python3 -m venv ~/.stoq/.venv
-    $ source~/.stoq/.venv/bin/activate
+    $ source ~/.stoq/.venv/bin/activate
 
 
 .. _installlateststable:
