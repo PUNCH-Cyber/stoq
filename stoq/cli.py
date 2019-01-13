@@ -199,7 +199,9 @@ Examples:
                     plugin_opts[plugin_name].update({opt: value})
                 else:
                     plugin_opts[plugin_name] = {opt: value}
-    except (AttributeError, ValueError) as err:
+    except AttributeError:
+        pass
+    except ValueError as err:
         print(f'Failed parsing plugin option: {err}')
 
     request_meta = RequestMeta()
@@ -214,7 +216,9 @@ Examples:
                 elif extra_value.lower() == 'false':
                     extra_value = False
                 request_meta.extra_data[extra_key] = extra_value
-    except (AttributeError, ValueError) as err:
+    except AttributeError:
+        pass
+    except ValueError as err:
         print(f'Failed parsing request metadata option: {err}')
 
     if args.command == 'scan':
