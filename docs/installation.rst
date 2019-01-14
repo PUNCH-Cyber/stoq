@@ -14,7 +14,7 @@ over 40 publicly available plugins that can be found in their own repository
 
 Minimum requirements
 ********************
-stoQ requires a minimum of python 3.6 and is recommended to be run in a [python venv](https://docs.python.org/3/library/venv.html).
+stoQ requires a minimum of python 3.6 and is recommended to be run in a `python venv <https://docs.python.org/3/library/venv.html>`_.
 
 .. _installsetup:
 
