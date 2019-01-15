@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Fix erroneous error from being displayed when installing or listing plugins
+- Fix plugin install if requirements.txt does not exist
+- Documentation update for installation (@chemberger)
 
 ## [2.0.1] - 2019-01-10
 
