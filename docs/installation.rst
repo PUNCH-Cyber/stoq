@@ -20,7 +20,7 @@ stoQ requires a minimum of python 3.6 and is recommended to be run in a `python 
 
 Initial Setup
 -------------
-Setup a \$STOQ_HOME (defaults to ~/.stoq/plugins) folder and virtual environment::
+Setup a \$STOQ_HOME (defaults to ~/.stoq) folder, the necessary plugin folder and a virtual environment::
 
     $ mkdir -p ~/.stoq/plugins
     $ python3 -m venv ~/.stoq/.venv
