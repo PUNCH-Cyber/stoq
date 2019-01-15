@@ -160,8 +160,14 @@ Examples:
             nargs='+',
             help='Key/value pair to add to initial scan request metadata',
         )
+        subparser.add_argument(
+            '--plugin-dir', nargs='+', help='Directory(ies) containing stoQ plugins'
+        )
 
-    subparsers.add_parser('list', help='List available plugins')
+    plugin_list = subparsers.add_parser('list', help='List available plugins')
+    plugin_list.add_argument(
+        '--plugin-dir', nargs='+', help='Directory(ies) containing stoQ plugins'
+    )
 
     install = subparsers.add_parser('install', help='Install a given plugin')
     install.add_argument(
@@ -252,6 +258,7 @@ Examples:
             decorators=args.decorators,
             always_dispatch=args.always_dispatch,
             max_recursion=args.max_recursion,
+            plugin_dir_list=args.plugin_dir,
         )
         response = stoq.scan(
             content,
@@ -274,6 +281,7 @@ Examples:
             decorators=args.decorators,
             always_dispatch=args.always_dispatch,
             max_recursion=args.max_recursion,
+            plugin_dir_list=args.plugin_dir,
         )
         stoq.run(
             request_meta=request_meta,
@@ -281,7 +289,7 @@ Examples:
             add_start_deep_dispatch=args.start_deep_dispatch,
         )
     elif args.command == 'list':
-        stoq = Stoq(base_dir=stoq_home)
+        stoq = Stoq(base_dir=stoq_home, plugin_dir_list=args.plugin_dir)
         print(about)
         print('-' * len(about))
         for name, info in stoq.list_plugins().items():
