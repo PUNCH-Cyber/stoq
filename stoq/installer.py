@@ -68,7 +68,6 @@ class StoqPluginInstaller:
             requirements = f'{url}/master/{path}/requirements.txt'
             with NamedTemporaryFile() as temp_file:
                 response = requests.get(requirements)
-                response.raise_for_status()
                 if response.status_code == 200:
                     temp_file.write(response.content)
                     temp_file.flush()
@@ -83,6 +82,8 @@ class StoqPluginInstaller:
                             temp_file.name,
                         ]
                     )
+                elif response.status_code == 404:
+                    pass
                 else:
                     print(f'Failed to install requirements from {requirements}')
         else:
