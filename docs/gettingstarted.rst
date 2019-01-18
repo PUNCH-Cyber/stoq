@@ -30,7 +30,7 @@ Below are the individual steps and order for how plugins are handled within `sto
     which worker plugins the payload and results are passed.
 #. :ref:`Archiver Plugin <archiver>` :ref:`(destination archiver) <archiverdest>`:
     If a payload or extracted payload should be archived, they will be passed along to
-    the destional archiver for saving.
+    the destination archiver for saving.
 #. :ref:`Decorator Plugin <decorator>`:
     Once all dispatching, scanning, archiving, and decorating has completed, the final
     results are passed to the decorator plugins in order for it to analyze the completed
