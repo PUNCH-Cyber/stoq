@@ -62,7 +62,7 @@
         >>> from stoq import Stoq
 
 
-    2. We will now define the plugins we want to us. In this case, we will be
+    2. We will now define the plugins we want to use. In this case, we will be
        loading the ``hash``, and ``exif`` plugins:
 
         >>> workers = ['hash', 'exif']
@@ -122,7 +122,7 @@
         >>> from stoq import Stoq
 
 
-    2. We will now define the plugins we want to us. In this case, we will be
+    2. We will now define the plugins we want to use. In this case, we will be
        loading the ``dirmon``, ``filedir``, ``hash``, and ``exif`` plugins. We
        will also set the ``base_dir`` to a specific directory. Additionally,
        we will also set some plugin options to ensure the plugins are
