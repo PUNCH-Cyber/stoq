@@ -34,7 +34,7 @@ How to report a bug
 Security Disclosures
 ^^^^^^^^^^^^^^^^^^^^
 If you find a security vulnerability, do NOT open an issue.
-Email stoq @ punchcyber.com instead.
+Email info @ punchcyber.com instead.
 
 Other Bug Disclosures
 ^^^^^^^^^^^^^^^^^^^^^

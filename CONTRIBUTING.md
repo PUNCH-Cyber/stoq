@@ -26,7 +26,7 @@ accordance with the project's [Code of Conduct](CODE_OF_CONDUCT.md)
 ### Security Disclosures
 
 If you find a security vulnerability, do NOT open an issue.
-Email stoq @ punchcyber.com instead.
+Email info @ punchcyber.com instead.
 
 ### Other Bug Disclosures
 

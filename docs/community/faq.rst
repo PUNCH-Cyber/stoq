@@ -50,4 +50,4 @@ Frequently Asked Questions
 
 - **How can I ask other questions?**
 
-    Feel free to send us an e-mail at stoq @ punchcyber.com or, reach out to us at `@punchcyber <https://twitter.com/punchcyber>`_ or the author `@mlaferrera <https://twitter.com/mlaferrera>`_
+    Feel free to join us on `spectrum <https://spectrum.chat/stoq>`_, reach out to us at `@punchcyber <https://twitter.com/punchcyber>`_ or the author `@mlaferrera <https://twitter.com/mlaferrera>`_
