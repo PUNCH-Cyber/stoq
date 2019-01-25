@@ -16,11 +16,14 @@
 
 import os
 import sys
+import logging
 import requests
 import subprocess
 from tempfile import NamedTemporaryFile
 
 from .exceptions import StoqException
+
+log = logging.getLogger()
 
 
 class StoqPluginInstaller:
@@ -85,7 +88,7 @@ class StoqPluginInstaller:
                 elif response.status_code == 404:
                     pass
                 else:
-                    print(f'Failed to install requirements from {requirements}')
+                    log.info(f'Failed to install requirements from {requirements}')
         else:
             requirements = f'{plugin_path}/requirements.txt'
             if os.path.isfile(requirements):
@@ -107,4 +110,8 @@ class StoqPluginInstaller:
         try:
             output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as err:
+            if not os.getenv('VIRTUAL_ENV'):
+                log.error(
+                    '[!!] Plugin install failed. Are you root or in a virtual environment?\n'
+                )
             raise StoqException(err.output)
