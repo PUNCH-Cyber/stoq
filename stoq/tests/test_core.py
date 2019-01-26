@@ -20,7 +20,14 @@ import tempfile
 import unittest
 from unittest.mock import create_autospec, Mock
 
-from stoq import PayloadMeta, RequestMeta, Stoq, StoqException, ArchiverResponse, Payload
+from stoq import (
+    PayloadMeta,
+    RequestMeta,
+    Stoq,
+    StoqException,
+    ArchiverResponse,
+    Payload,
+)
 from stoq.data_classes import (
     StoqResponse,
     PayloadMeta,
@@ -30,7 +37,7 @@ from stoq.data_classes import (
     ArchiverResponse,
     DispatcherResponse,
     DeepDispatcherResponse,
-    DecoratorResponse
+    DecoratorResponse,
 )
 import stoq.tests.utils as utils
 
@@ -90,7 +97,10 @@ class TestCore(unittest.TestCase):
 
     def test_split_results(self):
         s = Stoq(base_dir=utils.get_data_dir())
-        response = s.scan(self.generic_content, add_start_dispatch=['multiclass_plugin', 'simple_worker'])
+        response = s.scan(
+            self.generic_content,
+            add_start_dispatch=['multiclass_plugin', 'simple_worker'],
+        )
         split_response = response.split()
         self.assertEqual(len(split_response), 2)
         for r in split_response:
@@ -459,8 +469,14 @@ class TestCore(unittest.TestCase):
         dummy_connector.save = create_autospec(
             dummy_connector.save, side_effect=RuntimeError('Unexpected exception')
         )
-        with self.assertRaises(Exception):
+        logging.disable(logging.NOTSET)
+        with self.assertLogs(level='ERROR') as cm:
             s.scan(self.generic_content)
+        self.assertTrue(
+            cm.output[0].startswith(
+                'ERROR:stoq:Failed to save results using dummy_connector'
+            )
+        )
 
     def test_decorator(self):
         s = Stoq(base_dir=utils.get_data_dir(), decorators=['simple_decorator'])
@@ -615,7 +631,10 @@ class TestCore(unittest.TestCase):
         dummy_worker.scan = create_autospec(dummy_worker.scan)
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.scan = create_autospec(simple_worker.scan)
-        s.run(add_start_dispatch=['simple_worker'], add_start_deep_dispatch=['dummy_worker'])
+        s.run(
+            add_start_dispatch=['simple_worker'],
+            add_start_deep_dispatch=['dummy_worker'],
+        )
         dummy_worker.scan.assert_called_once()
         simple_worker.scan.assert_called_once()
         dummy_connector.save.assert_called_once()

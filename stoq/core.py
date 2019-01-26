@@ -547,7 +547,12 @@ class Stoq(StoqPluginManager):
                 response.errors[plugin_name].extend(decorator_response.errors)
 
         for connector in self._loaded_connector_plugins:
-            connector.save(response)
+            try:
+                connector.save(response)
+            except Exception:
+                self.log.exception(
+                    f'Failed to save results using {connector.__module__}: {response}'
+                )
         return response
 
     def run(

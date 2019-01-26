@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Allow `--plugin-dir` from command line to force one or more plugin directories
 - Provide better logging when a plugin is installed from github as a non-root user outside of a venv
+- Gracefully handle exceptions in `ConnectorPlugins`
 
 ## [2.0.2] - 2019-01-14
 
