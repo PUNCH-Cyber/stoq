@@ -11,7 +11,7 @@ be run a few different ways, depending on what your requirements are.
 Workflow
 ********
 
-.. image:: /_static/workflow-72png
+.. image:: /_static/workflow-72.png
 
 .. note: Each plugin class is optional. They can all be mix and matched as required.
          Additionally, multiple plugins of each class can be used simultaneously.
