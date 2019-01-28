@@ -39,7 +39,8 @@
     behavior, it is recommended that all required plugins be loaded
     upon instantiation.
 
-    For these examples, it is assumed the below :ref:`plugins have been installed <installplugins>`:
+    For these examples, it is assumed the below :ref:`plugins have been installed <installplugins>` in
+    `$CWD/plugins`:
         - dirmon
         - exif
         - filedir
@@ -59,34 +60,28 @@
 
     1. First, import the required class:
 
-        >>> from stoq import Stoq
+        >>> from stoq import Stoq, RequestMeta
 
 
     2. We will now define the plugins we want to use. In this case, we will be
        loading the ``hash``, and ``exif`` plugins:
 
         >>> workers = ['hash', 'exif']
-        >>> plugin_dirs = ['/opt/plugins']
 
 
     3. Now that we have our environment defined, lets instantiate the ``Stoq`` class:
 
-        >>> s = Stoq(
-        ...     plugin_dir_list=plugin_dirs,
-        ...     always_dispatch=workers
-        ... )
+        >>> s = Stoq(always_dispatch=workers)
 
 
     4. We can now load a payload, and scan it individually with `stoQ`:
 
         >>> src = '/tmp/bad.exe'
         >>> with open(src, 'rb') as src_payload:
-        ...     s = Stoq()
-        ...     meta = {'filename': src}
+        ...     meta = RequestMeta(extra_data={'filename': src})
         ...     results = s.scan(
         ...             content=src_payload.read(),
-        ...             request_meta=meta,
-        ...             add_start_dispatch=plugins)
+        ...             request_meta=meta)
         >>> print(results)
         ...    {
         ...        "time": "...",
