@@ -125,6 +125,10 @@ for new files, queueing solutions such as RabbitMQ or Google PubSub can be lever
 be monitored for new e-mails. No matter what an analyst wants to do with stoQ, it's simply a matter of
 writing a plugin.
 
+See the below workflow for an overview of the plugin architecture:
+
+![workflow](docs/_static/workflow-72.png)
+
 # Example Output
 
 As an example of output from stoQ, let's scan a local file with ExifTool and get

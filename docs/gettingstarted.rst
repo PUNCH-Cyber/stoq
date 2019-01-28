@@ -11,34 +11,7 @@ be run a few different ways, depending on what your requirements are.
 Workflow
 ********
 
-Below are the individual steps and order for how plugins are handled within `stoQ`.
-
-#. :ref:`Provider Plugin <provider>`:
-    Provider plugins add a payload to the stoQ queue for processing
-#. :ref:`Archiver Plugin <archiver>` :ref:`(source archiver) <archiversource>`:
-    If the provider plugin passes a message, such as a file path or url, the source
-    archiver retrieves the payload and provides it to stoQ
-#. :ref:`Dispatcher Plugin <dispatcher>`:
-    Once a payload is provided, it is passed to the dispatcher plugin that decides
-    which worker plugins are used to scan the payload
-#. :ref:`Worker Plugin <worker>`:
-    The payload is scanned by the worker plugin, and any extracted payloads are passed
-    back to stoQ for additional processing
-#. :ref:`Deep Dispatcher Plugin <deepdispatcher>`:
-    Once each worker completes their scanning, the payloads as well as the worker results
-    are passed to the deep dispatcher plugins. The Deep Dispatchers will then decided
-    which worker plugins the payload and results are passed.
-#. :ref:`Archiver Plugin <archiver>` :ref:`(destination archiver) <archiverdest>`:
-    If a payload or extracted payload should be archived, they will be passed along to
-    the destination archiver for saving.
-#. :ref:`Decorator Plugin <decorator>`:
-    Once all dispatching, scanning, archiving, and decorating has completed, the final
-    results are passed to the decorator plugins in order for it to analyze the completed
-    and correlated results.
-#. :ref:`Connector Plugin <connector>`:
-    The final step is handled by the connector plugin. If results should be saved or
-    handled otherwise (i.e., added to a queue, emailed, etc..), the connector plugin will
-    handle it.
+.. image:: /_static/workflow-72png
 
 .. note: Each plugin class is optional. They can all be mix and matched as required.
          Additionally, multiple plugins of each class can be used simultaneously.
