@@ -23,7 +23,7 @@ from stoq.plugins import ArchiverPlugin
 class SimpleArchiver(ArchiverPlugin):
     RAISE_EXCEPTION = False
     RETURN_ERRORS = False
-    PAYLOAD = None
+    PAYLOAD = b''
 
     def archive(
         self, payload: Payload, request_meta: RequestMeta

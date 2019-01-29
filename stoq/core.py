@@ -650,7 +650,7 @@ class Stoq(StoqPluginManager):
             # Normal dispatches are the "1st round" of scanning
             payload.plugins_run['workers'][0].append(plugin_name)
             try:
-                worker_response = plugin.scan(payload, request_meta)  # pyre-ignore[16]
+                worker_response = plugin.scan(payload, request_meta) # pyre-ignore[16]
             except Exception as e:
                 msg = 'worker:failed to scan'
                 self.log.exception(msg)

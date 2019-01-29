@@ -87,10 +87,7 @@ class Payload:
         self.dispatch_meta: Dict[str, Dict] = {}
         self.deep_dispatch_meta: Dict[str, Dict] = {}
         self.worker_results: List[Dict[str, Dict]] = [{}]  # Empty dict for first round
-        self.plugins_run: Dict[str, Union[List[List[str]], List[str]]] = {
-            'workers': [[]],
-            'archivers': [],
-        }
+        self.plugins_run: Dict[str, List[List]] = {'workers': [[]], 'archivers': []}
         self.payload_id = str(uuid.uuid4()) if payload_id is None else payload_id
 
     def __repr__(self):
@@ -134,7 +131,7 @@ class PayloadResults:
         size: int,
         payload_meta: PayloadMeta,
         workers: List[Dict[str, Dict]],
-        plugins_run: Dict[str, Union[List[List[str]], List[str]]],
+        plugins_run: Dict[str, List[List]],
         extracted_from: Optional[str] = None,
         extracted_by: Optional[str] = None,
     ) -> None:
@@ -154,7 +151,7 @@ class PayloadResults:
         self.payload_id = payload_id
         self.size = size
         self.payload_meta = payload_meta
-        self.workers: List[Dict[str, Dict]] = workers
+        self.workers = workers
         self.archivers: Dict[str, Dict] = {}
         self.plugins_run = plugins_run
         self.extracted_from = (
@@ -217,7 +214,7 @@ class StoqResponse:
         self.request_meta = request_meta
         self.errors = errors
         self.time: str = datetime.now().isoformat() if time is None else time
-        self.decorators: Dict[str, Dict] = {} if decorators is None else decorators
+        self.decorators = {} if decorators is None else decorators
         self.scan_id = str(uuid.uuid4())
 
     def split(self) -> List[Dict]:

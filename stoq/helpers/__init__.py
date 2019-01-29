@@ -29,7 +29,7 @@ class JsonComplexEncoder(json.JSONEncoder):
     Extends the default JSON encoder to handle bytes and sets
     """
 
-    def default(self, obj):
+    def default(self, obj):  # pyre-ignore[15]
         if isinstance(obj, bytes):
             return UnicodeDammit(obj).unicode_markup
         elif isinstance(obj, datetime.datetime):
