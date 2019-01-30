@@ -103,6 +103,20 @@ or third party plugins. Additionally, plugins can be installed from a cloned ver
     $ stoq install path/to/plugin
 
 
+.. _upgradeplugins:
+
+Upgrading plugins
+-----------------
+
+Plugins may be upgraded (or downgraded) by adding the `--upgrade` command line option to the install command::
+
+    $ stoq install --upgrade --github stoq:stdout
+
+.. warning::
+    Upgrading plugins is a destructive operation. This will overwrite/remove all data within the plugins directory,
+    to include the plugin configuration file. It is highly recommended that the plugin directory be backed up
+    regularly to ensure important information is not lost.
+
 .. _devenv:
 
 Dev Environment
