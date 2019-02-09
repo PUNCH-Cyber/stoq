@@ -20,7 +20,7 @@ import logging
 import configparser
 import importlib.util
 from pkg_resources import parse_version
-from typing import Dict, List, Optional, Set, Tuple, Any
+from typing import Dict, List, Optional, Tuple, Any
 
 from .exceptions import StoqException
 from stoq.plugins import (
@@ -40,7 +40,7 @@ class StoqPluginManager:
         self,
         plugin_dir_list: List[str],
         plugin_opts: Optional[Dict[str, Dict]] = None,
-        stoq_config: configparser.ConfigParser = None,
+        stoq_config: Optional[configparser.ConfigParser] = None,
     ) -> None:
         self._stoq_config = stoq_config
         self._plugin_opts = {} if plugin_opts is None else plugin_opts
@@ -154,7 +154,9 @@ class StoqPluginManager:
         # 1) plugin options provided at instatiation of `Stoq()`
         # 2) `plugin_name.stoq`
         # 3) plugin configuration in `stoq.cfg`
-        if self._stoq_config and self._stoq_config.has_section(plugin_name):
+        if isinstance(
+            self._stoq_config, configparser.ConfigParser
+        ) and self._stoq_config.has_section(plugin_name):
             for opt in self._stoq_config.options(plugin_name):
                 if opt not in plugin_config.options('options'):
                     plugin_config['options'][opt] = self._stoq_config.get(
