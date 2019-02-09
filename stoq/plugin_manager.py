@@ -37,8 +37,12 @@ from stoq.plugins import (
 
 class StoqPluginManager:
     def __init__(
-        self, plugin_dir_list: List[str], plugin_opts: Optional[Dict[str, Dict]] = None
+        self,
+        plugin_dir_list: List[str],
+        plugin_opts: Optional[Dict[str, Dict]] = None,
+        stoq_config: configparser.ConfigParser = None,
     ) -> None:
+        self._stoq_config = stoq_config
         self._plugin_opts = {} if plugin_opts is None else plugin_opts
         self._plugin_name_to_info: Dict[str, Tuple[str, configparser.ConfigParser]] = {}
         self._loaded_plugins: Dict[str, BasePlugin] = {}
@@ -68,11 +72,11 @@ class StoqPluginManager:
                     if not file.endswith('.stoq'):
                         continue
                     plugin_conf_path = os.path.join(root_path, file)
-                    config = configparser.ConfigParser()
+                    plugin_config = configparser.ConfigParser()
                     try:
-                        config.read(plugin_conf_path)
-                        name = config.get('Core', 'Name')
-                        module_name = config.get('Core', 'Module')
+                        plugin_config.read(plugin_conf_path)
+                        plugin_name = plugin_config.get('Core', 'Name')
+                        module_name = plugin_config.get('Core', 'Module')
                     except Exception:
                         self.log.warning(
                             f'Error parsing config file: {plugin_conf_path}',
@@ -82,9 +86,15 @@ class StoqPluginManager:
                     module_path_pyc = os.path.join(root_path, module_name) + '.pyc'
                     module_path_py = os.path.join(root_path, module_name) + '.py'
                     if os.path.isfile(module_path_pyc):
-                        self._plugin_name_to_info[name] = (module_path_pyc, config)
+                        self._plugin_name_to_info[plugin_name] = (
+                            module_path_pyc,
+                            plugin_config,
+                        )
                     elif os.path.isfile(module_path_py):
-                        self._plugin_name_to_info[name] = (module_path_py, config)
+                        self._plugin_name_to_info[plugin_name] = (
+                            module_path_py,
+                            plugin_config,
+                        )
                     else:
                         self.log.warning(
                             f'Unable to find module at: {module_path_pyc} or {module_path_py}',
@@ -92,24 +102,24 @@ class StoqPluginManager:
                         )
                         continue
 
-    def load_plugin(self, name: str) -> BasePlugin:
-        name = name.strip()
-        if name in self._loaded_plugins:
-            return self._loaded_plugins[name]
-        module_path, config = self._plugin_name_to_info[name]
-        if config.has_option('options', 'min_stoq_version'):
-            min_stoq_version = config.get('options', 'min_stoq_version')
+    def load_plugin(self, plugin_name: str) -> BasePlugin:
+        plugin_name = plugin_name.strip()
+        if plugin_name in self._loaded_plugins:
+            return self._loaded_plugins[plugin_name]
+        module_path, plugin_config = self._plugin_name_to_info[plugin_name]
+        if plugin_config.has_option('options', 'min_stoq_version'):
+            min_stoq_version = plugin_config.get('options', 'min_stoq_version')
             # Placing this import at the top of this file causes a circular
             # import chain that causes stoq to crash on initialization
             from stoq import __version__
 
             if parse_version(__version__) < parse_version(min_stoq_version):
                 self.log.warning(
-                    f'Plugin {name} not compatible with this version of '
+                    f'Plugin {plugin_name} not compatible with this version of '
                     'stoQ. Unpredictable results may occur!'
                 )
         spec = importlib.util.spec_from_file_location(
-            config.get('Core', 'Module'), module_path
+            plugin_config.get('Core', 'Module'), module_path
         )
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)  # pyre-ignore
@@ -132,16 +142,28 @@ class StoqPluginManager:
         )
         if len(plugin_classes) == 0:
             raise StoqException(
-                f'No valid plugin classes found in the module for {name}'
+                f'No valid plugin classes found in the module for {plugin_name}'
             )
         if len(plugin_classes) > 1:
             raise StoqException(
-                f'Multiple possible plugin classes found in the module for {name},'
+                f'Multiple possible plugin classes found in the module for {plugin_name},'
                 ' unable to distinguish which to use.'
             )
         _, plugin_class = plugin_classes[0]
-        plugin = plugin_class(config, self._plugin_opts.get(name))
-        self._loaded_plugins[name] = plugin
+        # Plugin configuration order of precendence:
+        # 1) plugin options provided at instatiation of `Stoq()`
+        # 2) `plugin_name.stoq`
+        # 3) plugin configuration in `stoq.cfg`
+        if self._stoq_config and self._stoq_config.has_section(plugin_name):
+            for opt in self._stoq_config.options(plugin_name):
+                if opt not in plugin_config.options('options'):
+                    plugin_config['options'][opt] = self._stoq_config.get(
+                        plugin_name, opt
+                    )
+        if self._plugin_opts.get(plugin_name):
+            plugin_config.read_dict({'options': self._plugin_opts.get(plugin_name)})
+        plugin = plugin_class(plugin_config, self._plugin_opts.get(plugin_name))
+        self._loaded_plugins[plugin_name] = plugin
         return plugin
 
     def list_plugins(self) -> Dict[str, Dict[str, Any]]:
