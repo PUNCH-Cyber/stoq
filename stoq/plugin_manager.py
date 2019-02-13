@@ -151,17 +151,14 @@ class StoqPluginManager:
             )
         _, plugin_class = plugin_classes[0]
         # Plugin configuration order of precendence:
-        # 1) plugin options provided at instatiation of `Stoq()`
-        # 2) `plugin_name.stoq`
-        # 3) plugin configuration in `stoq.cfg`
+        # 1) plugin options provided at instantiation of `Stoq()`
+        # 2) plugin configuration in `stoq.cfg`
+        # 3) `plugin_name.stoq`
         if isinstance(
             self._stoq_config, configparser.ConfigParser
         ) and self._stoq_config.has_section(plugin_name):
             for opt in self._stoq_config.options(plugin_name):
-                if opt not in plugin_config.options('options'):
-                    plugin_config['options'][opt] = self._stoq_config.get(
-                        plugin_name, opt
-                    )
+                plugin_config['options'][opt] = self._stoq_config.get(plugin_name, opt)
         if self._plugin_opts.get(plugin_name):
             plugin_config.read_dict({'options': self._plugin_opts.get(plugin_name)})
         plugin = plugin_class(plugin_config, self._plugin_opts.get(plugin_name))
