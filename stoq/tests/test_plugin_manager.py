@@ -20,7 +20,7 @@ from typing import Optional
 import unittest
 
 
-from stoq import StoqException
+from stoq import Stoq, StoqException
 from stoq.data_classes import Payload, WorkerResponse, RequestMeta
 from stoq.plugin_manager import StoqPluginManager
 from stoq.plugins import WorkerPlugin
@@ -110,6 +110,49 @@ class TestPluginManager(unittest.TestCase):
         plugin = pm.load_plugin('configurable_worker')
         self.assertEqual(plugin.get_crazy_runtime_option(), 16)
 
+    def test_plugin_opts_from_stoq_cfg(self):
+        s = Stoq(base_dir=utils.get_data_dir())
+        plugin = s.load_plugin('configurable_worker')
+        self.assertEqual(
+            plugin.config.getboolean('options', 'worker_test_option_bool'), True
+        )
+        self.assertEqual(
+            plugin.config.get('options', 'worker_test_option_str'),
+            'Worker Testy McTest Face',
+        )
+        self.assertEqual(plugin.config.getint('options', 'worker_test_option_int'), 10)
+        plugin = s.load_plugin('dummy_connector')
+        self.assertEqual(
+            plugin.config.getboolean('options', 'connector_test_option_bool'), False
+        )
+        self.assertEqual(
+            plugin.config.get('options', 'Connector_test_option_str'),
+            'Connector Testy McTest Face',
+        )
+        self.assertEqual(
+            plugin.config.getint('options', 'connector_test_option_int'), 5
+        )
+
+    def test_plugin_opts_precedence(self):
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_opts={
+                'configurable_worker': {
+                    'worker_test_option_bool': False,
+                    'worker_test_option_str': 'Test string',
+                    'worker_test_option_int': 20,
+                }
+            },
+        )
+        plugin = s.load_plugin('configurable_worker')
+        self.assertEqual(
+            plugin.config.getboolean('options', 'worker_test_option_bool'), False
+        )
+        self.assertEqual(
+            plugin.config.get('options', 'worker_test_option_str'), 'Test string'
+        )
+        self.assertEqual(plugin.config.getint('options', 'worker_test_option_int'), 20)
+
     def test_min_stoq_version(self):
         pm = StoqPluginManager([utils.get_invalid_plugins_dir()])
         # We have to override the fact that all log calls are disabled in setUp()
@@ -133,7 +176,6 @@ class TestPluginManager(unittest.TestCase):
         worker = pm.load_plugin('dummy_worker')
         with self.assertRaises(Exception):
             worker.PLUGINS2_DUP_MARKER
-
 
 
 class ExampleExternalPlugin(WorkerPlugin):
