@@ -115,7 +115,7 @@ Plugins may be upgraded (or downgraded) by adding the `--upgrade` command line o
 .. warning::
     Upgrading plugins is a destructive operation. This will overwrite/remove all data within the plugins directory,
     to include the plugin configuration file. It is highly recommended that the plugin directory be backed up
-    regularly to ensure important information is not lost.
+    regularly to ensure important information is not lost, or plugin configuration options be defined in `stoq.cfg`.
 
 .. _devenv:
 

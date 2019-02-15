@@ -34,6 +34,8 @@ look for ``stoq.cfg`` in ``$STOQ_HOME`` if running from the command line, or ``$
 used as a library.
 
 
+Plugin options may also be defined in `stoq.cfg`. For more information on how
+
 .. _stoqhome:
 
 $STOQ_HOME
@@ -281,32 +283,10 @@ to what stoQ can do. For more command line options in `run` mode, simply run::
 
     $ stoq run -h
 
-.. _pluginoptions:
+Plugin configuration
+--------------------
 
-Plugin Options
---------------
-
-Plugin options allows for configuration settings of plugins to be modified upon instantiation.
-This is extremely useful when you need to change a configuration options on the fly, such as
-our `run` mode example above.
-
-When running ``stoq`` from the command line, simply add ``--plugin-opts`` to your arguments
-followed by the desired plugin options. The syntax for plugin options is::
-
-    plugin_name:option=value
-
-For example, if we want to tell the plugin ``dirmon`` to monitor the directory ``/tmp/monitor``
-for new files by setting the option ``source_dir``, the syntax would be::
-
-    dirmon:source_dir=/tmp/monitor
-
-Additionally, plugin options may be defined when instantiating ``Stoq`` using the ``plugin_opts``
-argument::
-
-    >>> from stoq import Stoq
-    >>> plugin_options = {'dirmon': {'source_dir': '/tmp/monitor'}}
-    >>> s = Stoq(plugin_opts=plugin_options)
-
+Plugin configurations may be defined in several ways, see :ref:`plugin configuration <pluginconfig>`.
 
 RequestMeta Options
 -------------------
