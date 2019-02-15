@@ -392,7 +392,7 @@ class Stoq(StoqPluginManager):
             )
             plugin_dir_list = [d.strip() for d in plugin_dir_str.split(',')]
 
-        super().__init__(plugin_dir_list, plugin_opts)
+        super().__init__(plugin_dir_list, plugin_opts, config)
 
         if not providers:
             providers_str = config.get('core', 'providers', fallback='')
@@ -650,7 +650,7 @@ class Stoq(StoqPluginManager):
             # Normal dispatches are the "1st round" of scanning
             payload.plugins_run['workers'][0].append(plugin_name)
             try:
-                worker_response = plugin.scan(payload, request_meta) # pyre-ignore[16]
+                worker_response = plugin.scan(payload, request_meta)  # pyre-ignore[16]
             except Exception as e:
                 msg = 'worker:failed to scan'
                 self.log.exception(msg)

@@ -19,7 +19,62 @@ For a full listing of all publicly available plugins, check out the `stoQ public
 Configuration
 *************
 
-Each plugin must have an ``.stoq`` configuration file. The configuration file resides in
+Plugins may be provided configuration options in one of four ways. In order of precendece:
+
+    - From the command line
+    - Upon instantiation of `Stoq()`
+    - Defined in `stoq.cfg`
+    - Defined in the plugin's `.stoq` configuration file
+
+.. _pluginconfigcmdline:
+
+Command Line
+------------
+
+When running ``stoq`` from the command line, simply add ``--plugin-opts`` to your arguments
+followed by the desired plugin options. The syntax for plugin options is::
+
+    plugin_name:option=value
+
+For example, if we want to tell the plugin ``dirmon`` to monitor the directory ``/tmp/monitor``
+for new files by setting the option ``source_dir``, the syntax would be::
+
+    dirmon:source_dir=/tmp/monitor
+
+
+.. _pluginconfiginstantiation:
+
+Instantiation
+-------------
+
+When using stoQ as a framework, plugin options may be defined when instantiating ``Stoq`` using the ``plugin_opts``
+argument::
+
+    >>> from stoq import Stoq
+    >>> plugin_options = {'dirmon': {'source_dir': '/tmp/monitor'}}
+    >>> s = Stoq(plugin_opts=plugin_options)
+
+
+.. _pluginconfigstoqcfg:
+
+stoq.cfg
+--------
+
+The recommended location for storing static plugin configuration options is in `stoq.cfg`.  The reason for this
+if all plugin options defined in the plugin's `.stoq` file will be overwritten when the plugin is upgraded.
+
+To define plugin options in `stoq.cfg` simply add a section header of the plugin name, then define the plugin options::
+
+    [dirmon]
+    source_dir = /tmp/monitor
+
+
+.. _pluginconfigpluginstoq:
+
+Plugin .stoq configuration file
+--------------------------------
+
+Each plugin must have a ``.stoq`` configuration file. The configuration file resides in
 the same directory as the plugin module. The plugin's configuration file allows for
 configuring a plugin with default or static settings. The configuration file is a standard
 YAML file and is parsed using the ``configparser`` module. The following is an example
@@ -55,37 +110,14 @@ Additionally, some optional settings may be defined::
 * **options**
     - **min_stoq_version**: Minimum version of stoQ required to work properly. If the version of `stoQ` is less than the version defined, a warning will be raised.
 
-Custom settings may be added as required for plugins, but the plugins must be configured to
-load and set them. For example, our configuration file may be::
+.. note::
+    Plugin options *must* be under the `[options]` section header to be accessible via the other plugin configuration options.J
 
-    [Core]
-    Name = example_plugin
-    Module = example_plugin
-
-    [Documentation]
-    Author = PUNCH Cyber
-    Version = 0.1
-    Website = https://github.com/PUNCH-Cyber/stoq-plugins-public
-    Description = Example stoQ Plugin
-
-    [worker]
-    source = /tmp
-
-
-Now, in the ``__init__`` method of our plugin class, we can ensure we define the ``source``
-setting under the ``worker`` section of the configuration file::
-
-
-        if plugin_opts and 'source' in plugin_opts:
-            self.source = plugin_opts['source']
-        elif config.has_option('worker', 'source'):
-            self.source = config.get('worker', 'source')
-
-
-First, we are checking for any plugin options were provided to ``Stoq`` at instantiation or at the
-:ref:`command line <pluginoptions>`. If not, it will check the plugin's configuration file for
-the ``source`` setting under the ``worker`` section. If ``source`` is defined in either, the
-setting will be made available to the plugin by defining ``self.source``.
+.. warning::
+    Plugin configuration options may be overwritten when a plugin is upgraded. Upgrading plugins is a destructive
+    operation. This will overwrite/remove all data within the plugins directory, to include the plugin configuration
+    file. It is highly recommended that the plugin directory be backed up regularly to ensure important information
+    is not lost, or plugin configuration options be defined in `stoq.cfg`.
 
 
 .. _multiclass:
