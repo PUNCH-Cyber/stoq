@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Improve handling of plugin configuration options. Plugin options can now also be in stoq.cfg. (Thanks for feedback @chemberger!)
 - Set default precendence for plugin configuration options to be 1) `plugin_opts` when instantiating `Stoq`, 2) `stoq.cfg`, 3) Plugin config file (Thanks for feedback @chemberger!)
+- Make formatted exceptions more legible in results
 
 ## [2.0.2] - 2019-01-14
 

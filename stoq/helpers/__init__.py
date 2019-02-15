@@ -66,11 +66,17 @@ def get_sha512(content: bytes) -> str:
 
 
 def format_exc(exc: Exception, limit: int = -1, msg: Optional[str] = None):
+    # Inspired from https://github.com/python/cpython/blob/3.7/Lib/traceback.py#L560-L563
     tb = traceback.format_tb(exc.__traceback__, limit=limit)[0].split('\n')[0].strip()
-    e = f'{tb} ; {repr(exc)}'
+    stype = type(exc).__qualname__
+    smod = type(exc).__module__
+    if smod not in ('__main__', 'builtins'):
+        stype = f'{smod}.{stype}'
+    exc_str = f'{tb} ; {stype}: {str(exc)}'
     if msg:
-        e = f'Exception: {msg}: {e}'
-    return e
+        return f'{msg}: {exc_str}'
+    else:
+        return exc_str
 
 
 def merge_dicts(
