@@ -34,7 +34,8 @@ look for ``stoq.cfg`` in ``$STOQ_HOME`` if running from the command line, or ``$
 used as a library.
 
 
-Plugin options may also be defined in `stoq.cfg`. For more information on how
+Plugin options may also be defined in `stoq.cfg`. More information on how to configure plugins
+in `stoq.cfg` can be found in :ref:`plugin configuration <pluginconfigstoqcfg>`.
 
 .. _stoqhome:
 
