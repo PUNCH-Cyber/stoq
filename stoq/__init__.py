@@ -30,4 +30,4 @@ from .data_classes import (
 )
 from .exceptions import StoqException, StoqPluginException
 
-__version__ = '2.0.3'
+__version__ = '2.0.4'

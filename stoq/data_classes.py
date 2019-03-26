@@ -17,8 +17,7 @@
 import uuid
 from copy import deepcopy
 from datetime import datetime
-from collections import defaultdict
-from typing import Dict, List, Optional, Union, Tuple, DefaultDict
+from typing import Dict, List, Optional, DefaultDict
 
 import stoq.helpers as helpers
 
@@ -79,7 +78,7 @@ class Payload:
         >>> payload = Payload(content, payload_meta=payload_meta)
 
         """
-        self.content = content
+        self.content = content if isinstance(content, bytes) else content.encode()
         self.size: int = len(content)
         self.payload_meta = PayloadMeta() if payload_meta is None else payload_meta
         self.extracted_by = extracted_by
