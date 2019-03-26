@@ -198,6 +198,7 @@ class StoqResponse:
         errors: DefaultDict[str, List[str]],
         time: Optional[str] = None,
         decorators: Optional[Dict[str, Dict]] = None,
+        scan_id: Optional[str] = None,
     ) -> None:
         """
 
@@ -215,7 +216,7 @@ class StoqResponse:
         self.errors = errors
         self.time: str = datetime.now().isoformat() if time is None else time
         self.decorators = {} if decorators is None else decorators
-        self.scan_id = str(uuid.uuid4())
+        self.scan_id = str(uuid.uuid4()) if scan_id is None else scan_id
 
     def split(self) -> List[Dict]:
         """

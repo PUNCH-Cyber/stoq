@@ -294,7 +294,7 @@ import concurrent.futures
 from collections import defaultdict
 from pythonjsonlogger import jsonlogger  # pyre-ignore[21]
 from logging.handlers import RotatingFileHandler
-from typing import Dict, List, Optional, Set, Tuple, DefaultDict
+from typing import Dict, Iterable, List, Optional, Set, Tuple, DefaultDict
 
 
 from .exceptions import StoqException
@@ -524,22 +524,7 @@ class Stoq(StoqPluginManager):
             results=scan_results, request_meta=request_meta, errors=errors
         )
 
-        for plugin_name, decorator in self._loaded_decorator_plugins.items():
-            try:
-                decorator_response = decorator.decorate(response)
-            except Exception as e:
-                msg = 'decorator'
-                self.log.exception(msg)
-                response.errors[plugin_name].append(
-                    helpers.format_exc(e, msg='decorator')
-                )
-                continue
-            if decorator_response is None:
-                continue
-            if decorator_response.results is not None:
-                response.decorators[plugin_name] = decorator_response.results
-            if decorator_response.errors:
-                response.errors[plugin_name].extend(decorator_response.errors)
+        self._apply_decorators(response)
 
         for connector in self._loaded_connector_plugins:
             try:
@@ -832,3 +817,40 @@ class Stoq(StoqPluginManager):
                 errors[deep_dispatcher_name].append(helpers.format_exc(e, msg=msg))
 
         return (deep_dispatches, errors)
+
+    def _apply_decorators(self, response: StoqResponse) -> None:
+        """Mutates the given StoqResponse object to include decorator information"""
+        for plugin_name, decorator in self._loaded_decorator_plugins.items():
+            try:
+                decorator_response = decorator.decorate(response)
+            except Exception as e:
+                msg = 'decorator'
+                self.log.exception(msg)
+                response.errors[plugin_name].append(
+                    helpers.format_exc(e, msg='decorator')
+                )
+                continue
+            if decorator_response is None:
+                continue
+            if decorator_response.results is not None:
+                response.decorators[plugin_name] = decorator_response.results
+            if decorator_response.errors:
+                response.errors[plugin_name].extend(decorator_response.errors)
+
+    def reconstruct_all_subresponses(self, stoq_response: StoqResponse) -> Iterable[StoqResponse]:
+        for i, new_root_result in enumerate(stoq_response.results):
+            parent_payload_ids = {stoq_response.results[i].payload_id}
+            relevant_results: List[PayloadResults] = [new_root_result]
+            for payload_result in stoq_response.results[i:]:
+                if payload_result.extracted_from in parent_payload_ids:
+                    parent_payload_ids.add(payload_result.payload_id)
+                    relevant_results.append(payload_result)
+            new_response = StoqResponse(
+                results=relevant_results,
+                request_meta=stoq_response.request_meta,
+                errors=stoq_response.errors,
+                time=stoq_response.time,
+                scan_id=stoq_response.scan_id
+            )
+            self._apply_decorators(new_response)
+            yield new_response
