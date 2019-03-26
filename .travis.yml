@@ -11,7 +11,7 @@ before_install:
   - sudo apt-get -yq update
   - sudo apt-get -yq install automake build-essential libyaml-dev
   - pip install -r requirements.txt
-  - pip install coveralls pyre-check
+  - pip install coveralls pyre-check==0.0.20
   - mkdir plugins
 
 install:
