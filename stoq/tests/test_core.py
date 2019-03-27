@@ -702,3 +702,75 @@ class TestCore(unittest.TestCase):
         response_dict = json.loads(response_str)
         self.assertIsInstance(response_str, str)
         self.assertIsInstance(response_dict, dict)
+
+    def test_reconstruct_all_subresponses(self):
+        # Construct a fake stoq_response as if it were generated from a file
+        # A.zip that contains two files, B.txt and C.zip, where C.zip contains D.txt
+        initial_response = StoqResponse(
+            results=[
+                PayloadResults(
+                    payload_id="A.zip",
+                    size=0,
+                    payload_meta=PayloadMeta(),
+                    workers=[{"fake": "result1"}],
+                    plugins_run={"workers": [["fake"]]},
+                ),
+                PayloadResults(
+                    payload_id="B.txt",
+                    size=0,
+                    payload_meta=PayloadMeta(),
+                    workers=[{"fake": "result2"}],
+                    plugins_run={"workers": [["fake"]]},
+                    extracted_from="A.zip",
+                    extracted_by="fake",
+                ),
+                PayloadResults(
+                    payload_id="C.zip",
+                    size=0,
+                    payload_meta=PayloadMeta(),
+                    workers=[{"fake": "result3"}],
+                    plugins_run={"workers": [["fake"]]},
+                    extracted_from="A.zip",
+                    extracted_by="fake",
+                ),
+                PayloadResults(
+                    payload_id="D.txt",
+                    size=0,
+                    payload_meta=PayloadMeta(),
+                    workers=[{"fake": "result4"}],
+                    plugins_run={"workers": [["fake"]]},
+                    extracted_from="C.zip",
+                    extracted_by="fake",
+                ),
+            ],
+            request_meta=RequestMeta(extra_data={"check": "me"}),
+            errors={},
+        )
+        s = Stoq(base_dir=utils.get_data_dir(), decorators=["simple_decorator"])
+        all_subresponses = list(s.reconstruct_all_subresponses(initial_response))
+        # We expect there to be four "artificial" responses generated, one for
+        # each payload as the root.
+        self.assertEqual(len(all_subresponses), 4)
+        # We expect the first response to have all 4 payloads, the second response
+        # to have just the second payload, the third response to have the third
+        # and fourth payload, and the fourth response to have just the fourth payload
+        self.assertEqual(
+            [len(stoq_response.results) for stoq_response in all_subresponses], [4, 1, 2, 1]
+        )
+        self.assertEqual(
+            [
+                stoq_response.results[0].workers[0]["fake"]
+                for stoq_response in all_subresponses
+            ],
+            ["result1", "result2", "result3", "result4"],
+        )
+        self.assertTrue(
+            all(
+                "simple_decorator" in stoq_response.decorators
+                for stoq_response in all_subresponses
+            )
+        )
+        # Assert that they all have the same scan ID
+        self.assertEqual(
+            len({stoq_response.scan_id for stoq_response in all_subresponses}), 1
+        )
