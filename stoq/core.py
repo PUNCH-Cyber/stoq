@@ -267,6 +267,25 @@
         >>> results = s.scan_payload(payload)
         >>> results.split()
 
+    Reconstructing Subresponse Results
+    ----------------------------------
+
+    stoQ can produce complex results depending on the recursion depth and extracted payload objects.
+    In order to help handle complex results and limit redundant processing of payloads when using
+    stoQ as a framework, a method exists that will allow for iterating over each result as if it
+    were the original root object. This is especially useful when handling compressed archives, such
+    as `zip` or `apk` files that may have multiple levels of archived content. Additionally, the
+    defined decorators will be run against each newly constructed `StoqResponse` and added to the
+    results.
+
+        >>> for result in s.reconstruct_all_subresponses(results):
+        ...     print(result)
+
+    Below is a simple flow diagram of the iterated results when being reconstructed.
+
+    .. image:: /_static/reconstruct-results.png
+
+
     .. _multiplugindir:
 
     Multiple Plugin directories
@@ -286,7 +305,6 @@
 """
 
 import os
-import json
 import queue
 import logging
 import configparser
@@ -837,7 +855,9 @@ class Stoq(StoqPluginManager):
             if decorator_response.errors:
                 response.errors[plugin_name].extend(decorator_response.errors)
 
-    def reconstruct_all_subresponses(self, stoq_response: StoqResponse) -> Iterable[StoqResponse]:
+    def reconstruct_all_subresponses(
+        self, stoq_response: StoqResponse
+    ) -> Iterable[StoqResponse]:
         for i, new_root_result in enumerate(stoq_response.results):
             parent_payload_ids = {stoq_response.results[i].payload_id}
             relevant_results: List[PayloadResults] = [new_root_result]
@@ -850,7 +870,7 @@ class Stoq(StoqPluginManager):
                 request_meta=stoq_response.request_meta,
                 errors=stoq_response.errors,
                 time=stoq_response.time,
-                scan_id=stoq_response.scan_id
+                scan_id=stoq_response.scan_id,
             )
             self._apply_decorators(new_response)
             yield new_response

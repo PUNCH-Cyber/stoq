@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- `Stoq.reconstruct_all_subresponses()` method to allow for reconstructing `StoqResponse` objects iteratively (@maydewd)
+
 ### Changed
 
 - Force payload content to be of type bytes
