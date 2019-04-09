@@ -163,6 +163,11 @@ Examples:
         subparser.add_argument(
             '--plugin-dir', nargs='+', help='Directory(ies) containing stoQ plugins'
         )
+        subparser.add_argument(
+            '--config-file',
+            default=f'{stoq_home}/stoq.cfg',
+            help='Path to stoQ configuration file',
+        )
 
     plugin_list = subparsers.add_parser('list', help='List available plugins')
     plugin_list.add_argument(
@@ -227,6 +232,12 @@ Examples:
     except ValueError as err:
         print(f'Failed parsing request metadata option: {err}')
 
+    try:
+        if not os.path.isfile(args.config_file):
+            print(f'Warning: {args.config_file} does not exist, using stoQ defaults!')
+    except AttributeError:
+        pass
+
     if args.command == 'scan':
         with args.file as f:
             # Verify that the file or stdin has some sort of data
@@ -249,6 +260,7 @@ Examples:
 
         stoq = Stoq(
             base_dir=stoq_home,
+            config_file=args.config_file,
             plugin_opts=plugin_opts,
             source_archivers=args.source_archivers,
             dest_archivers=args.dest_archivers,
@@ -272,6 +284,7 @@ Examples:
     elif args.command == 'run':
         stoq = Stoq(
             base_dir=stoq_home,
+            config_file=args.config_file,
             plugin_opts=plugin_opts,
             providers=args.providers,
             source_archivers=args.source_archivers,
