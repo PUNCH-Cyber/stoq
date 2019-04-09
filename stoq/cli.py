@@ -168,6 +168,12 @@ Examples:
             default=f'{stoq_home}/stoq.cfg',
             help='Path to stoQ configuration file',
         )
+        subparser.add_argument(
+            '--log-level',
+            default=None,
+            choices=['debug', 'info', 'warning', 'error' 'crtical'],
+            help='Log level for stoQ events',
+        )
 
     plugin_list = subparsers.add_parser('list', help='List available plugins')
     plugin_list.add_argument(
@@ -261,6 +267,7 @@ Examples:
         stoq = Stoq(
             base_dir=stoq_home,
             config_file=args.config_file,
+            log_level=args.log_level,
             plugin_opts=plugin_opts,
             source_archivers=args.source_archivers,
             dest_archivers=args.dest_archivers,
@@ -285,6 +292,7 @@ Examples:
         stoq = Stoq(
             base_dir=stoq_home,
             config_file=args.config_file,
+            log_level=args.log_level,
             plugin_opts=plugin_opts,
             providers=args.providers,
             source_archivers=args.source_archivers,

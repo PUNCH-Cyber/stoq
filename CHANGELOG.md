@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Provide console output if stoQ configuration file does not exist (Thanks for feedback @jakubgs!)
 - Add command line option `--config-file` to define stoQ configuration file
+- Add command line option `--log-level` to allow for setting of the log level
 
 ## [2.0.4] - 2019-03-29
 
