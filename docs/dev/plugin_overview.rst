@@ -111,7 +111,7 @@ Additionally, some optional settings may be defined::
     - **min_stoq_version**: Minimum version of stoQ required to work properly. If the version of `stoQ` is less than the version defined, a warning will be raised.
 
 .. note::
-    Plugin options *must* be under the `[options]` section header to be accessible via the other plugin configuration options.J
+    Plugin options *must* be under the `[options]` section header to be accessible via the other plugin configuration options.
 
 .. warning::
     Plugin configuration options may be overwritten when a plugin is upgraded. Upgrading plugins is a destructive
