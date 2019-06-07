@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add command line option `--config-file` to define stoQ configuration file
 - Add command line option `--log-level` to allow for setting of the log level
 
+### Changed
+
+- Raise exception if installing a plugin that is already installed
+- Display `plugin_path` when plugin is successfully installed
+
 ## [2.0.4] - 2019-03-29
 
 ### Added

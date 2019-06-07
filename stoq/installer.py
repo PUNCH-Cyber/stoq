@@ -21,7 +21,7 @@ import requests
 import subprocess
 from tempfile import NamedTemporaryFile
 
-from .exceptions import StoqException
+from .exceptions import StoqException, StoqPluginException
 
 log = logging.getLogger()
 
@@ -109,6 +109,10 @@ class StoqPluginInstaller:
             cmd.append('--upgrade')
         try:
             output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+            if f'WARNING: Target directory {install_dir}' in output.decode():
+                raise StoqPluginException(
+                    f'Plugin ({plugin_path}) already exists in {install_dir}'
+                )
         except subprocess.CalledProcessError as err:
             if not os.getenv('VIRTUAL_ENV'):
                 log.error(

@@ -321,7 +321,7 @@ Examples:
         StoqPluginInstaller.install(
             args.plugin_path, args.install_dir, args.upgrade, args.github
         )
-        print(f'Successfully installed to {args.install_dir}')
+        print(f'Successfully installed {args.plugin_path} into {args.install_dir}')
     elif args.command == 'test':
         test_path = os.path.dirname(tests.__file__)
         test_suite = unittest.TestLoader().discover(test_path)
