@@ -72,7 +72,8 @@
 
     ::
 
-        from typing import List, Optional
+        from typing import Dict, List, Optional
+        from configparser import ConfigParser
 
         from stoq.data_classes import (
             Payload,
@@ -83,10 +84,17 @@
 
 
         class ExampleWorker(WorkerPlugin):
+            def __init__(self, config: ConfigParser, plugin_opts: Optional[Dict]) -> None:
+                super().__init__(config, plugin_opts)
+                self.useful = config.get('options', 'useful', fallback=False)
+
             def scan(
                 self, payload: Payload, request_meta: RequestMeta
             ) -> Optional[WorkerResponse]:
-                wr = WorkerResponse({'worker_results': 'something useful'})
+                if self.useful:
+                    wr = WorkerResponse({'worker_results': 'something useful'})
+                else:
+                    wr = WorkerResponse({'worker_results': 'something not useful'})
                 return wr
 
     Extracted Payloads
@@ -98,7 +106,8 @@
 
     ::
 
-        from typing import List, Optional
+        from typing import Dict, List, Optional
+        from configparser import ConfigParser
 
         from stoq.data_classes import (
             ExtractedPayload,
@@ -111,11 +120,18 @@
 
 
         class ExampleWorker(WorkerPlugin):
+            def __init__(self, config: ConfigParser, plugin_opts: Optional[Dict]) -> None:
+                super().__init__(config, plugin_opts)
+                self.useful = config.get('options', 'useful', fallback=False)
+
             def scan(
                 self, payload: Payload, request_meta: RequestMeta
             ) -> Optional[WorkerResponse]:
                 p = ExtractedPayload(b'Lorem ipsum')
-                wr = WorkerResponse({'worker_results': 'something useful'}, extracted=[p])
+                if self.useful:
+                    wr = WorkerResponse({'worker_results': 'something useful'}, extracted=[p])
+                else:
+                    wr = WorkerResponse({'worker_results': 'something not useful'}, extracted=[p])
                 return wr
 
 
@@ -127,7 +143,8 @@
 
     ::
 
-        from typing import List, Optional
+        from typing import Dict, List, Optional
+        from configparser import ConfigParser
 
         from stoq.data_classes import (
             ExtractedPayload,
@@ -140,12 +157,19 @@
 
 
         class ExampleWorker(WorkerPlugin):
+            def __init__(self, config: ConfigParser, plugin_opts: Optional[Dict]) -> None:
+                super().__init__(config, plugin_opts)
+                self.useful = config.get('options', 'useful', fallback=False)
+
             def scan(
                 self, payload: Payload, request_meta: RequestMeta
             ) -> Optional[WorkerResponse]:
                 dispatch_meta = PayloadMeta(dispatch_to='yara')
                 p = ExtractedPayload(b'this is a payload with bad stuff', dispatch_meta)
-                wr = WorkerResponse({'worker_results': 'something useful'}, extracted=[p])
+                if self.useful:
+                    wr = WorkerResponse({'worker_results': 'something useful'}, extracted=[p])
+                else:
+                    wr = WorkerResponse({'worker_results': 'something not useful'}, extracted=[p])
                 return wr
 
     API

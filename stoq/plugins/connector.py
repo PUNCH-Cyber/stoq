@@ -62,12 +62,20 @@
 
     ::
 
+        from typing import Dict, Optional
+        from configparser import ConfigParser
+
         from stoq.data_classes import StoqResponse
         from stoq.plugins import ConnectorPlugin
 
         class ExampleConnector(ConnectorPlugin):
+            def __init__(self, config: ConfigParser, plugin_opts: Optional[Dict]) -> None:
+                super().__init__(config, plugin_opts)
+                self.output_file = config.get(
+                    'options', 'output_file', fallback='/tmp/stoqresult.txt')
+
             def save(self, response: StoqResponse) -> None:
-                with open('/tmp/stoqresult.txt', 'w') as result:
+                with open(f'{self.output_file}', 'w') as result:
                     result.write(response)
 
     API

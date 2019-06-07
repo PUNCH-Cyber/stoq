@@ -72,19 +72,25 @@
 
     ::
 
-        from typing import Optional
+        from typing import Dict, Optional
+        from configparser import ConfigParser
 
         from stoq.data_classes import Payload, DeepDispatcherResponse, RequestMeta
         from stoq.plugins import DeepDispatcherPlugin
 
 
         class ExampleDeepDispatcher(DeepDispatcherPlugin):
+            def __init__(self, config: ConfigParser, plugin_opts: Optional[Dict]) -> None:
+                super().__init__(config, plugin_opts)
+                self.msg = config.get('options', 'msg', fallback='Useful content here')
+
             def get_deep_dispatches(
                 self, payload: Payload, request_meta: RequestMeta
             ) -> Optional[DeepDispatcherResponse]:
                 dr = DeepDispatcherResponse()
                 dr.errors.append('This is an example error and is completely optional')
                 dr.meta['deep_key'] = 'Useful deep metadata info'
+                dr.meta['msg'] = self.msg
                 return dr
 
     API

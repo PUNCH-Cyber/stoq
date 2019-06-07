@@ -63,19 +63,23 @@
 
     ::
 
-        from typing import Optional
+        from typing import Dict, Optional
+        from configparser import ConfigParser
 
         from stoq.data_classes import StoqResponse, DecoratorResponse
         from stoq.plugins import DecoratorPlugin
 
 
         class ExampleDecorator(DecoratorPlugin):
+            def __init__(self, config: ConfigParser, plugin_opts: Optional[Dict]) -> None:
+                super().__init__(config, plugin_opts)
+                self.msg = config.get('options', 'msg', fallback='do_more msg')
 
             def decorate(self, response: StoqResponse) -> Optional[DecoratorResponse]:
                 do_more = False
                 if 'yara' in response.results[0].plugins_run:
                     do_more = True
-                dr = DecoratorResponse({'do_more': do_more})
+                dr = DecoratorResponse({'do_more': do_more, 'msg': self.msg})
                 return dr
 
     API

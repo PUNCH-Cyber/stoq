@@ -129,19 +129,25 @@
     ^^^^^^^
     ::
 
-        from typing import Optional
+        from typing import Dict, Optional
+        from configparser import ConfigParser
 
         from stoq.plugins import ArchiverPlugin
         from stoq.data_classes import ArchiverResponse, Payload, RequestMeta, PayloadMeta
 
 
         class ExampleArchiver(ArchiverPlugin):
+            def __init__(self, config: ConfigParser, plugin_opts: Optional[Dict]) -> None:
+                super().__init__(config, plugin_opts)
+                self.archive_path = config.get(
+                    'options', 'archive_path', fallback='/tmp/archive_payload')
+
             def archive(
                 self, payload: Payload, request_meta: RequestMeta
             ) -> Optional[ArchiverResponse]:
-                with open('/tmp/archived_payload', 'wb) as out:
+                with open(f'{self.archive_path}', 'wb) as out:
                     out.write(payload.content)
-                ar = ArchiverResponse({'path': '/tmp/archive_payload'})
+                ar = ArchiverResponse({'path': f'{self.archive_path}'})
                 return ar
 
             def get(self, task: ArchiverResponse) -> Optional[Payload]:
@@ -152,15 +158,14 @@
                             extra_data={'path': task.results['path']}))
 
 
-    .. note:: `ArchiverPlugin.archive()` returns an `ArchiverResponse` object, which contains metadata that is
-              later used by `ArchiverPlugin.get()` to load the payload.
+    .. note:: `ArchiverPlugin.archive()` returns an `ArchiverResponse` object, which contains
+              metadata that is later used by `ArchiverPlugin.get()` to load the payload.
 
     API
     ===
 
 """
 
-from abc import abstractmethod
 from typing import Optional
 
 from stoq.data_classes import ArchiverResponse, Payload, RequestMeta
