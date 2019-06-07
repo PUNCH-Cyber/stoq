@@ -21,3 +21,7 @@ class StoqException(Exception):
 
 class StoqPluginException(Exception):
     pass
+
+
+class StoqPluginNotFound(Exception):
+    pass

@@ -20,7 +20,7 @@ from typing import Optional
 import unittest
 
 
-from stoq import Stoq, StoqException
+from stoq import Stoq, StoqException, StoqPluginNotFound
 from stoq.data_classes import Payload, WorkerResponse, RequestMeta
 from stoq.plugin_manager import StoqPluginManager
 from stoq.plugins import WorkerPlugin
@@ -73,6 +73,11 @@ class TestPluginManager(unittest.TestCase):
         pm = StoqPluginManager([utils.get_plugins_dir()])
         for name in self.DUMMY_PLUGINS:
             pm.load_plugin(name)
+
+    def test_load_plugin_nonexistent(self):
+        pm = StoqPluginManager([utils.get_plugins_dir()])
+        with self.assertRaises(StoqPluginNotFound):
+            pm.load_plugin('this_plugin_does_not_exist')
 
     def test_load_non_plugin(self):
         pm = StoqPluginManager([utils.get_invalid_plugins_dir()])

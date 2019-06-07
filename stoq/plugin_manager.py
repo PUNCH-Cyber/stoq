@@ -22,7 +22,7 @@ import importlib.util
 from pkg_resources import parse_version
 from typing import Dict, List, Optional, Tuple, Any
 
-from .exceptions import StoqException
+from .exceptions import StoqException, StoqPluginNotFound
 from stoq.plugins import (
     ArchiverPlugin,
     BasePlugin,
@@ -106,6 +106,10 @@ class StoqPluginManager:
         plugin_name = plugin_name.strip()
         if plugin_name in self._loaded_plugins:
             return self._loaded_plugins[plugin_name]
+        if plugin_name not in self._plugin_name_to_info:
+            raise StoqPluginNotFound(
+                f'The plugin "{plugin_name}" is invalid or does not exist in your plugin path'
+            )
         module_path, plugin_config = self._plugin_name_to_info[plugin_name]
         if plugin_config.has_option('options', 'min_stoq_version'):
             min_stoq_version = plugin_config.get('options', 'min_stoq_version')
