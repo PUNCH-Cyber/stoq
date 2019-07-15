@@ -84,7 +84,6 @@ class Payload:
         self.extracted_by = extracted_by
         self.extracted_from = extracted_from
         self.dispatch_meta: Dict[str, Dict] = {}
-        self.deep_dispatch_meta: Dict[str, Dict] = {}
         self.worker_results: List[Dict[str, Dict]] = [{}]  # Empty dict for first round
         self.plugins_run: Dict[str, List[List]] = {'workers': [[]], 'archivers': []}
         self.payload_id = str(uuid.uuid4()) if payload_id is None else payload_id
@@ -336,37 +335,6 @@ class DispatcherResponse:
         >>> plugins = ['yara', 'exif']
         >>> meta = {'hit': 'exe_file'}
         >>> dispatcher = DispatcherResponse(plugin_names=plugins, meta=meta)
-
-        """
-        self.plugin_names = [] if plugin_names is None else plugin_names
-        self.meta = {} if meta is None else meta
-        self.errors = [] if errors is None else errors
-
-    def __str__(self) -> str:
-        return helpers.dumps(self)
-
-    def __repr__(self):
-        return repr(self.__dict__)
-
-
-class DeepDispatcherResponse:
-    def __init__(
-        self,
-        plugin_names: Optional[List[str]] = None,
-        meta: Optional[Dict] = None,
-        errors: Optional[List[str]] = None,
-    ) -> None:
-        """
-
-        Object containing response from deep dispatcher plugins
-
-        :param plugins_names: Plugins to send payload to for scanning
-        :param meta: Metadata pertaining to deep dispatching results
-        :param errors: Errors that occurred
-
-        >>> plugins = ['yara', 'exif']
-        >>> meta = {'hit': 'exe_file'}
-        >>> deep_dispatcher = DeepDispatcherResponse(plugin_names=plugins, meta=meta)
 
         """
         self.plugin_names = [] if plugin_names is None else plugin_names

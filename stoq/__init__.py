@@ -25,9 +25,8 @@ from .data_classes import (
     StoqResponse,
     WorkerResponse,
     DispatcherResponse,
-    DeepDispatcherResponse,
     DecoratorResponse,
 )
 from .exceptions import StoqException, StoqPluginException, StoqPluginNotFound
 
-__version__ = '2.0.5'
+__version__ = '3.0.0a'

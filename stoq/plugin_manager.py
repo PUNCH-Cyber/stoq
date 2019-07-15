@@ -30,7 +30,6 @@ from stoq.plugins import (
     WorkerPlugin,
     ConnectorPlugin,
     DispatcherPlugin,
-    DeepDispatcherPlugin,
     DecoratorPlugin,
 )
 
@@ -51,7 +50,6 @@ class StoqPluginManager:
         self._loaded_source_archiver_plugins: Dict[str, ArchiverPlugin] = {}
         self._loaded_dest_archiver_plugins: Dict[str, ArchiverPlugin] = {}
         self._loaded_dispatcher_plugins: Dict[str, DispatcherPlugin] = {}
-        self._loaded_deep_dispatcher_plugins: Dict[str, DeepDispatcherPlugin] = {}
         self._loaded_connector_plugins: List[ConnectorPlugin] = []
         self._loaded_decorator_plugins: Dict[str, DecoratorPlugin] = {}
 
@@ -139,7 +137,6 @@ class StoqPluginManager:
                 WorkerPlugin,
                 ConnectorPlugin,
                 DispatcherPlugin,
-                DeepDispatcherPlugin,
                 DecoratorPlugin,
             ]
             and not inspect.isabstract(mem),
@@ -181,7 +178,6 @@ class StoqPluginManager:
             'WorkerPlugin',
             'ConnectorPlugin',
             'DispatcherPlugin',
-            'DeepDispatcherPlugin',
             'DecoratorPlugin',
         ]
         plugins = {}

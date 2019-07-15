@@ -120,12 +120,6 @@ Examples:
             help='Dispatcher plugins to use send payloads to',
         )
         subparser.add_argument(
-            '-E',
-            '--deep-dispatchers',
-            nargs='+',
-            help='Deep dispatcher plugins to use send payloads and results to',
-        )
-        subparser.add_argument(
             '-a',
             '--always-dispatch',
             nargs='+',
@@ -136,12 +130,6 @@ Examples:
             '--start-dispatch',
             nargs='+',
             help='Worker plugins to add to the original payload dispatch',
-        )
-        subparser.add_argument(
-            '-d',
-            '--start-deep-dispatch',
-            nargs='+',
-            help='Worker plugins to add to the deep dispatch',
         )
         subparser.add_argument(
             '--max-recursion',
@@ -273,7 +261,6 @@ Examples:
             dest_archivers=args.dest_archivers,
             connectors=args.connectors,
             dispatchers=args.dispatchers,
-            deep_dispatchers=args.deep_dispatchers,
             decorators=args.decorators,
             always_dispatch=args.always_dispatch,
             max_recursion=args.max_recursion,
@@ -284,7 +271,6 @@ Examples:
             PayloadMeta(extra_data={'filename': filename}),
             request_meta=request_meta,
             add_start_dispatch=args.start_dispatch,
-            add_start_deep_dispatch=args.start_deep_dispatch,
         )
         if not args.connectors:
             print(response)
@@ -307,7 +293,6 @@ Examples:
         stoq.run(
             request_meta=request_meta,
             add_start_dispatch=args.start_dispatch,
-            add_start_deep_dispatch=args.start_deep_dispatch,
         )
     elif args.command == 'list':
         stoq = Stoq(base_dir=stoq_home, plugin_dir_list=args.plugin_dir)
