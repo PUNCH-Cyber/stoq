@@ -54,6 +54,15 @@ decided to open source our work in hopes of helping the wider Network Defense co
 Since then, we've been constantly enhancing stoQ thanks to the feedback and contributions
 from the community of stoQ users.
 
+What is new in stoQ v3?
+***********************
+
+The recent changes made to stoQ were to meant for implementing a foundation for running and
+designing coroutines. The changes to date for stoQ v3 consist of:
+    - asyncio package
+    - Removal of DeepDispatcher functionality within the Architecture
+    - to be continued...
+
 
 Why use stoQ?
 *************
