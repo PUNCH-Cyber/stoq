@@ -84,8 +84,8 @@ class Payload:
         self.extracted_by = extracted_by
         self.extracted_from = extracted_from
         self.dispatch_meta: Dict[str, Dict] = {}
-        self.worker_results: List[Dict[str, Dict]] = [{}]  # Empty dict for first round
-        self.plugins_run: Dict[str, List[List]] = {'workers': [[]], 'archivers': []}
+        self.worker_results: Dict[str, Dict] = {}
+        self.plugins_run: Dict[str, List[str]] = {'workers': [], 'archivers': []}
         self.payload_id = str(uuid.uuid4()) if payload_id is None else payload_id
 
     def __repr__(self):
@@ -128,7 +128,7 @@ class PayloadResults:
         payload_id: str,
         size: int,
         payload_meta: PayloadMeta,
-        workers: List[Dict[str, Dict]],
+        workers: Dict[str, Dict],
         plugins_run: Dict[str, List[List]],
         extracted_from: Optional[str] = None,
         extracted_by: Optional[str] = None,
@@ -223,12 +223,11 @@ class StoqResponse:
         """
         split_results = []
         for result in self.results:
-            for workers in result.workers:
-                for k, v in workers.items():
-                    rcopy = deepcopy(self.__dict__)
-                    rcopy['results'] = [deepcopy(result.__dict__)]
-                    rcopy['results'][0]['workers'] = [{k: v}]
-                    split_results.append(rcopy)
+            for k, v in result.workers.items():
+                rcopy = deepcopy(self.__dict__)
+                rcopy['results'] = [deepcopy(result.__dict__)]
+                rcopy['results'][0]['workers'] = {k: v}
+                split_results.append(rcopy)
         return split_results
 
     def __str__(self) -> str:

@@ -618,7 +618,7 @@ class Stoq(StoqPluginManager):
                 errors[plugin_name].append(helpers.format_exc(e, msg=msg))
                 continue
             # Normal dispatches are the "1st round" of scanning
-            payload.plugins_run['workers'][0].append(plugin_name)
+            payload.plugins_run['workers'].append(plugin_name)
             try:
                 worker_response = plugin.scan(payload, request_meta)  # pyre-ignore[16]
             except Exception as e:
@@ -630,7 +630,7 @@ class Stoq(StoqPluginManager):
                 continue
             if worker_response.results is not None:
                 # Normal dispatches are the "1st round" of scanning
-                payload.worker_results[0][plugin_name] = worker_response.results
+                payload.worker_results[plugin_name] = worker_response.results
             extracted.extend(
                 [
                     Payload(
