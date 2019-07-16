@@ -36,7 +36,6 @@ from stoq.data_classes import (
     WorkerResponse,
     ArchiverResponse,
     DispatcherResponse,
-    DeepDispatcherResponse,
     DecoratorResponse,
 )
 import stoq.tests.utils as utils
@@ -77,7 +76,6 @@ class TestCore(unittest.TestCase):
             connectors=['dummy_connector'],
             decorators=['dummy_decorator'],
             dispatchers=['dummy_dispatcher'],
-            deep_dispatchers=['dummy_deep_dispatcher'],
         )
         self.assertEqual(len(s._loaded_provider_plugins), 1)
         self.assertEqual(len(s._loaded_source_archiver_plugins), 1)
@@ -85,7 +83,6 @@ class TestCore(unittest.TestCase):
         self.assertEqual(len(s._loaded_connector_plugins), 1)
         self.assertEqual(len(s._loaded_decorator_plugins), 1)
         self.assertEqual(len(s._loaded_dispatcher_plugins), 1)
-        self.assertEqual(len(s._loaded_deep_dispatcher_plugins), 1)
 
     ############ 'SCAN' TESTS ############
 
@@ -205,104 +202,6 @@ class TestCore(unittest.TestCase):
         s = Stoq(base_dir=utils.get_data_dir())
         response = s.scan(
             self.generic_content, add_start_dispatch=['this_plugin_doesnt_exist']
-        )
-        self.assertNotIn(
-            'this_plugin_doesnt_exist', response.results[0].plugins_run['workers'][0]
-        )
-        self.assertEqual(len(response.errors), 1)
-
-    def test_start_deep_dispatch(self):
-        s = Stoq(base_dir=utils.get_data_dir())
-        response = s.scan(
-            self.generic_content, add_start_deep_dispatch=['extract_random']
-        )
-        self.assertIn('extract_random', response.results[0].plugins_run['workers'][1])
-        self.assertNotIn(
-            'extract_random', response.results[0].plugins_run['workers'][0]
-        )
-
-    def test_deep_dispatch(self):
-        s = Stoq(
-            base_dir=utils.get_data_dir(), deep_dispatchers=['simple_deep_dispatcher']
-        )
-        dummy_worker = s.load_plugin('dummy_worker')
-        dummy_worker.scan = create_autospec(dummy_worker.scan, return_value=None)
-        response = s.scan(self.generic_content)
-        self.assertEqual(len(dummy_worker.scan.call_args[0]), 2)
-        self.assertEqual(
-            dummy_worker.scan.call_args[0][0].deep_dispatch_meta[
-                'simple_deep_dispatcher'
-            ],
-            {'test_deep_key': 'Useful deep metadata info'},
-        )
-        self.assertIn('dummy_worker', response.results[0].plugins_run['workers'][1])
-
-    def test_deep_dispatcher_exception(self):
-        s = Stoq(
-            base_dir=utils.get_data_dir(), deep_dispatchers=['simple_deep_dispatcher']
-        )
-        simple_deep_dispatcher = s.load_plugin('simple_deep_dispatcher')
-        simple_deep_dispatcher.RAISE_EXCEPTION = True
-        with self.assertRaises(Exception) as context:
-            simple_deep_dispatcher.get_dispatches(task)
-        self.assertTrue('Test exception', context.exception)
-
-    def test_deep_dispatch_duplicate(self):
-        s = Stoq(
-            base_dir=utils.get_data_dir(), deep_dispatchers=['simple_deep_dispatcher']
-        )
-        s.load_plugin('simple_deep_dispatcher').WORKERS = [
-            'simple_worker',
-            'simple_worker',
-        ]
-        simple_worker = s.load_plugin('simple_worker')
-        simple_worker.scan = create_autospec(simple_worker.scan, return_value=None)
-        s.scan(self.generic_content)
-        self.assertEqual(simple_worker.scan.call_count, 1)
-        self.assertEqual(len(simple_worker.scan.call_args[0]), 2)
-
-    def test_deep_dispatch_multiple_plugins(self):
-        multi_plugin_content = b'multi-plugin-content'
-        s = Stoq(
-            base_dir=utils.get_data_dir(), deep_dispatchers=['simple_deep_dispatcher']
-        )
-        s.load_plugin('simple_deep_dispatcher').WORKERS = [
-            'simple_worker',
-            'dummy_worker',
-        ]
-        simple_worker = s.load_plugin('simple_worker')
-        simple_worker.scan = create_autospec(simple_worker.scan, return_value=None)
-        dummy_worker = s.load_plugin('dummy_worker')
-        dummy_worker.scan = create_autospec(dummy_worker.scan, return_value=None)
-        s.scan(multi_plugin_content)
-        simple_worker.scan.assert_called_once()
-        self.assertEqual(len(simple_worker.scan.call_args[0]), 2)
-        dummy_worker.scan.assert_called_once()
-        self.assertEqual(len(dummy_worker.scan.call_args[0]), 2)
-
-    def test_deep_dispatch_multiple_plugins2(self):
-        again_multi_plugin_content = b'again-multi-plugin-space-content'
-        s = Stoq(
-            base_dir=utils.get_data_dir(), deep_dispatchers=['simple_deep_dispatcher']
-        )
-        s.load_plugin('simple_deep_dispatcher').WORKERS = [
-            'simple_worker',
-            'dummy_worker',
-        ]
-        simple_worker = s.load_plugin('simple_worker')
-        simple_worker.scan = create_autospec(simple_worker.scan, return_value=None)
-        dummy_worker = s.load_plugin('dummy_worker')
-        dummy_worker.scan = create_autospec(dummy_worker.scan, return_value=None)
-        s.scan(again_multi_plugin_content)
-        simple_worker.scan.assert_called_once()
-        self.assertEqual(len(simple_worker.scan.call_args[0]), 2)
-        dummy_worker.scan.assert_called_once()
-        self.assertEqual(len(dummy_worker.scan.call_args[0]), 2)
-
-    def test_deep_dispatch_nonexistent_plugin(self):
-        s = Stoq(base_dir=utils.get_data_dir())
-        response = s.scan(
-            self.generic_content, add_start_deep_dispatch=['this_plugin_doesnt_exist']
         )
         self.assertNotIn(
             'this_plugin_doesnt_exist', response.results[0].plugins_run['workers'][0]
@@ -595,50 +494,6 @@ class TestCore(unittest.TestCase):
         dummy_worker.scan.assert_called_once()
         dummy_connector.save.assert_called_once()
 
-    def test_provider_with_start_deep_dispatch(self):
-        s = Stoq(
-            base_dir=utils.get_data_dir(),
-            source_archivers=['simple_archiver'],
-            providers=['simple_provider'],
-            connectors=['dummy_connector'],
-        )
-        dummy_connector = s.load_plugin('dummy_connector')
-        dummy_connector.save = create_autospec(dummy_connector.save)
-        simple_provider = s.load_plugin('simple_provider')
-        simple_provider.RETURN_PAYLOAD = True
-        simple_archiver = s.load_plugin('simple_archiver')
-        simple_archiver.PAYLOAD = b'This is a payload'
-        dummy_worker = s.load_plugin('dummy_worker')
-        dummy_worker.scan = create_autospec(dummy_worker.scan)
-        s.run(add_start_deep_dispatch=['dummy_worker'])
-        dummy_worker.scan.assert_called_once()
-        dummy_connector.save.assert_called_once()
-
-    def test_provider_with_start_dispatch_and_start_deep_dispatch(self):
-        s = Stoq(
-            base_dir=utils.get_data_dir(),
-            source_archivers=['simple_archiver'],
-            providers=['simple_provider'],
-            connectors=['dummy_connector'],
-        )
-        dummy_connector = s.load_plugin('dummy_connector')
-        dummy_connector.save = create_autospec(dummy_connector.save)
-        simple_provider = s.load_plugin('simple_provider')
-        simple_provider.RETURN_PAYLOAD = True
-        simple_archiver = s.load_plugin('simple_archiver')
-        simple_archiver.PAYLOAD = b'This is a payload'
-        dummy_worker = s.load_plugin('dummy_worker')
-        dummy_worker.scan = create_autospec(dummy_worker.scan)
-        simple_worker = s.load_plugin('simple_worker')
-        simple_worker.scan = create_autospec(simple_worker.scan)
-        s.run(
-            add_start_dispatch=['simple_worker'],
-            add_start_deep_dispatch=['dummy_worker'],
-        )
-        dummy_worker.scan.assert_called_once()
-        simple_worker.scan.assert_called_once()
-        dummy_connector.save.assert_called_once()
-
     def test_stoqresponse_to_str(self):
         response = StoqResponse({}, RequestMeta(), [])
         response_str = str(response)
@@ -684,13 +539,6 @@ class TestCore(unittest.TestCase):
 
     def test_dispatcherresponse_to_str(self):
         response = DispatcherResponse()
-        response_str = str(response)
-        response_dict = json.loads(response_str)
-        self.assertIsInstance(response_str, str)
-        self.assertIsInstance(response_dict, dict)
-
-    def test_deepdispatcherresponse_to_str(self):
-        response = DeepDispatcherResponse()
         response_str = str(response)
         response_dict = json.loads(response_str)
         self.assertIsInstance(response_str, str)

@@ -164,7 +164,6 @@ Classes
    archivers
    connectors
    decorators
-   deepdispatchers
    dispatchers
    providers
    workers
