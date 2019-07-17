@@ -101,10 +101,10 @@ class TestCore(unittest.TestCase):
         split_response = response.split()
         self.assertEqual(len(split_response), 2)
         for r in split_response:
-            if 'simple_worker' in r['results'][0]['workers'][0]:
-                self.assertNotIn('multiclass_plugin', r['results'][0]['workers'][0])
-            elif 'multiclass_plugin' in r['results'][0]['workers'][0]:
-                self.assertNotIn('simple_worker', r['results'][0]['workers'][0])
+            if 'simple_worker' in r['results'][0]['workers']:
+                self.assertNotIn('multiclass_plugin', r['results'][0]['workers'])
+            elif 'multiclass_plugin' in r['results'][0]['workers']:
+                self.assertNotIn('simple_worker', r['results'][0]['workers'])
             else:
                 raise Exception('required plugin not found in results')
 
@@ -118,9 +118,9 @@ class TestCore(unittest.TestCase):
     def test_start_dispatch(self):
         s = Stoq(base_dir=utils.get_data_dir())
         response = s.scan(self.generic_content, add_start_dispatch=['extract_random'])
-        self.assertIn('extract_random', response.results[0].plugins_run['workers'][0])
+        self.assertIn('extract_random', response.results[0].plugins_run['workers'])
         self.assertNotIn(
-            'extract_random', response.results[1].plugins_run['workers'][0]
+            'extract_random', response.results[1].plugins_run['workers']
         )
 
     def test_dispatch(self):
@@ -204,7 +204,7 @@ class TestCore(unittest.TestCase):
             self.generic_content, add_start_dispatch=['this_plugin_doesnt_exist']
         )
         self.assertNotIn(
-            'this_plugin_doesnt_exist', response.results[0].plugins_run['workers'][0]
+            'this_plugin_doesnt_exist', response.results[0].plugins_run['workers']
         )
         self.assertEqual(len(response.errors), 1)
 
@@ -269,9 +269,9 @@ class TestCore(unittest.TestCase):
     def test_worker_in_results(self):
         s = Stoq(base_dir=utils.get_data_dir())
         response = s.scan(self.generic_content, add_start_dispatch=['simple_worker'])
-        self.assertIn('simple_worker', response.results[0].workers[0])
+        self.assertIn('simple_worker', response.results[0].workers)
         self.assertIn(
-            'valuable_insight', response.results[0].workers[0]['simple_worker']
+            'valuable_insight', response.results[0].workers['simple_worker']
         )
         self.assertEqual(len(response.errors), 0)
 
@@ -311,7 +311,7 @@ class TestCore(unittest.TestCase):
         simple_worker.RETURN_ERRORS = True
         response = s.scan(self.generic_content, add_start_dispatch=['simple_worker'])
         self.assertIn('simple_worker', response.results[0].plugins_run['workers'][0])
-        self.assertIn('simple_worker', response.results[0].workers[0])
+        self.assertIn('simple_worker', response.results[0].workers)
         self.assertEqual(len(response.errors), 1)
         self.assertIn('Test error', response.errors['simple_worker'][0])
 
@@ -560,15 +560,15 @@ class TestCore(unittest.TestCase):
                     payload_id="A.zip",
                     size=0,
                     payload_meta=PayloadMeta(),
-                    workers=[{"fake": "result1"}],
-                    plugins_run={"workers": [["fake"]]},
+                    workers={"fake": "result1"},
+                    plugins_run={"workers": ["fake"]},
                 ),
                 PayloadResults(
                     payload_id="B.txt",
                     size=0,
                     payload_meta=PayloadMeta(),
-                    workers=[{"fake": "result2"}],
-                    plugins_run={"workers": [["fake"]]},
+                    workers={"fake": "result2"},
+                    plugins_run={"workers": ["fake"]},
                     extracted_from="A.zip",
                     extracted_by="fake",
                 ),
@@ -576,8 +576,8 @@ class TestCore(unittest.TestCase):
                     payload_id="C.zip",
                     size=0,
                     payload_meta=PayloadMeta(),
-                    workers=[{"fake": "result3"}],
-                    plugins_run={"workers": [["fake"]]},
+                    workers={"fake": "result3"},
+                    plugins_run={"workers": ["fake"]},
                     extracted_from="A.zip",
                     extracted_by="fake",
                 ),
@@ -585,8 +585,8 @@ class TestCore(unittest.TestCase):
                     payload_id="D.txt",
                     size=0,
                     payload_meta=PayloadMeta(),
-                    workers=[{"fake": "result4"}],
-                    plugins_run={"workers": [["fake"]]},
+                    workers={"fake": "result4"},
+                    plugins_run={"workers": ["fake"]},
                     extracted_from="C.zip",
                     extracted_by="fake",
                 ),
@@ -607,7 +607,7 @@ class TestCore(unittest.TestCase):
         )
         self.assertEqual(
             [
-                stoq_response.results[0].workers[0]["fake"]
+                stoq_response.results[0].workers["fake"]
                 for stoq_response in all_subresponses
             ],
             ["result1", "result2", "result3", "result4"],
