@@ -59,9 +59,9 @@ What is new in stoQ v3?
 
 The recent changes made to stoQ were to meant for implementing a foundation for running and
 designing coroutines. The changes to date for stoQ v3 consist of:
-    - asyncio package
     - Removal of DeepDispatcher functionality within the Architecture
-    - to be continued...
+    - Updated type check for PayloadResults to be a Dictionary
+    - Supports Async IO design and the asyncio package
 
 
 Why use stoQ?
