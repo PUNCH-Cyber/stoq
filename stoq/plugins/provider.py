@@ -89,7 +89,7 @@
 
             async def ingest(self, queue: Queue) -> None:
                 payload_meta = PayloadMeta(extra_data={'msg': self.meta})
-                queue.put(Payload(b'This is a payload', payload_meta=payload_meta))
+                await queue.put(Payload(b'This is a payload', payload_meta=payload_meta))
 
     API
     ===
