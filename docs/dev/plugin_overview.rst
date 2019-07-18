@@ -140,13 +140,13 @@ methods exist.::
     from stoq.plugins import DispatcherPlugin, WorkerPlugin
 
     class MultiClassPlugin(WorkerPlugin, DispatcherPlugin):
-        def scan(
+        async def scan(
             self, payload: Payload, request_meta: RequestMeta
         ) -> Optional[WorkerResponse]:
             # do worker plugin stuff here
             return
 
-        def get_dispatches(
+        async def get_dispatches(
             self, payload: Payload, request_meta: RequestMeta
         ) -> Optional[DispatcherResponse]:
             # do dispatcher plugin stuff here

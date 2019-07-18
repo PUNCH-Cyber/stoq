@@ -87,7 +87,7 @@
                 super().__init__(config, plugin_opts)
                 self.meta = config.get('options', 'meta', fallback='This msg will always be')
 
-            def ingest(self, queue: Queue) -> None:
+            async def ingest(self, queue: Queue) -> None:
                 payload_meta = PayloadMeta(extra_data={'msg': self.meta})
                 queue.put(Payload(b'This is a payload', payload_meta=payload_meta))
 

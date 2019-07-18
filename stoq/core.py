@@ -79,7 +79,7 @@
         >>> src = '/tmp/bad.exe'
         >>> with open(src, 'rb') as src_payload:
         ...     meta = RequestMeta(extra_data={'filename': src})
-        ...     results = s.scan(
+        ...     results = await s.scan(
         ...             content=src_payload.read(),
         ...             request_meta=meta)
         >>> print(results)
@@ -150,12 +150,12 @@
         ...     plugins_opts=plugins_opts,
         ...     always_dispatch=always_dispatch
         ... )
-        >>> s.run()
+        >>> await s.run()
 
 
     A few things are happening here:
         #. The ``/tmp/datadump`` directory is being monitored for newly created files
-        #. Each file is opened, and the payload is loaded into ``Stoq``
+        #. Each file is opened, and the payload is loaded into ``Stoq`` asynchronously
         #. The payload is scanned with the ``yara`` dispatcher plugin
         #. The yara dispatcher plugin returns a list of plugins that the payload should
            be scanned with
@@ -234,7 +234,7 @@
     be created.:
 
         >>> start_dispatch = ['yara']
-        >>> results = s.scan('raw bytes', add_start_dispatch=start_dispatch)
+        >>> results = await s.scan('raw bytes', add_start_dispatch=start_dispatch)
 
 
     From ``Payload`` object
@@ -244,7 +244,7 @@
     ``scan_payload`` function may be called:
 
         >>> start_dispatch = ['yara']
-        >>> results = s.scan_payload(payload, add_start_dispatch=start_dispatch)
+        >>> results = await s.scan_payload(payload, add_start_dispatch=start_dispatch)
 
 
     Save Results
@@ -256,7 +256,7 @@
     the ``filedir`` plugin which will save the results to a specified directory.:
 
         >>> connector = s.load_plugin('filedir')
-        >>> connector.save(results)
+        >>> await connector.save(results)
 
     Split Results
     -------------
@@ -264,7 +264,7 @@
     In some cases it may be required to split results out individually. For example, when
     saving results to different indexes depending on plugin name, such as with ElasticSearch or Splunk.
 
-        >>> results = s.scan_payload(payload)
+        >>> results = await s.scan_payload(payload)
         >>> results.split()
 
     Reconstructing Subresponse Results
@@ -278,7 +278,7 @@
     defined decorators will be run against each newly constructed `StoqResponse` and added to the
     results.
 
-        >>> for result in s.reconstruct_all_subresponses(results):
+        >>> await for result in s.reconstruct_all_subresponses(results):
         ...     print(result)
 
     Below is a simple flow diagram of the iterated results when being reconstructed.
