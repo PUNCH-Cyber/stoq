@@ -14,11 +14,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from queue import Queue
+from asyncio import Queue
 
 from stoq.plugins import ProviderPlugin
 
 
 class DummyProvider(ProviderPlugin):
-    def ingest(self, queue: Queue) -> None:
+    async def ingest(self, queue: Queue) -> None:
         pass

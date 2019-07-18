@@ -173,7 +173,7 @@ from stoq.plugins import BasePlugin
 
 
 class ArchiverPlugin(BasePlugin):
-    def archive(
+    async def archive(
         self, payload: Payload, request_meta: RequestMeta
     ) -> Optional[ArchiverResponse]:
         """
@@ -194,7 +194,7 @@ class ArchiverPlugin(BasePlugin):
         """
         pass
 
-    def get(self, task: ArchiverResponse) -> Optional[Payload]:
+    async def get(self, task: ArchiverResponse) -> Optional[Payload]:
         """
         Retrieve payload for processing
 

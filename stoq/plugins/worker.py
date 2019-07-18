@@ -185,7 +185,7 @@ from stoq.plugins import BasePlugin
 
 class WorkerPlugin(BasePlugin):
     @abstractmethod
-    def scan(
+    async def scan(
         self, payload: Payload, request_meta: RequestMeta
     ) -> Optional[WorkerResponse]:
         pass

@@ -32,7 +32,7 @@ def ratelimited():
         last_call = time.perf_counter()
 
         @wraps(func)
-        def ratelimit(*args, **kwargs):
+        async def ratelimit(*args, **kwargs):
             limit = kwargs.get("ratelimit", None)
             if limit:
                 count, seconds = limit.split("/")
@@ -54,7 +54,7 @@ def ratelimited():
             except KeyError:
                 pass
 
-            return func(*args, **kwargs)
+            return await func(*args, **kwargs)
 
         return ratelimit
 

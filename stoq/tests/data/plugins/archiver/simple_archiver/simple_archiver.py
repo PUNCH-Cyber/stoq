@@ -25,7 +25,7 @@ class SimpleArchiver(ArchiverPlugin):
     RETURN_ERRORS = False
     PAYLOAD = b''
 
-    def archive(
+    async def archive(
         self, payload: Payload, request_meta: RequestMeta
     ) -> Optional[ArchiverResponse]:
         if self.RAISE_EXCEPTION:
@@ -35,7 +35,7 @@ class SimpleArchiver(ArchiverPlugin):
             ar.errors += ['Test error please ignore']
         return ar
 
-    def get(self, task: ArchiverResponse) -> Optional[Payload]:
+    async def get(self, task: ArchiverResponse) -> Optional[Payload]:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')
         return Payload(self.PAYLOAD, PayloadMeta(extra_data=task.results))

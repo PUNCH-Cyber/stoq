@@ -96,5 +96,5 @@ from stoq.plugins import BasePlugin
 
 class DecoratorPlugin(BasePlugin):
     @abstractmethod
-    def decorate(self, response: StoqResponse) -> Optional[DecoratorResponse]:
+    async def decorate(self, response: StoqResponse) -> Optional[DecoratorResponse]:
         pass

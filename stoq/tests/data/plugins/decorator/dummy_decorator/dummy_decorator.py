@@ -19,5 +19,5 @@ from stoq.plugins import DecoratorPlugin
 
 
 class DummyDecorator(DecoratorPlugin):
-    def decorate(self, response: StoqResponse) -> None:
+    async def decorate(self, response: StoqResponse) -> None:
         pass

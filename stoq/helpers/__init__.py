@@ -18,7 +18,6 @@ import json
 import hashlib
 import datetime
 import traceback
-import collections
 
 from bs4 import UnicodeDammit  # pyre-ignore
 from typing import Optional, Dict, DefaultDict, Union, List
@@ -49,19 +48,19 @@ def dumps(data, indent=4, compactly=False):
     return json.dumps(data, indent=indent, cls=JsonComplexEncoder, ensure_ascii=False)
 
 
-def get_md5(content: bytes) -> str:
+async def get_md5(content: bytes) -> str:
     return hashlib.md5(content).hexdigest()
 
 
-def get_sha1(content: bytes) -> str:
+async def get_sha1(content: bytes) -> str:
     return hashlib.sha1(content).hexdigest()
 
 
-def get_sha256(content: bytes) -> str:
+async def get_sha256(content: bytes) -> str:
     return hashlib.sha256(content).hexdigest()
 
 
-def get_sha512(content: bytes) -> str:
+async def get_sha512(content: bytes) -> str:
     return hashlib.sha512(content).hexdigest()
 
 
@@ -79,7 +78,7 @@ def format_exc(exc: Exception, limit: int = -1, msg: Optional[str] = None):
         return exc_str
 
 
-def merge_dicts(
+async def merge_dicts(
     d1: DefaultDict[str, List[str]],
     d2: Union[DefaultDict[str, List[str]], Dict[str, List[str]]],
 ) -> DefaultDict[str, List[str]]:

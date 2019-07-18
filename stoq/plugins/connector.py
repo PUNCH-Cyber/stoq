@@ -91,5 +91,5 @@ from stoq.plugins import BasePlugin
 
 class ConnectorPlugin(BasePlugin):
     @abstractmethod
-    def save(self, response: StoqResponse) -> None:
+    async def save(self, response: StoqResponse) -> None:
         pass

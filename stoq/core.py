@@ -305,14 +305,13 @@
 """
 
 import os
-import queue
+import asyncio
 import logging
 import configparser
-import concurrent.futures
 from collections import defaultdict
 from pythonjsonlogger import jsonlogger  # pyre-ignore[21]
 from logging.handlers import RotatingFileHandler
-from typing import Dict, Iterable, List, Optional, Set, Tuple, DefaultDict
+from typing import Dict, AsyncGenerator, List, Optional, Set, Tuple, DefaultDict
 
 
 from .exceptions import StoqException
@@ -329,16 +328,13 @@ import stoq.helpers as helpers
 from stoq.utils import ratelimited
 from stoq.plugin_manager import StoqPluginManager
 
-# Created to enable `None' as a valid paramater
-_UNSET = object()
-
 
 class Stoq(StoqPluginManager):
     def __init__(
         self,
         base_dir: Optional[str] = None,
         config_file: Optional[str] = None,
-        log_dir: Optional[str] = _UNSET,
+        log_dir: Optional[str] = None,
         log_level: Optional[str] = None,
         plugin_dir_list: Optional[List[str]] = None,
         plugin_opts: Optional[Dict[str, Dict]] = None,
@@ -380,11 +376,14 @@ class Stoq(StoqPluginManager):
             config.read(config_file)
 
         self.max_queue = config.getint('core', 'max_queue', fallback=100)
+        self.provider_consumers = config.getint(
+            'core', 'provider_consumers', fallback=50
+        )
         self.max_recursion = config.getint(
             'core', 'max_recursion', fallback=max_recursion
         )
 
-        if log_dir is _UNSET:
+        if not log_dir:
             log_dir = config.get(
                 'core', 'log_dir', fallback=os.path.join(base_dir, 'logs')
             )
@@ -447,7 +446,7 @@ class Stoq(StoqPluginManager):
                 self.load_plugin(ad)
 
     @ratelimited()
-    def scan(
+    async def scan(
         self,
         content: bytes,
         payload_meta: Optional[PayloadMeta] = None,
@@ -471,9 +470,9 @@ class Stoq(StoqPluginManager):
         """
         payload_meta = PayloadMeta() if payload_meta is None else payload_meta
         payload = Payload(content, payload_meta)
-        return self.scan_payload(payload, request_meta, add_start_dispatch)
+        return await self.scan_payload(payload, request_meta, add_start_dispatch)
 
-    def scan_payload(
+    async def scan_payload(
         self,
         payload: Payload,
         request_meta: Optional[RequestMeta] = None,
@@ -496,40 +495,33 @@ class Stoq(StoqPluginManager):
         scan_results: List = []
         errors: DefaultDict[str, List[str]] = defaultdict(list)
         scan_queue = [(payload, add_start_dispatch)]
-        hashes_seen: Set[str] = set(helpers.get_sha256(payload.content))
+        hashes_seen: Set[str] = set(await helpers.get_sha256(payload.content))
 
         for _recursion_level in range(self.max_recursion + 1):
             next_scan_queue: List[Tuple[Payload, List[str]]] = []
             for payload, add_dispatch in scan_queue:
-                payload_results, extracted, p_errors = self._single_scan(
+                payload_results, extracted, p_errors = await self._single_scan(
                     payload, add_dispatch, request_meta
                 )
                 scan_results.append(payload_results)
                 # TODO: Add option for no-dedup
                 for ex in extracted:
-                    ex_hash = helpers.get_sha256(ex.content)
+                    ex_hash = await helpers.get_sha256(ex.content)
                     if ex_hash not in hashes_seen:
                         hashes_seen.add(ex_hash)
                         next_scan_queue.append((ex, ex.payload_meta.dispatch_to))
-                errors = helpers.merge_dicts(errors, p_errors)
+                errors = await helpers.merge_dicts(errors, p_errors)
             scan_queue = next_scan_queue
 
         response = StoqResponse(
             results=scan_results, request_meta=request_meta, errors=errors
         )
 
-        self._apply_decorators(response)
-
-        for connector in self._loaded_connector_plugins:
-            try:
-                connector.save(response)
-            except Exception:
-                self.log.exception(
-                    f'Failed to save results using {connector.__module__}: {response}'
-                )
+        response = await self._apply_decorators(response)
+        await self._save_results(response)
         return response
 
-    def run(
+    async def run(
         self,
         request_meta: Optional[RequestMeta] = None,
         add_start_dispatch: Optional[List[str]] = None,
@@ -546,69 +538,80 @@ class Stoq(StoqPluginManager):
         # initialized on stoq start-up or via load_plugin()
         if not self._loaded_provider_plugins:
             raise StoqException('No activated provider plugins')
-        payload_queue: queue.Queue = queue.Queue(self.max_queue)
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            # Start the load operations and mark each future with its URL
-            future_to_name = {
-                executor.submit(plugin.ingest, payload_queue): name
-                for name, plugin in self._loaded_provider_plugins.items()
-            }
-            while len(future_to_name) > 0 or payload_queue.qsize() > 0:
-                try:
-                    # Using get_nowait results in high CPU churn
-                    task = payload_queue.get(timeout=0.1)
-                    # Determine whether the provider has returned a `Payload`, or a task.
-                    # If it is a task, load the defined archiver plugin to load the
-                    # `Payload`, otherwise, simply continue on with the scanning.
-                    if isinstance(task, Payload):
-                        self.scan_payload(
-                            task,
-                            request_meta=request_meta,
-                            add_start_dispatch=add_start_dispatch,
-                        )
-                    else:
-                        for source_archiver, task_meta in task.items():
-                            try:
-                                ar = ArchiverResponse(task_meta)
-                                payload = self._loaded_source_archiver_plugins[
-                                    source_archiver
-                                ].get(ar)
-                                if payload:
-                                    self.scan_payload(
-                                        payload,
-                                        request_meta=request_meta,
-                                        add_start_dispatch=add_start_dispatch,
-                                    )
-                            except Exception as e:
-                                self.log.warn(
-                                    f'"{task_meta}" failed with archiver "{source_archiver}": {str(e)}'
-                                )
-                except queue.Empty:
-                    pass
-                for future in [fut for fut in future_to_name if fut.done()]:
-                    try:
-                        future.result()
-                        self.log.info(
-                            f'Provider plugin {future_to_name[future]} successfully completed'
-                        )
-                        del future_to_name[future]
-                    except Exception as e:
-                        msg = f'provider:{future_to_name[future]} failed'
-                        self.log.exception(msg)
-                        raise StoqException(msg) from e
 
-    def _single_scan(
+        payload_queue: asyncio.Queue = asyncio.Queue(maxsize=self.max_queue)
+        providers = [
+            asyncio.ensure_future(plugin.ingest(payload_queue))
+            for name, plugin in self._loaded_provider_plugins.items()
+        ]
+        workers = [
+            asyncio.ensure_future(
+                self._consume(payload_queue, request_meta, add_start_dispatch)
+            )
+            for n in range(self.provider_consumers)
+        ]
+        try:
+            await asyncio.gather(*providers)
+            await payload_queue.join()
+        except KeyboardInterrupt:
+            pass
+        except Exception as e:
+            self.log.exception(e, exc_info=True)
+        finally:
+            for worker in workers:
+                worker.cancel()
+
+    async def _consume(
+        self,
+        payload_queue: asyncio.Queue,
+        request_meta: Optional[RequestMeta] = None,
+        add_start_dispatch: Optional[List[str]] = None,
+    ) -> None:
+        while True:
+            try:
+                task = await payload_queue.get()
+                # Determine whether the provider has returned a `Payload`, or a task.
+                # If it is a task, load the defined archiver plugin to load the
+                # `Payload`, otherwise, simply continue on with the scanning.
+                if isinstance(task, Payload):
+                    await self.scan_payload(
+                        task,
+                        request_meta=request_meta,
+                        add_start_dispatch=add_start_dispatch,
+                    )
+                else:
+                    for source_archiver, task_meta in task.items():
+                        try:
+                            ar = ArchiverResponse(task_meta)
+                            payload = await self._loaded_source_archiver_plugins[
+                                source_archiver
+                            ].get(ar)
+                            if payload:
+                                await self.scan_payload(
+                                    payload,
+                                    request_meta=request_meta,
+                                    add_start_dispatch=add_start_dispatch,
+                                )
+                        except Exception as e:
+                            self.log.warn(
+                                f'"{task_meta}" failed with archiver "{source_archiver}": {str(e)}'
+                            )
+                payload_queue.task_done()
+            except asyncio.QueueEmpty:
+                pass
+
+    async def _single_scan(
         self, payload: Payload, add_dispatch: List[str], request_meta: RequestMeta
     ) -> Tuple[PayloadResults, List[Payload], DefaultDict[str, List[str]]]:
 
         extracted = []
         errors: DefaultDict[str, List[str]] = defaultdict(list)
 
-        dispatches, dispatch_errors = self._get_dispatches(
+        dispatches, dispatch_errors = await self._get_dispatches(
             payload, add_dispatch, request_meta
         )
         if dispatch_errors:
-            errors = helpers.merge_dicts(errors, dispatch_errors)
+            errors = await helpers.merge_dicts(errors, dispatch_errors)
         for plugin_name in dispatches:
             try:
                 plugin = self.load_plugin(plugin_name)
@@ -617,10 +620,11 @@ class Stoq(StoqPluginManager):
                 self.log.exception(msg)
                 errors[plugin_name].append(helpers.format_exc(e, msg=msg))
                 continue
-            # Normal dispatches are the "1st round" of scanning
             payload.plugins_run['workers'].append(plugin_name)
             try:
-                worker_response = plugin.scan(payload, request_meta)  # pyre-ignore[16]
+                worker_response = await plugin.scan(
+                    payload, request_meta
+                )  # pyre-ignore[16]
             except Exception as e:
                 msg = 'worker:failed to scan'
                 self.log.exception(msg)
@@ -647,7 +651,7 @@ class Stoq(StoqPluginManager):
             for plugin_name, archiver in self._loaded_dest_archiver_plugins.items():
                 payload.plugins_run['archivers'].append(plugin_name)
                 try:
-                    archiver_response = archiver.archive(payload, request_meta)
+                    archiver_response = await archiver.archive(payload, request_meta)
                 except Exception as e:
                     msg = 'archiver:failed to archive'
                     self.log.exception(msg)
@@ -705,7 +709,7 @@ class Stoq(StoqPluginManager):
             self.log.addHandler(file_handler)
             self.log.debug(f'Writing logs to {log_path}')
 
-    def _get_dispatches(
+    async def _get_dispatches(
         self, payload: Payload, add_dispatches: List[str], request_meta: RequestMeta
     ) -> Tuple[Set[str], DefaultDict[str, List[str]]]:
 
@@ -714,10 +718,13 @@ class Stoq(StoqPluginManager):
 
         for dispatcher_name, dispatcher in self._loaded_dispatcher_plugins.items():
             try:
-                dispatcher_result = dispatcher.get_dispatches(payload, request_meta)
-                dispatches.update(dispatcher_result.plugin_names)
-                if dispatcher_result.meta is not None:
-                    payload.dispatch_meta[dispatcher_name] = dispatcher_result.meta
+                dispatcher_result = await dispatcher.get_dispatches(
+                    payload, request_meta
+                )
+                if dispatcher_result:
+                    dispatches.update(dispatcher_result.plugin_names)
+                    if dispatcher_result.meta is not None:
+                        payload.dispatch_meta[dispatcher_name] = dispatcher_result.meta
             except Exception as e:
                 msg = 'dispatcher:failed to dispatch'
                 self.log.exception(msg)
@@ -725,11 +732,11 @@ class Stoq(StoqPluginManager):
 
         return (dispatches, errors)
 
-    def _apply_decorators(self, response: StoqResponse) -> None:
+    async def _apply_decorators(self, response: StoqResponse) -> StoqResponse:
         """Mutates the given StoqResponse object to include decorator information"""
         for plugin_name, decorator in self._loaded_decorator_plugins.items():
             try:
-                decorator_response = decorator.decorate(response)
+                decorator_response = await decorator.decorate(response)
             except Exception as e:
                 msg = 'decorator'
                 self.log.exception(msg)
@@ -743,10 +750,20 @@ class Stoq(StoqPluginManager):
                 response.decorators[plugin_name] = decorator_response.results
             if decorator_response.errors:
                 response.errors[plugin_name].extend(decorator_response.errors)
+        return response
 
-    def reconstruct_all_subresponses(
+    async def _save_results(self, response: StoqResponse) -> None:
+        for connector in self._loaded_connector_plugins:
+            try:
+                await connector.save(response)
+            except Exception:
+                self.log.exception(
+                    f'Failed to save results using {connector.__module__}: {response}'
+                )
+
+    async def reconstruct_all_subresponses(
         self, stoq_response: StoqResponse
-    ) -> Iterable[StoqResponse]:
+    ) -> AsyncGenerator[StoqResponse, None]:
         for i, new_root_result in enumerate(stoq_response.results):
             parent_payload_ids = {stoq_response.results[i].payload_id}
             relevant_results: List[PayloadResults] = [new_root_result]
@@ -761,5 +778,5 @@ class Stoq(StoqPluginManager):
                 time=stoq_response.time,
                 scan_id=stoq_response.scan_id,
             )
-            self._apply_decorators(new_response)
+            await self._apply_decorators(new_response)
             yield new_response
