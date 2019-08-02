@@ -24,7 +24,7 @@ class SimpleDecorator(DecoratorPlugin):
     RAISE_EXCEPTION = False
     RETURN_ERRORS = False
 
-    def decorate(self, response: StoqResponse) -> Optional[DecoratorResponse]:
+    async def decorate(self, response: StoqResponse) -> Optional[DecoratorResponse]:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')
         dr = DecoratorResponse({'simple_decoration': 123})

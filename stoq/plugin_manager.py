@@ -124,7 +124,7 @@ class StoqPluginManager:
             plugin_config.get('Core', 'Module'), module_path
         )
         module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)  # pyre-ignore
+        spec.loader.exec_module(module)  # type: ignore
         plugin_classes = inspect.getmembers(
             module,
             predicate=lambda mem: inspect.isclass(mem)
@@ -163,7 +163,9 @@ class StoqPluginManager:
             for opt in self._stoq_config.options(plugin_name):
                 plugin_config['options'][opt] = self._stoq_config.get(plugin_name, opt)
         if self._plugin_opts.get(plugin_name):
-            plugin_config.read_dict({'options': self._plugin_opts.get(plugin_name)})
+            plugin_config.read_dict(
+                {'options': self._plugin_opts.get(plugin_name)}  # type: ignore
+            )
         plugin = plugin_class(plugin_config, self._plugin_opts.get(plugin_name))
         self._loaded_plugins[plugin_name] = plugin
         return plugin
@@ -186,12 +188,16 @@ class StoqPluginManager:
             try:
                 with open(self._plugin_name_to_info[plugin][0]) as f:
                     parsed_plugin = ast.parse(f.read())
-                classes = [n for n in parsed_plugin.body if isinstance(n, ast.ClassDef)]
+                classes = [
+                    n
+                    for n in parsed_plugin.body  # type: ignore
+                    if isinstance(n, ast.ClassDef)
+                ]
                 for c in classes:
                     for base in c.bases:
-                        if base.id in valid_classes:  # pyre-ignore[16]
+                        if base.id in valid_classes:  # type: ignore
                             plugin_classes.append(
-                                base.id.replace('Plugin', '')  # pyre-ignore[16]
+                                base.id.replace('Plugin', '')  # type: ignore
                             )
             except (UnicodeDecodeError, ValueError):
                 plugin_classes = ['UNKNOWN']

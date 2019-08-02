@@ -88,7 +88,7 @@
                 super().__init__(config, plugin_opts)
                 self.useful = config.get('options', 'useful', fallback=False)
 
-            def scan(
+            async def scan(
                 self, payload: Payload, request_meta: RequestMeta
             ) -> Optional[WorkerResponse]:
                 if self.useful:
@@ -124,7 +124,7 @@
                 super().__init__(config, plugin_opts)
                 self.useful = config.get('options', 'useful', fallback=False)
 
-            def scan(
+            async def scan(
                 self, payload: Payload, request_meta: RequestMeta
             ) -> Optional[WorkerResponse]:
                 p = ExtractedPayload(b'Lorem ipsum')
@@ -161,7 +161,7 @@
                 super().__init__(config, plugin_opts)
                 self.useful = config.get('options', 'useful', fallback=False)
 
-            def scan(
+            async def scan(
                 self, payload: Payload, request_meta: RequestMeta
             ) -> Optional[WorkerResponse]:
                 dispatch_meta = PayloadMeta(dispatch_to='yara')
@@ -185,7 +185,7 @@ from stoq.plugins import BasePlugin
 
 class WorkerPlugin(BasePlugin):
     @abstractmethod
-    def scan(
+    async def scan(
         self, payload: Payload, request_meta: RequestMeta
     ) -> Optional[WorkerResponse]:
         pass

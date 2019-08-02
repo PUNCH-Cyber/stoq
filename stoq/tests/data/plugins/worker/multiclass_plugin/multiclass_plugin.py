@@ -34,7 +34,7 @@ class MultiClassPlugin(WorkerPlugin, DispatcherPlugin):
     WORKERS = ['multiclass_plugin']
     RULE_COUNT = 1
 
-    def scan(
+    async def scan(
         self, payload: Payload, request_meta: RequestMeta
     ) -> Optional[WorkerResponse]:
         if self.RAISE_EXCEPTION:
@@ -46,7 +46,7 @@ class MultiClassPlugin(WorkerPlugin, DispatcherPlugin):
             wr.errors += ['Test error please ignore']
         return wr
 
-    def get_dispatches(
+    async def get_dispatches(
         self, payload: Payload, request_meta: RequestMeta
     ) -> Optional[DispatcherResponse]:
         if self.RAISE_EXCEPTION:

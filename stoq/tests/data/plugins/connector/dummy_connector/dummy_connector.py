@@ -19,5 +19,5 @@ from stoq.plugins import ConnectorPlugin
 
 
 class DummyConnector(ConnectorPlugin):
-    def save(self, response: StoqResponse) -> None:
+    async def save(self, response: StoqResponse) -> None:
         pass

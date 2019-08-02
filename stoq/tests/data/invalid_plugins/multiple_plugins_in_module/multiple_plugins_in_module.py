@@ -21,7 +21,7 @@ from stoq.plugins import WorkerPlugin
 
 
 class MultiplePluginsInModuleNum1(WorkerPlugin):
-    def scan(
+    async def scan(
         self,
         payload: Payload,
         dispatch_rules: Optional[List[Dict]],
@@ -29,8 +29,9 @@ class MultiplePluginsInModuleNum1(WorkerPlugin):
     ) -> Optional[WorkerResponse]:
         pass
 
+
 class MultiplePluginsInModuleNum2(WorkerPlugin):
-    def scan(
+    async def scan(
         self,
         payload: Payload,
         dispatch_rules: Optional[List[Dict]],

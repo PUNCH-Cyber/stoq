@@ -17,7 +17,7 @@
 import uuid
 from copy import deepcopy
 from datetime import datetime
-from typing import Dict, List, Optional, DefaultDict
+from typing import Dict, List, Optional, DefaultDict, Union
 
 import stoq.helpers as helpers
 
@@ -57,7 +57,7 @@ class PayloadMeta:
 class Payload:
     def __init__(
         self,
-        content: bytes,
+        content: Union[bytes, str],
         payload_meta: Optional[PayloadMeta] = None,
         extracted_by: Optional[str] = None,
         extracted_from: Optional[str] = None,
@@ -129,7 +129,7 @@ class PayloadResults:
         size: int,
         payload_meta: PayloadMeta,
         workers: Dict[str, Dict],
-        plugins_run: Dict[str, List[List]],
+        plugins_run: Dict[str, List[str]],
         extracted_from: Optional[str] = None,
         extracted_by: Optional[str] = None,
     ) -> None:

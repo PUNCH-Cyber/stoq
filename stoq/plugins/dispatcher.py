@@ -98,7 +98,7 @@
                 super().__init__(config, plugin_opts)
                 self.msg = config.get('options', 'msg', fallback='Useful content here')
 
-            def get_dispatches(
+            async def get_dispatches(
                 self, payload: Payload, request_meta: RequestMeta
             ) -> Optional[DispatcherResponse]:
                 dr = DispatcherResponse()
@@ -122,7 +122,7 @@ from stoq.plugins import BasePlugin
 
 class DispatcherPlugin(BasePlugin):
     @abstractmethod
-    def get_dispatches(
+    async def get_dispatches(
         self, payload: Payload, request_meta: RequestMeta
     ) -> Optional[DispatcherResponse]:
         pass

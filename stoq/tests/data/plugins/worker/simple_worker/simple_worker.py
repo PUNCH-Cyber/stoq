@@ -31,7 +31,7 @@ class SimpleWorker(WorkerPlugin):
     RETURN_ERRORS = False
     DISPATCH_TO: List[str] = []
 
-    def scan(
+    async def scan(
         self, payload: Payload, request_meta: RequestMeta
     ) -> Optional[WorkerResponse]:
         if self.RAISE_EXCEPTION:

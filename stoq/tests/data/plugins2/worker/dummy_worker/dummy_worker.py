@@ -24,7 +24,7 @@ class DummyWorker(WorkerPlugin):
 
     PLUGINS2_DUP_MARKER = True
 
-    def scan(
+    async def scan(
         self, payload: Payload, request_meta: RequestMeta
     ) -> Optional[WorkerResponse]:
         return None

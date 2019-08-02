@@ -21,7 +21,7 @@ from stoq.plugins import WorkerPlugin
 
 
 class DummyWorker2(WorkerPlugin):
-    def scan(
+    async def scan(
         self, payload: Payload, request_meta: RequestMeta
     ) -> Optional[WorkerResponse]:
         pass

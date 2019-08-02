@@ -75,7 +75,7 @@
                 super().__init__(config, plugin_opts)
                 self.msg = config.get('options', 'msg', fallback='do_more msg')
 
-            def decorate(self, response: StoqResponse) -> Optional[DecoratorResponse]:
+            async def decorate(self, response: StoqResponse) -> Optional[DecoratorResponse]:
                 do_more = False
                 if 'yara' in response.results[0].plugins_run:
                     do_more = True
@@ -96,5 +96,5 @@ from stoq.plugins import BasePlugin
 
 class DecoratorPlugin(BasePlugin):
     @abstractmethod
-    def decorate(self, response: StoqResponse) -> Optional[DecoratorResponse]:
+    async def decorate(self, response: StoqResponse) -> Optional[DecoratorResponse]:
         pass

@@ -14,7 +14,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from queue import Queue
+from asyncio import Queue
 
 from stoq import Payload
 from stoq.plugins import ProviderPlugin
@@ -24,10 +24,12 @@ class SimpleProvider(ProviderPlugin):
     RAISE_EXCEPTION = False
     RETURN_PAYLOAD = True
 
-    def ingest(self, queue: Queue) -> None:
+    async def ingest(self, queue: Queue) -> None:
         if self.RAISE_EXCEPTION:
             raise RuntimeError('Test exception, please ignore')
         if self.RETURN_PAYLOAD:
-            queue.put(Payload(b'Important stuff'))
+            await queue.put(Payload(b'Important stuff'))
         else:
-            queue.put({"simple_archiver": {"task": "This is a task from provider"}})
+            await queue.put(
+                {"simple_archiver": {"task": "This is a task from provider"}}
+            )

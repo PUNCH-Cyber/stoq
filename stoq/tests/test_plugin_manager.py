@@ -16,8 +16,8 @@
 
 
 import logging
-from typing import Optional
 import unittest
+from typing import Optional
 
 
 from stoq import Stoq, StoqException, StoqPluginNotFound
@@ -188,14 +188,14 @@ class ExampleExternalPlugin(WorkerPlugin):
     def __init__(self):
         pass
 
-    def scan(
+    async def scan(
         self, payload: Payload, request_meta: RequestMeta, *args
     ) -> Optional[WorkerResponse]:
         pass
 
 
 class NoParentClassPlugin:
-    def scan(
+    async def scan(
         self, payload: Payload, request_meta: RequestMeta, *args
     ) -> Optional[WorkerResponse]:
         pass

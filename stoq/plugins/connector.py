@@ -74,7 +74,7 @@
                 self.output_file = config.get(
                     'options', 'output_file', fallback='/tmp/stoqresult.txt')
 
-            def save(self, response: StoqResponse) -> None:
+            async def save(self, response: StoqResponse) -> None:
                 with open(f'{self.output_file}', 'w') as result:
                     result.write(response)
 
@@ -91,5 +91,5 @@ from stoq.plugins import BasePlugin
 
 class ConnectorPlugin(BasePlugin):
     @abstractmethod
-    def save(self, response: StoqResponse) -> None:
+    async def save(self, response: StoqResponse) -> None:
         pass

@@ -17,6 +17,7 @@
 import os
 import sys
 import select
+import asyncio
 import argparse
 import unittest
 from pathlib import Path
@@ -266,11 +267,13 @@ Examples:
             max_recursion=args.max_recursion,
             plugin_dir_list=args.plugin_dir,
         )
-        response = stoq.scan(
-            content,
-            PayloadMeta(extra_data={'filename': filename}),
-            request_meta=request_meta,
-            add_start_dispatch=args.start_dispatch,
+        response = asyncio.get_event_loop().run_until_complete(
+            stoq.scan(
+                content,
+                PayloadMeta(extra_data={'filename': filename}),
+                request_meta=request_meta,
+                add_start_dispatch=args.start_dispatch,
+            )
         )
         if not args.connectors:
             print(response)
@@ -290,9 +293,8 @@ Examples:
             max_recursion=args.max_recursion,
             plugin_dir_list=args.plugin_dir,
         )
-        stoq.run(
-            request_meta=request_meta,
-            add_start_dispatch=args.start_dispatch,
+        asyncio.get_event_loop().run_until_complete(
+            stoq.run(request_meta=request_meta, add_start_dispatch=args.start_dispatch)
         )
     elif args.command == 'list':
         stoq = Stoq(base_dir=stoq_home, plugin_dir_list=args.plugin_dir)
