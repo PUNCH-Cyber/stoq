@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased (pre-v3.0)
+
+### Added
+
+- Support for asyncio within the framework and plugins
+- Better type checking support
+
+### Changed
+
+- `Payload.plugins_run` is now a `Dict[str, List[str]]` rather than `Dict[str, List[List[str]]]`
+- `Payload.worker_results` is now a `Dict[str, List[str]]` rather than `List[Dict[str, Dict]]`
+- `PayloadResults.workers` is now a `Dict[str, Dict]` rather than `List[Dict[str, Dict]]`
+
+### Deprecated
+
+- DeepDispatcher plugin class
+
+
 ## [2.0.5] - 2019-06-07
 
 ### Added
