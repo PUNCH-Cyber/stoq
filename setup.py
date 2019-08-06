@@ -28,6 +28,7 @@ setup(
     include_package_data=True,
     packages=['stoq'],
     install_requires=open('requirements.txt').read().split(),
+    tests_require=['asynctest==0.13.0'],
     keywords='malware-analysis, malware-analyzer, malware-detection, framework, automation',
     python_requires='>=3.6',
     test_suite='stoq.tests',

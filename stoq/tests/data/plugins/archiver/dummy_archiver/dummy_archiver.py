@@ -21,10 +21,10 @@ from stoq.data_classes import ArchiverResponse, Payload, RequestMeta
 
 
 class DummyArchiver(ArchiverPlugin):
-    def archive(
+    async def archive(
         self, payload: Payload, request_meta: RequestMeta
     ) -> Optional[ArchiverResponse]:
         return None
 
-    def get(self, task: ArchiverResponse) -> Optional[Payload]:
+    async def get(self, task: ArchiverResponse) -> Optional[Payload]:
         return None

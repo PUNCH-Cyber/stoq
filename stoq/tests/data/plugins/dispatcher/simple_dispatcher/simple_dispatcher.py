@@ -26,7 +26,7 @@ class SimpleDispatcher(DispatcherPlugin):
     SHOULD_ARCHIVE = True
     WORKERS = ['dummy_worker']
 
-    def get_dispatches(
+    async def get_dispatches(
         self, payload: Payload, request_meta: RequestMeta
     ) -> Optional[DispatcherResponse]:
         if self.RAISE_EXCEPTION:

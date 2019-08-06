@@ -18,9 +18,8 @@ import json
 import hashlib
 import datetime
 import traceback
-import collections
 
-from bs4 import UnicodeDammit  # pyre-ignore
+from bs4 import UnicodeDammit  # type: ignore
 from typing import Optional, Dict, DefaultDict, Union, List
 
 
@@ -29,7 +28,7 @@ class JsonComplexEncoder(json.JSONEncoder):
     Extends the default JSON encoder to handle bytes and sets
     """
 
-    def default(self, obj):  # pyre-ignore[15]
+    def default(self, obj):
         if isinstance(obj, bytes):
             return UnicodeDammit(obj).unicode_markup
         elif isinstance(obj, datetime.datetime):

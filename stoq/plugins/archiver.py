@@ -142,7 +142,7 @@
                 self.archive_path = config.get(
                     'options', 'archive_path', fallback='/tmp/archive_payload')
 
-            def archive(
+            async def archive(
                 self, payload: Payload, request_meta: RequestMeta
             ) -> Optional[ArchiverResponse]:
                 with open(f'{self.archive_path}', 'wb) as out:
@@ -150,7 +150,7 @@
                 ar = ArchiverResponse({'path': f'{self.archive_path}'})
                 return ar
 
-            def get(self, task: ArchiverResponse) -> Optional[Payload]:
+            async def get(self, task: ArchiverResponse) -> Optional[Payload]:
                 with open(task.results['path'], 'rb') as infile:
                     return Payload(
                         infile.read(),
@@ -173,7 +173,7 @@ from stoq.plugins import BasePlugin
 
 
 class ArchiverPlugin(BasePlugin):
-    def archive(
+    async def archive(
         self, payload: Payload, request_meta: RequestMeta
     ) -> Optional[ArchiverResponse]:
         """
@@ -188,13 +188,13 @@ class ArchiverPlugin(BasePlugin):
         >>> payload = Payload(b'this is going to be saved')
         >>> s = Stoq()
         >>> archiver = s.load_plugin('filedir')
-        >>> archiver.archive(payload)
+        >>> await archiver.archive(payload)
         ... {'path': '/tmp/bad.exe'}
 
         """
         pass
 
-    def get(self, task: ArchiverResponse) -> Optional[Payload]:
+    async def get(self, task: ArchiverResponse) -> Optional[Payload]:
         """
         Retrieve payload for processing
 
@@ -207,7 +207,7 @@ class ArchiverPlugin(BasePlugin):
         >>> s = Stoq()
         >>> archiver = s.load_plugin('filedir')
         >>> task = ArchiverResponse(results={'path': '/tmp/bad.exe'})
-        >>> payload = archiver.get(task)
+        >>> payload = await archiver.get(task)
 
         """
         pass

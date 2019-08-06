@@ -21,7 +21,7 @@ from stoq.plugins import DispatcherPlugin
 
 
 class DummyDispatcher(DispatcherPlugin):
-    def get_dispatches(
+    async def get_dispatches(
         self, payload: Payload, request_meta: RequestMeta
     ) -> Optional[DispatcherResponse]:
         return None

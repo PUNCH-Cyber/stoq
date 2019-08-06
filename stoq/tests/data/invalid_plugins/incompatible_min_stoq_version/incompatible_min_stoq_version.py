@@ -21,7 +21,7 @@ from stoq.plugins import WorkerPlugin
 
 
 class IncompatibleMinStoqVersion(WorkerPlugin):
-    def scan(
+    async def scan(
         self,
         payload: Payload,
         dispatch_rules: Optional[List[Dict]],
