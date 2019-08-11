@@ -116,13 +116,13 @@
 from abc import abstractmethod
 from typing import Optional
 
-from stoq.data_classes import Payload, DispatcherResponse, RequestMeta
+from stoq.data_classes import Payload, DispatcherResponse, Request
 from stoq.plugins import BasePlugin
 
 
 class DispatcherPlugin(BasePlugin):
     @abstractmethod
     async def get_dispatches(
-        self, payload: Payload, request_meta: RequestMeta
+        self, payload: Payload, request: Request
     ) -> Optional[DispatcherResponse]:
         pass

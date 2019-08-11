@@ -20,7 +20,7 @@ from stoq.data_classes import (
     ExtractedPayload,
     Payload,
     PayloadMeta,
-    RequestMeta,
+    Request,
     WorkerResponse,
 )
 from stoq.plugins import WorkerPlugin
@@ -32,7 +32,7 @@ class SimpleWorker(WorkerPlugin):
     DISPATCH_TO: List[str] = []
 
     async def scan(
-        self, payload: Payload, request_meta: RequestMeta
+        self, payload: Payload, request: Request
     ) -> Optional[WorkerResponse]:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')

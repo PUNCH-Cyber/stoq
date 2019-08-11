@@ -21,6 +21,7 @@ from .data_classes import (
     Payload,
     PayloadMeta,
     PayloadResults,
+    Request,
     RequestMeta,
     StoqResponse,
     WorkerResponse,
@@ -29,4 +30,4 @@ from .data_classes import (
 )
 from .exceptions import StoqException, StoqPluginException, StoqPluginNotFound
 
-__version__ = '3.0.0a'
+__version__ = '3.0.0a1'

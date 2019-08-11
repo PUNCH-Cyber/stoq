@@ -16,7 +16,7 @@
 
 from typing import Optional
 
-from stoq.data_classes import Payload, DispatcherResponse, RequestMeta
+from stoq.data_classes import Payload, DispatcherResponse, Request
 from stoq.plugins import DispatcherPlugin
 
 
@@ -27,7 +27,7 @@ class SimpleDispatcher(DispatcherPlugin):
     WORKERS = ['dummy_worker']
 
     async def get_dispatches(
-        self, payload: Payload, request_meta: RequestMeta
+        self, payload: Payload, request: Request
     ) -> Optional[DispatcherResponse]:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')

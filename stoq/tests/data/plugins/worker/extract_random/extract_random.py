@@ -17,12 +17,12 @@
 import os
 from typing import Optional
 
-from stoq.data_classes import ExtractedPayload, Payload, RequestMeta, WorkerResponse
+from stoq.data_classes import ExtractedPayload, Payload, Request, WorkerResponse
 from stoq.plugins import WorkerPlugin
 
 
 class ExtractRandom(WorkerPlugin):
     async def scan(
-        self, payload: Payload, request_meta: RequestMeta
+        self, payload: Payload, request: Request
     ) -> Optional[WorkerResponse]:
         return WorkerResponse(extracted=[ExtractedPayload(os.urandom(50))])
