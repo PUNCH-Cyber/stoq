@@ -39,7 +39,7 @@ import stoq.tests.utils as utils
 class TestCore(asynctest.TestCase):
     def setUp(self) -> None:
         logging.disable(logging.CRITICAL)
-        self.generic_content = b'The quick brown fox'
+        self.generic_content = b'The quick brown fox'  # type: ignore
 
     def tearDown(self) -> None:
         logging.disable(logging.NOTSET)

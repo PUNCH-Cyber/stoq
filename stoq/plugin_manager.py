@@ -156,11 +156,14 @@ class StoqPluginManager:
         # 2) plugin configuration in `stoq.cfg`
         # 3) `plugin_name.stoq`
         if isinstance(
-            self._stoq_config, configparser.ConfigParser
+            self._stoq_config,
+            configparser.ConfigParser
+            # type: ignore
         ) and self._stoq_config.has_section(plugin_name):
             if not plugin_config.has_section('options'):
                 plugin_config.add_section('options')
-            for opt in self._stoq_config.options(plugin_name):
+            for opt in self._stoq_config.options(plugin_name):  # type: ignore
+                # type: ignore
                 plugin_config['options'][opt] = self._stoq_config.get(plugin_name, opt)
         if self._plugin_opts.get(plugin_name):
             plugin_config.read_dict(

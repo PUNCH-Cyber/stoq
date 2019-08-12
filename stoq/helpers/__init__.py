@@ -30,7 +30,7 @@ class JsonComplexEncoder(json.JSONEncoder):
 
     def default(self, o) -> Any:
         if isinstance(o, bytes):
-            return UnicodeDammit(o).unicode_markup
+            return UnicodeDammit(o).unicode_markup  # type: ignore
         elif isinstance(o, datetime.datetime):
             return str(o)
         elif isinstance(o, set):
