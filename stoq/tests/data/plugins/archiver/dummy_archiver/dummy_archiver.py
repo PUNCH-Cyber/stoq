@@ -17,12 +17,12 @@
 from typing import Optional
 
 from stoq.plugins import ArchiverPlugin
-from stoq.data_classes import ArchiverResponse, Payload, RequestMeta
+from stoq.data_classes import ArchiverResponse, Payload, Request
 
 
 class DummyArchiver(ArchiverPlugin):
     async def archive(
-        self, payload: Payload, request_meta: RequestMeta
+        self, payload: Payload, request: Request
     ) -> Optional[ArchiverResponse]:
         return None
 

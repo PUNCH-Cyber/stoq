@@ -16,7 +16,7 @@
 
 from typing import Optional
 
-from stoq.data_classes import ArchiverResponse, Payload, RequestMeta, PayloadMeta
+from stoq.data_classes import ArchiverResponse, Payload, Request, PayloadMeta, Error
 from stoq.plugins import ArchiverPlugin
 
 
@@ -26,13 +26,19 @@ class SimpleArchiver(ArchiverPlugin):
     PAYLOAD = b''
 
     async def archive(
-        self, payload: Payload, request_meta: RequestMeta
+        self, payload: Payload, request: Request
     ) -> Optional[ArchiverResponse]:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')
         ar = ArchiverResponse({'file_save_id': 12345})
         if self.RETURN_ERRORS:
-            ar.errors += ['Test error please ignore']
+            ar.errors.append(
+                Error(
+                    plugin_name='simple_archiver',
+                    error='Test error please ignore',
+                    payload_id=payload.payload_id,
+                )
+            )
         return ar
 
     async def get(self, task: ArchiverResponse) -> Optional[Payload]:

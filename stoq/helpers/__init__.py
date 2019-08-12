@@ -20,7 +20,7 @@ import datetime
 import traceback
 
 from bs4 import UnicodeDammit  # type: ignore
-from typing import Optional, Dict, DefaultDict, Union, List
+from typing import Any, Optional, Dict, DefaultDict, Union, List
 
 
 class JsonComplexEncoder(json.JSONEncoder):
@@ -28,18 +28,18 @@ class JsonComplexEncoder(json.JSONEncoder):
     Extends the default JSON encoder to handle bytes and sets
     """
 
-    def default(self, obj):
-        if isinstance(obj, bytes):
-            return UnicodeDammit(obj).unicode_markup
-        elif isinstance(obj, datetime.datetime):
-            return str(obj)
-        elif isinstance(obj, set):
-            return list(obj)
+    def default(self, o) -> Any:
+        if isinstance(o, bytes):
+            return UnicodeDammit(o).unicode_markup
+        elif isinstance(o, datetime.datetime):
+            return str(o)
+        elif isinstance(o, set):
+            return list(o)
         try:
-            return vars(obj)
+            return vars(o)
         except Exception:
             pass
-        return json.JSONEncoder.default(self, obj)
+        return json.JSONEncoder.default(self, o)
 
 
 def dumps(data, indent=4, compactly=False):

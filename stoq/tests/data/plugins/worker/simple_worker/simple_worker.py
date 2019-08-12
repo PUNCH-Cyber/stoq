@@ -17,6 +17,7 @@
 from typing import List, Optional
 
 from stoq.data_classes import (
+    Error,
     ExtractedPayload,
     Payload,
     PayloadMeta,
@@ -43,5 +44,11 @@ class SimpleWorker(WorkerPlugin):
             p = ExtractedPayload(b'Lorem ipsum')
         wr = WorkerResponse({'valuable_insight': 'wow'}, extracted=[p])
         if self.RETURN_ERRORS:
-            wr.errors += ['Test error please ignore']
+            wr.errors.append(
+                Error(
+                    plugin_name='simple_worker',
+                    error='Test error please ignore',
+                    payload_id=payload.payload_id,
+                )
+            )
         return wr

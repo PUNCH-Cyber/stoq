@@ -21,7 +21,7 @@ from typing import Optional
 
 
 from stoq import Stoq, StoqException, StoqPluginNotFound
-from stoq.data_classes import Payload, WorkerResponse, RequestMeta
+from stoq.data_classes import Payload, WorkerResponse, Request
 from stoq.plugin_manager import StoqPluginManager
 from stoq.plugins import WorkerPlugin
 import stoq.tests.utils as utils
@@ -189,13 +189,13 @@ class ExampleExternalPlugin(WorkerPlugin):
         pass
 
     async def scan(
-        self, payload: Payload, request_meta: RequestMeta, *args
+        self, payload: Payload, request: Request, *args
     ) -> Optional[WorkerResponse]:
         pass
 
 
 class NoParentClassPlugin:
     async def scan(
-        self, payload: Payload, request_meta: RequestMeta, *args
+        self, payload: Payload, request: Request, *args
     ) -> Optional[WorkerResponse]:
         pass
