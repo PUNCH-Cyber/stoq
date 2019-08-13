@@ -206,10 +206,12 @@ class Request:
         payloads: Optional[List[Payload]] = None,
         request_meta: Optional[RequestMeta] = None,
         results: Optional[List[PayloadResults]] = None,
+        errors: Optional[List[Error]] = None,
     ):
         self.payloads = payloads or []
         self.request_meta = request_meta or RequestMeta()
         self.results = results or []
+        self.errors = errors or []
 
     def __str__(self) -> str:
         return helpers.dumps(self)
@@ -222,7 +224,6 @@ class StoqResponse:
     def __init__(
         self,
         request: Request,
-        errors: List[Error],
         time: Optional[str] = None,
         decorators: Optional[Dict[str, Dict]] = None,
         scan_id: Optional[str] = None,
@@ -233,14 +234,13 @@ class StoqResponse:
 
         :param results: ``PayloadResults`` object of scanned payload
         :param request_meta: ``RequetMeta`` object pertaining to original scan request
-        :param errors: Errors that may have occurred during lifecyle of the payload
         :param time: ISO Formatted timestamp of scan
         :param decorators: Decorator plugin results
 
         """
         self.results = request.results
         self.request_meta = request.request_meta
-        self.errors = errors
+        self.errors = request.errors
         self.time: str = datetime.now().isoformat() if time is None else time
         self.decorators = {} if decorators is None else decorators
         self.scan_id = str(uuid.uuid4()) if scan_id is None else scan_id

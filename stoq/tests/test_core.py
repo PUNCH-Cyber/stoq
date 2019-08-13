@@ -606,7 +606,7 @@ class TestCore(asynctest.TestCase):
         for result in results:
             request.results.append(result)
 
-        initial_response = StoqResponse(request, errors={})
+        initial_response = StoqResponse(request)
         s = Stoq(base_dir=utils.get_data_dir(), decorators=["simple_decorator"])
         all_subresponses = [
             r async for r in s.reconstruct_all_subresponses(initial_response)
