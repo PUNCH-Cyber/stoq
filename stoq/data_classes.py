@@ -41,6 +41,7 @@ class PayloadMeta:
     def __init__(
         self,
         should_archive: bool = True,
+        should_scan: bool = True,
         extra_data: Optional[Dict] = None,
         dispatch_to: Optional[List[str]] = None,
     ) -> None:
@@ -49,6 +50,7 @@ class PayloadMeta:
         Object to store metadata pertaining to a payload
 
         :param should_archive: Archive payload if destination archiver is defined
+        :param should_scan: Define whether the payload should be scanned by worker plugin
         :param extra_data: Additional metadata that should be added to the results
         :param dispatch_to: Force payload to be dispatched to specified plugins
 
@@ -59,6 +61,7 @@ class PayloadMeta:
         """
 
         self.should_archive = should_archive
+        self.should_scan = should_scan
         self.extra_data = {} if extra_data is None else extra_data
         self.dispatch_to = [] if dispatch_to is None else dispatch_to
 
@@ -99,7 +102,6 @@ class Payload:
         self.extracted_by = extracted_by
         self.extracted_from = extracted_from
         self.dispatch_meta: Dict[str, Dict] = {}
-        self.plugins_run: Dict[str, List[str]] = {'workers': [], 'archivers': []}
         self.payload_id = str(uuid.uuid4()) if payload_id is None else payload_id
 
     def __repr__(self):
@@ -142,7 +144,7 @@ class PayloadResults:
         payload_id: str,
         size: int,
         payload_meta: PayloadMeta,
-        plugins_run: Dict[str, List[str]],
+        plugins_run: Optional[Dict[str, List[str]]] = None,
         extracted_from: Optional[str] = None,
         extracted_by: Optional[str] = None,
         workers: Optional[Dict] = None,
@@ -155,22 +157,19 @@ class PayloadResults:
         :param size: Size of raw payload
         :param payload_meta: `PayloadMeta` object for payload
         :param plugins_run: Plugins used to scan payload
-        :param extracted_by: Name of plugin that extracted the payload
         :param extracted_from: Unique payload ID the payload was extracted from
+        :param extracted_by: Name of plugin that extracted the payload
+        :param workers: Results from worker plugins
 
         """
         self.payload_id = payload_id
         self.size = size
         self.payload_meta = payload_meta
-        self.plugins_run = plugins_run
-        self.archivers: Dict[str, Dict] = {}
-        self.extracted_from = (
-            extracted_from
-        )  # payload_id of parent payload, if applicable
-        self.extracted_by = (
-            extracted_by
-        )  # plugin name that extracted this payload, if applicable
+        self.plugins_run = plugins_run or {'workers': [], 'archivers': []}
+        self.extracted_from = extracted_from
+        self.extracted_by = extracted_by
         self.workers = workers or {}
+        self.archivers: Dict[str, Dict] = {}
 
     @classmethod
     def from_payload(cls, payload: Payload) -> 'PayloadResults':
@@ -185,12 +184,11 @@ class PayloadResults:
 
         """
         return cls(
-            payload.payload_id,
-            payload.size,
-            payload.payload_meta,
-            payload.plugins_run,
-            payload.extracted_from,
-            payload.extracted_by,
+            payload_id=payload.payload_id,
+            size=payload.size,
+            payload_meta=payload.payload_meta,
+            extracted_from=payload.extracted_from,
+            extracted_by=payload.extracted_by,
         )
 
     def __str__(self) -> str:

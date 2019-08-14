@@ -103,6 +103,18 @@ class TestCore(asynctest.TestCase):
             else:
                 raise Exception('required plugin not found in results')
 
+    async def test_worker_should_scan(self):
+        s = Stoq(base_dir=utils.get_data_dir())
+        simple_worker = s.load_plugin('simple_worker')
+        simple_worker.SHOULD_SCAN = False
+        simple_worker.DISPATCH_TO = ['dummy_worker']
+        response = await s.scan(
+            self.generic_content, add_start_dispatch=['simple_worker']
+        )
+        self.assertIn('simple_worker', response.results[0].plugins_run['workers'][0])
+        self.assertEqual(2, len(response.results))
+        self.assertNotIn('dummy_worker', response.results[1].plugins_run['workers'])
+
     async def test_always_dispatch(self):
         s = Stoq(base_dir=utils.get_data_dir(), always_dispatch=['simple_worker'])
         response = await s.scan(self.generic_content)
