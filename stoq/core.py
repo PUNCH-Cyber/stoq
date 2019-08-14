@@ -347,6 +347,7 @@ from stoq.plugins import (
     ArchiverPlugin,
     ConnectorPlugin,
     DecoratorPlugin,
+    WorkerPlugin,
 )
 
 # Created to enable `None' as a valid paramater
@@ -628,37 +629,57 @@ class Stoq(StoqPluginManager):
             add_dispatch, self.always_dispatch
         )
 
-        dispatch_tasks: List = []
-        for dispatcher_name, dispatcher in self._loaded_dispatcher_plugins.items():
-            dispatch_tasks.append(self._get_dispatches(dispatcher, payload, request))
-        dispatch_results = await asyncio.gather(*dispatch_tasks)
-
-        for dispatcher_name, dispatched_workers in dispatch_results:
-            for dispatched_worker in dispatched_workers:
-                dispatches.add(dispatched_worker)
-
-        worker_tasks: List[Awaitable] = [
-            self._worker_start(w, payload, request) for w in dispatches
-        ]
-        worker_results = await asyncio.gather(*worker_tasks)  # type: ignore
         payload_results = PayloadResults.from_payload(payload)
 
-        for worker_name, worker_response in worker_results:
-            if worker_response is None:
-                continue
-            elif worker_response.errors:
-                request.errors.extend(worker_response.errors)
+        if payload.payload_meta.should_scan is True:
+            dispatch_tasks: List = []
+            worker_tasks: List = []
+            for dispatcher_name, dispatcher in self._loaded_dispatcher_plugins.items():
+                dispatch_tasks.append(
+                    self._get_dispatches(dispatcher, payload, request)
+                )
+            dispatch_results = await asyncio.gather(*dispatch_tasks)
 
-            if worker_response.results is not None:
-                payload_results.workers[worker_name] = worker_response.results
-            extracted.extend(
-                [
-                    Payload(
-                        ex.content, ex.payload_meta, worker_name, payload.payload_id
+            for dispatcher_name, dispatched_workers in dispatch_results:
+                for dispatched_worker in dispatched_workers:
+                    dispatches.add(dispatched_worker)
+
+            for worker in dispatches:
+                try:
+                    worker_plugin = self.load_plugin(worker)
+                except Exception as e:
+                    msg = 'worker:failed to load'
+                    self.log.exception(msg)
+                    request.errors.append(
+                        Error(
+                            payload_id=payload.payload_id,
+                            plugin_name=worker,
+                            error=helpers.format_exc(e, msg=msg),
+                        )
                     )
-                    for ex in worker_response.extracted
-                ]
-            )
+                    continue
+                worker_tasks.append(
+                    self._worker_start(worker_plugin, payload, request)  # type: ignore
+                )
+            worker_results = await asyncio.gather(*worker_tasks)  # type: ignore
+
+            for worker_name, worker_response in worker_results:
+                payload_results.plugins_run['workers'].append(worker_name)
+                if worker_response is None:
+                    continue
+                elif worker_response.errors:
+                    request.errors.extend(worker_response.errors)
+
+                if worker_response.results is not None:
+                    payload_results.workers[worker_name] = worker_response.results
+                extracted.extend(
+                    [
+                        Payload(
+                            ex.content, ex.payload_meta, worker_name, payload.payload_id
+                        )
+                        for ex in worker_response.extracted
+                    ]
+                )
 
         if (
             request.request_meta.archive_payloads
@@ -670,12 +691,14 @@ class Stoq(StoqPluginManager):
             archive_results = await asyncio.gather(*archive_tasks)
 
             for archiver_name, archiver_response in archive_results:
+                payload_results.plugins_run['archivers'].append(archiver_name)
                 if archiver_response is None:
                     continue
                 elif archiver_response.errors:
                     request.errors.extend(archiver_response.errors)
                 if archiver_response.results is not None:
                     payload_results.archivers[archiver_name] = archiver_response.results
+
         request.results.append(payload_results)
         return extracted
 
@@ -684,7 +707,6 @@ class Stoq(StoqPluginManager):
     ) -> Tuple[str, Union[ArchiverResponse, None]]:
         archiver_name = archiver.config.get('Core', 'Name')
         archiver_response: Union[ArchiverResponse, None] = None
-        payload.plugins_run['archivers'].append(archiver_name)
         try:
             archiver_response = await archiver.archive(payload, request)
         except Exception as e:
@@ -700,24 +722,11 @@ class Stoq(StoqPluginManager):
         return (archiver_name, archiver_response)
 
     async def _worker_start(
-        self, dispatched_worker: str, payload: Payload, request: Request
+        self, plugin: WorkerPlugin, payload: Payload, request: Request
     ) -> Tuple[str, Union[WorkerResponse, None]]:
+        worker_name = plugin.config.get('Core', 'Name')
         extracted: List[Payload] = []
         worker_response: Union[None, WorkerResponse] = None
-        try:
-            plugin = self.load_plugin(dispatched_worker)
-        except Exception as e:
-            msg = 'worker:failed to load'
-            self.log.exception(msg)
-            request.errors.append(
-                Error(
-                    payload_id=payload.payload_id,
-                    plugin_name=dispatched_worker,
-                    error=helpers.format_exc(e, msg=msg),
-                )
-            )
-            return (dispatched_worker, worker_response)
-        payload.plugins_run['workers'].append(dispatched_worker)
         try:
             worker_response = await plugin.scan(payload, request)  # type: ignore
         except Exception as e:
@@ -726,11 +735,11 @@ class Stoq(StoqPluginManager):
             request.errors.append(
                 Error(
                     payload_id=payload.payload_id,
-                    plugin_name=dispatched_worker,
+                    plugin_name=worker_name,
                     error=helpers.format_exc(e, msg=msg),
                 )
             )
-        return (dispatched_worker, worker_response)
+        return (worker_name, worker_response)
 
     def _init_logger(
         self,
