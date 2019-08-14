@@ -16,6 +16,7 @@
 
 from .core import Stoq
 from .data_classes import (
+    Error,
     ArchiverResponse,
     ExtractedPayload,
     Payload,

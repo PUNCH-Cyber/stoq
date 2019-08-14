@@ -22,6 +22,21 @@ from typing import Dict, List, Optional, DefaultDict, Union
 import stoq.helpers as helpers
 
 
+class Error:
+    def __init__(
+        self, plugin_name: str, error: str, payload_id: Optional[str] = None
+    ) -> None:
+        self.plugin_name = plugin_name
+        self.error = error
+        self.payload_id = payload_id
+
+    def __str__(self) -> str:
+        return helpers.dumps(self)
+
+    def __repr__(self):
+        return repr(self.__dict__)
+
+
 class PayloadMeta:
     def __init__(
         self,
@@ -191,10 +206,12 @@ class Request:
         payloads: Optional[List[Payload]] = None,
         request_meta: Optional[RequestMeta] = None,
         results: Optional[List[PayloadResults]] = None,
+        errors: Optional[List[Error]] = None,
     ):
         self.payloads = payloads or []
         self.request_meta = request_meta or RequestMeta()
         self.results = results or []
+        self.errors = errors or []
 
     def __str__(self) -> str:
         return helpers.dumps(self)
@@ -207,7 +224,6 @@ class StoqResponse:
     def __init__(
         self,
         request: Request,
-        errors: DefaultDict[str, List[str]],
         time: Optional[str] = None,
         decorators: Optional[Dict[str, Dict]] = None,
         scan_id: Optional[str] = None,
@@ -218,14 +234,13 @@ class StoqResponse:
 
         :param results: ``PayloadResults`` object of scanned payload
         :param request_meta: ``RequetMeta`` object pertaining to original scan request
-        :param errors: Errors that may have occurred during lifecyle of the payload
         :param time: ISO Formatted timestamp of scan
         :param decorators: Decorator plugin results
 
         """
         self.results = request.results
         self.request_meta = request.request_meta
-        self.errors = errors
+        self.errors = request.errors
         self.time: str = datetime.now().isoformat() if time is None else time
         self.decorators = {} if decorators is None else decorators
         self.scan_id = str(uuid.uuid4()) if scan_id is None else scan_id
@@ -279,7 +294,7 @@ class WorkerResponse:
         self,
         results: Optional[Dict] = None,
         extracted: Optional[List[ExtractedPayload]] = None,
-        errors: Optional[List[str]] = None,
+        errors: Optional[List[Error]] = None,
     ) -> None:
         """
 
@@ -296,7 +311,7 @@ class WorkerResponse:
         """
         self.results = results
         self.extracted = [] if extracted is None else extracted
-        self.errors = [] if errors is None else errors
+        self.errors = errors or []
 
     def __str__(self) -> str:
         return helpers.dumps(self)
@@ -307,7 +322,7 @@ class WorkerResponse:
 
 class ArchiverResponse:
     def __init__(
-        self, results: Optional[Dict] = None, errors: Optional[List[str]] = None
+        self, results: Optional[Dict] = None, errors: Optional[List[Error]] = None
     ) -> None:
         """
 
@@ -321,7 +336,7 @@ class ArchiverResponse:
 
         """
         self.results = results
-        self.errors = [] if errors is None else errors
+        self.errors = errors or []
 
     def __str__(self) -> str:
         return helpers.dumps(self)
@@ -335,7 +350,7 @@ class DispatcherResponse:
         self,
         plugin_names: Optional[List[str]] = None,
         meta: Optional[Dict] = None,
-        errors: Optional[List[str]] = None,
+        errors: Optional[List[Error]] = None,
     ) -> None:
         """
 
@@ -352,7 +367,7 @@ class DispatcherResponse:
         """
         self.plugin_names = [] if plugin_names is None else plugin_names
         self.meta = {} if meta is None else meta
-        self.errors = [] if errors is None else errors
+        self.errors = errors or []
 
     def __str__(self) -> str:
         return helpers.dumps(self)
@@ -363,7 +378,7 @@ class DispatcherResponse:
 
 class DecoratorResponse:
     def __init__(
-        self, results: Optional[Dict] = None, errors: Optional[List[str]] = None
+        self, results: Optional[Dict] = None, errors: Optional[List[Error]] = None
     ) -> None:
         """
          Object containing response from decorator plugins
@@ -377,7 +392,7 @@ class DecoratorResponse:
 
         """
         self.results = results
-        self.errors = [] if errors is None else errors
+        self.errors = errors or []
 
     def __str__(self) -> str:
         return helpers.dumps(self)

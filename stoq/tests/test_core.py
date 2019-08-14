@@ -39,7 +39,7 @@ import stoq.tests.utils as utils
 class TestCore(asynctest.TestCase):
     def setUp(self) -> None:
         logging.disable(logging.CRITICAL)
-        self.generic_content = b'The quick brown fox'  # pyre-ignore[16]
+        self.generic_content = b'The quick brown fox'  # type: ignore
 
     def tearDown(self) -> None:
         logging.disable(logging.NOTSET)
@@ -307,7 +307,7 @@ class TestCore(asynctest.TestCase):
         )
         self.assertIn('simple_worker', response.results[0].plugins_run['workers'])
         self.assertEqual(len(response.errors), 1)
-        self.assertIn('Test exception', response.errors['simple_worker'][0])
+        self.assertIn('Test exception', response.errors[0].error)
 
     async def test_worker_errors(self):
         s = Stoq(base_dir=utils.get_data_dir())
@@ -319,7 +319,7 @@ class TestCore(asynctest.TestCase):
         self.assertIn('simple_worker', response.results[0].plugins_run['workers'][0])
         self.assertIn('simple_worker', response.results[0].workers)
         self.assertEqual(len(response.errors), 1)
-        self.assertIn('Test error', response.errors['simple_worker'][0])
+        self.assertIn('Test error', response.errors[0].error)
 
     async def test_source_archiver_exception(self):
         s = Stoq(base_dir=utils.get_data_dir(), source_archivers=['simple_archiver'])
@@ -337,7 +337,7 @@ class TestCore(asynctest.TestCase):
         response = await s.scan(self.generic_content)
         self.assertIn('simple_archiver', response.results[0].plugins_run['archivers'])
         self.assertEqual(len(response.errors), 1)
-        self.assertIn('Test exception', response.errors['simple_archiver'][0])
+        self.assertIn('Test exception', response.errors[0].error)
 
     async def test_dest_archiver_errors(self):
         s = Stoq(base_dir=utils.get_data_dir(), dest_archivers=['simple_archiver'])
@@ -347,7 +347,7 @@ class TestCore(asynctest.TestCase):
         self.assertIn('simple_archiver', response.results[0].plugins_run['archivers'])
         self.assertIn('simple_archiver', response.results[0].archivers)
         self.assertEqual(len(response.errors), 1)
-        self.assertIn('Test error', response.errors['simple_archiver'][0])
+        self.assertIn('Test error', response.errors[0].error)
 
     async def test_max_recursion(self):
         max_rec_depth = 4  # defined in stoq.cfg
@@ -400,7 +400,7 @@ class TestCore(asynctest.TestCase):
         self.assertIn('simple_decorator', response.decorators)
         self.assertIn('simple_decoration', response.decorators['simple_decorator'])
         self.assertEqual(len(response.errors), 1)
-        self.assertIn('Test error', response.errors['simple_decorator'][0])
+        self.assertIn('Test error', response.errors[0].error)
 
     async def test_decorator_exception(self):
         s = Stoq(base_dir=utils.get_data_dir(), decorators=['simple_decorator'])
@@ -408,7 +408,7 @@ class TestCore(asynctest.TestCase):
         simple_decorator.RAISE_EXCEPTION = True
         response = await s.scan(self.generic_content)
         self.assertEqual(len(response.errors), 1)
-        self.assertIn('Test exception', response.errors['simple_decorator'][0])
+        self.assertIn('Test exception', response.errors[0].error)
 
     async def test_multiclass_plugin(self):
         s = Stoq(base_dir=utils.get_data_dir(), dispatchers=['multiclass_plugin'])
@@ -606,7 +606,7 @@ class TestCore(asynctest.TestCase):
         for result in results:
             request.results.append(result)
 
-        initial_response = StoqResponse(request, errors={})
+        initial_response = StoqResponse(request)
         s = Stoq(base_dir=utils.get_data_dir(), decorators=["simple_decorator"])
         all_subresponses = [
             r async for r in s.reconstruct_all_subresponses(initial_response)
