@@ -241,10 +241,10 @@
     ^^^^^^^^^^^^^^^^^^^^^^^
 
     If a ``Payload`` object has already been instatiated, as detailed above, the
-    ``scan_payload`` function may be called:
+    ``scan_request`` function may be called:
 
         >>> start_dispatch = ['yara']
-        >>> results = await s.scan_payload(payload, add_start_dispatch=start_dispatch)
+        >>> results = await s.scan_request(payload, add_start_dispatch=start_dispatch)
 
 
     Save Results
@@ -264,7 +264,7 @@
     In some cases it may be required to split results out individually. For example, when
     saving results to different indexes depending on plugin name, such as with ElasticSearch or Splunk.
 
-        >>> results = await s.scan_payload(payload)
+        >>> results = await s.scan_request(payload)
         >>> results.split()
 
     Reconstructing Subresponse Results
@@ -329,6 +329,7 @@ from stoq.data_classes import (
     Payload,
     PayloadMeta,
     PayloadResults,
+    Request,
     RequestMeta,
     StoqResponse,
     ArchiverResponse,
@@ -471,7 +472,7 @@ class Stoq(StoqPluginManager):
             for ad in self.always_dispatch:
                 self.load_plugin(ad)
 
-    @ratelimited()
+    #  @ratelimited()
     async def scan(
         self,
         content: bytes,
@@ -482,7 +483,7 @@ class Stoq(StoqPluginManager):
     ) -> StoqResponse:
         """
 
-        Wrapper for `scan_payload` that creates a `Payload` object from bytes
+        Wrapper for `scan_request` that creates a `Payload` object from bytes
 
         :param content: Raw bytes to be scanned
         :param payload_meta: Metadata pertaining to originating source
@@ -494,42 +495,39 @@ class Stoq(StoqPluginManager):
         :rtype: StoqResponse
 
         """
-        payload_meta = PayloadMeta() if payload_meta is None else payload_meta
+        payload_meta = payload_meta or PayloadMeta()
         payload = Payload(content, payload_meta)
-        return await self.scan_payload(payload, request_meta, add_start_dispatch)
+        request_meta = request_meta or RequestMeta()
+        request = Request(payloads=[payload], request_meta=request_meta)
+        return await self.scan_request(request, add_start_dispatch)
 
-    async def scan_payload(
-        self,
-        payload: Payload,
-        request_meta: Optional[RequestMeta] = None,
-        add_start_dispatch: Optional[List[str]] = None,
+    async def scan_request(
+        self, request: Request, add_start_dispatch: Optional[List[str]] = None
     ) -> StoqResponse:
         """
 
         Scan an individual payload
 
-        :param payload: ``Payload`` object of data to be scanned
-        :param request_meta: Metadata pertaining to the originating request
+        :param request: ``Request`` object of payload(s) to be scanned
         :param add_start_dispatch: Force first round of scanning to use specified plugins
 
         :return: Complete scan results
         :rtype: StoqResponse
 
         """
-        request_meta = RequestMeta() if request_meta is None else request_meta
-        add_start_dispatch = [] if add_start_dispatch is None else add_start_dispatch
-        scan_results: List = []
+        add_start_dispatch = add_start_dispatch or []
         errors: DefaultDict[str, List[str]] = defaultdict(list)
-        scan_queue = [(payload, add_start_dispatch)]
-        hashes_seen: Set[str] = set(helpers.get_sha256(payload.content))
+        scan_queue = [(payload, add_start_dispatch) for payload in request.payloads]
+        hashes_seen: Set[str] = set(
+            [helpers.get_sha256(payload.content) for payload in request.payloads]
+        )
 
         for _recursion_level in range(self.max_recursion + 1):
             next_scan_queue: List[Tuple[Payload, List[str]]] = []
             for payload, add_dispatch in scan_queue:
-                payload_results, extracted, p_errors = await self._single_scan(
-                    payload, add_dispatch, request_meta
+                extracted, p_errors = await self._single_scan(
+                    payload, add_dispatch, request
                 )
-                scan_results.append(payload_results)
                 # TODO: Add option for no-dedup
                 for ex in extracted:
                     ex_hash = helpers.get_sha256(ex.content)
@@ -539,9 +537,7 @@ class Stoq(StoqPluginManager):
                 errors = helpers.merge_dicts(errors, p_errors)
             scan_queue = next_scan_queue
 
-        response = StoqResponse(
-            results=scan_results, request_meta=request_meta, errors=errors
-        )
+        response = StoqResponse(request=request, errors=errors)
 
         decorator_tasks = []
         for plugin_name, decorator in self._loaded_decorator_plugins.items():
@@ -607,11 +603,8 @@ class Stoq(StoqPluginManager):
                 # If it is a task, load the defined archiver plugin to load the
                 # `Payload`, otherwise, simply continue on with the scanning.
                 if isinstance(task, Payload):
-                    await self.scan_payload(
-                        task,
-                        request_meta=request_meta,
-                        add_start_dispatch=add_start_dispatch,
-                    )
+                    request = Request([task], request_meta)
+                    await self.scan_request(request, add_start_dispatch)
                 else:
                     for source_archiver, task_meta in task.items():
                         try:
@@ -620,11 +613,8 @@ class Stoq(StoqPluginManager):
                                 source_archiver
                             ].get(ar)
                             if payload:
-                                await self.scan_payload(
-                                    payload,
-                                    request_meta=request_meta,
-                                    add_start_dispatch=add_start_dispatch,
-                                )
+                                request = Request([payload], request_meta)
+                                await self.scan_request(request, add_start_dispatch)
                         except Exception as e:
                             self.log.warn(
                                 f'"{task_meta}" failed with archiver "{source_archiver}": {str(e)}'
@@ -634,9 +624,9 @@ class Stoq(StoqPluginManager):
                 pass
 
     async def _single_scan(
-        self, payload: Payload, add_dispatch: List[str], request_meta: RequestMeta
-    ) -> Tuple[PayloadResults, List[Payload], DefaultDict[str, List[str]]]:
-
+        self, payload: Payload, add_dispatch: List[str], request: Request
+    ) -> Tuple[List[Payload], DefaultDict[str, List[str]]]:
+        # TODO: Figure out Request usage
         extracted: List[Payload] = []
         errors: DefaultDict[str, List[str]] = defaultdict(list)
         dispatches: Set[str] = set().union(  # type: ignore
@@ -645,22 +635,21 @@ class Stoq(StoqPluginManager):
 
         dispatch_tasks: List = []
         for dispatcher_name, dispatcher in self._loaded_dispatcher_plugins.items():
-            dispatch_tasks.append(
-                self._get_dispatches(dispatcher, payload, request_meta)
-            )
+            dispatch_tasks.append(self._get_dispatches(dispatcher, payload, request))
         dispatch_results = await asyncio.gather(*dispatch_tasks)
 
         worker_tasks: List[Coroutine] = [
-            self._worker_start(w, payload, request_meta) for w in dispatches
+            self._worker_start(w, payload, request) for w in dispatches
         ]
         for dispatcher_name, dispatched_workers, dispatch_error in dispatch_results:
             for dispatched_worker in dispatched_workers:
                 worker_tasks.append(
-                    self._worker_start(dispatched_worker, payload, request_meta)
+                    self._worker_start(dispatched_worker, payload, request)
                 )
             if dispatch_error:
                 errors[dispatcher_name].append(dispatch_error)
         worker_results = await asyncio.gather(*worker_tasks)  # type: ignore
+        payload_results = PayloadResults.from_payload(payload)
 
         for worker_name, worker_response, worker_error in worker_results:
             if worker_response is None:
@@ -671,7 +660,7 @@ class Stoq(StoqPluginManager):
                 errors[worker_name].extend(worker_response.errors)
 
             if worker_response.results is not None:
-                payload.worker_results[worker_name] = worker_response.results
+                payload_results.workers[worker_name] = worker_response.results
             extracted.extend(
                 [
                     Payload(
@@ -681,13 +670,13 @@ class Stoq(StoqPluginManager):
                 ]
             )
 
-        payload_results = PayloadResults.from_payload(payload)
-        if request_meta.archive_payloads and payload.payload_meta.should_archive:
+        if (
+            request.request_meta.archive_payloads
+            and payload.payload_meta.should_archive
+        ):
             archive_tasks: List = []
             for archiver_name, archiver in self._loaded_dest_archiver_plugins.items():
-                archive_tasks.append(
-                    self._archive_payload(archiver, payload, request_meta)
-                )
+                archive_tasks.append(self._archive_payload(archiver, payload, request))
             archive_results = await asyncio.gather(*archive_tasks)
 
             for archiver_name, archiver_response, archiver_error in archive_results:
@@ -699,16 +688,16 @@ class Stoq(StoqPluginManager):
                     errors[archiver_name].extend(archiver_response.errors)
                 if archiver_response.results is not None:
                     payload_results.archivers[archiver_name] = archiver_response.results
-
-        return (payload_results, extracted, errors)
+        request.results.append(payload_results)
+        return (extracted, errors)
 
     async def _archive_payload(
-        self, archiver: ArchiverPlugin, payload: Payload, request_meta: RequestMeta
+        self, archiver: ArchiverPlugin, payload: Payload, request: Request
     ) -> Tuple[str, Union[ArchiverResponse, None], Union[str, None]]:
         archiver_name = archiver.config.get('Core', 'Name')
         payload.plugins_run['archivers'].append(archiver_name)
         try:
-            archiver_response = await archiver.archive(payload, request_meta)
+            archiver_response = await archiver.archive(payload, request)
         except Exception as e:
             msg = 'archiver:failed to archive'
             self.log.exception(msg)
@@ -716,7 +705,7 @@ class Stoq(StoqPluginManager):
         return (archiver_name, archiver_response, None)
 
     async def _worker_start(
-        self, dispatched_worker: str, payload: Payload, request_meta: RequestMeta
+        self, dispatched_worker: str, payload: Payload, request: Request
     ) -> Tuple[str, Union[WorkerResponse, None], Union[None, str]]:
         extracted: List[Payload] = []
         try:
@@ -727,7 +716,7 @@ class Stoq(StoqPluginManager):
             return (dispatched_worker, None, helpers.format_exc(e, msg=msg))
         payload.plugins_run['workers'].append(dispatched_worker)
         try:
-            worker_response = await plugin.scan(payload, request_meta)  # type: ignore
+            worker_response = await plugin.scan(payload, request)  # type: ignore
         except Exception as e:
             msg = 'worker:failed to scan'
             self.log.exception(msg)
@@ -781,13 +770,13 @@ class Stoq(StoqPluginManager):
             self.log.debug(f'Writing logs to {log_path}')
 
     async def _get_dispatches(
-        self, dispatcher: DispatcherPlugin, payload: Payload, request_meta: RequestMeta
+        self, dispatcher: DispatcherPlugin, payload: Payload, request: Request
     ) -> Tuple[str, Union[Set[str], None], Union[str, None]]:
 
         dispatcher_name = dispatcher.config.get('Core', 'Name')
         plugin_names: Set[str] = set()
         try:
-            dispatcher_result = await dispatcher.get_dispatches(payload, request_meta)
+            dispatcher_result = await dispatcher.get_dispatches(payload, request)
             if dispatcher_result:
                 plugin_names.update(dispatcher_result.plugin_names)
                 if dispatcher_result.meta is not None:
@@ -839,9 +828,11 @@ class Stoq(StoqPluginManager):
                 if payload_result.extracted_from in parent_payload_ids:
                     parent_payload_ids.add(payload_result.payload_id)
                     relevant_results.append(payload_result)
+            new_request = Request(
+                request_meta=stoq_response.request_meta, results=relevant_results
+            )
             new_response = StoqResponse(
-                results=relevant_results,
-                request_meta=stoq_response.request_meta,
+                request=new_request,
                 errors=stoq_response.errors,
                 time=stoq_response.time,
                 scan_id=stoq_response.scan_id,

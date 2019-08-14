@@ -168,19 +168,19 @@
 
 from typing import Optional
 
-from stoq.data_classes import ArchiverResponse, Payload, RequestMeta
+from stoq.data_classes import ArchiverResponse, Payload, Request
 from stoq.plugins import BasePlugin
 
 
 class ArchiverPlugin(BasePlugin):
     async def archive(
-        self, payload: Payload, request_meta: RequestMeta
+        self, payload: Payload, request: Request
     ) -> Optional[ArchiverResponse]:
         """
         Archive payload
 
         :param payload: Payload object to archive
-        :param request_meta: Originating request metadata
+        :param request: Originating Request object
 
         :return: ArchiverResponse object. Results are used to retrieve payload.
 

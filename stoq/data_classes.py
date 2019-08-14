@@ -84,7 +84,6 @@ class Payload:
         self.extracted_by = extracted_by
         self.extracted_from = extracted_from
         self.dispatch_meta: Dict[str, Dict] = {}
-        self.worker_results: Dict[str, Dict] = {}
         self.plugins_run: Dict[str, List[str]] = {'workers': [], 'archivers': []}
         self.payload_id = str(uuid.uuid4()) if payload_id is None else payload_id
 
@@ -128,10 +127,10 @@ class PayloadResults:
         payload_id: str,
         size: int,
         payload_meta: PayloadMeta,
-        workers: Dict[str, Dict],
         plugins_run: Dict[str, List[str]],
         extracted_from: Optional[str] = None,
         extracted_by: Optional[str] = None,
+        workers: Optional[Dict] = None,
     ) -> None:
         """
 
@@ -140,7 +139,6 @@ class PayloadResults:
         :param payload_id: Unique ID of payload
         :param size: Size of raw payload
         :param payload_meta: `PayloadMeta` object for payload
-        :param workers: Results from worker plugins
         :param plugins_run: Plugins used to scan payload
         :param extracted_by: Name of plugin that extracted the payload
         :param extracted_from: Unique payload ID the payload was extracted from
@@ -149,15 +147,15 @@ class PayloadResults:
         self.payload_id = payload_id
         self.size = size
         self.payload_meta = payload_meta
-        self.workers = workers
-        self.archivers: Dict[str, Dict] = {}
         self.plugins_run = plugins_run
+        self.archivers: Dict[str, Dict] = {}
         self.extracted_from = (
             extracted_from
         )  # payload_id of parent payload, if applicable
         self.extracted_by = (
             extracted_by
         )  # plugin name that extracted this payload, if applicable
+        self.workers = workers or {}
 
     @classmethod
     def from_payload(cls, payload: Payload) -> 'PayloadResults':
@@ -175,7 +173,6 @@ class PayloadResults:
             payload.payload_id,
             payload.size,
             payload.payload_meta,
-            payload.worker_results,
             payload.plugins_run,
             payload.extracted_from,
             payload.extracted_by,
@@ -188,11 +185,28 @@ class PayloadResults:
         return repr(self.__dict__)
 
 
+class Request:
+    def __init__(
+        self,
+        payloads: Optional[List[Payload]] = None,
+        request_meta: Optional[RequestMeta] = None,
+        results: Optional[List[PayloadResults]] = None,
+    ):
+        self.payloads = payloads or []
+        self.request_meta = request_meta or RequestMeta()
+        self.results = results or []
+
+    def __str__(self) -> str:
+        return helpers.dumps(self)
+
+    def __repr__(self):
+        return repr(self.__dict__)
+
+
 class StoqResponse:
     def __init__(
         self,
-        results: List[PayloadResults],
-        request_meta: RequestMeta,
+        request: Request,
         errors: DefaultDict[str, List[str]],
         time: Optional[str] = None,
         decorators: Optional[Dict[str, Dict]] = None,
@@ -209,8 +223,8 @@ class StoqResponse:
         :param decorators: Decorator plugin results
 
         """
-        self.results = results
-        self.request_meta = request_meta
+        self.results = request.results
+        self.request_meta = request.request_meta
         self.errors = errors
         self.time: str = datetime.now().isoformat() if time is None else time
         self.decorators = {} if decorators is None else decorators

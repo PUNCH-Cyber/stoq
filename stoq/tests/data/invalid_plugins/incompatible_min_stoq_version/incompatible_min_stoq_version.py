@@ -16,15 +16,12 @@
 
 from typing import Dict, List, Optional
 
-from stoq.data_classes import Payload, RequestMeta, WorkerResponse
+from stoq.data_classes import Payload, Request, WorkerResponse
 from stoq.plugins import WorkerPlugin
 
 
 class IncompatibleMinStoqVersion(WorkerPlugin):
     async def scan(
-        self,
-        payload: Payload,
-        dispatch_rules: Optional[List[Dict]],
-        request_meta: RequestMeta,
+        self, payload: Payload, request: Request
     ) -> Optional[WorkerResponse]:
         pass

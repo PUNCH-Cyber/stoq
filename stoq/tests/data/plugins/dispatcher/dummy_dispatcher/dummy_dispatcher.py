@@ -16,12 +16,12 @@
 
 from typing import Optional
 
-from stoq.data_classes import Payload, RequestMeta, DispatcherResponse
+from stoq.data_classes import Payload, Request, DispatcherResponse
 from stoq.plugins import DispatcherPlugin
 
 
 class DummyDispatcher(DispatcherPlugin):
     async def get_dispatches(
-        self, payload: Payload, request_meta: RequestMeta
+        self, payload: Payload, request: Request
     ) -> Optional[DispatcherResponse]:
         return None

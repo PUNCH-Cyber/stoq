@@ -21,7 +21,7 @@ from stoq.data_classes import (
     Payload,
     ExtractedPayload,
     Payload,
-    RequestMeta,
+    Request,
     WorkerResponse,
     DispatcherResponse,
 )
@@ -35,7 +35,7 @@ class MultiClassPlugin(WorkerPlugin, DispatcherPlugin):
     RULE_COUNT = 1
 
     async def scan(
-        self, payload: Payload, request_meta: RequestMeta
+        self, payload: Payload, request: Request
     ) -> Optional[WorkerResponse]:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')
@@ -47,7 +47,7 @@ class MultiClassPlugin(WorkerPlugin, DispatcherPlugin):
         return wr
 
     async def get_dispatches(
-        self, payload: Payload, request_meta: RequestMeta
+        self, payload: Payload, request: Request
     ) -> Optional[DispatcherResponse]:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')
