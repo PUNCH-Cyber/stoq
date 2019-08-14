@@ -52,6 +52,27 @@ class TestPluginManager(unittest.TestCase):
         for name in self.DUMMY_PLUGINS:
             self.assertIn(name, collected_plugins)
 
+    def test_plugin_objects(self):
+        pm = StoqPluginManager([utils.get_plugins_dir()])
+        simple_worker = pm.load_plugin('simple_worker')
+        self.assertEqual('simple_worker', simple_worker.plugin_name)
+        self.assertEqual('Marcus LaFerrera', simple_worker.__author__)
+        self.assertEqual('0.1', simple_worker.__version__)
+        self.assertEqual(
+            'https://github.com/PUNCH-Cyber/stoq-plugins-public',
+            simple_worker.__website__,
+        )
+        self.assertEqual('Simple stoQ Worker plugin', simple_worker.__description__)
+
+    def test_plugin_missing_objects(self):
+        pm = StoqPluginManager([utils.get_invalid_plugins_dir()])
+        worker = pm.load_plugin('missing_config_objects')
+        self.assertEqual('missing_config_objects', worker.plugin_name)
+        self.assertEqual('', worker.__author__)
+        self.assertEqual('', worker.__version__)
+        self.assertEqual('', worker.__website__)
+        self.assertEqual('', worker.__description__)
+
     def test_multiple_dirs(self):
         pm = StoqPluginManager([utils.get_plugins_dir(), utils.get_plugins2_dir()])
         collected_plugins = pm.list_plugins()
@@ -168,8 +189,10 @@ class TestPluginManager(unittest.TestCase):
         self.assertIsNotNone(plugin)
 
     def test_plugin_override(self):
-        """Verify that if plugin directories have plugins with duplicate names,
-        the one in the last specified directory will be used"""
+        """
+        Verify that if plugin directories have plugins with duplicate names,
+        the one in the last specified directory will be used
+        """
         pm = StoqPluginManager([utils.get_plugins_dir(), utils.get_plugins2_dir()])
         collected_plugins = pm.list_plugins()
         self.assertIn('dummy_worker', collected_plugins)

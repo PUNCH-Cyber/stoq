@@ -14,6 +14,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import logging
 from abc import ABC
 from configparser import ConfigParser
 from typing import Dict, Optional
@@ -23,3 +24,9 @@ class BasePlugin(ABC):
     def __init__(self, config: ConfigParser, plugin_opts: Optional[Dict]) -> None:
         self.config = config
         self.plugin_opts = plugin_opts
+        self.plugin_name = config.get('Core', 'Name')
+        self.__author__ = config.get('Documentation', 'Author', fallback='')
+        self.__version__ = config.get('Documentation', 'Version', fallback='')
+        self.__website__ = config.get('Documentation', 'Website', fallback='')
+        self.__description__ = config.get('Documentation', 'Description', fallback='')
+        self.log = logging.getLogger(f'stoq.{self.plugin_name}')

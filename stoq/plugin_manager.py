@@ -207,10 +207,10 @@ class StoqPluginManager:
             plugins[plugin] = {
                 'classes': plugin_classes,
                 'version': self._plugin_name_to_info[plugin][1].get(
-                    'Documentation', 'version'
+                    'Documentation', 'version', fallback=''
                 ),
                 'description': self._plugin_name_to_info[plugin][1].get(
-                    'Documentation', 'description'
+                    'Documentation', 'description', fallback=''
                 ),
             }
         return plugins
