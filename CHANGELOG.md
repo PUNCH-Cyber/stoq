@@ -11,17 +11,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Support for asyncio within the framework and plugins
 - Better type checking support
+- `self.log` may be leveraged from within all plugin classes
+- Add new `Error()` class for standardizing errors from stoQ and plugins
+    `Error()` will track plugin name, error message, and payload_id (optional)
+- Add configuration properties from `[Core]` and `[Documentation]` to each plugin object when loaded 
+- `PayloadMeta` now has a `should_scan` boolean which will allow payloads to be logged and archived, but not scanned by worker plugin
+- `Request()` class is passed to all dispatchers, workers, and archiver plugins.
+    The `Request` object contains all payloads, request metadata, results, and errors from all other plugins. This will allow for all neccessary plugins
+    to have a full understanding of the current state of the `Request`.
 
 ### Changed
 
-- `Payload.plugins_run` is now a `Dict[str, List[str]]` rather than `Dict[str, List[List[str]]]`
+- `Payload.plugins_run` moved to `PayloadResults.plugins_runs` and is now a `Dict[str, List[str]]` rather than `Dict[str, List[List[str]]]`
 - `Payload.worker_results` is now a `Dict[str, List[str]]` rather than `List[Dict[str, Dict]]`
 - `PayloadResults.workers` is now a `Dict[str, Dict]` rather than `List[Dict[str, Dict]]`
 
 ### Deprecated
 
 - DeepDispatcher plugin class
-
+- `Payload.plugins_run` has been removed in favor of `PayloadResults.plugins_run`)
+- `RequestMeta` is no longer passed to plugins, in favor of the `Request` object.
 
 ## [2.0.5] - 2019-06-07
 
