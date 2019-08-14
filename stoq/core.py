@@ -705,7 +705,6 @@ class Stoq(StoqPluginManager):
     async def _archive_payload(
         self, archiver: ArchiverPlugin, payload: Payload, request: Request
     ) -> Tuple[str, Union[ArchiverResponse, None]]:
-        archiver_name = archiver.config.get('Core', 'Name')
         archiver_response: Union[ArchiverResponse, None] = None
         try:
             archiver_response = await archiver.archive(payload, request)
@@ -715,31 +714,30 @@ class Stoq(StoqPluginManager):
             request.errors.append(
                 Error(
                     payload_id=payload.payload_id,
-                    plugin_name=archiver_name,
+                    plugin_name=archiver.plugin_name,
                     error=helpers.format_exc(e, msg=msg),
                 )
             )
-        return (archiver_name, archiver_response)
+        return (archiver.plugin_name, archiver_response)
 
     async def _worker_start(
-        self, plugin: WorkerPlugin, payload: Payload, request: Request
+        self, worker: WorkerPlugin, payload: Payload, request: Request
     ) -> Tuple[str, Union[WorkerResponse, None]]:
-        worker_name = plugin.config.get('Core', 'Name')
         extracted: List[Payload] = []
         worker_response: Union[None, WorkerResponse] = None
         try:
-            worker_response = await plugin.scan(payload, request)  # type: ignore
+            worker_response = await worker.scan(payload, request)  # type: ignore
         except Exception as e:
             msg = 'worker:failed to scan'
             self.log.exception(msg)
             request.errors.append(
                 Error(
                     payload_id=payload.payload_id,
-                    plugin_name=worker_name,
+                    plugin_name=worker.plugin_name,
                     error=helpers.format_exc(e, msg=msg),
                 )
             )
-        return (worker_name, worker_response)
+        return (worker.plugin_name, worker_response)
 
     def _init_logger(
         self,
