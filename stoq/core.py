@@ -623,7 +623,6 @@ class Stoq(StoqPluginManager):
     async def _single_scan(
         self, payload: Payload, add_dispatch: List[str], request: Request
     ) -> List[Payload]:
-        # TODO: Figure out Request usage
         extracted: List[Payload] = []
         dispatches: Set[str] = set().union(  # type: ignore
             add_dispatch, self.always_dispatch
@@ -634,14 +633,13 @@ class Stoq(StoqPluginManager):
             dispatch_tasks.append(self._get_dispatches(dispatcher, payload, request))
         dispatch_results = await asyncio.gather(*dispatch_tasks)
 
+        for dispatcher_name, dispatched_workers in dispatch_results:
+            for dispatched_worker in dispatched_workers:
+                dispatches.add(dispatched_worker)
+
         worker_tasks: List[Awaitable] = [
             self._worker_start(w, payload, request) for w in dispatches
         ]
-        for dispatcher_name, dispatched_workers in dispatch_results:
-            for dispatched_worker in dispatched_workers:
-                worker_tasks.append(
-                    self._worker_start(dispatched_worker, payload, request)
-                )
         worker_results = await asyncio.gather(*worker_tasks)  # type: ignore
         payload_results = PayloadResults.from_payload(payload)
 
