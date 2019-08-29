@@ -497,6 +497,11 @@ class Stoq(StoqPluginManager):
         :rtype: StoqResponse
 
         """
+        self.log.debug(
+            f'Content received ({len(content)} bytes): '
+            f'PayloadMeta: {helpers.dumps(payload_meta, indent=0)}, '
+            f'RequestMeta: {helpers.dumps(request_meta, indent=0)}'
+        )
         payload_meta = payload_meta or PayloadMeta()
         payload = Payload(content, payload_meta)
         request_meta = request_meta or RequestMeta()
@@ -522,8 +527,12 @@ class Stoq(StoqPluginManager):
         hashes_seen: Set[str] = set(
             [helpers.get_sha256(payload.content) for payload in request.payloads]
         )
-
+        self.log.debug(
+            f'Request received: RequestMeta: {helpers.dumps(request.request_meta, indent=0)}, '
+            f'start_dispatches: {helpers.dumps(add_start_dispatch, indent=0)}'
+        )
         for _recursion_level in range(self.max_recursion + 1):
+            self.log.debug(f'Current recursion depth: {_recursion_level}')
             next_scan_queue: List[Tuple[Payload, List[str]]] = []
             for payload, add_dispatch in scan_queue:
                 extracted = await self._single_scan(payload, add_dispatch, request)
@@ -531,9 +540,15 @@ class Stoq(StoqPluginManager):
                 for ex in extracted:
                     ex_hash = helpers.get_sha256(ex.content)
                     if ex_hash not in hashes_seen:
+                        self.log.debug(
+                            f'Adding extracted payload to scan queue: {ex_hash}, '
+                            f'PayloadMeta: {ex.payload_meta}'
+                        )
                         hashes_seen.add(ex_hash)
                         next_scan_queue.append((ex, ex.payload_meta.dispatch_to))
             scan_queue = next_scan_queue
+            if len(scan_queue) <= 0:
+                break
 
         response = StoqResponse(request=request)
 
@@ -566,6 +581,10 @@ class Stoq(StoqPluginManager):
         if not self._loaded_provider_plugins:
             raise StoqException('No activated provider plugins')
 
+        self.log.debug(
+            f'Starting provider queue: RequestMeta: {request_meta}, '
+            f'start_dispatches: {add_start_dispatch}'
+        )
         payload_queue: asyncio.Queue = asyncio.Queue(maxsize=self.max_queue)
         providers = [
             asyncio.ensure_future(plugin.ingest(payload_queue))
@@ -587,6 +606,7 @@ class Stoq(StoqPluginManager):
         finally:
             for worker in workers:
                 worker.cancel()
+                self.log.debug('Cancelling provider worker')
 
     async def _consume(
         self,
@@ -605,6 +625,10 @@ class Stoq(StoqPluginManager):
                     await self.scan_request(request, add_start_dispatch)
                 else:
                     for source_archiver, task_meta in task.items():
+                        self.log.debug(
+                            f'Provider task received: source_archiver: {source_archiver}, '
+                            f'task_meta: {task_meta}'
+                        )
                         try:
                             ar = ArchiverResponse(task_meta)
                             payload = await self._loaded_source_archiver_plugins[
@@ -629,6 +653,7 @@ class Stoq(StoqPluginManager):
             add_dispatch, self.always_dispatch
         )
 
+        self.log.debug(f'Scanning Payload {payload.payload_id}')
         payload_results = PayloadResults.from_payload(payload)
 
         if payload.payload_meta.should_scan is True:
@@ -700,12 +725,17 @@ class Stoq(StoqPluginManager):
                     payload_results.archivers[archiver_name] = archiver_response.results
 
         request.results.append(payload_results)
+        self.log.debug(
+            f'Completed scan of {payload.payload_id} with {len(payload_results.workers)} results, '
+            f'{len(extracted)} extracted payloads'
+        )
         return extracted
 
     async def _archive_payload(
         self, archiver: ArchiverPlugin, payload: Payload, request: Request
     ) -> Tuple[str, Union[ArchiverResponse, None]]:
         archiver_response: Union[ArchiverResponse, None] = None
+        self.log.debug(f'Archiving {payload.payload_id} with {archiver.plugin_name}')
         try:
             archiver_response = await archiver.archive(payload, request)
         except Exception as e:
@@ -725,6 +755,7 @@ class Stoq(StoqPluginManager):
     ) -> Tuple[str, Union[WorkerResponse, None]]:
         extracted: List[Payload] = []
         worker_response: Union[None, WorkerResponse] = None
+        self.log.debug(f'Scanning {payload.payload_id} with {worker.plugin_name}')
         try:
             worker_response = await worker.scan(payload, request)  # type: ignore
         except Exception as e:
@@ -788,43 +819,50 @@ class Stoq(StoqPluginManager):
         self, dispatcher: DispatcherPlugin, payload: Payload, request: Request
     ) -> Tuple[str, Union[Set[str], None]]:
 
-        dispatcher_name = dispatcher.config.get('Core', 'Name')
+        self.log.debug(
+            f'Sending {payload.payload_id} to dispatcher ({dispatcher.plugin_name})'
+        )
         plugin_names: Set[str] = set()
         try:
             dispatcher_result = await dispatcher.get_dispatches(payload, request)
             if dispatcher_result:
                 plugin_names.update(dispatcher_result.plugin_names)
+                self.log.debug(f'Dispatching {payload.payload_id} to {plugin_names}')
                 if dispatcher_result.meta is not None:
-                    payload.dispatch_meta[dispatcher_name] = dispatcher_result.meta
+                    payload.dispatch_meta[
+                        dispatcher.plugin_name
+                    ] = dispatcher_result.meta
         except Exception as e:
             msg = 'dispatcher:failed to dispatch'
             self.log.exception(msg)
             request.errors.append(
                 Error(
-                    plugin_name=dispatcher_name,
+                    plugin_name=dispatcher.plugin_name,
                     error=helpers.format_exc(e, msg=msg),
                     payload_id=payload.payload_id,
                 )
             )
-        return (dispatcher_name, plugin_names)
+        return (dispatcher.plugin_name, plugin_names)
 
     async def _apply_decorators(
         self, decorator: DecoratorPlugin, response: StoqResponse
     ) -> StoqResponse:
         """Mutates the given StoqResponse object to include decorator information"""
-        plugin_name = decorator.config.get('Core', 'Name')
+        self.log.debug(f'Applying decorator {decorator.plugin_name}')
         try:
             decorator_response = await decorator.decorate(response)
         except Exception as e:
             msg = 'decorator'
             self.log.exception(msg)
-            error = Error(plugin_name=plugin_name, error=helpers.format_exc(e, msg=msg))
+            error = Error(
+                plugin_name=decorator.plugin_name, error=helpers.format_exc(e, msg=msg)
+            )
             response.errors.append(error)
             return response
         if decorator_response is None:
             return response
         if decorator_response.results is not None:
-            response.decorators[plugin_name] = decorator_response.results
+            response.decorators[decorator.plugin_name] = decorator_response.results
         if decorator_response.errors:
             response.errors.extend(decorator_response.errors)
         return response
@@ -832,6 +870,7 @@ class Stoq(StoqPluginManager):
     async def _save_result(
         self, connector: ConnectorPlugin, response: StoqResponse
     ) -> None:
+        self.log.debug(f'Saving results to connector {connector.plugin_name}')
         try:
             await connector.save(response)
         except Exception:
