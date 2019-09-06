@@ -23,3 +23,31 @@ class BasePlugin(ABC):
     def __init__(self, config: ConfigParser, plugin_opts: Optional[Dict]) -> None:
         self.config = config
         self.plugin_opts = plugin_opts
+        self._version_info = {}
+        if config.has_option("Documentation", "Version"):
+            self._version_info.update({"PluginVersion": config.get("Documentation", "Version")})
+
+    def version_info(self):
+        """
+        version_info() method
+
+        All plugins will inherit this method which will return the version information
+        of the plugin.  Each plugin may overload this method to provide more information.
+        A decorator plugin could be used to gather all version_info for all plugins that
+        were run.
+
+        For example:
+
+        Adding the following code to the exif plugin would enhance the exif version information:
+
+        def version_info(self):
+            try:
+                cmd = [self.bin_path, '-ver']
+                output = run(cmd, stdout=PIPE)
+                version = output.stdout.rstrip()
+                self._version_info.update({'ExifToolVersion': version})
+            except Exception as err:
+                raise StoqPluginException(f'Failed gathering exiftool version: {err}')
+            return self._version_info
+        """
+        return self._version_info
