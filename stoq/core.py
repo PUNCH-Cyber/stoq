@@ -313,6 +313,7 @@ from pythonjsonlogger import jsonlogger  # type: ignore
 from logging.handlers import RotatingFileHandler
 from typing import (
     Awaitable,
+    Coroutine,
     Dict,
     AsyncGenerator,
     List,
@@ -370,7 +371,8 @@ class Stoq(StoqPluginManager):
         dispatchers: Optional[List[str]] = None,
         decorators: Optional[List[str]] = None,
         always_dispatch: Optional[List[str]] = None,
-        max_recursion: int = 3,
+        max_recursion: Optional[int] = None,
+        max_required_worker_depth: Optional[int] = None,
     ) -> None:
         """
 
@@ -390,6 +392,8 @@ class Stoq(StoqPluginManager):
         :param decorators: Decorators to be used
         :param always_dispatch: Plugins to always send payloads to, no matter what
         :param max_recursion: Maximum level of recursion into a payload and extracted payloads
+        :param max_required_worker_depth: Maximum depth for required worker plugins dependencies
+    ) -> None:
         """
         if not base_dir:
             base_dir = os.getcwd()
@@ -404,8 +408,11 @@ class Stoq(StoqPluginManager):
         self.provider_consumers = config.getint(
             'core', 'provider_consumers', fallback=50
         )
-        self.max_recursion = config.getint(
-            'core', 'max_recursion', fallback=max_recursion
+        self.max_recursion = max_recursion or config.getint(
+            'core', 'max_recursion', fallback=3
+        )
+        self.max_required_worker_depth = max_required_worker_depth or config.getint(
+            'core', 'max_required_worker_depth', fallback=3
         )
 
         if log_dir is _UNSET:
@@ -532,7 +539,7 @@ class Stoq(StoqPluginManager):
             f'start_dispatches: {helpers.dumps(add_start_dispatch, indent=0)}'
         )
         for _recursion_level in range(self.max_recursion + 1):
-            self.log.debug(f'Current recursion depth: {_recursion_level}')
+            self.log.debug(f'Current payload recursion depth: {_recursion_level}')
             next_scan_queue: List[Tuple[Payload, List[str]]] = []
             for payload, add_dispatch in scan_queue:
                 extracted = await self._single_scan(payload, add_dispatch, request)
@@ -649,62 +656,96 @@ class Stoq(StoqPluginManager):
         self, payload: Payload, add_dispatch: List[str], request: Request
     ) -> List[Payload]:
         extracted: List[Payload] = []
+        worker_tasks: Dict[str, Dict[str, Union[Set[str], Awaitable]]] = {}
         dispatches: Set[str] = set().union(  # type: ignore
             add_dispatch, self.always_dispatch
         )
 
         self.log.debug(f'Scanning Payload {payload.payload_id}')
+
         payload_results = PayloadResults.from_payload(payload)
 
         if payload.payload_meta.should_scan is True:
             dispatch_tasks: List = []
-            worker_tasks: List = []
             for dispatcher_name, dispatcher in self._loaded_dispatcher_plugins.items():
                 dispatch_tasks.append(
                     self._get_dispatches(dispatcher, payload, request)
                 )
-            dispatch_results = await asyncio.gather(*dispatch_tasks)
-
-            for dispatcher_name, dispatched_workers in dispatch_results:
+            for fut in asyncio.as_completed(dispatch_tasks):
+                dispatcher_name, dispatched_workers = await fut
                 for dispatched_worker in dispatched_workers:
                     dispatches.add(dispatched_worker)
 
-            for worker in dispatches:
-                try:
-                    worker_plugin = self.load_plugin(worker)
-                except Exception as e:
-                    msg = 'worker:failed to load'
-                    self.log.exception(msg)
-                    request.errors.append(
-                        Error(
-                            payload_id=payload.payload_id,
-                            plugin_name=worker,
-                            error=helpers.format_exc(e, msg=msg),
+            for worker_name in dispatches:
+                new_tasks = self._generate_tasks(worker_name, payload, request)
+                if new_tasks:
+                    worker_tasks.update(new_tasks)
+
+            # Allow for worker plugin to have dependencies, with a maximum depth
+            for _recursion_depth in range(self.max_required_worker_depth + 1):
+                self.log.debug(
+                    f'Current required plugin recursion depth: {_recursion_depth}'
+                )
+                if not worker_tasks:
+                    break
+                current_worker_tasks: List[Awaitable] = []
+                for current_worker, current_meta in worker_tasks.items():
+                    if (
+                        not current_meta['required_plugins']
+                        and current_worker not in payload_results.plugins_run['workers']
+                    ):
+                        # No required plugins found, and this plugin hasn't been run yet
+                        self.log.debug(f'Adding {current_worker} to task list')
+                        current_worker_tasks.append(  # type: ignore
+                            current_meta['task']
                         )
+                    else:
+                        done = True
+                        # Iterate over each required plugin
+                        for current_required in current_meta[  # type: ignore
+                            'required_plugins'
+                        ]:
+                            if (
+                                current_required
+                                not in payload_results.plugins_run['workers']
+                            ):
+                                # This workers required plugin has not been run yet
+                                done = False
+                        if (
+                            done
+                            and current_worker
+                            not in payload_results.plugins_run['workers']
+                        ):
+                            # All required plugins have been run, and this plugin is ready
+                            # to be run.
+                            self.log.debug(f'Adding {current_worker} to task list')
+                            current_worker_tasks.append(  # type: ignore
+                                current_meta['task']
+                            )
+
+                if not current_worker_tasks:
+                    break
+                for fut in asyncio.as_completed(current_worker_tasks):
+                    worker_name, worker_response = await fut
+                    payload_results.plugins_run['workers'].append(worker_name)
+                    if worker_response is None:
+                        continue
+                    elif worker_response.errors:
+                        request.errors.extend(worker_response.errors)
+
+                    if worker_response.results is not None:
+                        payload_results.workers[worker_name] = worker_response.results
+                    extracted.extend(
+                        [
+                            Payload(
+                                ex.content,
+                                ex.payload_meta,
+                                worker_name,
+                                payload.payload_id,
+                            )
+                            for ex in worker_response.extracted
+                        ]
                     )
-                    continue
-                worker_tasks.append(
-                    self._worker_start(worker_plugin, payload, request)  # type: ignore
-                )
-            worker_results = await asyncio.gather(*worker_tasks)  # type: ignore
-
-            for worker_name, worker_response in worker_results:
-                payload_results.plugins_run['workers'].append(worker_name)
-                if worker_response is None:
-                    continue
-                elif worker_response.errors:
-                    request.errors.extend(worker_response.errors)
-
-                if worker_response.results is not None:
-                    payload_results.workers[worker_name] = worker_response.results
-                extracted.extend(
-                    [
-                        Payload(
-                            ex.content, ex.payload_meta, worker_name, payload.payload_id
-                        )
-                        for ex in worker_response.extracted
-                    ]
-                )
 
         if (
             request.request_meta.archive_payloads
@@ -757,7 +798,7 @@ class Stoq(StoqPluginManager):
         worker_response: Union[None, WorkerResponse] = None
         self.log.debug(f'Scanning {payload.payload_id} with {worker.plugin_name}')
         try:
-            worker_response = await worker.scan(payload, request)  # type: ignore
+            worker_response = await worker.scan(payload, request)
         except Exception as e:
             msg = 'worker:failed to scan'
             self.log.exception(msg)
@@ -769,6 +810,84 @@ class Stoq(StoqPluginManager):
                 )
             )
         return (worker.plugin_name, worker_response)
+
+    def _generate_tasks(
+        self, plugin_name: str, payload: Payload, request: Request, depth: int = 0
+    ) -> Optional[Dict[str, Dict[str, Union[Set[str], Awaitable]]]]:
+        tasks: Dict[str, Dict[str, Union[Set[str], Awaitable]]] = {}
+        if depth > self.max_required_worker_depth:
+            request.errors.append(
+                Error(
+                    payload_id=payload.payload_id,
+                    plugin_name=plugin_name,
+                    error=f'Max required plugin depth ({self.max_required_worker_depth}) reached, unable to generate additional tasks',
+                )
+            )
+            return None
+        self.log.debug(f'Current task recursion depth = {depth}')
+        self.log.debug(f'Checking for plugin dependencies for {plugin_name}')
+        try:
+            plugin = self.load_plugin(plugin_name)
+        except Exception as e:
+            msg = 'worker:failed to load'
+            self.log.exception(msg)
+            request.errors.append(
+                Error(
+                    payload_id=payload.payload_id,
+                    plugin_name=plugin_name,
+                    error=helpers.format_exc(e, msg=msg),
+                )
+            )
+            return None
+
+        required_plugins = set(
+            [
+                w.strip()
+                for w in plugin.config.get(  # type: ignore
+                    'options', 'required_workers', fallback=''
+                ).split(',')
+                if w
+            ]
+        )
+
+        tasks.update(
+            {
+                plugin_name: {
+                    'required_plugins': required_plugins,
+                    'task': asyncio.ensure_future(
+                        self._worker_start(  # type: ignore
+                            plugin, payload, request
+                        )
+                    ),
+                }
+            }
+        )
+        if required_plugins:
+            self.log.debug(
+                f'{plugin_name} has dependencies of {",".join(required_plugins)}'
+            )
+            for required_plugin in required_plugins:
+                if required_plugin not in tasks:
+                    try:
+                        new_tasks = self._generate_tasks(
+                            required_plugin, payload, request, depth + 1
+                        )
+                        if new_tasks:
+                            tasks.update(new_tasks)
+                    except RecursionError as e:
+                        request.errors.append(
+                            Error(
+                                payload_id=payload.payload_id,
+                                plugin_name=required_plugin,
+                                error=helpers.format_exc(e),
+                            )
+                        )
+                else:
+                    self.log.debug(
+                        f'{required_plugin} already in task list for parent {plugin_name}'
+                    )
+
+        return tasks
 
     def _init_logger(
         self,

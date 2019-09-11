@@ -24,7 +24,10 @@ import stoq.helpers as helpers
 
 class Error:
     def __init__(
-        self, plugin_name: str, error: str, payload_id: Optional[str] = None
+        self,
+        error: str,
+        plugin_name: Optional[str] = None,
+        payload_id: Optional[str] = None,
     ) -> None:
         self.plugin_name = plugin_name
         self.error = error
