@@ -56,7 +56,7 @@ class MultiClassPlugin(WorkerPlugin, DispatcherPlugin):
             for count in range(0, self.RULE_COUNT):
                 dr.plugin_names.append(worker)
                 dr.meta[worker] = {f'rule{count}': worker}
-                payload.payload_meta.should_archive = self.SHOULD_ARCHIVE
+                payload.results.payload_meta.should_archive = self.SHOULD_ARCHIVE
                 if self.RETURN_ERRORS:
                     dr.errors += ['Test error please ignore']
         return dr

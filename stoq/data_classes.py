@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python5
 
 #   Copyright 2014-2018 PUNCH Cyber Analytics Group
 #
@@ -29,8 +29,8 @@ class Error:
         plugin_name: Optional[str] = None,
         payload_id: Optional[str] = None,
     ) -> None:
-        self.plugin_name = plugin_name
         self.error = error
+        self.plugin_name = plugin_name
         self.payload_id = payload_id
 
     def __str__(self) -> str:
@@ -100,12 +100,14 @@ class Payload:
 
         """
         self.content = content if isinstance(content, bytes) else content.encode()
-        self.size: int = len(content)
-        self.payload_meta = PayloadMeta() if payload_meta is None else payload_meta
-        self.extracted_by = extracted_by
-        self.extracted_from = extracted_from
         self.dispatch_meta: Dict[str, Dict] = {}
-        self.payload_id = str(uuid.uuid4()) if payload_id is None else payload_id
+        self.results = PayloadResults(
+            payload_id=payload_id,
+            size=len(content),
+            payload_meta=payload_meta,
+            extracted_from=extracted_from,
+            extracted_by=extracted_by,
+        )
 
     def __repr__(self):
         return repr(self.__dict__)
@@ -144,9 +146,9 @@ class RequestMeta:
 class PayloadResults:
     def __init__(
         self,
-        payload_id: str,
         size: int,
-        payload_meta: PayloadMeta,
+        payload_id: Optional[str] = None,
+        payload_meta: Optional[PayloadMeta] = None,
         plugins_run: Optional[Dict[str, List[str]]] = None,
         extracted_from: Optional[str] = None,
         extracted_by: Optional[str] = None,
@@ -165,34 +167,14 @@ class PayloadResults:
         :param workers: Results from worker plugins
 
         """
-        self.payload_id = payload_id
         self.size = size
-        self.payload_meta = payload_meta
+        self.payload_id = str(uuid.uuid4()) if payload_id is None else payload_id
+        self.payload_meta = PayloadMeta() if payload_meta is None else payload_meta
         self.plugins_run = plugins_run or {'workers': [], 'archivers': []}
         self.extracted_from = extracted_from
         self.extracted_by = extracted_by
         self.workers = workers or {}
         self.archivers: Dict[str, Dict] = {}
-
-    @classmethod
-    def from_payload(cls, payload: Payload) -> 'PayloadResults':
-        """
-
-        Class method to create ``PayloadResults`` from ``Payload`` object
-
-        >>> content = b'This is a raw payload'
-        >>> payload_meta = PayloadMeta(should_archive=True)
-        >>> payload = Payload(content, payload_meta=payload_meta)
-        >>> payload_results = PayloadResults(payload)
-
-        """
-        return cls(
-            payload_id=payload.payload_id,
-            size=payload.size,
-            payload_meta=payload.payload_meta,
-            extracted_from=payload.extracted_from,
-            extracted_by=payload.extracted_by,
-        )
 
     def __str__(self) -> str:
         return helpers.dumps(self)
@@ -206,12 +188,10 @@ class Request:
         self,
         payloads: Optional[List[Payload]] = None,
         request_meta: Optional[RequestMeta] = None,
-        results: Optional[List[PayloadResults]] = None,
         errors: Optional[List[Error]] = None,
     ):
         self.payloads = payloads or []
         self.request_meta = request_meta or RequestMeta()
-        self.results = results or []
         self.errors = errors or []
 
     def __str__(self) -> str:
@@ -239,7 +219,7 @@ class StoqResponse:
         :param decorators: Decorator plugin results
 
         """
-        self.results = request.results
+        self.results = [p.results for p in request.payloads]
         self.request_meta = request.request_meta
         self.errors = request.errors
         self.time: str = datetime.now().isoformat() if time is None else time

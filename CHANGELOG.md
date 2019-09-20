@@ -15,21 +15,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add new `Error()` class for standardizing errors from stoQ and plugins
     `Error()` will track plugin name, error message, and payload_id (optional)
 - Add configuration properties from `[Core]` and `[Documentation]` to each plugin object when loaded 
-- `PayloadMeta` now has a `should_scan` boolean which will allow payloads to be logged and archived, but not scanned by worker plugin
+- `PayloadMeta` now has a `should_scan` boolean.
+    Allows payloads to be logged and archived, but not scanned by worker plugin.
+- `Payload` is now updated as results are completed.
+    Results from completed scans will be available to other plugins instantly
 - `Request()` class is passed to all dispatchers, workers, and archiver plugins.
-    The `Request` object contains all payloads, request metadata, results, and errors from all other plugins. This will allow for all neccessary plugins
-    to have a full understanding of the current state of the `Request`.
+    The `Request` object contains all payloads, request metadata, results, and errors from 
+    all other completed plugins. This will allow for all neccessary plugins to have a full 
+    understanding of the current state of the complete `Request`.
+- `WorkerPlugin`s now have a configuration option of `required_worker_plugins`.
+    This allows for chained worker dependencies. If `required_worker_plugins` is defined, the 
+    parent plugin will not be run until all required plugins are completed successfully. The
+    parent plugin may then use results from other completed plugins for their respective 
+    scanning tasks.
+
 
 ### Changed
 
-- `Payload.plugins_run` moved to `PayloadResults.plugins_runs` and is now a `Dict[str, List[str]]` rather than `Dict[str, List[List[str]]]`
-- `Payload.worker_results` is now a `Dict[str, List[str]]` rather than `List[Dict[str, Dict]]`
+- `PayloadResults` is now an object of `Payload.results`, rather than an independent object
+- Most objects have been removed from `Payload` and are now availabe in `Payload.results`, 
+    namely `extracted_by`, `extracted_from`, `payload_id`, `size`, `payload_meta`
+- `Payload.plugins_run` moved to `PayloadResults.plugins_runs` and is now a `Dict[str, List[str]]` 
+    rather than `Dict[str, List[List[str]]]`
 - `PayloadResults.workers` is now a `Dict[str, Dict]` rather than `List[Dict[str, Dict]]`
+- `PayloadMeta` is now an object of `PayloadResults.payload_meta` 
 
 ### Deprecated
 
-- DeepDispatcher plugin class
+- DeepDispatcher plugin class has been removed
 - `Payload.plugins_run` has been removed in favor of `PayloadResults.plugins_run`)
+- `Payload.worker_results` has been removed in favor of `PayloadResults.workers`
 - `RequestMeta` is no longer passed to plugins, in favor of the `Request` object.
 
 ## [2.0.5] - 2019-06-07
