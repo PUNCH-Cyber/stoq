@@ -299,6 +299,7 @@ Examples:
             dest_archivers=args.dest_archivers,
             connectors=args.connectors,
             dispatchers=args.dispatchers,
+            deep_dispatchers=args.deep_dispatchers,
             decorators=args.decorators,
             always_dispatch=args.always_dispatch,
             max_recursion=args.max_recursion,
