@@ -20,8 +20,10 @@ import logging
 import configparser
 import importlib.util
 from pkg_resources import parse_version
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Tuple, Any, Union
 
+import stoq.helpers as helpers
+from stoq.data_classes import Error
 from .exceptions import StoqException, StoqPluginNotFound
 from stoq.plugins import (
     ArchiverPlugin,

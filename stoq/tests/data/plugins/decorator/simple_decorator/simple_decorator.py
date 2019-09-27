@@ -29,5 +29,7 @@ class SimpleDecorator(DecoratorPlugin):
             raise Exception('Test exception please ignore')
         dr = DecoratorResponse({'simple_decoration': 123})
         if self.RETURN_ERRORS:
-            dr.errors.append(Error('simple_decorator', 'Test error please ignore'))
+            dr.errors.append(
+                Error(plugin_name='simple_decorator', error='Test error please ignore')
+            )
         return dr

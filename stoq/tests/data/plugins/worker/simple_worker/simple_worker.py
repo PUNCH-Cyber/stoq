@@ -51,7 +51,7 @@ class SimpleWorker(WorkerPlugin):
                 Error(
                     plugin_name='simple_worker',
                     error='Test error please ignore',
-                    payload_id=payload.payload_id,
+                    payload_id=payload.results.payload_id,
                 )
             )
         return wr

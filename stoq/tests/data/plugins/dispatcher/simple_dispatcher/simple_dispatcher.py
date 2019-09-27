@@ -36,5 +36,5 @@ class SimpleDispatcher(DispatcherPlugin):
             dr.errors.append('Test error please ignore')
         dr.plugin_names.extend(self.WORKERS)
         dr.meta['test_key'] = 'Useful metadata info'
-        payload.payload_meta.should_archive = self.SHOULD_ARCHIVE
+        payload.results.payload_meta.should_archive = self.SHOULD_ARCHIVE
         return dr
