@@ -21,8 +21,13 @@ from stoq.data_classes import ExtractedPayload, Payload, Request, WorkerResponse
 from stoq.plugins import WorkerPlugin
 
 
-class ExtractRandom(WorkerPlugin):
+class ExtractPayload(WorkerPlugin):
+    EXTRACTED_PAYLOAD = None
+
     async def scan(
         self, payload: Payload, request: Request
     ) -> Optional[WorkerResponse]:
-        return WorkerResponse(extracted=[ExtractedPayload(os.urandom(50))])
+        if not self.EXTRACTED_PAYLOAD:
+            return WorkerResponse(extracted=[ExtractedPayload(os.urandom(50))])
+        else:
+            return WorkerResponse(extracted=[ExtractedPayload(self.EXTRACTED_PAYLOAD)])

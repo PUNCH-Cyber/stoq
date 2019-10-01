@@ -80,8 +80,8 @@ class Payload:
         self,
         content: Union[bytes, str],
         payload_meta: Optional[PayloadMeta] = None,
-        extracted_by: Optional[str] = None,
-        extracted_from: Optional[str] = None,
+        extracted_by: Optional[Union[str, List[str]]] = None,
+        extracted_from: Optional[Union[str, List[str]]] = None,
         payload_id: Optional[str] = None,
     ) -> None:
         """
@@ -150,8 +150,8 @@ class PayloadResults:
         payload_id: Optional[str] = None,
         payload_meta: Optional[PayloadMeta] = None,
         plugins_run: Optional[Dict[str, List[str]]] = None,
-        extracted_from: Optional[str] = None,
-        extracted_by: Optional[str] = None,
+        extracted_from: Optional[Union[str, List[str]]] = None,
+        extracted_by: Optional[Union[str, List[str]]] = None,
         workers: Optional[Dict] = None,
     ) -> None:
         """
@@ -171,8 +171,12 @@ class PayloadResults:
         self.payload_id = str(uuid.uuid4()) if payload_id is None else payload_id
         self.payload_meta = PayloadMeta() if payload_meta is None else payload_meta
         self.plugins_run = plugins_run or {'workers': [], 'archivers': []}
-        self.extracted_from = extracted_from
-        self.extracted_by = extracted_by
+        if isinstance(extracted_from, str):
+            extracted_from = [extracted_from]
+        self.extracted_from = extracted_from or []
+        if isinstance(extracted_by, str):
+            extracted_by = [extracted_by]
+        self.extracted_by = extracted_by or []
         self.workers = workers or {}
         self.archivers: Dict[str, Dict] = {}
 

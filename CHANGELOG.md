@@ -28,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     parent plugin will not be run until all required plugins are completed successfully. The
     parent plugin may then use results from other completed plugins for their respective 
     scanning tasks.
+- Duplicate extracted payloads are no longer simply skipped, they are appended to 
+    `Payload.results[].extracted_by` and `Payload.results[].extracted_from`  
 
 
 ### Changed
@@ -39,6 +41,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     rather than `Dict[str, List[List[str]]]`
 - `PayloadResults.workers` is now a `Dict[str, Dict]` rather than `List[Dict[str, Dict]]`
 - `PayloadMeta` is now an object of `PayloadResults.payload_meta` 
+- `PayloadResults.extracted_by` is now a `List[str]` rather than `str`
+- `PayloadResults.extracted_from` is now a `List[str]` rather than `str`
 
 ### Deprecated
 

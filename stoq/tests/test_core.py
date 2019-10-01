@@ -126,10 +126,10 @@ class TestCore(asynctest.TestCase):
     async def test_start_dispatch(self):
         s = Stoq(base_dir=utils.get_data_dir())
         response = await s.scan(
-            self.generic_content, add_start_dispatch=['extract_random']
+            self.generic_content, add_start_dispatch=['extract_payload']
         )
-        self.assertIn('extract_random', response.results[0].plugins_run['workers'])
-        self.assertNotIn('extract_random', response.results[1].plugins_run['workers'])
+        self.assertIn('extract_payload', response.results[0].plugins_run['workers'])
+        self.assertNotIn('extract_payload', response.results[1].plugins_run['workers'])
 
     async def test_dispatch(self):
         s = Stoq(base_dir=utils.get_data_dir(), dispatchers=['simple_dispatcher'])
@@ -167,13 +167,13 @@ class TestCore(asynctest.TestCase):
     async def test_dispatch_from_worker(self):
         s = Stoq(base_dir=utils.get_data_dir())
         simple_worker = s.load_plugin('simple_worker')
-        simple_worker.DISPATCH_TO = ['extract_random']
+        simple_worker.DISPATCH_TO = ['extract_payload']
         response = await s.scan(
             self.generic_content, add_start_dispatch=['simple_worker']
         )
         self.assertIn('simple_worker', response.results[0].plugins_run['workers'][0])
-        self.assertIn('extract_random', response.results[1].plugins_run['workers'][0])
-        self.assertEqual('extract_random', response.results[2].extracted_by)
+        self.assertIn('extract_payload', response.results[1].plugins_run['workers'][0])
+        self.assertIn('extract_payload', response.results[2].extracted_by)
 
     async def test_dispatch_multiple_plugins(self):
         multi_plugin_content = b'multi-plugin-content'
@@ -237,6 +237,26 @@ class TestCore(asynctest.TestCase):
         self.assertEqual('simple_worker', response.results[1].plugins_run['workers'][1])
         self.assertEqual('dummy_worker', response.results[1].plugins_run['workers'][0])
 
+    async def test_scan_with_duplicate_extracted_payloads(self):
+        s = Stoq(base_dir=utils.get_data_dir())
+        simple_worker = s.load_plugin('simple_worker')
+        simple_worker.DISPATCH_TO = ['extract_payload']
+        simple_worker.EXTRACTED_PAYLOAD = self.generic_content + b'more data'
+        extract_worker = s.load_plugin('extract_payload')
+        extract_worker.EXTRACTED_PAYLOAD = self.generic_content + b'more data'
+        response = await s.scan(
+            self.generic_content, add_start_dispatch=['simple_worker']
+        )
+        self.assertEqual(2, len(response.results))
+        self.assertEqual('simple_worker', response.results[0].plugins_run['workers'][0])
+        self.assertNotIn('extract_payload', response.results[0].plugins_run['workers'])
+        self.assertNotIn('simple_worker', response.results[1].plugins_run['workers'])
+        self.assertEqual(
+            'extract_payload', response.results[1].plugins_run['workers'][0]
+        )
+        self.assertEqual('simple_worker', response.results[1].extracted_by[0])
+        self.assertEqual('extract_payload', response.results[1].extracted_by[1])
+
     async def test_scan_with_nested_required_plugin(self):
         s = Stoq(base_dir=utils.get_data_dir())
         simple_worker = s.load_plugin('simple_worker')
@@ -245,7 +265,7 @@ class TestCore(asynctest.TestCase):
         simple_worker.config.set('options', 'required_workers', 'dummy_worker')
         dummy_worker = s.load_plugin('dummy_worker')
         dummy_worker.config.add_section('options')
-        dummy_worker.config.set('options', 'required_workers', 'extract_random')
+        dummy_worker.config.set('options', 'required_workers', 'extract_payload')
         response = await s.scan(
             self.generic_content, add_start_dispatch=['simple_worker']
         )
@@ -253,15 +273,15 @@ class TestCore(asynctest.TestCase):
         self.assertEqual('simple_worker', response.results[0].plugins_run['workers'][2])
         self.assertEqual('dummy_worker', response.results[0].plugins_run['workers'][1])
         self.assertEqual(
-            'extract_random', response.results[0].plugins_run['workers'][0]
+            'extract_payload', response.results[0].plugins_run['workers'][0]
         )
-        self.assertEqual('extract_random', response.results[1].extracted_by)
+        self.assertIn('extract_payload', response.results[1].extracted_by)
         self.assertEqual('simple_worker', response.results[2].plugins_run['workers'][2])
         self.assertEqual('dummy_worker', response.results[2].plugins_run['workers'][1])
         self.assertEqual(
-            'extract_random', response.results[2].plugins_run['workers'][0]
+            'extract_payload', response.results[2].plugins_run['workers'][0]
         )
-        self.assertEqual('extract_random', response.results[3].extracted_by)
+        self.assertIn('extract_payload', response.results[3].extracted_by)
 
     async def test_scan_with_required_plugin_max_depth(self):
         s = Stoq(base_dir=utils.get_data_dir(), max_required_worker_depth=1)
@@ -271,7 +291,7 @@ class TestCore(asynctest.TestCase):
         simple_worker.config.set('options', 'required_workers', 'dummy_worker')
         dummy_worker = s.load_plugin('dummy_worker')
         dummy_worker.config.add_section('options')
-        dummy_worker.config.set('options', 'required_workers', 'extract_random')
+        dummy_worker.config.set('options', 'required_workers', 'extract_payload')
         response = await s.scan(
             self.generic_content, add_start_dispatch=['simple_worker']
         )
@@ -320,7 +340,7 @@ class TestCore(asynctest.TestCase):
         dummy_archiver.archive = asynctest.CoroutineMock(return_value=None)
         response = await s.scan(
             self.generic_content,
-            add_start_dispatch=['extract_random'],
+            add_start_dispatch=['extract_payload'],
             request_meta=RequestMeta(archive_payloads=False),
         )
         dummy_archiver.archive.assert_not_awaited()
@@ -336,7 +356,7 @@ class TestCore(asynctest.TestCase):
         response = await s.scan(
             self.generic_content,
             payload_meta=PayloadMeta(should_archive=False),
-            add_start_dispatch=['extract_random'],
+            add_start_dispatch=['extract_payload'],
             request_meta=RequestMeta(archive_payloads=True),
         )
         dummy_archiver.archive.assert_awaited_once()
@@ -436,7 +456,7 @@ class TestCore(asynctest.TestCase):
 
     async def test_max_recursion(self):
         max_rec_depth = 4  # defined in stoq.cfg
-        s = Stoq(base_dir=utils.get_data_dir(), always_dispatch=['extract_random'])
+        s = Stoq(base_dir=utils.get_data_dir(), always_dispatch=['extract_payload'])
         response = await s.scan(self.generic_content)
         self.assertEqual(len(response.results), max_rec_depth + 2)
         self.assertIn('Max recursion level', response.errors[0].error)

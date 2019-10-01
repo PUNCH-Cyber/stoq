@@ -425,7 +425,11 @@ class Stoq(StoqPluginManager):
         log_backup_count = int(config.get('core', 'log_backup_count', fallback='5'))
         log_syntax = config.get('core', 'log_syntax', fallback='text')
         self._init_logger(
-            log_dir, log_level, log_maxbytes, log_backup_count, log_syntax
+            log_dir,  # type: ignore
+            log_level,  # type: ignore
+            log_maxbytes,
+            log_backup_count,
+            log_syntax,
         )
 
         if not plugin_dir_list:
@@ -440,7 +444,7 @@ class Stoq(StoqPluginManager):
             providers_str = config.get('core', 'providers', fallback='')
             providers = [d.strip() for d in providers_str.split(',') if d.strip()]
         self._loaded_provider_plugins = {  # type: ignore
-            d: self.load_plugin(d) for d in providers if d
+            d: self.load_plugin(d) for d in providers if d  # type: ignore
         }
         if not source_archivers:
             source_arch_str = config.get('core', 'source_archivers', fallback='')
@@ -448,13 +452,13 @@ class Stoq(StoqPluginManager):
                 d.strip() for d in source_arch_str.split(',') if d.strip()
             ]
         self._loaded_source_archiver_plugins = {  # type: ignore
-            d: self.load_plugin(d) for d in source_archivers if d
+            d: self.load_plugin(d) for d in source_archivers if d  # type: ignore
         }
         if not dest_archivers:
             dest_arch_str = config.get('core', 'dest_archivers', fallback='')
             dest_archivers = [d.strip() for d in dest_arch_str.split(',') if d.strip()]
         self._loaded_dest_archiver_plugins = {  # type: ignore
-            d: self.load_plugin(d) for d in dest_archivers if d
+            d: self.load_plugin(d) for d in dest_archivers if d  # type: ignore
         }
         if not connectors:
             conn_str = config.get('core', 'connectors', fallback='')
@@ -466,13 +470,13 @@ class Stoq(StoqPluginManager):
             dispatcher_str = config.get('core', 'dispatchers', fallback='')
             dispatchers = [d.strip() for d in dispatcher_str.split(',') if d.strip()]
         self._loaded_dispatcher_plugins = {  # type: ignore
-            d: self.load_plugin(d) for d in dispatchers if d
+            d: self.load_plugin(d) for d in dispatchers if d  # type: ignore
         }
         if not decorators:
             decorator_str = config.get('core', 'decorators', fallback='')
             decorators = [d.strip() for d in decorator_str.split(',') if d.strip()]
         self._loaded_decorator_plugins = {  # type: ignore
-            d: self.load_plugin(d) for d in decorators if d
+            d: self.load_plugin(d) for d in decorators if d  # type: ignore
         }
         self.always_dispatch = always_dispatch
         if not self.always_dispatch:
@@ -531,9 +535,11 @@ class Stoq(StoqPluginManager):
         """
         add_start_dispatch = add_start_dispatch or []
         scan_queue = [(payload, add_start_dispatch) for payload in request.payloads]
-        hashes_seen: Set[str] = set(
-            [helpers.get_sha256(payload.content) for payload in request.payloads]
-        )
+        hashes_seen: DefaultDict[str, List] = defaultdict(list)
+        for idx, payload in enumerate(request.payloads):
+            sha = helpers.get_sha256(payload.content)
+            hashes_seen[sha].append(idx)
+
         self.log.debug(
             f'Request received: RequestMeta: {helpers.dumps(request.request_meta, indent=0)}, '
             f'start_dispatches: {helpers.dumps(add_start_dispatch, indent=0)}'
@@ -551,8 +557,8 @@ class Stoq(StoqPluginManager):
                             f'Adding extracted payload to scan queue: {ex_hash}, '
                             f'PayloadMeta: {ex.results.payload_meta}'
                         )
-                        hashes_seen.add(ex_hash)
                         request.payloads.append(ex)
+                        hashes_seen[ex_hash].append(len(request.payloads) - 1)
                         if _recursion_level >= self.max_recursion:
                             request.errors.append(
                                 Error(
@@ -563,6 +569,15 @@ class Stoq(StoqPluginManager):
                         next_scan_queue.append(
                             (ex, ex.results.payload_meta.dispatch_to)
                         )
+                    else:
+                        payload_idx = hashes_seen[ex_hash]
+                        for idx in payload_idx:
+                            request.payloads[idx].results.extracted_by.extend(
+                                ex.results.extracted_by
+                            )
+                            request.payloads[idx].results.extracted_from.extend(
+                                ex.results.extracted_from
+                            )
             scan_queue = next_scan_queue
             if len(scan_queue) <= 0:
                 break
@@ -668,7 +683,7 @@ class Stoq(StoqPluginManager):
         extracted: List[Payload] = []
         worker_tasks: Dict[str, Dict[str, Union[Set[str], Awaitable]]] = {}
         dispatches: Set[str] = set().union(  # type: ignore
-            add_dispatch, self.always_dispatch
+            add_dispatch, self.always_dispatch  # type: ignore
         )
 
         self.log.debug(f'Scanning Payload {payload.results.payload_id}')
@@ -710,7 +725,9 @@ class Stoq(StoqPluginManager):
                         current_worker_tasks.append(
                             asyncio.ensure_future(
                                 self._worker_start(
-                                    current_meta['plugin'], payload, request
+                                    current_meta['plugin'],  # type: ignore
+                                    payload,
+                                    request,
                                 )
                             )
                         )  # type: ignore
@@ -735,7 +752,9 @@ class Stoq(StoqPluginManager):
                             current_worker_tasks.append(
                                 asyncio.ensure_future(
                                     self._worker_start(
-                                        current_meta['plugin'], payload, request
+                                        current_meta['plugin'],  # type: ignore
+                                        payload,
+                                        request,
                                     )
                                 )
                             )  # type: ignore
@@ -874,7 +893,12 @@ class Stoq(StoqPluginManager):
         )
 
         tasks.update(
-            {plugin_name: {'required_plugins': required_plugins, 'plugin': plugin}}
+            {
+                plugin_name: {
+                    'required_plugins': required_plugins,
+                    'plugin': plugin,  # type: ignore
+                }
+            }
         )
         if required_plugins:
             self.log.debug(
@@ -906,7 +930,7 @@ class Stoq(StoqPluginManager):
 
     def _init_logger(
         self,
-        log_dir: Optional[Union[object, str]],
+        log_dir: Union[object, str],
         log_level: str,
         log_maxbytes: int,
         log_backup_count: int,
@@ -1026,11 +1050,12 @@ class Stoq(StoqPluginManager):
             relevant_payloads: List[Payload] = [new_root_payload]
 
             for payload_result in stoq_response.results[i:]:
-                if payload_result.extracted_from in parent_payload_ids:
-                    parent_payload_ids.add(payload_result.payload_id)
-                    new_payload = Payload(b'')
-                    new_payload.results = payload_result
-                    relevant_payloads.append(new_payload)
+                for extracted_from in payload_result.extracted_from:
+                    if extracted_from in parent_payload_ids:
+                        parent_payload_ids.add(payload_result.payload_id)
+                        new_payload = Payload(b'')
+                        new_payload.results = payload_result
+                        relevant_payloads.append(new_payload)
 
             new_request = Request(
                 payloads=relevant_payloads, request_meta=stoq_response.request_meta
