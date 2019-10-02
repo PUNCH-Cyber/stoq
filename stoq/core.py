@@ -882,33 +882,25 @@ class Stoq(StoqPluginManager):
             )
             return None
 
-        required_plugins = set(
-            [
-                w.strip()
-                for w in plugin.config.get(  # type: ignore
-                    'options', 'required_workers', fallback=''
-                ).split(',')
-                if w
-            ]
-        )
+        required_workers = set(plugin.required_workers)  # type: ignore
 
         tasks.update(
             {
                 plugin_name: {
-                    'required_plugins': required_plugins,
+                    'required_plugins': required_workers,
                     'plugin': plugin,  # type: ignore
                 }
             }
         )
-        if required_plugins:
+        if required_workers:
             self.log.debug(
-                f'{plugin_name} has dependencies of {",".join(required_plugins)}'
+                f'{plugin_name} has dependencies of {",".join(required_workers)}'
             )
-            for required_plugin in required_plugins:
-                if required_plugin not in tasks:
+            for required_worker in required_workers:
+                if required_worker not in tasks:
                     try:
                         new_tasks = self._generate_tasks(
-                            required_plugin, payload, request, depth + 1
+                            required_worker, payload, request, depth + 1
                         )
                         if new_tasks:
                             tasks.update(new_tasks)
@@ -916,13 +908,13 @@ class Stoq(StoqPluginManager):
                         request.errors.append(
                             Error(
                                 payload_id=payload.results.payload_id,
-                                plugin_name=required_plugin,
+                                plugin_name=required_worker,
                                 error=helpers.format_exc(e),
                             )
                         )
                 else:
                     self.log.debug(
-                        f'{required_plugin} already in task list for parent {plugin_name}'
+                        f'{required_worker} already in task list for parent {plugin_name}'
                     )
 
         self.log.debug(f'Current tasks: {tasks.keys()}')

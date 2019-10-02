@@ -19,7 +19,7 @@ import inspect
 import logging
 import configparser
 import importlib.util
-from pkg_resources import parse_version
+from pkg_resources import parse_version, working_set
 from typing import Dict, List, Optional, Tuple, Any, Union
 
 import stoq.helpers as helpers
@@ -57,76 +57,25 @@ class StoqPluginManager:
 
         if not hasattr(self, 'log') or self.log is None:
             self.log: logging.Logger = logging.getLogger('stoq')
-        self._collect_plugins(plugin_dir_list)
 
-    def _collect_plugins(self, plugin_dir_list: List[str]) -> None:
-        for plugin_dir in plugin_dir_list:
-            abs_plugin_dir = os.path.abspath(plugin_dir.strip())
-            if not os.path.isdir(abs_plugin_dir):
-                self.log.warning(
-                    f'Invalid plugin directory specified, skipping: {abs_plugin_dir}'
-                )
-                continue
-            for root_path, _, files in os.walk(abs_plugin_dir):
-                for file in files:
-                    if not file.endswith('.stoq'):
-                        continue
-                    plugin_conf_path = os.path.join(root_path, file)
-                    plugin_config = configparser.ConfigParser()
-                    try:
-                        plugin_config.read(plugin_conf_path)
-                        plugin_name = plugin_config.get('Core', 'Name')
-                        module_name = plugin_config.get('Core', 'Module')
-                    except Exception:
-                        self.log.warning(
-                            f'Error parsing config file: {plugin_conf_path}',
-                            exc_info=True,
-                        )
-                        continue
-                    module_path_pyc = os.path.join(root_path, module_name) + '.pyc'
-                    module_path_py = os.path.join(root_path, module_name) + '.py'
-                    if os.path.isfile(module_path_pyc):
-                        self._plugin_name_to_info[plugin_name] = (
-                            module_path_pyc,
-                            plugin_config,
-                        )
-                    elif os.path.isfile(module_path_py):
-                        self._plugin_name_to_info[plugin_name] = (
-                            module_path_py,
-                            plugin_config,
-                        )
-                    else:
-                        self.log.warning(
-                            f'Unable to find module at: {module_path_pyc} or {module_path_py}',
-                            exc_info=True,
-                        )
-                        continue
+    @property
+    def _collect_plugins(self) -> Dict[str, str]:
+        return {
+            p.project_name: p.version
+            for p in working_set
+            if p.project_name.startswith('stoq-plugin')
+        }
 
     def load_plugin(self, plugin_name: str) -> BasePlugin:
         plugin_name = plugin_name.strip()
         if plugin_name in self._loaded_plugins:
             return self._loaded_plugins[plugin_name]
-        if plugin_name not in self._plugin_name_to_info:
+        if f'stoq-plugin-{plugin_name}' not in self._collect_plugins:
             raise StoqPluginNotFound(
-                f'The plugin "{plugin_name}" is invalid or does not exist in your plugin path'
+                f'The plugin "{plugin_name}" is invalid or does not exist'
             )
-        module_path, plugin_config = self._plugin_name_to_info[plugin_name]
-        if plugin_config.has_option('options', 'min_stoq_version'):
-            min_stoq_version = plugin_config.get('options', 'min_stoq_version')
-            # Placing this import at the top of this file causes a circular
-            # import chain that causes stoq to crash on initialization
-            from stoq import __version__
 
-            if parse_version(__version__) < parse_version(min_stoq_version):
-                self.log.warning(
-                    f'Plugin {plugin_name} not compatible with this version of '
-                    'stoQ. Unpredictable results may occur!'
-                )
-        spec = importlib.util.spec_from_file_location(
-            plugin_config.get('Core', 'Module'), module_path
-        )
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)  # type: ignore
+        module = importlib.import_module(f'stoq_plugins.{plugin_name}.{plugin_name}')
         plugin_classes = inspect.getmembers(
             module,
             predicate=lambda mem: inspect.isclass(mem)
@@ -156,22 +105,24 @@ class StoqPluginManager:
         # Plugin configuration order of precendence:
         # 1) plugin options provided at instantiation of `Stoq()`
         # 2) plugin configuration in `stoq.cfg`
-        # 3) `plugin_name.stoq`
         if isinstance(
-            self._stoq_config,
-            configparser.ConfigParser
-            # type: ignore
+            self._stoq_config, configparser.ConfigParser
         ) and self._stoq_config.has_section(plugin_name):
-            if not plugin_config.has_section('options'):
-                plugin_config.add_section('options')
-            for opt in self._stoq_config.options(plugin_name):  # type: ignore
-                # type: ignore
-                plugin_config['options'][opt] = self._stoq_config.get(plugin_name, opt)
-        if self._plugin_opts.get(plugin_name):
-            plugin_config.read_dict(
-                {'options': self._plugin_opts.get(plugin_name)}  # type: ignore
-            )
+            plugin_config = dict(self._stoq_config.items(plugin_name))
+        else:
+            plugin_config = {}
+        plugin_config.update(self._plugin_opts.get(plugin_name, {}))
         plugin = plugin_class(plugin_config, self._plugin_opts.get(plugin_name))
+        if hasattr(plugin, '__min_stoq_version__'):
+            # Placing this import at the top of this file causes a circular
+            # import chain that causes stoq to crash on initialization
+            from stoq import __version__
+
+            if parse_version(__version__) < parse_version(plugin.__min_stoq_version__):
+                self.log.warning(
+                    f'Plugin {plugin_name} not compatible with this version of '
+                    'stoQ. Unpredictable results may occur!'
+                )
         self._loaded_plugins[plugin_name] = plugin
         return plugin
 

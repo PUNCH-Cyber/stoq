@@ -177,13 +177,15 @@
 
 """
 from abc import abstractmethod
-from typing import Optional
+from typing import Optional, Set
 
 from stoq.data_classes import Payload, Request, WorkerResponse
 from stoq.plugins import BasePlugin
 
 
 class WorkerPlugin(BasePlugin):
+    required_workers: Set[str] = set()
+
     @abstractmethod
     async def scan(
         self, payload: Payload, request: Request
