@@ -15,6 +15,7 @@
 #   limitations under the License.
 
 
+import sys
 import logging
 import unittest
 from typing import Optional
@@ -38,19 +39,24 @@ class TestPluginManager(unittest.TestCase):
 
     def setUp(self) -> None:
         logging.disable(logging.CRITICAL)
+        self.orig_sys_path = sys.path.copy()
 
     def tearDown(self) -> None:
         logging.disable(logging.NOTSET)
+        sys.path = self.orig_sys_path
 
     def test_no_plugins(self):
+        sys.path = []
         pm = StoqPluginManager([])
         self.assertEqual(len(pm.list_plugins()), 0)
+        sys.path = self.orig_sys_path
 
     def test_collect_plugins(self):
         pm = StoqPluginManager([utils.get_plugins_dir()])
         collected_plugins = pm.list_plugins()
         for name in self.DUMMY_PLUGINS:
             self.assertIn(name, collected_plugins)
+        sys.path = self.orig_sys_path
 
     def test_plugin_objects(self):
         pm = StoqPluginManager([utils.get_plugins_dir()])
@@ -63,58 +69,65 @@ class TestPluginManager(unittest.TestCase):
             simple_worker.__website__,
         )
         self.assertEqual('Simple stoQ Worker plugin', simple_worker.__description__)
+        sys.path = self.orig_sys_path
 
     def test_plugin_missing_objects(self):
         pm = StoqPluginManager([utils.get_invalid_plugins_dir()])
         worker = pm.load_plugin('missing_config_objects')
         self.assertEqual('missing_config_objects', worker.plugin_name)
+        with self.assertRaises(AttributeError):
+            worker.__version__
         self.assertEqual('', worker.__author__)
-        self.assertEqual('', worker.__version__)
         self.assertEqual('', worker.__website__)
         self.assertEqual('', worker.__description__)
+        sys.path = self.orig_sys_path
 
     def test_multiple_dirs(self):
         pm = StoqPluginManager([utils.get_plugins_dir(), utils.get_plugins2_dir()])
         collected_plugins = pm.list_plugins()
         for name in self.DUMMY_PLUGINS + ['dummy_worker2']:
             self.assertIn(name, collected_plugins)
+        sys.path = self.orig_sys_path
 
     def test_collect_one_invalid_dir(self):
         # Verify that the invalid directory doesn't cause an exception
         pm = StoqPluginManager([utils.get_plugins_dir(), '/no/way/this/exists'])
         self.assertGreater(len(pm.list_plugins()), 0)
+        sys.path = self.orig_sys_path
 
-    def test_collect_invalid_config(self):
+    def test_collect_invalid_plugins(self):
         pm = StoqPluginManager([utils.get_invalid_plugins_dir()])
-        collected_plugins = pm.list_plugins()
-        self.assertNotIn('missing_module', collected_plugins)
-        self.assertNotIn('invalid_config', collected_plugins)
+        with self.assertRaises(AttributeError):
+            collected_plugins = pm.list_plugins()
+        sys.path = self.orig_sys_path
 
     def test_load_plugin(self):
         pm = StoqPluginManager([utils.get_plugins_dir()])
         for name in self.DUMMY_PLUGINS:
             pm.load_plugin(name)
+        sys.path = self.orig_sys_path
 
     def test_load_plugin_nonexistent(self):
         pm = StoqPluginManager([utils.get_plugins_dir()])
         with self.assertRaises(StoqPluginNotFound):
             pm.load_plugin('this_plugin_does_not_exist')
+        sys.path = self.orig_sys_path
 
     def test_load_non_plugin(self):
         pm = StoqPluginManager([utils.get_invalid_plugins_dir()])
-        collected_plugins = pm.list_plugins()
         # The plugin should be collected even though it is invalid at load time
-        self.assertIn('missing_plugin', collected_plugins)
+        self.assertIn('missing_plugin', pm._available_plugins)
         with self.assertRaises(StoqException):
             pm.load_plugin('missing_plugin')
+        sys.path = self.orig_sys_path
 
     def test_load_multiple_plugins_in_module(self):
         pm = StoqPluginManager([utils.get_invalid_plugins_dir()])
-        collected_plugins = pm.list_plugins()
         # The plugin should be collected even though it is invalid at load time
-        self.assertIn('multiple_plugins_in_module', collected_plugins)
+        self.assertIn('multiple_plugins_in_module', pm._available_plugins)
         with self.assertRaises(StoqException):
             pm.load_plugin('multiple_plugins_in_module')
+        sys.path = self.orig_sys_path
 
     def test_no_reload(self):
         pm = StoqPluginManager([utils.get_plugins_dir()])
@@ -122,11 +135,7 @@ class TestPluginManager(unittest.TestCase):
         self.assertIsNotNone(worker)
         worker2 = pm.load_plugin('dummy_worker')
         self.assertIs(worker, worker2)  # Same object
-
-    def test_plugin_config(self):
-        pm = StoqPluginManager([utils.get_plugins_dir()])
-        plugin = pm.load_plugin('configurable_worker')
-        self.assertEqual(plugin.get_important_option(), 'cybercybercyber')
+        sys.path = self.orig_sys_path
 
     def test_plugin_opts(self):
         pm = StoqPluginManager(
@@ -135,9 +144,12 @@ class TestPluginManager(unittest.TestCase):
         )
         plugin = pm.load_plugin('configurable_worker')
         self.assertEqual(plugin.get_crazy_runtime_option(), 16)
+        sys.path = self.orig_sys_path
 
     def test_plugin_opts_from_stoq_cfg(self):
-        s = Stoq(base_dir=utils.get_data_dir())
+        s = Stoq(
+            base_dir=utils.get_data_dir(), plugin_dir_list=[utils.get_plugins_dir()]
+        )
         plugin = s.load_plugin('configurable_worker')
         self.assertEqual(
             plugin.config.getboolean('options', 'worker_test_option_bool'), True
@@ -147,6 +159,7 @@ class TestPluginManager(unittest.TestCase):
             'Worker Testy McTest Face',
         )
         self.assertEqual(plugin.config.getint('options', 'worker_test_option_int'), 10)
+        self.assertEqual(plugin.get_important_option(), 'cybercybercyber')
         plugin = s.load_plugin('dummy_connector')
         self.assertEqual(
             plugin.config.getboolean('options', 'connector_test_option_bool'), False
@@ -158,10 +171,12 @@ class TestPluginManager(unittest.TestCase):
         self.assertEqual(
             plugin.config.getint('options', 'connector_test_option_int'), 5
         )
+        sys.path = self.orig_sys_path
 
     def test_plugin_opts_precedence(self):
         s = Stoq(
             base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
             plugin_opts={
                 'configurable_worker': {
                     'worker_test_option_bool': False,
@@ -178,6 +193,7 @@ class TestPluginManager(unittest.TestCase):
             plugin.config.get('options', 'worker_test_option_str'), 'Test string'
         )
         self.assertEqual(plugin.config.getint('options', 'worker_test_option_int'), 20)
+        sys.path = self.orig_sys_path
 
     def test_min_stoq_version(self):
         pm = StoqPluginManager([utils.get_invalid_plugins_dir()])
@@ -187,23 +203,25 @@ class TestPluginManager(unittest.TestCase):
         with self.assertLogs(level='WARNING'):
             plugin = pm.load_plugin('incompatible_min_stoq_version')
         self.assertIsNotNone(plugin)
+        sys.path = self.orig_sys_path
 
     def test_plugin_override(self):
         """
         Verify that if plugin directories have plugins with duplicate names,
-        the one in the last specified directory will be used
+        the one in the first specified directory will be used
         """
-        pm = StoqPluginManager([utils.get_plugins_dir(), utils.get_plugins2_dir()])
-        collected_plugins = pm.list_plugins()
-        self.assertIn('dummy_worker', collected_plugins)
+        pm = StoqPluginManager([utils.get_plugins2_dir(), utils.get_plugins_dir()])
+        self.assertIn('dummy_worker', pm._available_plugins)
         worker = pm.load_plugin('dummy_worker')
         self.assertTrue(worker.PLUGINS2_DUP_MARKER)
+        sys.path = self.orig_sys_path
 
-        pm = StoqPluginManager([utils.get_plugins2_dir(), utils.get_plugins_dir()])
-        self.assertIn('dummy_worker', collected_plugins)
+        pm = StoqPluginManager([utils.get_plugins_dir(), utils.get_plugins2_dir()])
+        self.assertIn('dummy_worker', pm._available_plugins)
         worker = pm.load_plugin('dummy_worker')
         with self.assertRaises(Exception):
             worker.PLUGINS2_DUP_MARKER
+        sys.path = self.orig_sys_path
 
 
 class ExampleExternalPlugin(WorkerPlugin):

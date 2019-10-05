@@ -433,9 +433,7 @@ class Stoq(StoqPluginManager):
         )
 
         if not plugin_dir_list:
-            plugin_dir_str = config.get(
-                'core', 'plugin_dir_list', fallback=os.path.join(base_dir, 'plugins')
-            )
+            plugin_dir_str = config.get('core', 'plugin_dir_list', fallback='')
             plugin_dir_list = [d.strip() for d in plugin_dir_str.split(',')]
 
         super().__init__(plugin_dir_list, plugin_opts, config)
@@ -670,7 +668,7 @@ class Stoq(StoqPluginManager):
                                 request = Request([payload], request_meta)
                                 await self.scan_request(request, add_start_dispatch)
                         except Exception as e:
-                            self.log.warn(
+                            self.log.warning(
                                 f'"{task_meta}" failed with archiver "{source_archiver}": {str(e)}'
                             )
                 payload_queue.task_done()

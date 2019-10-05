@@ -33,11 +33,3 @@ def get_plugins2_dir():
 
 def get_invalid_plugins_dir():
     return os.path.join(get_data_dir(), 'invalid_plugins')
-
-
-def get_complex_dispatcher():
-    return os.path.join(get_data_dir(), 'complex_dispatcher.yar')
-
-
-def get_always_dispatcher():
-    return os.path.join(get_data_dir(), 'always_dispatcher.yar')

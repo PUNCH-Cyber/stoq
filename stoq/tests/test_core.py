@@ -14,6 +14,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import sys
 import json
 import asyncio
 import logging
@@ -39,17 +40,21 @@ import stoq.tests.utils as utils
 class TestCore(asynctest.TestCase):
     def setUp(self) -> None:
         logging.disable(logging.CRITICAL)
+        self.orig_sys_path = sys.path.copy()
         self.generic_content = b'The quick brown fox'  # type: ignore
 
     def tearDown(self) -> None:
         logging.disable(logging.NOTSET)
+        sys.path = self.orig_sys_path
 
     def test_no_base_dir(self):
         # Verify that this doesn't throw an exception. Explicitly set log_dir
         # to none since we don't want to create logs in a random location and
         # shouldn't use a config file in this test.
+        sys.path = []
         s = Stoq(log_dir=None)
         self.assertEqual(len(s.list_plugins()), 0)
+        sys.path = self.orig_sys_path
 
     def test_config_from_base_dir(self):
         s = Stoq(base_dir=utils.get_data_dir())
@@ -65,6 +70,7 @@ class TestCore(asynctest.TestCase):
     def test_initial_plugins(self):
         s = Stoq(
             base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
             providers=['dummy_provider'],
             source_archivers=['dummy_archiver'],
             dest_archivers=['dummy_archiver'],
@@ -82,13 +88,17 @@ class TestCore(asynctest.TestCase):
     ############ 'SCAN' TESTS ############
 
     async def test_scan(self):
-        s = Stoq(base_dir=utils.get_data_dir())
+        s = Stoq(
+            base_dir=utils.get_data_dir(), plugin_dir_list=[utils.get_plugins_dir()]
+        )
         response = await s.scan(self.generic_content)
         self.assertEqual(len(response.results), 1)
         self.assertEqual(response.results[0].size, len(self.generic_content))
 
     async def test_split_results(self):
-        s = Stoq(base_dir=utils.get_data_dir())
+        s = Stoq(
+            base_dir=utils.get_data_dir(), plugin_dir_list=[utils.get_plugins_dir()]
+        )
         response = await s.scan(
             self.generic_content,
             add_start_dispatch=['multiclass_plugin', 'simple_worker'],
@@ -104,7 +114,9 @@ class TestCore(asynctest.TestCase):
                 raise Exception('required plugin not found in results')
 
     async def test_worker_should_scan(self):
-        s = Stoq(base_dir=utils.get_data_dir())
+        s = Stoq(
+            base_dir=utils.get_data_dir(), plugin_dir_list=[utils.get_plugins_dir()]
+        )
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.SHOULD_SCAN = False
         simple_worker.DISPATCH_TO = ['dummy_worker']
@@ -117,14 +129,20 @@ class TestCore(asynctest.TestCase):
         self.assertNotIn('dummy_worker', response.results[1].plugins_run['workers'])
 
     async def test_always_dispatch(self):
-        s = Stoq(base_dir=utils.get_data_dir(), always_dispatch=['simple_worker'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            always_dispatch=['simple_worker'],
+        )
         response = await s.scan(self.generic_content)
         self.assertIn('simple_worker', s._loaded_plugins)
         self.assertIn('simple_worker', response.results[0].plugins_run['workers'])
         self.assertIn('simple_worker', response.results[1].plugins_run['workers'])
 
     async def test_start_dispatch(self):
-        s = Stoq(base_dir=utils.get_data_dir())
+        s = Stoq(
+            base_dir=utils.get_data_dir(), plugin_dir_list=[utils.get_plugins_dir()]
+        )
         response = await s.scan(
             self.generic_content, add_start_dispatch=['extract_payload']
         )
@@ -132,7 +150,11 @@ class TestCore(asynctest.TestCase):
         self.assertNotIn('extract_payload', response.results[1].plugins_run['workers'])
 
     async def test_dispatch(self):
-        s = Stoq(base_dir=utils.get_data_dir(), dispatchers=['simple_dispatcher'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            dispatchers=['simple_dispatcher'],
+        )
         dummy_worker = s.load_plugin('dummy_worker')
         dummy_worker.scan = asynctest.create_autospec(
             dummy_worker.scan, return_value=None
@@ -146,7 +168,11 @@ class TestCore(asynctest.TestCase):
         self.assertIn('dummy_worker', response.results[0].plugins_run['workers'][0])
 
     async def test_dispatcher_exception(self):
-        s = Stoq(base_dir=utils.get_data_dir(), dispatchers=['simple_dispatcher'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            dispatchers=['simple_dispatcher'],
+        )
         simple_dispatcher = s.load_plugin('simple_dispatcher')
         simple_dispatcher.RAISE_EXCEPTION = True
         with self.assertRaises(Exception) as context:
@@ -154,7 +180,11 @@ class TestCore(asynctest.TestCase):
         self.assertTrue('Test exception', context.exception)
 
     async def test_dispatch_duplicate(self):
-        s = Stoq(base_dir=utils.get_data_dir(), dispatchers=['simple_dispatcher'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            dispatchers=['simple_dispatcher'],
+        )
         s.load_plugin('simple_dispatcher').WORKERS = ['simple_worker', 'simple_worker']
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.scan = asynctest.create_autospec(
@@ -165,7 +195,9 @@ class TestCore(asynctest.TestCase):
         self.assertEqual(len(simple_worker.scan.await_args[0]), 2)
 
     async def test_dispatch_from_worker(self):
-        s = Stoq(base_dir=utils.get_data_dir())
+        s = Stoq(
+            base_dir=utils.get_data_dir(), plugin_dir_list=[utils.get_plugins_dir()]
+        )
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.DISPATCH_TO = ['extract_payload']
         response = await s.scan(
@@ -177,7 +209,11 @@ class TestCore(asynctest.TestCase):
 
     async def test_dispatch_multiple_plugins(self):
         multi_plugin_content = b'multi-plugin-content'
-        s = Stoq(base_dir=utils.get_data_dir(), dispatchers=['simple_dispatcher'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            dispatchers=['simple_dispatcher'],
+        )
         s.load_plugin('simple_dispatcher').WORKERS = ['simple_worker', 'dummy_worker']
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.scan = asynctest.create_autospec(
@@ -195,7 +231,11 @@ class TestCore(asynctest.TestCase):
 
     async def test_dispatch_multiple_plugins2(self):
         again_multi_plugin_content = b'again-multi-plugin-space-content'
-        s = Stoq(base_dir=utils.get_data_dir(), dispatchers=['simple_dispatcher'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            dispatchers=['simple_dispatcher'],
+        )
         s.load_plugin('simple_dispatcher').WORKERS = ['simple_worker', 'dummy_worker']
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.scan = asynctest.create_autospec(
@@ -212,7 +252,9 @@ class TestCore(asynctest.TestCase):
         self.assertEqual(len(dummy_worker.scan.await_args[0]), 2)
 
     async def test_dispatch_nonexistent_plugin(self):
-        s = Stoq(base_dir=utils.get_data_dir())
+        s = Stoq(
+            base_dir=utils.get_data_dir(), plugin_dir_list=[utils.get_plugins_dir()]
+        )
         response = await s.scan(
             self.generic_content, add_start_dispatch=['this_plugin_doesnt_exist']
         )
@@ -222,11 +264,12 @@ class TestCore(asynctest.TestCase):
         self.assertEqual(len(response.errors), 1)
 
     async def test_scan_with_required_plugin(self):
-        s = Stoq(base_dir=utils.get_data_dir())
+        s = Stoq(
+            base_dir=utils.get_data_dir(), plugin_dir_list=[utils.get_plugins_dir()]
+        )
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.DISPATCH_TO = ['simple_worker']
-        simple_worker.config.add_section('options')
-        simple_worker.config.set('options', 'required_workers', 'dummy_worker')
+        simple_worker.required_workers = ['dummy_worker']
         dummy_worker = s.load_plugin('dummy_worker')
         response = await s.scan(
             self.generic_content, add_start_dispatch=['simple_worker']
@@ -238,7 +281,9 @@ class TestCore(asynctest.TestCase):
         self.assertEqual('dummy_worker', response.results[1].plugins_run['workers'][0])
 
     async def test_scan_with_duplicate_extracted_payloads(self):
-        s = Stoq(base_dir=utils.get_data_dir())
+        s = Stoq(
+            base_dir=utils.get_data_dir(), plugin_dir_list=[utils.get_plugins_dir()]
+        )
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.DISPATCH_TO = ['extract_payload']
         simple_worker.EXTRACTED_PAYLOAD = self.generic_content + b'more data'
@@ -258,14 +303,14 @@ class TestCore(asynctest.TestCase):
         self.assertEqual('extract_payload', response.results[1].extracted_by[1])
 
     async def test_scan_with_nested_required_plugin(self):
-        s = Stoq(base_dir=utils.get_data_dir())
+        s = Stoq(
+            base_dir=utils.get_data_dir(), plugin_dir_list=[utils.get_plugins_dir()]
+        )
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.DISPATCH_TO = ['simple_worker']
-        simple_worker.config.add_section('options')
-        simple_worker.config.set('options', 'required_workers', 'dummy_worker')
+        simple_worker.required_workers = ['dummy_worker']
         dummy_worker = s.load_plugin('dummy_worker')
-        dummy_worker.config.add_section('options')
-        dummy_worker.config.set('options', 'required_workers', 'extract_payload')
+        dummy_worker.required_workers = ['extract_payload']
         response = await s.scan(
             self.generic_content, add_start_dispatch=['simple_worker']
         )
@@ -284,14 +329,16 @@ class TestCore(asynctest.TestCase):
         self.assertIn('extract_payload', response.results[3].extracted_by)
 
     async def test_scan_with_required_plugin_max_depth(self):
-        s = Stoq(base_dir=utils.get_data_dir(), max_required_worker_depth=1)
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            max_required_worker_depth=1,
+        )
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.DISPATCH_TO = ['simple_worker']
-        simple_worker.config.add_section('options')
-        simple_worker.config.set('options', 'required_workers', 'dummy_worker')
+        simple_worker.required_workers = ['dummy_worker']
         dummy_worker = s.load_plugin('dummy_worker')
-        dummy_worker.config.add_section('options')
-        dummy_worker.config.set('options', 'required_workers', 'extract_payload')
+        dummy_worker.required_workers = ['extract_payload']
         response = await s.scan(
             self.generic_content, add_start_dispatch=['simple_worker']
         )
@@ -299,22 +346,29 @@ class TestCore(asynctest.TestCase):
         self.assertIn('Max required plugin depth', response.errors[0].error)
 
     async def test_scan_with_required_plugin_circular_reference(self):
-        s = Stoq(base_dir=utils.get_data_dir(), max_required_worker_depth=2000)
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            max_required_worker_depth=2000,
+        )
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.DISPATCH_TO = ['simple_worker']
-        simple_worker.config.add_section('options')
-        simple_worker.config.set('options', 'required_workers', 'dummy_worker')
+        simple_worker.required_workers = ['dummy_worker']
         dummy_worker = s.load_plugin('dummy_worker')
-        dummy_worker.config.add_section('options')
-        dummy_worker.config.set('options', 'required_workers', 'simple_worker')
+        dummy_worker.required_workers = ['simple_worker']
         response = await s.scan(
             self.generic_content, add_start_dispatch=['simple_worker']
         )
+        print(response)
         self.assertEqual(1, len(response.results))
         self.assertIn('RecursionError', response.errors[0].error)
 
     async def test_source_archive(self):
-        s = Stoq(base_dir=utils.get_data_dir(), source_archivers=['simple_archiver'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            source_archivers=['simple_archiver'],
+        )
         simple_archiver = s.load_plugin('simple_archiver')
         simple_archiver.PAYLOAD = b'This is a payload'
         task = ArchiverResponse(results={'path': '/tmp/123'})
@@ -323,7 +377,11 @@ class TestCore(asynctest.TestCase):
         self.assertEqual(payload.content, simple_archiver.PAYLOAD)
 
     async def test_dest_archive(self):
-        s = Stoq(base_dir=utils.get_data_dir(), dest_archivers=['dummy_archiver'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            dest_archivers=['dummy_archiver'],
+        )
         dummy_archiver = s.load_plugin('dummy_archiver')
         dummy_archiver.archive = asynctest.create_autospec(
             dummy_archiver.archive, return_value=None
@@ -335,7 +393,11 @@ class TestCore(asynctest.TestCase):
         self.assertIn('dummy_archiver', response.results[0].plugins_run['archivers'])
 
     async def test_dont_dest_archive_request(self):
-        s = Stoq(base_dir=utils.get_data_dir(), dest_archivers=['dummy_archiver'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            dest_archivers=['dummy_archiver'],
+        )
         dummy_archiver = s.load_plugin('dummy_archiver')
         dummy_archiver.archive = asynctest.CoroutineMock(return_value=None)
         response = await s.scan(
@@ -348,7 +410,11 @@ class TestCore(asynctest.TestCase):
         self.assertNotIn('dummy_archiver', response.results[1].plugins_run['archivers'])
 
     async def test_dont_dest_archive_payload(self):
-        s = Stoq(base_dir=utils.get_data_dir(), dest_archivers=['dummy_archiver'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            dest_archivers=['dummy_archiver'],
+        )
         dummy_archiver = s.load_plugin('dummy_archiver')
         dummy_archiver.archive = asynctest.create_autospec(
             dummy_archiver.archive, return_value=None
@@ -364,7 +430,11 @@ class TestCore(asynctest.TestCase):
         self.assertIn('dummy_archiver', response.results[1].plugins_run['archivers'])
 
     async def test_dont_dest_archive_yara(self):
-        s = Stoq(base_dir=utils.get_data_dir(), dest_archivers=['dummy_archiver'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            dest_archivers=['dummy_archiver'],
+        )
         response = await s.scan(
             self.generic_content, request_meta=RequestMeta(archive_payloads=True)
         )
@@ -372,7 +442,9 @@ class TestCore(asynctest.TestCase):
         self.assertNotIn('dummy_archiver', response.results[0].archivers)
 
     async def test_worker_in_results(self):
-        s = Stoq(base_dir=utils.get_data_dir())
+        s = Stoq(
+            base_dir=utils.get_data_dir(), plugin_dir_list=[utils.get_plugins_dir()]
+        )
         response = await s.scan(
             self.generic_content, add_start_dispatch=['simple_worker']
         )
@@ -381,14 +453,20 @@ class TestCore(asynctest.TestCase):
         self.assertEqual(len(response.errors), 0)
 
     async def test_worker_not_in_results(self):
-        s = Stoq(base_dir=utils.get_data_dir())
+        s = Stoq(
+            base_dir=utils.get_data_dir(), plugin_dir_list=[utils.get_plugins_dir()]
+        )
         response = await s.scan(
             self.generic_content, add_start_dispatch=['dummy_worker']
         )
         self.assertNotIn('dummy_worker', response.results[0].workers)
 
     async def test_archiver_in_results(self):
-        s = Stoq(base_dir=utils.get_data_dir(), dest_archivers=['simple_archiver'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            dest_archivers=['simple_archiver'],
+        )
         response = await s.scan(
             self.generic_content, request_meta=RequestMeta(archive_payloads=True)
         )
@@ -397,14 +475,20 @@ class TestCore(asynctest.TestCase):
         self.assertEqual(len(response.errors), 0)
 
     async def test_archiver_not_in_results(self):
-        s = Stoq(base_dir=utils.get_data_dir(), dest_archivers=['dummy_archiver'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            dest_archivers=['dummy_archiver'],
+        )
         response = await s.scan(
             self.generic_content, request_meta=RequestMeta(archive_payloads=True)
         )
         self.assertNotIn('dummy_archiver', response.results[0].archivers)
 
     async def test_worker_exception(self):
-        s = Stoq(base_dir=utils.get_data_dir())
+        s = Stoq(
+            base_dir=utils.get_data_dir(), plugin_dir_list=[utils.get_plugins_dir()]
+        )
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.RAISE_EXCEPTION = True
         response = await s.scan(
@@ -415,7 +499,9 @@ class TestCore(asynctest.TestCase):
         self.assertIn('Test exception', response.errors[0].error)
 
     async def test_worker_errors(self):
-        s = Stoq(base_dir=utils.get_data_dir())
+        s = Stoq(
+            base_dir=utils.get_data_dir(), plugin_dir_list=[utils.get_plugins_dir()]
+        )
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.RETURN_ERRORS = True
         response = await s.scan(
@@ -427,7 +513,11 @@ class TestCore(asynctest.TestCase):
         self.assertIn('Test error', response.errors[0].error)
 
     async def test_source_archiver_exception(self):
-        s = Stoq(base_dir=utils.get_data_dir(), source_archivers=['simple_archiver'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            source_archivers=['simple_archiver'],
+        )
         simple_archiver = s.load_plugin('simple_archiver')
         simple_archiver.RAISE_EXCEPTION = True
         task = "This will fail"
@@ -436,7 +526,11 @@ class TestCore(asynctest.TestCase):
         self.assertTrue('Test exception', context.exception)
 
     async def test_dest_archiver_exception(self):
-        s = Stoq(base_dir=utils.get_data_dir(), dest_archivers=['simple_archiver'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            dest_archivers=['simple_archiver'],
+        )
         simple_archiver = s.load_plugin('simple_archiver')
         simple_archiver.RAISE_EXCEPTION = True
         response = await s.scan(self.generic_content)
@@ -445,7 +539,11 @@ class TestCore(asynctest.TestCase):
         self.assertIn('Test exception', response.errors[0].error)
 
     async def test_dest_archiver_errors(self):
-        s = Stoq(base_dir=utils.get_data_dir(), dest_archivers=['simple_archiver'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            dest_archivers=['simple_archiver'],
+        )
         simple_archiver = s.load_plugin('simple_archiver')
         simple_archiver.RETURN_ERRORS = True
         response = await s.scan(self.generic_content)
@@ -456,26 +554,42 @@ class TestCore(asynctest.TestCase):
 
     async def test_max_recursion(self):
         max_rec_depth = 4  # defined in stoq.cfg
-        s = Stoq(base_dir=utils.get_data_dir(), always_dispatch=['extract_payload'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            always_dispatch=['extract_payload'],
+        )
         response = await s.scan(self.generic_content)
         self.assertEqual(len(response.results), max_rec_depth + 2)
         self.assertIn('Max recursion level', response.errors[0].error)
 
     async def test_dedup(self):
         # The simple_worker plugin always extracts the same payload
-        s = Stoq(base_dir=utils.get_data_dir(), always_dispatch=['simple_worker'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            always_dispatch=['simple_worker'],
+        )
         response = await s.scan(self.generic_content)
         self.assertEqual(len(response.results), 2)
 
     async def test_connector(self):
-        s = Stoq(base_dir=utils.get_data_dir(), connectors=['dummy_connector'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            connectors=['dummy_connector'],
+        )
         dummy_connector = s.load_plugin('dummy_connector')
         dummy_connector.save = asynctest.create_autospec(dummy_connector.save)
         await s.scan(self.generic_content)
         dummy_connector.save.assert_awaited_once()
 
     async def test_connector_exception(self):
-        s = Stoq(base_dir=utils.get_data_dir(), connectors=['dummy_connector'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            connectors=['dummy_connector'],
+        )
         dummy_connector = s.load_plugin('dummy_connector')
         dummy_connector.save = asynctest.create_autospec(
             dummy_connector.save, side_effect=RuntimeError('Unexpected exception')
@@ -484,14 +598,16 @@ class TestCore(asynctest.TestCase):
         with self.assertLogs(level='ERROR') as cm:
             await s.scan(self.generic_content)
         self.assertTrue(
-            cm.output[0].startswith(
-                'ERROR:stoq:Failed to save results using dummy_connector'
-            )
+            cm.output[0].startswith('ERROR:stoq:Failed to save results using')
         )
         logging.disable(logging.CRITICAL)
 
     async def test_decorator(self):
-        s = Stoq(base_dir=utils.get_data_dir(), decorators=['simple_decorator'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            decorators=['simple_decorator'],
+        )
         _ = s.load_plugin('simple_decorator')
         response = await s.scan(self.generic_content)
         self.assertIn('simple_decorator', response.decorators)
@@ -499,7 +615,11 @@ class TestCore(asynctest.TestCase):
         self.assertEqual(len(response.errors), 0)
 
     async def test_decorator_errors(self):
-        s = Stoq(base_dir=utils.get_data_dir(), decorators=['simple_decorator'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            decorators=['simple_decorator'],
+        )
         simple_decorator = s.load_plugin('simple_decorator')
         simple_decorator.RETURN_ERRORS = True
         response = await s.scan(self.generic_content)
@@ -509,7 +629,11 @@ class TestCore(asynctest.TestCase):
         self.assertIn('Test error', response.errors[0].error)
 
     async def test_decorator_exception(self):
-        s = Stoq(base_dir=utils.get_data_dir(), decorators=['simple_decorator'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            decorators=['simple_decorator'],
+        )
         simple_decorator = s.load_plugin('simple_decorator')
         simple_decorator.RAISE_EXCEPTION = True
         response = await s.scan(self.generic_content)
@@ -517,7 +641,11 @@ class TestCore(asynctest.TestCase):
         self.assertIn('Test exception', response.errors[0].error)
 
     async def test_multiclass_plugin(self):
-        s = Stoq(base_dir=utils.get_data_dir(), dispatchers=['multiclass_plugin'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            dispatchers=['multiclass_plugin'],
+        )
         multiclass_worker = s.load_plugin('multiclass_plugin')
         multiclass_worker.scan = asynctest.create_autospec(
             multiclass_worker.scan, return_value=None
@@ -541,6 +669,7 @@ class TestCore(asynctest.TestCase):
     async def test_provider(self):
         s = Stoq(
             base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
             providers=['simple_provider'],
             connectors=['dummy_connector'],
         )
@@ -550,13 +679,16 @@ class TestCore(asynctest.TestCase):
         dummy_connector.save.assert_awaited_once()
 
     async def test_no_providers(self):
-        s = Stoq(base_dir=utils.get_data_dir())
+        s = Stoq(
+            base_dir=utils.get_data_dir(), plugin_dir_list=[utils.get_plugins_dir()]
+        )
         with self.assertRaises(StoqException):
             await s.run()
 
     async def test_multi_providers(self):
         s = Stoq(
             base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
             providers=['simple_provider', 'simple_provider2'],
             connectors=['dummy_connector'],
         )
@@ -566,7 +698,11 @@ class TestCore(asynctest.TestCase):
         self.assertEqual(dummy_connector.save.await_count, 2)
 
     async def test_provider_exception(self):
-        s = Stoq(base_dir=utils.get_data_dir(), providers=['simple_provider'])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            providers=['simple_provider'],
+        )
         simple_provider = s.load_plugin('simple_provider')
         simple_provider.RAISE_EXCEPTION = True
         logging.disable(logging.NOTSET)
@@ -580,6 +716,7 @@ class TestCore(asynctest.TestCase):
     async def test_provider_with_task(self):
         s = Stoq(
             base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
             source_archivers=['simple_archiver'],
             providers=['simple_provider'],
             connectors=['dummy_connector'],
@@ -596,6 +733,7 @@ class TestCore(asynctest.TestCase):
     async def test_provider_with_start_dispatch(self):
         s = Stoq(
             base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
             source_archivers=['simple_archiver'],
             providers=['simple_provider'],
             connectors=['dummy_connector'],
@@ -704,7 +842,11 @@ class TestCore(asynctest.TestCase):
             payload_count += 1
 
         initial_response = StoqResponse(request)
-        s = Stoq(base_dir=utils.get_data_dir(), decorators=["simple_decorator"])
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            plugin_dir_list=[utils.get_plugins_dir()],
+            decorators=["simple_decorator"],
+        )
         all_subresponses = [
             r async for r in s.reconstruct_all_subresponses(initial_response)
         ]

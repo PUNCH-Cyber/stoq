@@ -24,7 +24,6 @@ from pathlib import Path
 from typing import Dict, Union
 
 import stoq.tests as tests
-from stoq.installer import StoqPluginInstaller
 from stoq import Stoq, PayloadMeta, RequestMeta, __version__
 
 
@@ -40,7 +39,6 @@ def main() -> None:
         )
     except FileNotFoundError as err:
         print(f"$STOQ_HOME is invalid: {err}", file=sys.stderr)
-        sys.exit(1)
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -65,10 +63,6 @@ Examples:
       send them to workers, and archive all payloads into MongoDB:
 
     $ %(prog)s run -P dirmon -A mongodb
-
-    - Install a plugin from a directory
-
-    $ %(prog)s install path/to/plugin_directory
 
     ''',
     )
@@ -169,22 +163,8 @@ Examples:
         '--plugin-dir', nargs='+', help='Directory(ies) containing stoQ plugins'
     )
 
-    install = subparsers.add_parser('install', help='Install a given plugin')
-    install.add_argument(
-        'plugin_path', help='Directory or Github repo of the plugin to install'
-    )
-    install.add_argument(
-        '--install_dir',
-        default=os.path.join(stoq_home, 'plugins'),
-        help='Override the default plugin installation directory',
-    )
-    install.add_argument(
-        '--upgrade',
-        action='store_true',
-        help='Force the plugin to be upgraded if it already exists',
-    )
-    install.add_argument(
-        '--github', action='store_true', help='Install plugin from Github repository'
+    install = subparsers.add_parser(
+        'install', help='Install a given plugin (deprecated)'
     )
 
     subparsers.add_parser('test', help='Run stoQ tests')
@@ -305,10 +285,9 @@ Examples:
             print(f'\t\t\t\t- {", ".join(info["classes"]):<20s}')
 
     elif args.command == 'install':
-        StoqPluginInstaller.install(
-            args.plugin_path, args.install_dir, args.upgrade, args.github
+        print(
+            'stoQ plugins must be installed using pip. Please see documentation for additional help.'
         )
-        print(f'Successfully installed {args.plugin_path} into {args.install_dir}')
     elif args.command == 'test':
         test_path = os.path.dirname(tests.__file__)
         test_suite = unittest.TestLoader().discover(test_path)

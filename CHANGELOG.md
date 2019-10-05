@@ -43,6 +43,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PayloadMeta` is now an object of `PayloadResults.payload_meta` 
 - `PayloadResults.extracted_by` is now a `List[str]` rather than `str`
 - `PayloadResults.extracted_from` is now a `List[str]` rather than `str`
+- Plugins are now loaded via the Python path as well as predefined plugin paths.
+- Plugins are now entirely pip modules, and no longer require a `.stoq` file
+    This change also changes the way plugins must be written and their directory structure.
+    `plugin_name` *must* be defined as an object of the plugin for it to run properly.
 
 ### Deprecated
 
@@ -50,7 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Payload.plugins_run` has been removed in favor of `PayloadResults.plugins_run`)
 - `Payload.worker_results` has been removed in favor of `PayloadResults.workers`
 - `RequestMeta` is no longer passed to plugins, in favor of the `Request` object.
-
+- Plugin installation via `stoq` cli
 ## [2.0.5] - 2019-06-07
 
 ### Added

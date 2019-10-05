@@ -15,12 +15,15 @@
 #   limitations under the License.
 
 import os
+import abc
+import sys
 import inspect
 import logging
+import pkgutil
 import configparser
 import importlib.util
 from pkg_resources import parse_version, working_set
-from typing import Dict, List, Optional, Tuple, Any, Union
+from typing import Dict, List, Optional, Tuple, Any, Union, Set
 
 import stoq.helpers as helpers
 from stoq.data_classes import Error
@@ -45,7 +48,7 @@ class StoqPluginManager:
     ) -> None:
         self._stoq_config = stoq_config
         self._plugin_opts = {} if plugin_opts is None else plugin_opts
-        self._plugin_name_to_info: Dict[str, Tuple[str, configparser.ConfigParser]] = {}
+        self._available_plugins: Dict[str, str] = {}
         self._loaded_plugins: Dict[str, BasePlugin] = {}
         self._loaded_provider_plugins: Dict[str, ProviderPlugin] = {}
         self._loaded_worker_plugins: Dict[str, WorkerPlugin] = {}
@@ -55,41 +58,95 @@ class StoqPluginManager:
         self._loaded_connector_plugins: List[ConnectorPlugin] = []
         self._loaded_decorator_plugins: Dict[str, DecoratorPlugin] = {}
 
+        self.valid_plugin_classes = [
+            ArchiverPlugin,
+            ProviderPlugin,
+            WorkerPlugin,
+            ConnectorPlugin,
+            DispatcherPlugin,
+            DecoratorPlugin,
+        ]
+
         if not hasattr(self, 'log') or self.log is None:
             self.log: logging.Logger = logging.getLogger('stoq')
 
-    @property
-    def _collect_plugins(self) -> Dict[str, str]:
-        return {
-            p.project_name: p.version
-            for p in working_set
-            if p.project_name.startswith('stoq-plugin')
-        }
+        for plugin_path in plugin_dir_list:
+            plugin_path = os.path.abspath(plugin_path)
+            if os.path.isdir(plugin_path):
+                if plugin_path not in sys.path:
+                    self.log.debug(f'Adding {plugin_path} to sys.path')
+                    sys.path.insert(0, plugin_path)
+            else:
+                self.log.warning(
+                    f'{plugin_path} is an invalid directory, not adding it to path'
+                )
+        self._collect_plugins()
 
     def load_plugin(self, plugin_name: str) -> BasePlugin:
         plugin_name = plugin_name.strip()
         if plugin_name in self._loaded_plugins:
             return self._loaded_plugins[plugin_name]
-        if f'stoq-plugin-{plugin_name}' not in self._collect_plugins:
+        if plugin_name not in self._available_plugins:
             raise StoqPluginNotFound(
                 f'The plugin "{plugin_name}" is invalid or does not exist'
             )
 
-        module = importlib.import_module(f'stoq_plugins.{plugin_name}.{plugin_name}')
+        plugin_class = self._import_plugin(plugin_name)
+
+        # Plugin configuration order of precendence:
+        # 1) plugin options provided at instantiation of `Stoq()`
+        # 2) plugin configuration in `stoq.cfg`
+        if isinstance(
+            self._stoq_config, configparser.ConfigParser
+        ) and self._stoq_config.has_section(plugin_name):
+            plugin_opts = dict(self._stoq_config.items(plugin_name))
+        else:
+            plugin_opts = {}
+        plugin_opts.update(self._plugin_opts.get(plugin_name, {}))
+        plugin_config = configparser.ConfigParser()
+        plugin_config.read_dict({'options': plugin_opts})
+        plugin = plugin_class(plugin_config, self._plugin_opts.get(plugin_name))
+        if hasattr(plugin, '__min_stoq_version__'):
+            # Placing this import at the top of this file causes a circular
+            # import chain that causes stoq to crash on initialization
+            from stoq import __version__
+
+            if parse_version(__version__) < parse_version(
+                str(plugin.__min_stoq_version__)
+            ):
+                self.log.warning(
+                    f'Plugin {plugin_name} not compatible with this version of '
+                    'stoQ. Unpredictable results may occur!'
+                )
+        self._loaded_plugins[plugin_name] = plugin
+        return plugin
+
+    def list_plugins(self) -> Dict[str, Dict[str, Union[str, Set[str]]]]:
+        installed_plugins: Dict[str, Dict[str, Union[str, Set[str]]]] = {}
+        for plugin_name in self._available_plugins.keys():
+            plugin_classes: Set[str] = set()
+            plugin = self._import_plugin(plugin_name)
+            plugin_classes = set(
+                [
+                    p.__module__.split('.')[-1]
+                    for p in self.valid_plugin_classes
+                    if issubclass(plugin, p)
+                ]
+            )
+            installed_plugins[plugin_name] = {
+                'classes': plugin_classes,
+                'version': plugin.__version__,  # type: ignore
+                'description': plugin.__description__,  # type: ignore
+            }
+        return installed_plugins
+
+    def _import_plugin(self, plugin_name: str) -> abc.ABCMeta:
+        module = importlib.import_module(self._available_plugins[plugin_name])
         plugin_classes = inspect.getmembers(
             module,
             predicate=lambda mem: inspect.isclass(mem)
             and issubclass(mem, BasePlugin)
-            and mem
-            not in [
-                ArchiverPlugin,
-                BasePlugin,
-                ProviderPlugin,
-                WorkerPlugin,
-                ConnectorPlugin,
-                DispatcherPlugin,
-                DecoratorPlugin,
-            ]
+            and mem not in self.valid_plugin_classes
             and not inspect.isabstract(mem),
         )
         if len(plugin_classes) == 0:
@@ -101,69 +158,15 @@ class StoqPluginManager:
                 f'Multiple possible plugin classes found in the module for {plugin_name},'
                 ' unable to distinguish which to use.'
             )
-        _, plugin_class = plugin_classes[0]
-        # Plugin configuration order of precendence:
-        # 1) plugin options provided at instantiation of `Stoq()`
-        # 2) plugin configuration in `stoq.cfg`
-        if isinstance(
-            self._stoq_config, configparser.ConfigParser
-        ) and self._stoq_config.has_section(plugin_name):
-            plugin_config = dict(self._stoq_config.items(plugin_name))
-        else:
-            plugin_config = {}
-        plugin_config.update(self._plugin_opts.get(plugin_name, {}))
-        plugin = plugin_class(plugin_config, self._plugin_opts.get(plugin_name))
-        if hasattr(plugin, '__min_stoq_version__'):
-            # Placing this import at the top of this file causes a circular
-            # import chain that causes stoq to crash on initialization
-            from stoq import __version__
+        return plugin_classes[0][1]
 
-            if parse_version(__version__) < parse_version(plugin.__min_stoq_version__):
-                self.log.warning(
-                    f'Plugin {plugin_name} not compatible with this version of '
-                    'stoQ. Unpredictable results may occur!'
-                )
-        self._loaded_plugins[plugin_name] = plugin
-        return plugin
+    def onerror(self, name):
+        if name.startswith('stoq_plugins.'):
+            self.log.warning(f'Error importing {name}:', exc_info=True)
 
-    def list_plugins(self) -> Dict[str, Dict[str, Any]]:
-        import ast
-
-        valid_classes = [
-            'ArchiverPlugin',
-            'BasePlugin',
-            'ProviderPlugin',
-            'WorkerPlugin',
-            'ConnectorPlugin',
-            'DispatcherPlugin',
-            'DecoratorPlugin',
-        ]
-        plugins = {}
-        for plugin in self._plugin_name_to_info.keys():
-            plugin_classes = []
-            try:
-                with open(self._plugin_name_to_info[plugin][0]) as f:
-                    parsed_plugin = ast.parse(f.read())
-                classes = [
-                    n
-                    for n in parsed_plugin.body  # type: ignore
-                    if isinstance(n, ast.ClassDef)
-                ]
-                for c in classes:
-                    for base in c.bases:
-                        if base.id in valid_classes:  # type: ignore
-                            plugin_classes.append(
-                                base.id.replace('Plugin', '')  # type: ignore
-                            )
-            except (UnicodeDecodeError, ValueError):
-                plugin_classes = ['UNKNOWN']
-            plugins[plugin] = {
-                'classes': plugin_classes,
-                'version': self._plugin_name_to_info[plugin][1].get(
-                    'Documentation', 'version', fallback=''
-                ),
-                'description': self._plugin_name_to_info[plugin][1].get(
-                    'Documentation', 'description', fallback=''
-                ),
-            }
-        return plugins
+    def _collect_plugins(self) -> None:
+        self._available_plugins = {
+            p.name.split('.')[-1]: p.name
+            for p in pkgutil.walk_packages(onerror=self.onerror)
+            if p.name.startswith('stoq_plugins') and not p.ispkg
+        }

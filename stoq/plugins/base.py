@@ -21,8 +21,8 @@ from typing import Dict, Optional, Set
 
 
 class BasePlugin(ABC):
-    plugin_name: str = ''
-    __version__: str = ''
+    plugin_name: str
+    __version__: str
     __website__: str = ''
     __description__: str = ''
     __author__: str = ''
@@ -30,4 +30,4 @@ class BasePlugin(ABC):
     def __init__(self, config: ConfigParser, plugin_opts: Optional[Dict]) -> None:
         self.config = config
         self.plugin_opts = plugin_opts
-        self.log = logging.getLogger(f'stoq.{self.plugin_name}')
+        self.log = logging.getLogger(f'stoq.{self.plugin_name}')  # type: ignore
