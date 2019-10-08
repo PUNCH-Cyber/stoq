@@ -32,19 +32,16 @@ class SimpleWorker(WorkerPlugin):
     RETURN_ERRORS = False
     DISPATCH_TO: List[str] = []
     SHOULD_SCAN = True
+    EXTRACTED_PAYLOAD = None
 
     async def scan(
         self, payload: Payload, request: Request
     ) -> Optional[WorkerResponse]:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')
-        if self.DISPATCH_TO or self.SHOULD_SCAN is False:
-            meta = PayloadMeta(
-                should_scan=self.SHOULD_SCAN, dispatch_to=self.DISPATCH_TO
-            )
-            p = ExtractedPayload(b'Lorem ipsum', meta)
-        else:
-            p = ExtractedPayload(b'Lorem ipsum')
+        extracted_payload = self.EXTRACTED_PAYLOAD or b'Lorem ipsum'
+        meta = PayloadMeta(should_scan=self.SHOULD_SCAN, dispatch_to=self.DISPATCH_TO)
+        p = ExtractedPayload(extracted_payload, meta)
         wr = WorkerResponse({'valuable_insight': 'wow'}, extracted=[p])
         if self.RETURN_ERRORS:
             wr.errors.append(
