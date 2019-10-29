@@ -177,13 +177,27 @@
 
 """
 from abc import abstractmethod
-from typing import Optional
+from configparser import ConfigParser
+from typing import Dict, Optional
 
 from stoq.data_classes import Payload, Request, WorkerResponse
 from stoq.plugins import BasePlugin
 
 
 class WorkerPlugin(BasePlugin):
+    def __init__(self, config: ConfigParser, plugin_opts: Optional[Dict]) -> None:
+        super().__init__(config, plugin_opts)
+
+        required_worker_plugin_names = config.get(
+            'options', 'required_workers', fallback=None
+        )
+        if required_worker_plugin_names:
+            self.required_plugin_names = set(
+                w.strip() for w in required_worker_plugin_names.split(',')
+            )
+        else:
+            self.required_plugin_names = set()
+
     @abstractmethod
     async def scan(
         self, payload: Payload, request: Request

@@ -409,10 +409,10 @@ class Stoq(StoqPluginManager):
             'core', 'provider_consumers', fallback=50
         )
         self.max_recursion = max_recursion or config.getint(
-            'core', 'max_recursion', fallback=3
+            'core', 'max_recursion', fallback=10
         )
         self.max_required_worker_depth = max_required_worker_depth or config.getint(
-            'core', 'max_required_worker_depth', fallback=3
+            'core', 'max_required_worker_depth', fallback=10
         )
 
         if log_dir is _UNSET:
@@ -681,7 +681,7 @@ class Stoq(StoqPluginManager):
         self, payload: Payload, add_dispatch: List[str], request: Request
     ) -> List[Payload]:
         extracted: List[Payload] = []
-        worker_tasks: Dict[str, Dict[str, Union[Set[str], Awaitable]]] = {}
+        worker_plugins: Set[WorkerPlugin] = set()
         dispatches: Set[str] = set().union(  # type: ignore
             add_dispatch, self.always_dispatch  # type: ignore
         )
@@ -701,63 +701,30 @@ class Stoq(StoqPluginManager):
                 for dispatched_worker in dispatched_workers:
                     dispatches.add(dispatched_worker)
 
-            for worker_name in dispatches:
-                new_tasks = self._generate_tasks(worker_name, payload, request)
-                if new_tasks:
-                    worker_tasks.update(new_tasks)
+            for worker_plugin_name in dispatches:
+                plugins_resolved_dependencies: Set[WorkerPlugin] = self._resolve_plugin_dependencies(
+                    payload, worker_plugin_name, request
+                )
+                worker_plugins.update(plugins_resolved_dependencies)
 
             # Allow for worker plugin to have dependencies, with a maximum depth
             for _recursion_depth in range(self.max_required_worker_depth + 1):
-                self.log.debug(
-                    f'Current required plugin recursion depth: {_recursion_depth}'
-                )
-                if not worker_tasks:
+                if not worker_plugins:
                     break
                 current_worker_tasks: List[Awaitable] = []
-                for current_worker, current_meta in worker_tasks.items():
-                    if current_worker in payload.results.plugins_run['workers']:
+                for plugin in worker_plugins:
+                    if plugin.plugin_name in payload.results.plugins_run['workers']:
                         continue
-                    elif not current_meta['required_plugins']:
-                        # No required plugins found, and this plugin hasn't been run yet
-                        self.log.debug(
-                            f'No required plugins found, adding {current_worker} to task list'
-                        )
+                    elif self._worker_task_can_start(payload, plugin):
                         current_worker_tasks.append(
                             asyncio.ensure_future(
                                 self._worker_start(
-                                    current_meta['plugin'],  # type: ignore
+                                    plugin,  # type: ignore
                                     payload,
                                     request,
                                 )
                             )
                         )  # type: ignore
-                    else:
-                        done = True
-                        # Iterate over each required plugin
-                        for current_required in current_meta[  # type: ignore
-                            'required_plugins'
-                        ]:
-                            if (
-                                current_required
-                                not in payload.results.plugins_run['workers']
-                            ):
-                                # This workers required plugin has not been run yet
-                                done = False
-                        if done:
-                            # All required plugins have been run, and this plugin is ready
-                            # to be run.
-                            self.log.debug(
-                                f'All required plugins satisfied, adding {current_worker} to task list'
-                            )
-                            current_worker_tasks.append(
-                                asyncio.ensure_future(
-                                    self._worker_start(
-                                        current_meta['plugin'],  # type: ignore
-                                        payload,
-                                        request,
-                                    )
-                                )
-                            )  # type: ignore
 
                 self.log.debug(
                     f'Starting scan of {len(current_worker_tasks)} recursion depth {_recursion_depth}'
@@ -853,10 +820,14 @@ class Stoq(StoqPluginManager):
             )
         return (worker.plugin_name, worker_response)
 
-    def _generate_tasks(
-        self, plugin_name: str, payload: Payload, request: Request, depth: int = 0
-    ) -> Optional[Dict[str, Dict[str, Union[Set[str], Awaitable]]]]:
-        tasks: Dict[str, Dict[str, Union[Set[str], Awaitable]]] = {}
+    def _resolve_plugin_dependencies(
+        self,
+        payload: Payload,
+        plugin_name: str,
+        request: Request,
+        depth: int = 0,
+    ) -> Set[WorkerPlugin]:
+        self.log.debug(f'Checking plugin dependencies for {plugin_name}')
         if depth > self.max_required_worker_depth:
             request.errors.append(
                 Error(
@@ -865,11 +836,10 @@ class Stoq(StoqPluginManager):
                     error=f'Max required plugin depth ({self.max_required_worker_depth}) reached, unable to generate additional tasks',
                 )
             )
-            return None
-        self.log.debug(f'Current task recursion depth = {depth}')
-        self.log.debug(f'Checking for plugin dependencies for {plugin_name}')
+            return set()
+
         try:
-            plugin = self.load_plugin(plugin_name)
+            plugin: WorkerPlugin = self.load_plugin(plugin_name)
         except Exception as e:
             msg = 'worker:failed to load'
             self.log.exception(msg)
@@ -880,53 +850,43 @@ class Stoq(StoqPluginManager):
                     error=helpers.format_exc(e, msg=msg),
                 )
             )
-            return None
+            return set()
 
-        required_plugins = set(
-            [
-                w.strip()
-                for w in plugin.config.get(  # type: ignore
-                    'options', 'required_workers', fallback=''
-                ).split(',')
-                if w
-            ]
-        )
-
-        tasks.update(
-            {
-                plugin_name: {
-                    'required_plugins': required_plugins,
-                    'plugin': plugin,  # type: ignore
-                }
-            }
-        )
-        if required_plugins:
+        total_plugins_resolved_dependencies: Set[WorkerPlugin] = set()
+        total_plugins_resolved_dependencies.add(plugin)
+        if len(plugin.required_plugin_names) != 0:
             self.log.debug(
-                f'{plugin_name} has dependencies of {",".join(required_plugins)}'
+                f'{plugin_name} has dependencies of {", ".join(plugin.required_plugin_names)}'
             )
-            for required_plugin in required_plugins:
-                if required_plugin not in tasks:
-                    try:
-                        new_tasks = self._generate_tasks(
-                            required_plugin, payload, request, depth + 1
-                        )
-                        if new_tasks:
-                            tasks.update(new_tasks)
-                    except RecursionError as e:
-                        request.errors.append(
-                            Error(
-                                payload_id=payload.results.payload_id,
-                                plugin_name=required_plugin,
-                                error=helpers.format_exc(e),
-                            )
-                        )
-                else:
-                    self.log.debug(
-                        f'{required_plugin} already in task list for parent {plugin_name}'
+            for required_plugin_name in plugin.required_plugin_names:
+                try:
+                    plugins_resolved_dependencies = self._resolve_plugin_dependencies(
+                        payload,
+                        required_plugin_name,
+                        request,
+                        depth + 1,
                     )
+                except RecursionError as e:
+                    request.errors.append(
+                        Error(
+                            payload_id=payload.results.payload_id,
+                            plugin_name=required_plugin_name,
+                            error=helpers.format_exc(e),
+                        )
+                    )
+                    return set()
 
-        self.log.debug(f'Current tasks: {tasks.keys()}')
-        return tasks
+                if len(plugins_resolved_dependencies) == 0: # Bubble up failure
+                    return set()
+
+                total_plugins_resolved_dependencies.update(plugins_resolved_dependencies)
+        return total_plugins_resolved_dependencies
+
+    def _worker_task_can_start(self, payload: Payload, worker_plugin: WorkerPlugin):
+        for required_plugin_name in worker_plugin.required_plugin_names:
+            if required_plugin_name not in payload.results.plugins_run['workers']:
+                return False
+        return True
 
     def _init_logger(
         self,

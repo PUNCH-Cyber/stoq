@@ -225,17 +225,19 @@ class TestCore(asynctest.TestCase):
         s = Stoq(base_dir=utils.get_data_dir())
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.DISPATCH_TO = ['simple_worker']
-        simple_worker.config.add_section('options')
-        simple_worker.config.set('options', 'required_workers', 'dummy_worker')
-        dummy_worker = s.load_plugin('dummy_worker')
+        simple_worker.required_plugin_names.add('dummy_worker')
         response = await s.scan(
             self.generic_content, add_start_dispatch=['simple_worker']
         )
         self.assertEqual(2, len(response.results))
-        self.assertEqual('simple_worker', response.results[0].plugins_run['workers'][1])
-        self.assertEqual('dummy_worker', response.results[0].plugins_run['workers'][0])
-        self.assertEqual('simple_worker', response.results[1].plugins_run['workers'][1])
-        self.assertEqual('dummy_worker', response.results[1].plugins_run['workers'][0])
+        self.assertCountEqual(
+            ['dummy_worker', 'simple_worker'],
+            response.results[0].plugins_run['workers'],
+        )
+        self.assertCountEqual(
+            ['dummy_worker', 'simple_worker'],
+            response.results[1].plugins_run['workers'],
+        )
 
     async def test_scan_with_duplicate_extracted_payloads(self):
         s = Stoq(base_dir=utils.get_data_dir())
@@ -261,25 +263,21 @@ class TestCore(asynctest.TestCase):
         s = Stoq(base_dir=utils.get_data_dir())
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.DISPATCH_TO = ['simple_worker']
-        simple_worker.config.add_section('options')
-        simple_worker.config.set('options', 'required_workers', 'dummy_worker')
+        simple_worker.required_plugin_names.add('dummy_worker')
         dummy_worker = s.load_plugin('dummy_worker')
-        dummy_worker.config.add_section('options')
-        dummy_worker.config.set('options', 'required_workers', 'extract_payload')
+        dummy_worker.required_plugin_names.add('extract_payload')
         response = await s.scan(
             self.generic_content, add_start_dispatch=['simple_worker']
         )
         self.assertEqual(4, len(response.results))
-        self.assertEqual('simple_worker', response.results[0].plugins_run['workers'][2])
-        self.assertEqual('dummy_worker', response.results[0].plugins_run['workers'][1])
-        self.assertEqual(
-            'extract_payload', response.results[0].plugins_run['workers'][0]
+        self.assertCountEqual(
+            ['dummy_worker', 'extract_payload', 'simple_worker'],
+            response.results[0].plugins_run['workers'],
         )
         self.assertIn('extract_payload', response.results[1].extracted_by)
-        self.assertEqual('simple_worker', response.results[2].plugins_run['workers'][2])
-        self.assertEqual('dummy_worker', response.results[2].plugins_run['workers'][1])
-        self.assertEqual(
-            'extract_payload', response.results[2].plugins_run['workers'][0]
+        self.assertCountEqual(
+            ['dummy_worker', 'extract_payload', 'simple_worker'],
+            response.results[2].plugins_run['workers'],
         )
         self.assertIn('extract_payload', response.results[3].extracted_by)
 
@@ -287,11 +285,9 @@ class TestCore(asynctest.TestCase):
         s = Stoq(base_dir=utils.get_data_dir(), max_required_worker_depth=1)
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.DISPATCH_TO = ['simple_worker']
-        simple_worker.config.add_section('options')
-        simple_worker.config.set('options', 'required_workers', 'dummy_worker')
+        simple_worker.required_plugin_names.add('dummy_worker')
         dummy_worker = s.load_plugin('dummy_worker')
-        dummy_worker.config.add_section('options')
-        dummy_worker.config.set('options', 'required_workers', 'extract_payload')
+        dummy_worker.required_plugin_names.add('extract_payload')
         response = await s.scan(
             self.generic_content, add_start_dispatch=['simple_worker']
         )
@@ -302,11 +298,9 @@ class TestCore(asynctest.TestCase):
         s = Stoq(base_dir=utils.get_data_dir(), max_required_worker_depth=2000)
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.DISPATCH_TO = ['simple_worker']
-        simple_worker.config.add_section('options')
-        simple_worker.config.set('options', 'required_workers', 'dummy_worker')
+        simple_worker.required_plugin_names.add('dummy_worker')
         dummy_worker = s.load_plugin('dummy_worker')
-        dummy_worker.config.add_section('options')
-        dummy_worker.config.set('options', 'required_workers', 'simple_worker')
+        dummy_worker.required_plugin_names.add('simple_worker')
         response = await s.scan(
             self.generic_content, add_start_dispatch=['simple_worker']
         )
@@ -455,7 +449,7 @@ class TestCore(asynctest.TestCase):
         self.assertIn('Test error', response.errors[0].error)
 
     async def test_max_recursion(self):
-        max_rec_depth = 4  # defined in stoq.cfg
+        max_rec_depth = 10  # defined in stoq.cfg
         s = Stoq(base_dir=utils.get_data_dir(), always_dispatch=['extract_payload'])
         response = await s.scan(self.generic_content)
         self.assertEqual(len(response.results), max_rec_depth + 2)
