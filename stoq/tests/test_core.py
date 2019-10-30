@@ -452,8 +452,8 @@ class TestCore(asynctest.TestCase):
         max_rec_depth = 10  # defined in stoq.cfg
         s = Stoq(base_dir=utils.get_data_dir(), always_dispatch=['extract_payload'])
         response = await s.scan(self.generic_content)
-        self.assertEqual(len(response.results), max_rec_depth + 2)
-        self.assertIn('Max recursion level', response.errors[0].error)
+        self.assertEqual(len(response.results), max_rec_depth + 1)
+        self.assertIn('Final worker round', response.errors[0].error)
 
     async def test_dedup(self):
         # The simple_worker plugin always extracts the same payload
