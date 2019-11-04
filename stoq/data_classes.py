@@ -276,6 +276,7 @@ class WorkerResponse:
         results: Optional[Dict] = None,
         extracted: Optional[List[ExtractedPayload]] = None,
         errors: Optional[List[Error]] = None,
+        dispatch_to: Optional[List[str]] = None,
     ) -> None:
         """
 
@@ -291,8 +292,9 @@ class WorkerResponse:
 
         """
         self.results = results
-        self.extracted = [] if extracted is None else extracted
+        self.extracted = extracted or []
         self.errors = errors or []
+        self.dispatch_to = dispatch_to or []
 
     def __str__(self) -> str:
         return helpers.dumps(self)

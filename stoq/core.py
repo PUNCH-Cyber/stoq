@@ -704,7 +704,7 @@ class Stoq(StoqPluginManager):
 
     async def _apply_worker(
         self, payload: Payload, plugin: WorkerPlugin, request: Request
-    ) -> List[ExtractedPayload]:
+    ) -> Tuple[Set[Tuple[Payload, str]], List[ExtractedPayload]]:
         self.log.debug(
             f'Scanning Payload {payload.results.payload_id} with WorkerPlugin {plugin.plugin_name}'
         )
@@ -726,33 +726,34 @@ class Stoq(StoqPluginManager):
         payload.results.plugins_run['workers'].append(plugin.plugin_name)
 
         if not worker_response:
-            return []
-
-        if worker_response.errors:
-            request.errors.extend(worker_response.errors)
+            return set(), []
 
         if worker_response.results is not None:
             payload.results.workers[plugin.plugin_name] = worker_response.results
+        request.errors.extend(worker_response.errors)
 
-        if worker_response.extracted:
-            extracted_payloads = [
-                Payload(
-                    content=extracted_payload.content,
-                    payload_meta=extracted_payload.payload_meta,
-                    extracted_by=plugin.plugin_name,
-                    extracted_from=payload.results.payload_id
-                )
-                for extracted_payload in worker_response.extracted
-            ]
-        else:
-            extracted_payloads = []
+        additional_dispatches: Set[Tuple[Payload, str]] = {
+            (payload, plugin_name)
+            for plugin_name in worker_response.dispatch_to
+        }
+
+        extracted_payloads: List[ExtractedPayload] = [
+            Payload(
+                content=extracted_payload.content,
+                payload_meta=extracted_payload.payload_meta,
+                extracted_by=plugin.plugin_name,
+                extracted_from=payload.results.payload_id
+            )
+            for extracted_payload in worker_response.extracted
+        ]
 
         self.log.debug(
             f'Completed scan of {payload.results.payload_id} with '
-            f'{len(worker_response.results) if worker_response.results else 0} results and '
+            f'{len(worker_response.results) if worker_response.results else 0} results, '
+            f'{len(additional_dispatches)} additional dispatches, and '
             f'{len(extracted_payloads)} extracted payloads'
         )
-        return extracted_payloads
+        return additional_dispatches, extracted_payloads
 
     async def _apply_archiver(
         self, archiver: ArchiverPlugin, payload: Payload, request: Request
@@ -998,18 +999,20 @@ class Stoq(StoqPluginManager):
         )
 
         # Run plugins
-        nested_extracted_results: List[List[ExtractedPayload]] = await asyncio.gather(
+        nested_worker_results: List[
+            Tuple[Set[Tuple[Payload, str]], List[ExtractedPayload]]
+        ] = await asyncio.gather(
             *[
                 self._apply_worker(payload, plugin, request)
                 for payload, plugin in can_run
             ]
         )
-        extracted_results = [
-            extracted
-            for extracted_results in nested_extracted_results
-            for extracted in extracted_results
-        ]
-        return extracted_results, deferred
+
+        extracted_payloads = []
+        for additional_dispatches, extracted in nested_worker_results:
+            deferred.update(additional_dispatches)
+            extracted_payloads.extend(extracted)
+        return extracted_payloads, deferred
 
     async def _get_dispatches(
         self, payload: Payload, request: Request

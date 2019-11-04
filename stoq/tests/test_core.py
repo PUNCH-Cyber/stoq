@@ -107,7 +107,7 @@ class TestCore(asynctest.TestCase):
         s = Stoq(base_dir=utils.get_data_dir())
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.SHOULD_SCAN = False
-        simple_worker.DISPATCH_TO = ['dummy_worker']
+        simple_worker.EXTRACTED_DISPATCH_TO = ['dummy_worker']
         response = await s.scan(
             self.generic_content, add_start_dispatch=['simple_worker']
         )
@@ -179,7 +179,7 @@ class TestCore(asynctest.TestCase):
     async def test_dispatch_from_worker(self):
         s = Stoq(base_dir=utils.get_data_dir())
         simple_worker = s.load_plugin('simple_worker')
-        simple_worker.DISPATCH_TO = ['extract_payload']
+        simple_worker.EXTRACTED_DISPATCH_TO = ['extract_payload']
         response = await s.scan(
             self.generic_content, add_start_dispatch=['simple_worker']
         )
@@ -187,6 +187,21 @@ class TestCore(asynctest.TestCase):
         self.assertIn('simple_worker', response.results[0].plugins_run['workers'][0])
         self.assertIn('extract_payload', response.results[1].plugins_run['workers'][0])
         self.assertIn('extract_payload', response.results[2].extracted_by)
+
+    async def test_additional_dispatch_from_worker(self):
+        s = Stoq(base_dir=utils.get_data_dir())
+        simple_worker = s.load_plugin('simple_worker')
+        simple_worker.ADDITIONAL_DISPATCH_TO = ['dummy_worker']
+        response = await s.scan(
+            self.generic_content, add_start_dispatch=['simple_worker']
+        )
+
+        self.assertEqual(len(response.results), 2)
+        self.assertCountEqual(
+            response.results[0].plugins_run["workers"],
+            ["simple_worker", "dummy_worker"],
+        )
+        self.assertEqual(len(response.results[1].plugins_run["workers"]), 0)
 
     async def test_dispatch_multiple_plugins(self):
         multi_plugin_content = b'multi-plugin-content'
@@ -237,7 +252,7 @@ class TestCore(asynctest.TestCase):
     async def test_scan_with_required_plugin(self):
         s = Stoq(base_dir=utils.get_data_dir())
         simple_worker = s.load_plugin('simple_worker')
-        simple_worker.DISPATCH_TO = ['simple_worker']
+        simple_worker.EXTRACTED_DISPATCH_TO = ['simple_worker']
         simple_worker.required_plugin_names.add('dummy_worker')
         response = await s.scan(
             self.generic_content, add_start_dispatch=['simple_worker']
@@ -255,7 +270,7 @@ class TestCore(asynctest.TestCase):
     async def test_scan_with_duplicate_extracted_payloads(self):
         s = Stoq(base_dir=utils.get_data_dir())
         simple_worker = s.load_plugin('simple_worker')
-        simple_worker.DISPATCH_TO = ['extract_payload']
+        simple_worker.EXTRACTED_DISPATCH_TO = ['extract_payload']
         simple_worker.EXTRACTED_PAYLOAD = self.generic_content + b'more data'
         extract_worker = s.load_plugin('extract_payload')
         extract_worker.EXTRACTED_PAYLOAD = self.generic_content + b'more data'
@@ -275,7 +290,7 @@ class TestCore(asynctest.TestCase):
     async def test_scan_with_nested_required_plugin(self):
         s = Stoq(base_dir=utils.get_data_dir())
         simple_worker = s.load_plugin('simple_worker')
-        simple_worker.DISPATCH_TO = ['simple_worker']
+        simple_worker.EXTRACTED_DISPATCH_TO = ['simple_worker']
         simple_worker.required_plugin_names.add('dummy_worker')
         dummy_worker = s.load_plugin('dummy_worker')
         dummy_worker.required_plugin_names.add('extract_payload')
@@ -297,7 +312,7 @@ class TestCore(asynctest.TestCase):
     async def test_scan_with_required_plugin_max_depth(self):
         s = Stoq(base_dir=utils.get_data_dir(), max_required_worker_depth=1)
         simple_worker = s.load_plugin('simple_worker')
-        simple_worker.DISPATCH_TO = ['simple_worker']
+        simple_worker.EXTRACTED_DISPATCH_TO = ['simple_worker']
         simple_worker.required_plugin_names.add('dummy_worker')
         dummy_worker = s.load_plugin('dummy_worker')
         dummy_worker.required_plugin_names.add('extract_payload')
@@ -310,7 +325,7 @@ class TestCore(asynctest.TestCase):
     async def test_scan_with_required_plugin_circular_reference(self):
         s = Stoq(base_dir=utils.get_data_dir(), max_required_worker_depth=2000)
         simple_worker = s.load_plugin('simple_worker')
-        simple_worker.DISPATCH_TO = ['simple_worker']
+        simple_worker.EXTRACTED_DISPATCH_TO = ['simple_worker']
         simple_worker.required_plugin_names.add('dummy_worker')
         dummy_worker = s.load_plugin('dummy_worker')
         dummy_worker.required_plugin_names.add('simple_worker')
