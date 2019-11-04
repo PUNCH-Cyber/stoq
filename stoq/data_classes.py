@@ -251,18 +251,23 @@ class StoqResponse:
         return repr(self.__dict__)
 
 
-class ExtractedPayload(Payload):
-    """
-    Object to store extracted payloads for further analysis
-    :param content: Raw bytes of extracted payload
-    :param payload_meta: ``PayloadMeta`` object containing metadata about extracted payload
-    >>> src = '/tmp/bad.exe'
-    >>> data = open(src, 'rb').read()
-    >>> extra_data = {'source': src}
-    >>> extracted_meta = PayloadMeta(should_archive=True, extra_data=extra_data)
-    >>> extracted_payload = ExtractedPayload(content=data, payload_meta=extracted_meta)
-    """
-    pass
+class ExtractedPayload:
+    def __init__(
+        self, content: bytes, payload_meta: Optional[PayloadMeta] = None
+    ) -> None:
+        """
+        Object to store extracted payloads for further analysis
+        :param content: Raw bytes of extracted payload
+        :param payload_meta: ``PayloadMeta`` object containing metadata about extracted payload
+        >>> src = '/tmp/bad.exe'
+        >>> data = open(src, 'rb').read()
+        >>> extra_data = {'source': src}
+        >>> extracted_meta = PayloadMeta(should_archive=True, extra_data=extra_data)
+        >>> extracted_payload = ExtractedPayload(content=data, payload_meta=extracted_meta)
+        """
+
+        self.content = content
+        self.payload_meta: PayloadMeta = PayloadMeta() if payload_meta is None else payload_meta
 
 
 class WorkerResponse:

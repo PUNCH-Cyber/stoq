@@ -143,7 +143,7 @@ class TestCore(asynctest.TestCase):
             dummy_worker.scan.await_args[0][0].dispatch_meta['simple_dispatcher'],
             {'test_key': 'Useful metadata info'},
         )
-        self.assertIn('dummy_worker', response.results[0].plugins_run['workers'][0])
+        self.assertIn('dummy_worker', response.results[0].plugins_run['workers'])
 
     async def test_dispatcher_exception(self):
         s = Stoq(base_dir=utils.get_data_dir(), dispatchers=['simple_dispatcher'])
@@ -152,6 +152,18 @@ class TestCore(asynctest.TestCase):
         with self.assertRaises(Exception) as context:
             await simple_dispatcher.get_dispatches(task)
         self.assertTrue('Test exception', context.exception)
+
+    async def test_conditional_dispatch(self):
+        s = Stoq(base_dir=utils.get_data_dir(), dispatchers=['conditional_dispatcher'])
+        simple_worker = s.load_plugin('simple_worker')
+        simple_worker.scan = asynctest.create_autospec(
+            simple_worker.scan, return_value=None
+        )
+        response = await s.scan(self.generic_content)
+        self.assertNotIn('simple_worker', response.results[0].plugins_run['workers'])
+
+        response = await s.scan(self.generic_content, add_start_dispatch=['dummy_worker'])
+        self.assertIn('simple_worker', response.results[0].plugins_run['workers'])
 
     async def test_dispatch_duplicate(self):
         s = Stoq(base_dir=utils.get_data_dir(), dispatchers=['simple_dispatcher'])
@@ -171,6 +183,7 @@ class TestCore(asynctest.TestCase):
         response = await s.scan(
             self.generic_content, add_start_dispatch=['simple_worker']
         )
+        self.assertEqual(len(response.results), 3)
         self.assertIn('simple_worker', response.results[0].plugins_run['workers'][0])
         self.assertIn('extract_payload', response.results[1].plugins_run['workers'][0])
         self.assertIn('extract_payload', response.results[2].extracted_by)
@@ -449,10 +462,9 @@ class TestCore(asynctest.TestCase):
         self.assertIn('Test error', response.errors[0].error)
 
     async def test_max_recursion(self):
-        max_rec_depth = 10  # defined in stoq.cfg
         s = Stoq(base_dir=utils.get_data_dir(), always_dispatch=['extract_payload'])
         response = await s.scan(self.generic_content)
-        self.assertEqual(len(response.results), max_rec_depth + 1)
+        self.assertEqual(len(response.results), s.max_recursion + 1)
         self.assertIn('Final worker round', response.errors[0].error)
 
     async def test_dedup(self):
