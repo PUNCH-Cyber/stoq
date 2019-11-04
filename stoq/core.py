@@ -786,8 +786,19 @@ class Stoq(StoqPluginManager):
                 ] = archiver_response.results
 
     def _resolve_plugin_dependencies(
-        self, payload: Payload, plugin_name: str, request: Request, depth: int = 0,
+        self,
+        payload: Payload,
+        plugin_name: str,
+        request: Request,
+        init_plugin_dependency_chain: Set[str],
+        depth: int = 0,
     ) -> Tuple[Set[Tuple[Payload, WorkerPlugin]], Set[Tuple[Payload, str]]]:
+        if plugin_name in init_plugin_dependency_chain:
+            raise RecursionError(
+                'Circular required plugin dependency found, '
+                f'unable to process plugin {plugin_name}'
+            )
+
         if depth > self.max_required_worker_depth:
             raise RecursionError(
                 f'Max required plugin depth {self.max_required_worker_depth} reached, '
@@ -813,9 +824,16 @@ class Stoq(StoqPluginManager):
             self.log.debug(
                 f'{plugin_name} has dependencies of {", ".join(plugin.required_plugin_names)}'
             )
+
+            plugin_dependency_chain = init_plugin_dependency_chain.copy()
+            plugin_dependency_chain.add(plugin_name)
             for required_plugin in plugin.required_plugin_names:
                 required_plugin_can_run, required_plugin_deferred = self._resolve_plugin_dependencies(
-                    payload, required_plugin, request, depth + 1
+                    payload,
+                    required_plugin,
+                    request,
+                    plugin_dependency_chain,
+                    depth + 1,
                 )
                 can_run.update(required_plugin_can_run)
                 deferred.update(required_plugin_deferred)
@@ -1038,7 +1056,7 @@ class Stoq(StoqPluginManager):
         for payload, plugin in total_dispatches:
             try:
                 can_run, deferred = self._resolve_plugin_dependencies(
-                    payload, plugin, request
+                    payload, plugin, request, set()
                 )
             except RuntimeError as e:
                 msg = f'Error resolving dependencies for plugin {plugin}'

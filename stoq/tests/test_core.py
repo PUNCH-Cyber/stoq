@@ -333,7 +333,7 @@ class TestCore(asynctest.TestCase):
             self.generic_content, add_start_dispatch=['simple_worker']
         )
         self.assertEqual(1, len(response.results))
-        self.assertIn('RecursionError', response.errors[0].error)
+        self.assertIn('Circular', response.errors[0].error)
 
     async def test_source_archive(self):
         s = Stoq(base_dir=utils.get_data_dir(), source_archivers=['simple_archiver'])
