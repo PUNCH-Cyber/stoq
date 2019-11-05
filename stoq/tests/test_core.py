@@ -14,26 +14,26 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import json
 import asyncio
+import json
 import logging
 import tempfile
-import asynctest  # type: ignore
 
+import asynctest  # type: ignore
+import stoq.tests.utils as utils
 from stoq import Stoq, StoqException
 from stoq.data_classes import (
-    StoqResponse,
-    Request,
-    Payload,
-    PayloadResults,
-    PayloadMeta,
-    RequestMeta,
-    WorkerResponse,
-    DispatcherResponse,
-    DecoratorResponse,
     ArchiverResponse,
+    DecoratorResponse,
+    DispatcherResponse,
+    Payload,
+    PayloadMeta,
+    PayloadResults,
+    Request,
+    RequestMeta,
+    StoqResponse,
+    WorkerResponse,
 )
-import stoq.tests.utils as utils
 
 
 class TestCore(asynctest.TestCase):
@@ -198,10 +198,10 @@ class TestCore(asynctest.TestCase):
 
         self.assertEqual(len(response.results), 2)
         self.assertCountEqual(
-            response.results[0].plugins_run["workers"],
-            ["simple_worker", "dummy_worker"],
+            response.results[0].plugins_run['workers'],
+            ['simple_worker', 'dummy_worker'],
         )
-        self.assertEqual(len(response.results[1].plugins_run["workers"]), 0)
+        self.assertEqual(len(response.results[1].plugins_run['workers']), 0)
 
     async def test_dispatch_multiple_plugins(self):
         multi_plugin_content = b'multi-plugin-content'
@@ -452,7 +452,7 @@ class TestCore(asynctest.TestCase):
         s = Stoq(base_dir=utils.get_data_dir(), source_archivers=['simple_archiver'])
         simple_archiver = s.load_plugin('simple_archiver')
         simple_archiver.RAISE_EXCEPTION = True
-        task = "This will fail"
+        task = 'This will fail'
         with self.assertRaises(Exception) as context:
             await simple_archiver.get(task)
         self.assertTrue('Test exception', context.exception)
@@ -693,30 +693,30 @@ class TestCore(asynctest.TestCase):
         # Construct a fake stoq_response as if it were generated from a file
         # A.zip that contains two files, B.txt and C.zip, where C.zip contains D.txt
         results = [
-            Payload(content=b'', payload_id="A.zip", payload_meta=PayloadMeta()),
+            Payload(content=b'', payload_id='A.zip', payload_meta=PayloadMeta()),
             Payload(
                 content=b'',
-                payload_id="B.txt",
+                payload_id='B.txt',
                 payload_meta=PayloadMeta(),
-                extracted_from="A.zip",
-                extracted_by="fake",
+                extracted_from='A.zip',
+                extracted_by='fake',
             ),
             Payload(
                 content=b'',
-                payload_id="C.zip",
+                payload_id='C.zip',
                 payload_meta=PayloadMeta(),
-                extracted_from="A.zip",
-                extracted_by="fake",
+                extracted_from='A.zip',
+                extracted_by='fake',
             ),
             Payload(
                 content=b'',
-                payload_id="D.txt",
+                payload_id='D.txt',
                 payload_meta=PayloadMeta(),
-                extracted_from="C.zip",
-                extracted_by="fake",
+                extracted_from='C.zip',
+                extracted_by='fake',
             ),
         ]
-        request = Request(request_meta=RequestMeta(extra_data={"check": "me"}))
+        request = Request(request_meta=RequestMeta(extra_data={'check': 'me'}))
         payload_count = 1
         for result in results:
             result.results.workers['fake'] = f'result-{payload_count}'
@@ -725,7 +725,7 @@ class TestCore(asynctest.TestCase):
             payload_count += 1
 
         initial_response = StoqResponse(request)
-        s = Stoq(base_dir=utils.get_data_dir(), decorators=["simple_decorator"])
+        s = Stoq(base_dir=utils.get_data_dir(), decorators=['simple_decorator'])
         all_subresponses = [
             r async for r in s.reconstruct_all_subresponses(initial_response)
         ]
@@ -741,14 +741,14 @@ class TestCore(asynctest.TestCase):
         )
         self.assertEqual(
             [
-                stoq_response.results[0].workers["fake"]
+                stoq_response.results[0].workers['fake']
                 for stoq_response in all_subresponses
             ],
-            ["result-1", "result-2", "result-3", "result-4"],
+            ['result-1', 'result-2', 'result-3', 'result-4'],
         )
         self.assertTrue(
             all(
-                "simple_decorator" in stoq_response.decorators
+                'simple_decorator' in stoq_response.decorators
                 for stoq_response in all_subresponses
             )
         )

@@ -304,29 +304,31 @@
 
 """
 
-import os
 import asyncio
-import logging
 import configparser
+import logging
+import os
 from collections import defaultdict
-from pythonjsonlogger import jsonlogger  # type: ignore
 from logging.handlers import RotatingFileHandler
 from typing import (
+    AsyncGenerator,
     Awaitable,
     Coroutine,
+    DefaultDict,
     Dict,
-    AsyncGenerator,
     List,
     Optional,
     Set,
     Tuple,
-    DefaultDict,
     Union,
 )
 
-
-from .exceptions import StoqException
+import stoq.helpers as helpers
+from pythonjsonlogger import jsonlogger  # type: ignore
 from stoq.data_classes import (
+    ArchiverResponse,
+    DecoratorResponse,
+    DispatcherResponse,
     Error,
     ExtractedPayload,
     Payload,
@@ -335,22 +337,20 @@ from stoq.data_classes import (
     Request,
     RequestMeta,
     StoqResponse,
-    ArchiverResponse,
-    DispatcherResponse,
-    DecoratorResponse,
     WorkerResponse,
 )
-
-import stoq.helpers as helpers
-from stoq.utils import ratelimited
 from stoq.plugin_manager import StoqPluginManager
 from stoq.plugins import (
-    DispatcherPlugin,
     ArchiverPlugin,
     ConnectorPlugin,
     DecoratorPlugin,
+    DispatcherPlugin,
     WorkerPlugin,
 )
+from stoq.utils import ratelimited
+
+from .exceptions import StoqException
+
 
 # Created to enable `None' as a valid paramater
 _UNSET = object()
@@ -521,6 +521,51 @@ class Stoq(StoqPluginManager):
         request = Request(payloads=[payload], request_meta=request_meta)
         return await self.scan_request(request, add_start_dispatch)
 
+    async def run(
+        self,
+        request_meta: Optional[RequestMeta] = None,
+        add_start_dispatch: Optional[List[str]] = None,
+    ) -> None:
+        """
+
+        Run stoQ using a provider plugin to scan multiple files until exhaustion
+
+        :param request_meta: Metadata pertaining to the originating request
+        :param add_start_dispatch: Force first round of scanning to use specified plugins
+
+        """
+        # Don't initialize any (provider) plugins here! They should be
+        # initialized on stoq start-up or via load_plugin()
+        if not self._loaded_provider_plugins:
+            raise StoqException('No activated provider plugins')
+
+        self.log.debug(
+            f'Starting provider queue: RequestMeta: {request_meta}, '
+            f'start_dispatches: {add_start_dispatch}'
+        )
+        payload_queue: asyncio.Queue = asyncio.Queue(maxsize=self.max_queue)
+        providers = [
+            asyncio.ensure_future(plugin.ingest(payload_queue))
+            for name, plugin in self._loaded_provider_plugins.items()
+        ]
+        workers = [
+            asyncio.ensure_future(
+                self._consume(payload_queue, request_meta, add_start_dispatch)
+            )
+            for n in range(self.provider_consumers)
+        ]
+        try:
+            await asyncio.gather(*providers)
+            await payload_queue.join()
+        except KeyboardInterrupt:
+            pass
+        except Exception as e:
+            self.log.exception(e, exc_info=True)
+        finally:
+            for worker in workers:
+                worker.cancel()
+                self.log.debug('Cancelling provider worker')
+
     async def scan_request(
         self, request: Request, add_start_dispatch: Optional[List[str]] = None
     ) -> StoqResponse:
@@ -611,351 +656,14 @@ class Stoq(StoqPluginManager):
 
         decorator_tasks = []
         for decorator in self._loaded_decorator_plugins.values():
-            decorator_tasks.append(self._apply_decorators(decorator, response))
+            decorator_tasks.append(self._apply_decorator(decorator, response))
         await asyncio.gather(*decorator_tasks)
 
         connector_tasks = []
         for connector in self._loaded_connector_plugins:
-            connector_tasks.append(self._save_result(connector, response))
+            connector_tasks.append(self._apply_connector(connector, response))
         await asyncio.gather(*connector_tasks)
         return response
-
-    async def run(
-        self,
-        request_meta: Optional[RequestMeta] = None,
-        add_start_dispatch: Optional[List[str]] = None,
-    ) -> None:
-        """
-
-        Run stoQ using a provider plugin to scan multiple files until exhaustion
-
-        :param request_meta: Metadata pertaining to the originating request
-        :param add_start_dispatch: Force first round of scanning to use specified plugins
-
-        """
-        # Don't initialize any (provider) plugins here! They should be
-        # initialized on stoq start-up or via load_plugin()
-        if not self._loaded_provider_plugins:
-            raise StoqException('No activated provider plugins')
-
-        self.log.debug(
-            f'Starting provider queue: RequestMeta: {request_meta}, '
-            f'start_dispatches: {add_start_dispatch}'
-        )
-        payload_queue: asyncio.Queue = asyncio.Queue(maxsize=self.max_queue)
-        providers = [
-            asyncio.ensure_future(plugin.ingest(payload_queue))
-            for name, plugin in self._loaded_provider_plugins.items()
-        ]
-        workers = [
-            asyncio.ensure_future(
-                self._consume(payload_queue, request_meta, add_start_dispatch)
-            )
-            for n in range(self.provider_consumers)
-        ]
-        try:
-            await asyncio.gather(*providers)
-            await payload_queue.join()
-        except KeyboardInterrupt:
-            pass
-        except Exception as e:
-            self.log.exception(e, exc_info=True)
-        finally:
-            for worker in workers:
-                worker.cancel()
-                self.log.debug('Cancelling provider worker')
-
-    async def _consume(
-        self,
-        payload_queue: asyncio.Queue,
-        request_meta: Optional[RequestMeta] = None,
-        add_start_dispatch: Optional[List[str]] = None,
-    ) -> None:
-        while True:
-            try:
-                task = await payload_queue.get()
-                # Determine whether the provider has returned a `Payload`, or a task.
-                # If it is a task, load the defined archiver plugin to load the
-                # `Payload`, otherwise, simply continue on with the scanning.
-                if isinstance(task, Payload):
-                    request = Request([task], request_meta)
-                    await self.scan_request(request, add_start_dispatch)
-                else:
-                    for source_archiver, task_meta in task.items():
-                        self.log.debug(
-                            f'Provider task received: source_archiver: {source_archiver}, '
-                            f'task_meta: {task_meta}'
-                        )
-                        try:
-                            ar = ArchiverResponse(task_meta)
-                            payload = await self._loaded_source_archiver_plugins[
-                                source_archiver
-                            ].get(ar)
-                            if payload:
-                                request = Request([payload], request_meta)
-                                await self.scan_request(request, add_start_dispatch)
-                        except Exception as e:
-                            self.log.warn(
-                                f'"{task_meta}" failed with archiver "{source_archiver}": {str(e)}'
-                            )
-                payload_queue.task_done()
-            except asyncio.QueueEmpty:
-                pass
-
-    async def _apply_worker(
-        self, payload: Payload, plugin: WorkerPlugin, request: Request
-    ) -> Tuple[Set[Tuple[Payload, str]], List[ExtractedPayload]]:
-        self.log.debug(
-            f'Scanning Payload {payload.results.payload_id} with WorkerPlugin {plugin.plugin_name}'
-        )
-        try:
-            worker_response: Optional[WorkerResponse] = await plugin.scan(
-                payload, request
-            )
-        except Exception as e:
-            worker_response = None
-            msg = 'worker:failed to scan'
-            self.log.exception(msg)
-            request.errors.append(
-                Error(
-                    payload_id=payload.results.payload_id,
-                    plugin_name=plugin.plugin_name,
-                    error=helpers.format_exc(e, msg=msg),
-                )
-            )
-        payload.results.plugins_run['workers'].append(plugin.plugin_name)
-
-        if not worker_response:
-            return set(), []
-
-        if worker_response.results is not None:
-            payload.results.workers[plugin.plugin_name] = worker_response.results
-        request.errors.extend(worker_response.errors)
-
-        additional_dispatches: Set[Tuple[Payload, str]] = {
-            (payload, plugin_name)
-            for plugin_name in worker_response.dispatch_to
-        }
-
-        extracted_payloads: List[ExtractedPayload] = [
-            Payload(
-                content=extracted_payload.content,
-                payload_meta=extracted_payload.payload_meta,
-                extracted_by=plugin.plugin_name,
-                extracted_from=payload.results.payload_id
-            )
-            for extracted_payload in worker_response.extracted
-        ]
-
-        self.log.debug(
-            f'Completed scan of {payload.results.payload_id} with '
-            f'{len(worker_response.results) if worker_response.results else 0} results, '
-            f'{len(additional_dispatches)} additional dispatches, and '
-            f'{len(extracted_payloads)} extracted payloads'
-        )
-        return additional_dispatches, extracted_payloads
-
-    async def _apply_archiver(
-        self, archiver: ArchiverPlugin, payload: Payload, request: Request
-    ) -> None:
-        archiver_response: Optional[ArchiverResponse] = None
-        self.log.debug(
-            f'Archiving {payload.results.payload_id} with {archiver.plugin_name}'
-        )
-        try:
-            archiver_response = await archiver.archive(payload, request)
-        except Exception as e:
-            msg = 'archiver:failed to archive'
-            self.log.exception(msg)
-            request.errors.append(
-                Error(
-                    payload_id=payload.results.payload_id,
-                    plugin_name=archiver.plugin_name,
-                    error=helpers.format_exc(e, msg=msg),
-                )
-            )
-
-        payload.results.plugins_run['archivers'].append(archiver.plugin_name)
-        if archiver_response:
-            if archiver_response.errors is not None:
-                request.errors.extend(archiver_response.errors)
-
-            if archiver_response.results is not None:
-                payload.results.archivers[
-                    archiver.plugin_name
-                ] = archiver_response.results
-
-    def _resolve_plugin_dependencies(
-        self,
-        payload: Payload,
-        plugin_name: str,
-        request: Request,
-        init_plugin_dependency_chain: Set[str],
-        depth: int = 0,
-    ) -> Tuple[Set[Tuple[Payload, WorkerPlugin]], Set[Tuple[Payload, str]]]:
-        if plugin_name in init_plugin_dependency_chain:
-            raise RecursionError(
-                'Circular required plugin dependency found, '
-                f'unable to process plugin {plugin_name}'
-            )
-
-        if depth > self.max_required_worker_depth:
-            raise RecursionError(
-                f'Max required plugin depth {self.max_required_worker_depth} reached, '
-                'unable to generate additional tasks'
-            )
-
-        try:
-            plugin: WorkerPlugin = self.load_plugin(plugin_name)
-        except Exception as e:
-            raise RuntimeError(f'Worker plugin {plugin_name} failed to load') from e
-
-        if plugin_name in payload.results.plugins_run['workers']:
-            return set(), set()
-
-        can_run: Set[Tuple[Payload, WorkerPlugin]] = set()
-        deferred: Set[Tuple[Payload, str]] = set()
-        if self._plugin_can_run(payload, plugin):
-            can_run.add((payload, plugin))
-        else:
-            deferred.add((payload, plugin_name))
-
-        if len(plugin.required_plugin_names) != 0:
-            self.log.debug(
-                f'{plugin_name} has dependencies of {", ".join(plugin.required_plugin_names)}'
-            )
-
-            plugin_dependency_chain = init_plugin_dependency_chain.copy()
-            plugin_dependency_chain.add(plugin_name)
-            for required_plugin in plugin.required_plugin_names:
-                required_plugin_can_run, required_plugin_deferred = self._resolve_plugin_dependencies(
-                    payload,
-                    required_plugin,
-                    request,
-                    plugin_dependency_chain,
-                    depth + 1,
-                )
-                can_run.update(required_plugin_can_run)
-                deferred.update(required_plugin_deferred)
-        return can_run, deferred
-
-    def _plugin_can_run(self, payload: Payload, worker_plugin: WorkerPlugin) -> bool:
-        for required_plugin_name in worker_plugin.required_plugin_names:
-            if required_plugin_name not in payload.results.plugins_run['workers']:
-                return False
-        return True
-
-    def _init_logger(
-        self,
-        log_dir: Union[object, str],
-        log_level: str,
-        log_maxbytes: int,
-        log_backup_count: int,
-        log_syntax: str,
-    ) -> None:
-        self.log = logging.getLogger('stoq')
-        self.log.setLevel(log_level.upper())
-
-        if log_syntax == 'json':
-            formatter = jsonlogger.JsonFormatter  # type: ignore
-        else:
-            formatter = logging.Formatter
-
-        stderr_handler = logging.StreamHandler()
-        stderr_logformat = formatter(
-            '[%(asctime)s %(levelname)s] %(name)s: ' '%(message)s'
-        )
-        stderr_handler.setFormatter(stderr_logformat)
-        self.log.addHandler(stderr_handler)
-
-        if log_dir:
-            # Let's attempt to make the log directory if it doesn't exist
-            os.makedirs(log_dir, exist_ok=True)  # type: ignore
-            log_path = os.path.abspath(
-                os.path.join(log_dir, 'stoq.log')  # type: ignore
-            )
-            file_handler = RotatingFileHandler(
-                filename=log_path,
-                mode='a',
-                maxBytes=log_maxbytes,
-                backupCount=log_backup_count,
-            )
-            file_logformat = formatter(
-                '%(asctime)s %(levelname)s %(name)s:'
-                '%(filename)s:%(funcName)s:%(lineno)s: '
-                '%(message)s',
-                datefmt='%Y-%m-%d %H:%M:%S',
-            )
-            file_handler.setFormatter(file_logformat)
-            self.log.addHandler(file_handler)
-            self.log.debug(f'Writing logs to {log_path}')
-
-    async def _apply_dispatcher(
-        self, dispatcher: DispatcherPlugin, payload: Payload, request: Request
-    ) -> Set[str]:
-        self.log.debug(
-            f'Sending {payload.results.payload_id} to dispatcher ({dispatcher.plugin_name})'
-        )
-        plugin_names: Set[str] = set()
-        try:
-            dispatcher_result = await dispatcher.get_dispatches(payload, request)
-        except Exception as e:
-            msg = 'dispatcher:failed to dispatch'
-            self.log.exception(msg)
-            request.errors.append(
-                Error(
-                    plugin_name=dispatcher.plugin_name,
-                    error=helpers.format_exc(e, msg=msg),
-                    payload_id=payload.results.payload_id,
-                )
-            )
-            return plugin_names
-
-        if dispatcher_result:
-            if dispatcher_result.plugin_names is not None:
-                plugin_names.update(dispatcher_result.plugin_names)
-                self.log.debug(
-                    f'Dispatching {payload.results.payload_id} to {plugin_names}'
-                )
-
-            if dispatcher_result.meta is not None:
-                payload.dispatch_meta[dispatcher.plugin_name] = dispatcher_result.meta
-
-        return plugin_names
-
-    async def _apply_decorators(
-        self, decorator: DecoratorPlugin, response: StoqResponse
-    ) -> StoqResponse:
-        """Mutates the given StoqResponse object to include decorator information"""
-        self.log.debug(f'Applying decorator {decorator.plugin_name}')
-        try:
-            decorator_response = await decorator.decorate(response)
-        except Exception as e:
-            msg = 'decorator'
-            self.log.exception(msg)
-            error = Error(
-                plugin_name=decorator.plugin_name, error=helpers.format_exc(e, msg=msg)
-            )
-            response.errors.append(error)
-            return response
-        if decorator_response is None:
-            return response
-        if decorator_response.results is not None:
-            response.decorators[decorator.plugin_name] = decorator_response.results
-        if decorator_response.errors:
-            response.errors.extend(decorator_response.errors)
-        return response
-
-    async def _save_result(
-        self, connector: ConnectorPlugin, response: StoqResponse
-    ) -> None:
-        self.log.debug(f'Saving results to connector {connector.plugin_name}')
-        try:
-            await connector.save(response)
-        except Exception:
-            self.log.exception(
-                f'Failed to save results using {connector.__module__}: {response}'
-            )
 
     async def reconstruct_all_subresponses(
         self, stoq_response: StoqResponse
@@ -986,7 +694,7 @@ class Stoq(StoqPluginManager):
             )
             decorator_tasks = []
             for plugin_name, decorator in self._loaded_decorator_plugins.items():
-                decorator_tasks.append(self._apply_decorators(decorator, new_response))
+                decorator_tasks.append(self._apply_decorator(decorator, new_response))
             await asyncio.gather(*decorator_tasks)
             yield new_response
 
@@ -1073,3 +781,297 @@ class Stoq(StoqPluginManager):
             total_can_run.update(can_run)
             total_deferred.update(deferred)
         return total_can_run, total_deferred
+
+    def _resolve_plugin_dependencies(
+        self,
+        payload: Payload,
+        plugin_name: str,
+        request: Request,
+        init_plugin_dependency_chain: Set[str],
+        depth: int = 0,
+    ) -> Tuple[Set[Tuple[Payload, WorkerPlugin]], Set[Tuple[Payload, str]]]:
+        if plugin_name in init_plugin_dependency_chain:
+            raise RecursionError(
+                'Circular required plugin dependency found, '
+                f'unable to process plugin {plugin_name}'
+            )
+
+        if depth > self.max_required_worker_depth:
+            raise RecursionError(
+                f'Max required plugin depth {self.max_required_worker_depth} reached, '
+                'unable to generate additional tasks'
+            )
+
+        try:
+            plugin: WorkerPlugin = self.load_plugin(plugin_name)
+        except Exception as e:
+            raise RuntimeError(f'Worker plugin {plugin_name} failed to load') from e
+
+        if plugin_name in payload.results.plugins_run['workers']:
+            return set(), set()
+
+        can_run: Set[Tuple[Payload, WorkerPlugin]] = set()
+        deferred: Set[Tuple[Payload, str]] = set()
+        if self._plugin_can_run(payload, plugin):
+            can_run.add((payload, plugin))
+        else:
+            deferred.add((payload, plugin_name))
+
+        if len(plugin.required_plugin_names) != 0:
+            self.log.debug(
+                f'{plugin_name} has dependencies of {", ".join(plugin.required_plugin_names)}'
+            )
+
+            plugin_dependency_chain = init_plugin_dependency_chain.copy()
+            plugin_dependency_chain.add(plugin_name)
+            for required_plugin in plugin.required_plugin_names:
+                required_plugin_can_run, required_plugin_deferred = self._resolve_plugin_dependencies(
+                    payload,
+                    required_plugin,
+                    request,
+                    plugin_dependency_chain,
+                    depth + 1,
+                )
+                can_run.update(required_plugin_can_run)
+                deferred.update(required_plugin_deferred)
+        return can_run, deferred
+
+    async def _consume(
+        self,
+        payload_queue: asyncio.Queue,
+        request_meta: Optional[RequestMeta] = None,
+        add_start_dispatch: Optional[List[str]] = None,
+    ) -> None:
+        while True:
+            try:
+                task = await payload_queue.get()
+                # Determine whether the provider has returned a `Payload`, or a task.
+                # If it is a task, load the defined archiver plugin to load the
+                # `Payload`, otherwise, simply continue on with the scanning.
+                if isinstance(task, Payload):
+                    request = Request([task], request_meta)
+                    await self.scan_request(request, add_start_dispatch)
+                else:
+                    for source_archiver, task_meta in task.items():
+                        self.log.debug(
+                            f'Provider task received: source_archiver: {source_archiver}, '
+                            f'task_meta: {task_meta}'
+                        )
+                        try:
+                            ar = ArchiverResponse(task_meta)
+                            payload = await self._loaded_source_archiver_plugins[
+                                source_archiver
+                            ].get(ar)
+                            if payload:
+                                request = Request([payload], request_meta)
+                                await self.scan_request(request, add_start_dispatch)
+                        except Exception as e:
+                            self.log.warn(
+                                f'"{task_meta}" failed with archiver "{source_archiver}": {str(e)}'
+                            )
+                payload_queue.task_done()
+            except asyncio.QueueEmpty:
+                pass
+
+    def _plugin_can_run(self, payload: Payload, worker_plugin: WorkerPlugin) -> bool:
+        for required_plugin_name in worker_plugin.required_plugin_names:
+            if required_plugin_name not in payload.results.plugins_run['workers']:
+                return False
+        return True
+
+    async def _apply_worker(
+        self, payload: Payload, plugin: WorkerPlugin, request: Request
+    ) -> Tuple[Set[Tuple[Payload, str]], List[ExtractedPayload]]:
+        self.log.debug(
+            f'Scanning Payload {payload.results.payload_id} with WorkerPlugin {plugin.plugin_name}'
+        )
+        try:
+            worker_response: Optional[WorkerResponse] = await plugin.scan(
+                payload, request
+            )
+        except Exception as e:
+            worker_response = None
+            msg = 'worker:failed to scan'
+            self.log.exception(msg)
+            request.errors.append(
+                Error(
+                    payload_id=payload.results.payload_id,
+                    plugin_name=plugin.plugin_name,
+                    error=helpers.format_exc(e, msg=msg),
+                )
+            )
+        payload.results.plugins_run['workers'].append(plugin.plugin_name)
+
+        if not worker_response:
+            return set(), []
+
+        if worker_response.results is not None:
+            payload.results.workers[plugin.plugin_name] = worker_response.results
+        request.errors.extend(worker_response.errors)
+
+        additional_dispatches: Set[Tuple[Payload, str]] = {
+            (payload, plugin_name)
+            for plugin_name in worker_response.dispatch_to
+        }
+
+        extracted_payloads: List[ExtractedPayload] = [
+            Payload(
+                content=extracted_payload.content,
+                payload_meta=extracted_payload.payload_meta,
+                extracted_by=plugin.plugin_name,
+                extracted_from=payload.results.payload_id
+            )
+            for extracted_payload in worker_response.extracted
+        ]
+
+        self.log.debug(
+            f'Completed scan of {payload.results.payload_id} with '
+            f'{len(worker_response.results) if worker_response.results else 0} results, '
+            f'{len(additional_dispatches)} additional dispatches, and '
+            f'{len(extracted_payloads)} extracted payloads'
+        )
+        return additional_dispatches, extracted_payloads
+
+    async def _apply_dispatcher(
+        self, dispatcher: DispatcherPlugin, payload: Payload, request: Request
+    ) -> Set[str]:
+        self.log.debug(
+            f'Sending {payload.results.payload_id} to dispatcher ({dispatcher.plugin_name})'
+        )
+        plugin_names: Set[str] = set()
+        try:
+            dispatcher_result = await dispatcher.get_dispatches(payload, request)
+        except Exception as e:
+            msg = 'dispatcher:failed to dispatch'
+            self.log.exception(msg)
+            request.errors.append(
+                Error(
+                    plugin_name=dispatcher.plugin_name,
+                    error=helpers.format_exc(e, msg=msg),
+                    payload_id=payload.results.payload_id,
+                )
+            )
+            return plugin_names
+
+        if dispatcher_result:
+            if dispatcher_result.plugin_names is not None:
+                plugin_names.update(dispatcher_result.plugin_names)
+                self.log.debug(
+                    f'Dispatching {payload.results.payload_id} to {plugin_names}'
+                )
+
+            if dispatcher_result.meta is not None:
+                payload.dispatch_meta[dispatcher.plugin_name] = dispatcher_result.meta
+
+        return plugin_names
+
+    async def _apply_archiver(
+        self, archiver: ArchiverPlugin, payload: Payload, request: Request
+    ) -> None:
+        archiver_response: Optional[ArchiverResponse] = None
+        self.log.debug(
+            f'Archiving {payload.results.payload_id} with {archiver.plugin_name}'
+        )
+        try:
+            archiver_response = await archiver.archive(payload, request)
+        except Exception as e:
+            msg = 'archiver:failed to archive'
+            self.log.exception(msg)
+            request.errors.append(
+                Error(
+                    payload_id=payload.results.payload_id,
+                    plugin_name=archiver.plugin_name,
+                    error=helpers.format_exc(e, msg=msg),
+                )
+            )
+
+        payload.results.plugins_run['archivers'].append(archiver.plugin_name)
+        if archiver_response:
+            if archiver_response.errors is not None:
+                request.errors.extend(archiver_response.errors)
+
+            if archiver_response.results is not None:
+                payload.results.archivers[
+                    archiver.plugin_name
+                ] = archiver_response.results
+
+    async def _apply_decorator(
+        self, decorator: DecoratorPlugin, response: StoqResponse
+    ) -> StoqResponse:
+        """Mutates the given StoqResponse object to include decorator information"""
+        self.log.debug(f'Applying decorator {decorator.plugin_name}')
+        try:
+            decorator_response = await decorator.decorate(response)
+        except Exception as e:
+            msg = 'decorator'
+            self.log.exception(msg)
+            error = Error(
+                plugin_name=decorator.plugin_name, error=helpers.format_exc(e, msg=msg)
+            )
+            response.errors.append(error)
+            return response
+        if decorator_response is None:
+            return response
+        if decorator_response.results is not None:
+            response.decorators[decorator.plugin_name] = decorator_response.results
+        if decorator_response.errors:
+            response.errors.extend(decorator_response.errors)
+        return response
+
+    async def _apply_connector(
+        self, connector: ConnectorPlugin, response: StoqResponse
+    ) -> None:
+        self.log.debug(f'Saving results to connector {connector.plugin_name}')
+        try:
+            await connector.save(response)
+        except Exception as e:
+            msg = f'Failed to save results using {connector.__module__}'
+            self.log.exception(msg)
+            error = Error(
+                plugin_name=connector.plugin_name, error=helpers.format_exc(e, msg=msg)
+            )
+
+    def _init_logger(
+        self,
+        log_dir: Union[object, str],
+        log_level: str,
+        log_maxbytes: int,
+        log_backup_count: int,
+        log_syntax: str,
+    ) -> None:
+        self.log = logging.getLogger('stoq')
+        self.log.setLevel(log_level.upper())
+
+        if log_syntax == 'json':
+            formatter = jsonlogger.JsonFormatter  # type: ignore
+        else:
+            formatter = logging.Formatter
+
+        stderr_handler = logging.StreamHandler()
+        stderr_logformat = formatter(
+            '[%(asctime)s %(levelname)s] %(name)s: ' '%(message)s'
+        )
+        stderr_handler.setFormatter(stderr_logformat)
+        self.log.addHandler(stderr_handler)
+
+        if log_dir:
+            # Let's attempt to make the log directory if it doesn't exist
+            os.makedirs(log_dir, exist_ok=True)  # type: ignore
+            log_path = os.path.abspath(
+                os.path.join(log_dir, 'stoq.log')  # type: ignore
+            )
+            file_handler = RotatingFileHandler(
+                filename=log_path,
+                mode='a',
+                maxBytes=log_maxbytes,
+                backupCount=log_backup_count,
+            )
+            file_logformat = formatter(
+                '%(asctime)s %(levelname)s %(name)s:'
+                '%(filename)s:%(funcName)s:%(lineno)s: '
+                '%(message)s',
+                datefmt='%Y-%m-%d %H:%M:%S',
+            )
+            file_handler.setFormatter(file_logformat)
+            self.log.addHandler(file_handler)
+            self.log.debug(f'Writing logs to {log_path}')
