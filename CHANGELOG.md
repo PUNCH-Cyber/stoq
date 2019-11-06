@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased (pre-v3.0)
+## Unreleased (v3.0)
 
 ### Added
 
@@ -31,6 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Duplicate extracted payloads are no longer simply skipped, they are appended to 
     `Payload.results[].extracted_by` and `Payload.results[].extracted_from`  
 - Add `StoqConfigParser` to `stoq.helpers` to extend options for `Stoq` and plugin configurations.
+- Parallelization is performed across all of the plugins that can run in a given round, 
+    instead of parallelizing across all of the plugins to perform on a given payload (#147)
 
 ### Changed
 
@@ -43,6 +45,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PayloadMeta` is now an object of `PayloadResults.payload_meta` 
 - `PayloadResults.extracted_by` is now a `List[str]` rather than `str`
 - `PayloadResults.extracted_from` is now a `List[str]` rather than `str`
+- Dispatchers run on each payload every round, instead of once per payload. This allows 
+    the dispatcher to take advantage of the request state model. (#147)
+- Worker plugins can specify additional plugins to run on the payload they scan, effectively giving them dispatch capability.
+    With YARA, for example, this allows us to directly scan with YARA and dispatch 
+    to other plugins by running YARA once. Otherwise, we would run YARA as a dispatcher, 
+    and then immediately run YARA again as a worker plugin. (#147)
+- Archivers run at the very end along with connectors and decorators because we no 
+    longer scan a payload to completion at once. (#147)
+- The default value for max_recursion has increased because the average number of 
+    worker rounds taken to complete a scan is expected to increase. (#147)
+
 
 ### Deprecated
 
