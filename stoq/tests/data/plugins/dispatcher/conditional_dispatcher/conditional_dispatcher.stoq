@@ -1,4 +1,4 @@
-#   Copyright 2014-2018 PUNCH Cyber Analytics Group
+#   Copyright 2014-2015 PUNCH Cyber Analytics Group
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -12,24 +12,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-#
-# Core stoQ configuration
-#
+[Core]
+Name = conditional_dispatcher
+Module = conditional_dispatcher
 
-[core]
-# Leaving blank sets the value to None
-log_dir:
-# What is the maximum size of the provider queue?
-max_queue: 919
-max_recursion: 10
-provider_consumers: 50
-
-[configurable_worker]
-worker_test_option_bool = True
-worker_test_option_str = Worker Testy McTest Face
-worker_test_option_int = 10
-
-[dummy_connector]
-connector_test_option_bool = False
-connector_test_option_str = Connector Testy McTest Face
-connector_test_option_int = 5
+[Documentation]
+Author = Jeremy Fan
+Version = 0.1
+Description = Conditional stoQ Dispatcher plugin

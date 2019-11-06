@@ -30,7 +30,8 @@ from stoq.plugins import WorkerPlugin
 class SimpleWorker(WorkerPlugin):
     RAISE_EXCEPTION = False
     RETURN_ERRORS = False
-    DISPATCH_TO: List[str] = []
+    ADDITIONAL_DISPATCH_TO: List[str] = []
+    EXTRACTED_DISPATCH_TO: List[str] = []
     SHOULD_SCAN = True
     EXTRACTED_PAYLOAD = None
 
@@ -39,16 +40,26 @@ class SimpleWorker(WorkerPlugin):
     ) -> Optional[WorkerResponse]:
         if self.RAISE_EXCEPTION:
             raise Exception('Test exception please ignore')
-        extracted_payload = self.EXTRACTED_PAYLOAD or b'Lorem ipsum'
-        meta = PayloadMeta(should_scan=self.SHOULD_SCAN, dispatch_to=self.DISPATCH_TO)
-        p = ExtractedPayload(extracted_payload, meta)
-        wr = WorkerResponse({'valuable_insight': 'wow'}, extracted=[p])
+
+        extracted_payload_content = self.EXTRACTED_PAYLOAD or b'Lorem ipsum'
+        extracted_payload = ExtractedPayload(
+            extracted_payload_content,
+            PayloadMeta(
+                should_scan=self.SHOULD_SCAN, dispatch_to=self.EXTRACTED_DISPATCH_TO
+            ),
+        )
+        wr = WorkerResponse({"valuable_insight": "wow"}, extracted=[extracted_payload])
+
         if self.RETURN_ERRORS:
             wr.errors.append(
                 Error(
-                    plugin_name='simple_worker',
-                    error='Test error please ignore',
+                    plugin_name="simple_worker",
+                    error="Test error please ignore",
                     payload_id=payload.results.payload_id,
                 )
             )
+
+        if self.ADDITIONAL_DISPATCH_TO:
+            wr.dispatch_to.extend(self.ADDITIONAL_DISPATCH_TO)
+
         return wr

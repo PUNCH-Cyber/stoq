@@ -256,18 +256,14 @@ class ExtractedPayload:
         self, content: bytes, payload_meta: Optional[PayloadMeta] = None
     ) -> None:
         """
-
         Object to store extracted payloads for further analysis
-
         :param content: Raw bytes of extracted payload
         :param payload_meta: ``PayloadMeta`` object containing metadata about extracted payload
-
         >>> src = '/tmp/bad.exe'
         >>> data = open(src, 'rb').read()
         >>> extra_data = {'source': src}
         >>> extracted_meta = PayloadMeta(should_archive=True, extra_data=extra_data)
         >>> extracted_payload = ExtractedPayload(content=data, payload_meta=extracted_meta)
-
         """
 
         self.content = content
@@ -280,6 +276,7 @@ class WorkerResponse:
         results: Optional[Dict] = None,
         extracted: Optional[List[ExtractedPayload]] = None,
         errors: Optional[List[Error]] = None,
+        dispatch_to: Optional[List[str]] = None,
     ) -> None:
         """
 
@@ -295,8 +292,9 @@ class WorkerResponse:
 
         """
         self.results = results
-        self.extracted = [] if extracted is None else extracted
+        self.extracted = extracted or []
         self.errors = errors or []
+        self.dispatch_to = dispatch_to or []
 
     def __str__(self) -> str:
         return helpers.dumps(self)
