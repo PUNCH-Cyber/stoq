@@ -27,7 +27,9 @@ class ExtractPayload(WorkerPlugin):
     async def scan(
         self, payload: Payload, request: Request
     ) -> Optional[WorkerResponse]:
-        if not self.EXTRACTED_PAYLOAD:
-            return WorkerResponse(extracted=[ExtractedPayload(os.urandom(50))])
+        if self.EXTRACTED_PAYLOAD:
+            return WorkerResponse(
+                extracted=[ExtractedPayload(self.EXTRACTED_PAYLOAD)]  # type: ignore
+            )
         else:
-            return WorkerResponse(extracted=[ExtractedPayload(self.EXTRACTED_PAYLOAD)])
+            return WorkerResponse(extracted=[ExtractedPayload(os.urandom(50))])

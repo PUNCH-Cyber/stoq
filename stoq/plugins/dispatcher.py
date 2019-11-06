@@ -113,14 +113,14 @@
 
 """
 
-from abc import abstractmethod
 from typing import Optional
+from abc import abstractmethod, ABC
 
 from stoq.data_classes import Payload, DispatcherResponse, Request
 from stoq.plugins import BasePlugin
 
 
-class DispatcherPlugin(BasePlugin):
+class DispatcherPlugin(BasePlugin, ABC):
     @abstractmethod
     async def get_dispatches(
         self, payload: Payload, request: Request

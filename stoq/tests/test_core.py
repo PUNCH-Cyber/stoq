@@ -36,6 +36,7 @@ from stoq.data_classes import (
 )
 
 
+# type: ignore
 class TestCore(asynctest.TestCase):
     def setUp(self) -> None:
         logging.disable(logging.CRITICAL)
@@ -162,7 +163,9 @@ class TestCore(asynctest.TestCase):
         response = await s.scan(self.generic_content)
         self.assertNotIn('simple_worker', response.results[0].plugins_run['workers'])
 
-        response = await s.scan(self.generic_content, add_start_dispatch=['dummy_worker'])
+        response = await s.scan(
+            self.generic_content, add_start_dispatch=['dummy_worker']
+        )
         self.assertIn('simple_worker', response.results[0].plugins_run['workers'])
 
     async def test_dispatch_duplicate(self):

@@ -96,13 +96,13 @@
 
 """
 
-from abc import abstractmethod
 from asyncio import Queue
+from abc import abstractmethod, ABC
 
 from stoq.plugins import BasePlugin
 
 
-class ProviderPlugin(BasePlugin):
+class ProviderPlugin(BasePlugin, ABC):
     @abstractmethod
     async def ingest(self, queue: Queue) -> None:
         pass

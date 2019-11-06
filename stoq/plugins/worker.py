@@ -176,15 +176,15 @@
     ===
 
 """
-from abc import abstractmethod
-from configparser import ConfigParser
 from typing import Dict, Optional
+from abc import abstractmethod, ABC
+from configparser import ConfigParser
 
 from stoq.data_classes import Payload, Request, WorkerResponse
 from stoq.plugins import BasePlugin
 
 
-class WorkerPlugin(BasePlugin):
+class WorkerPlugin(BasePlugin, ABC):
     def __init__(self, config: ConfigParser, plugin_opts: Optional[Dict]) -> None:
         super().__init__(config, plugin_opts)
 

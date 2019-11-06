@@ -479,7 +479,7 @@ class Stoq(StoqPluginManager):
         self._loaded_decorator_plugins = {  # type: ignore
             d: self.load_plugin(d) for d in decorators if d  # type: ignore
         }
-        self.always_dispatch = always_dispatch
+        self.always_dispatch = always_dispatch or []
         if not self.always_dispatch:
             ad_str = config.get('core', 'always_dispatch', fallback='')
             self.always_dispatch = [d.strip() for d in ad_str.split(',') if d.strip()]
@@ -700,7 +700,7 @@ class Stoq(StoqPluginManager):
 
     async def _execute_scan_round(
         self, request: Request, add_dispatches: Set[Tuple[Payload, str]]
-    ) -> Optional[Tuple[List[ExtractedPayload], Set[Tuple[Payload, str]]]]:
+    ) -> Optional[Tuple[List[Payload], Set[Tuple[Payload, str]]]]:
         # Form total set of dispatches to run
         total_dispatches: Set[Tuple[Payload, str]] = set(add_dispatches)
         get_dispatches: List[Awaitable] = [
@@ -725,8 +725,8 @@ class Stoq(StoqPluginManager):
         )
 
         # Run plugins
-        nested_worker_results: List[
-            Tuple[Set[Tuple[Payload, str]], List[ExtractedPayload]]
+        nested_worker_results: List[  # type: ignore
+            Tuple[Set[Tuple[Payload, str]], List[Payload]]
         ] = await asyncio.gather(
             *[
                 self._apply_worker(payload, plugin, request)
@@ -745,7 +745,7 @@ class Stoq(StoqPluginManager):
     ) -> Tuple[Payload, Set[str]]:
         # Run all dispatchers to form our initial set of worker plugins to run
         worker_plugins: Set[str] = set(self.always_dispatch)
-        dispatch_results: List[Set[str]] = await asyncio.gather(
+        dispatch_results: List[Set[str]] = await asyncio.gather(  # type: ignore
             *[
                 self._apply_dispatcher(dispatcher, payload, request)
                 for dispatcher in self._loaded_dispatcher_plugins.values()
@@ -803,7 +803,7 @@ class Stoq(StoqPluginManager):
             )
 
         try:
-            plugin: WorkerPlugin = self.load_plugin(plugin_name)
+            plugin: WorkerPlugin = self.load_plugin(plugin_name)  # type: ignore
         except Exception as e:
             raise RuntimeError(f'Worker plugin {plugin_name} failed to load') from e
 
@@ -881,7 +881,7 @@ class Stoq(StoqPluginManager):
 
     async def _apply_worker(
         self, payload: Payload, plugin: WorkerPlugin, request: Request
-    ) -> Tuple[Set[Tuple[Payload, str]], List[ExtractedPayload]]:
+    ) -> Tuple[Set[Tuple[Payload, str]], List[Payload]]:
         self.log.debug(
             f'Scanning Payload {payload.results.payload_id} with WorkerPlugin {plugin.plugin_name}'
         )
@@ -910,23 +910,22 @@ class Stoq(StoqPluginManager):
         request.errors.extend(worker_response.errors)
 
         additional_dispatches: Set[Tuple[Payload, str]] = {
-            (payload, plugin_name)
-            for plugin_name in worker_response.dispatch_to
+            (payload, plugin_name) for plugin_name in worker_response.dispatch_to
         }
 
-        extracted_payloads: List[ExtractedPayload] = [
+        extracted_payloads: List[Payload] = [
             Payload(
                 content=extracted_payload.content,
                 payload_meta=extracted_payload.payload_meta,
                 extracted_by=plugin.plugin_name,
-                extracted_from=payload.results.payload_id
+                extracted_from=payload.results.payload_id,
             )
             for extracted_payload in worker_response.extracted
         ]
 
         self.log.debug(
             f'Completed scan of {payload.results.payload_id} with '
-            f'{len(worker_response.results) if worker_response.results else 0} results, '
+            f'{len(worker_response.results) if worker_response.results else 0} result keys, '  # type: ignore
             f'{len(additional_dispatches)} additional dispatches, and '
             f'{len(extracted_payloads)} extracted payloads'
         )
