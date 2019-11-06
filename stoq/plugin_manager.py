@@ -41,11 +41,11 @@ class StoqPluginManager:
         self,
         plugin_dir_list: List[str],
         plugin_opts: Optional[Dict[str, Dict]] = None,
-        stoq_config: Optional[configparser.ConfigParser] = None,
+        stoq_config: Optional[helpers.StoqConfigParser] = None,
     ) -> None:
         self._stoq_config = stoq_config
         self._plugin_opts = {} if plugin_opts is None else plugin_opts
-        self._plugin_name_to_info: Dict[str, Tuple[str, configparser.ConfigParser]] = {}
+        self._plugin_name_to_info: Dict[str, Tuple[str, helpers.StoqConfigParser]] = {}
         self._loaded_plugins: Dict[str, BasePlugin] = {}
         self._loaded_provider_plugins: Dict[str, ProviderPlugin] = {}
         self._loaded_worker_plugins: Dict[str, WorkerPlugin] = {}
@@ -72,7 +72,7 @@ class StoqPluginManager:
                     if not file.endswith('.stoq'):
                         continue
                     plugin_conf_path = os.path.join(root_path, file)
-                    plugin_config = configparser.ConfigParser()
+                    plugin_config = helpers.StoqConfigParser()
                     try:
                         plugin_config.read(plugin_conf_path)
                         plugin_name = plugin_config.get('Core', 'Name')
@@ -102,7 +102,7 @@ class StoqPluginManager:
                         )
                         continue
 
-    def load_plugin(self, plugin_name: str) -> BasePlugin:
+    def load_plugin(self, plugin_name: str) -> Union[BasePlugin, ProviderPlugin]:
         plugin_name = plugin_name.strip()
         if plugin_name in self._loaded_plugins:
             return self._loaded_plugins[plugin_name]
@@ -158,15 +158,18 @@ class StoqPluginManager:
         # 2) plugin configuration in `stoq.cfg`
         # 3) `plugin_name.stoq`
         if isinstance(
-            self._stoq_config,
-            configparser.ConfigParser
-            # type: ignore
-        ) and self._stoq_config.has_section(plugin_name):
+            self._stoq_config, helpers.StoqConfigParser
+        ) and self._stoq_config.has_section(  # pyre-ignore[16]
+            plugin_name
+        ):
             if not plugin_config.has_section('options'):
                 plugin_config.add_section('options')
-            for opt in self._stoq_config.options(plugin_name):  # type: ignore
-                # type: ignore
-                plugin_config['options'][opt] = self._stoq_config.get(plugin_name, opt)
+            for opt in self._stoq_config.options(plugin_name):  # pyre-ignore[16]
+                plugin_config['options'][
+                    opt
+                ] = self._stoq_config.get(  # pyre-ignore[16]
+                    plugin_name, opt
+                )
         if self._plugin_opts.get(plugin_name):
             plugin_config.read_dict(
                 {'options': self._plugin_opts.get(plugin_name)}  # type: ignore
@@ -193,11 +196,7 @@ class StoqPluginManager:
             try:
                 with open(self._plugin_name_to_info[plugin][0]) as f:
                     parsed_plugin = ast.parse(f.read())
-                classes = [
-                    n
-                    for n in parsed_plugin.body  # type: ignore
-                    if isinstance(n, ast.ClassDef)
-                ]
+                classes = [n for n in parsed_plugin.body if isinstance(n, ast.ClassDef)]
                 for c in classes:
                     for base in c.bases:
                         if base.id in valid_classes:  # type: ignore

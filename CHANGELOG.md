@@ -30,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     scanning tasks.
 - Duplicate extracted payloads are no longer simply skipped, they are appended to 
     `Payload.results[].extracted_by` and `Payload.results[].extracted_from`  
-
+- Add `StoqConfigParser` to `stoq.helpers` to extend options for `Stoq` and plugin configurations.
 
 ### Changed
 

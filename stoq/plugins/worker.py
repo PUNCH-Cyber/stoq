@@ -180,12 +180,13 @@ from typing import Dict, Optional
 from abc import abstractmethod, ABC
 from configparser import ConfigParser
 
-from stoq.data_classes import Payload, Request, WorkerResponse
 from stoq.plugins import BasePlugin
+from stoq.helpers import StoqConfigParser
+from stoq.data_classes import Payload, Request, WorkerResponse
 
 
 class WorkerPlugin(BasePlugin, ABC):
-    def __init__(self, config: ConfigParser, plugin_opts: Optional[Dict]) -> None:
+    def __init__(self, config: StoqConfigParser, plugin_opts: Optional[Dict]) -> None:
         super().__init__(config, plugin_opts)
 
         required_worker_plugin_names = config.get(
