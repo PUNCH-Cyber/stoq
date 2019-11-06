@@ -16,12 +16,13 @@
 
 import logging
 from abc import ABC
-from configparser import ConfigParser
 from typing import Dict, Optional
+
+from stoq.helpers import StoqConfigParser
 
 
 class BasePlugin(ABC):
-    def __init__(self, config: ConfigParser, plugin_opts: Optional[Dict]) -> None:
+    def __init__(self, config: StoqConfigParser, plugin_opts: Optional[Dict]) -> None:
         self.config = config
         self.plugin_opts = plugin_opts
         self.plugin_name = config.get('Core', 'Name')

@@ -87,14 +87,14 @@
 
 """
 
-from abc import abstractmethod
 from typing import Optional
+from abc import abstractmethod, ABC
 
 from stoq.data_classes import StoqResponse, DecoratorResponse
 from stoq.plugins import BasePlugin
 
 
-class DecoratorPlugin(BasePlugin):
+class DecoratorPlugin(BasePlugin, ABC):
     @abstractmethod
     async def decorate(self, response: StoqResponse) -> Optional[DecoratorResponse]:
         pass

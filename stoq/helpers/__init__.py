@@ -20,7 +20,25 @@ import datetime
 import traceback
 
 from bs4 import UnicodeDammit  # type: ignore
+from configparser import ConfigParser
 from typing import Any, Optional, Dict, DefaultDict, Union, List
+
+
+class StoqConfigParser(ConfigParser):
+    """ 
+    Extends ConfigParser to simplfy handling of common configuration options
+
+    """
+
+    def getlist(self, section, option, *args, **kwargs):
+        """
+        Create a list from config option using comma delimited string
+
+        """
+        value = self.get(section, option, fallback=kwargs.get('fallback', ''))
+        if isinstance(value, list):
+            return value
+        return [o.strip() for o in value.split(',') if o]
 
 
 class JsonComplexEncoder(json.JSONEncoder):

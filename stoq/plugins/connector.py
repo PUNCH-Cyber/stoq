@@ -83,13 +83,13 @@
 
 """
 
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 
 from stoq.data_classes import StoqResponse
 from stoq.plugins import BasePlugin
 
 
-class ConnectorPlugin(BasePlugin):
+class ConnectorPlugin(BasePlugin, ABC):
     @abstractmethod
     async def save(self, response: StoqResponse) -> None:
         pass

@@ -366,12 +366,14 @@ class Stoq(StoqPluginManager):
         plugin_dir_list: Optional[List[str]] = None,
         plugin_opts: Optional[Dict[str, Dict]] = None,
         providers: Optional[List[str]] = None,
+        provider_consumers: Optional[int] = None,
         source_archivers: Optional[List[str]] = None,
         dest_archivers: Optional[List[str]] = None,
         connectors: Optional[List[str]] = None,
         dispatchers: Optional[List[str]] = None,
         decorators: Optional[List[str]] = None,
         always_dispatch: Optional[List[str]] = None,
+        max_queue: Optional[int] = None,
         max_recursion: Optional[int] = None,
         max_required_worker_depth: Optional[int] = None,
     ) -> None:
@@ -392,6 +394,8 @@ class Stoq(StoqPluginManager):
         :param dispatchers: Dispatcher plugins to be used
         :param decorators: Decorators to be used
         :param always_dispatch: Plugins to always send payloads to, no matter what
+        :param provider_consumers: Number of provider consumers to instaniate
+        :param max_queue: Max Queue size for Providers plugins
         :param max_recursion: Maximum level of recursion into a payload and extracted payloads
         :param max_required_worker_depth: Maximum depth for required worker plugins dependencies
     ) -> None:
@@ -399,14 +403,13 @@ class Stoq(StoqPluginManager):
         if not base_dir:
             base_dir = os.getcwd()
         base_dir = os.path.realpath(base_dir)
-        config_file = config_file if config_file else os.path.join(base_dir, 'stoq.cfg')
-
-        config = configparser.ConfigParser(allow_no_value=True)
+        config_file = config_file or os.path.join(base_dir, 'stoq.cfg')
+        config = helpers.StoqConfigParser(allow_no_value=True)
         if os.path.exists(config_file):
             config.read(config_file)
 
-        self.max_queue = config.getint('core', 'max_queue', fallback=100)
-        self.provider_consumers = config.getint(
+        self.max_queue = max_queue or config.getint('core', 'max_queue', fallback=100)
+        self.provider_consumers = provider_consumers or config.getint(
             'core', 'provider_consumers', fallback=50
         )
         self.max_recursion = max_recursion or config.getint(
@@ -420,74 +423,66 @@ class Stoq(StoqPluginManager):
             log_dir = config.get(
                 'core', 'log_dir', fallback=os.path.join(base_dir, 'logs')
             )
-        if not log_level:
-            log_level = config.get('core', 'log_level', fallback='INFO')
+        log_level = log_level or config.get('core', 'log_level', fallback='INFO')
         log_maxbytes = int(config.get('core', 'log_maxbytes', fallback='1500000'))
         log_backup_count = int(config.get('core', 'log_backup_count', fallback='5'))
         log_syntax = config.get('core', 'log_syntax', fallback='text')
         self._init_logger(
-            log_dir,  # type: ignore
+            log_dir,
             log_level,  # type: ignore
             log_maxbytes,
             log_backup_count,
             log_syntax,
         )
 
-        if not plugin_dir_list:
-            plugin_dir_str = config.get(
-                'core', 'plugin_dir_list', fallback=os.path.join(base_dir, 'plugins')
-            )
-            plugin_dir_list = [d.strip() for d in plugin_dir_str.split(',')]
+        plugin_dir_list = plugin_dir_list or config.getlist(
+            'core', 'plugin_dir_list', fallback=os.path.join(base_dir, 'plugins')
+        )
 
         super().__init__(plugin_dir_list, plugin_opts, config)
 
-        if not providers:
-            providers_str = config.get('core', 'providers', fallback='')
-            providers = [d.strip() for d in providers_str.split(',') if d.strip()]
-        self._loaded_provider_plugins = {  # type: ignore
+        providers = providers or config.getlist('core', 'providers', fallback=[])
+        self._loaded_provider_plugins = {
             d: self.load_plugin(d) for d in providers if d  # type: ignore
         }
-        if not source_archivers:
-            source_arch_str = config.get('core', 'source_archivers', fallback='')
-            source_archivers = [
-                d.strip() for d in source_arch_str.split(',') if d.strip()
-            ]
-        self._loaded_source_archiver_plugins = {  # type: ignore
+
+        source_archivers = source_archivers or config.getlist(
+            'core', 'source_archivers', fallback=[]
+        )
+        self._loaded_source_archiver_plugins = {
             d: self.load_plugin(d) for d in source_archivers if d  # type: ignore
         }
-        if not dest_archivers:
-            dest_arch_str = config.get('core', 'dest_archivers', fallback='')
-            dest_archivers = [d.strip() for d in dest_arch_str.split(',') if d.strip()]
-        self._loaded_dest_archiver_plugins = {  # type: ignore
+
+        dest_archivers = dest_archivers or config.getlist(
+            'core', 'dest_archivers', fallback=[]
+        )
+        self._loaded_dest_archiver_plugins = {
             d: self.load_plugin(d) for d in dest_archivers if d  # type: ignore
         }
-        if not connectors:
-            conn_str = config.get('core', 'connectors', fallback='')
-            connectors = [d.strip() for d in conn_str.split(',') if d.strip()]
+
+        connectors = connectors or config.getlist('core', 'connectors', fallback=[])
         self._loaded_connector_plugins = [
             self.load_plugin(d) for d in connectors if d  # type: ignore
         ]
-        if not dispatchers:
-            dispatcher_str = config.get('core', 'dispatchers', fallback='')
-            dispatchers = [d.strip() for d in dispatcher_str.split(',') if d.strip()]
-        self._loaded_dispatcher_plugins = {  # type: ignore
+
+        dispatchers = dispatchers or config.getlist('core', 'dispatchers', fallback=[])
+        self._loaded_dispatcher_plugins = {
             d: self.load_plugin(d) for d in dispatchers if d  # type: ignore
         }
-        if not decorators:
-            decorator_str = config.get('core', 'decorators', fallback='')
-            decorators = [d.strip() for d in decorator_str.split(',') if d.strip()]
-        self._loaded_decorator_plugins = {  # type: ignore
+
+        decorators = decorators or config.getlist('core', 'decorators', fallback=[])
+        self._loaded_decorator_plugins = {
             d: self.load_plugin(d) for d in decorators if d  # type: ignore
         }
-        self.always_dispatch = always_dispatch
-        if not self.always_dispatch:
-            ad_str = config.get('core', 'always_dispatch', fallback='')
-            self.always_dispatch = [d.strip() for d in ad_str.split(',') if d.strip()]
 
-        for ad in self.always_dispatch:
-            self.load_plugin(ad)
+        self.always_dispatch = always_dispatch or config.get(
+            'core', 'always_dispatch', fallback=[]
+        )
+        if self.always_dispatch:
+            for ad in self.always_dispatch:
+                self.load_plugin(ad)
 
-    #  @ratelimited()
+    @ratelimited()
     async def scan(
         self,
         content: bytes,
@@ -700,7 +695,7 @@ class Stoq(StoqPluginManager):
 
     async def _execute_scan_round(
         self, request: Request, add_dispatches: Set[Tuple[Payload, str]]
-    ) -> Optional[Tuple[List[ExtractedPayload], Set[Tuple[Payload, str]]]]:
+    ) -> Optional[Tuple[List[Payload], Set[Tuple[Payload, str]]]]:
         # Form total set of dispatches to run
         total_dispatches: Set[Tuple[Payload, str]] = set(add_dispatches)
         get_dispatches: List[Awaitable] = [
@@ -725,8 +720,8 @@ class Stoq(StoqPluginManager):
         )
 
         # Run plugins
-        nested_worker_results: List[
-            Tuple[Set[Tuple[Payload, str]], List[ExtractedPayload]]
+        nested_worker_results: List[  # type: ignore
+            Tuple[Set[Tuple[Payload, str]], List[Payload]]
         ] = await asyncio.gather(
             *[
                 self._apply_worker(payload, plugin, request)
@@ -744,8 +739,10 @@ class Stoq(StoqPluginManager):
         self, payload: Payload, request: Request
     ) -> Tuple[Payload, Set[str]]:
         # Run all dispatchers to form our initial set of worker plugins to run
-        worker_plugins: Set[str] = set(self.always_dispatch)
-        dispatch_results: List[Set[str]] = await asyncio.gather(
+        worker_plugins: Set[str] = set(
+            self.always_dispatch
+        ) if self.always_dispatch else set()
+        dispatch_results: List[Set[str]] = await asyncio.gather(  # type: ignore
             *[
                 self._apply_dispatcher(dispatcher, payload, request)
                 for dispatcher in self._loaded_dispatcher_plugins.values()
@@ -803,7 +800,7 @@ class Stoq(StoqPluginManager):
             )
 
         try:
-            plugin: WorkerPlugin = self.load_plugin(plugin_name)
+            plugin: WorkerPlugin = self.load_plugin(plugin_name)  # type: ignore
         except Exception as e:
             raise RuntimeError(f'Worker plugin {plugin_name} failed to load') from e
 
@@ -881,7 +878,7 @@ class Stoq(StoqPluginManager):
 
     async def _apply_worker(
         self, payload: Payload, plugin: WorkerPlugin, request: Request
-    ) -> Tuple[Set[Tuple[Payload, str]], List[ExtractedPayload]]:
+    ) -> Tuple[Set[Tuple[Payload, str]], List[Payload]]:
         self.log.debug(
             f'Scanning Payload {payload.results.payload_id} with WorkerPlugin {plugin.plugin_name}'
         )
@@ -910,23 +907,22 @@ class Stoq(StoqPluginManager):
         request.errors.extend(worker_response.errors)
 
         additional_dispatches: Set[Tuple[Payload, str]] = {
-            (payload, plugin_name)
-            for plugin_name in worker_response.dispatch_to
+            (payload, plugin_name) for plugin_name in worker_response.dispatch_to
         }
 
-        extracted_payloads: List[ExtractedPayload] = [
+        extracted_payloads: List[Payload] = [
             Payload(
                 content=extracted_payload.content,
                 payload_meta=extracted_payload.payload_meta,
                 extracted_by=plugin.plugin_name,
-                extracted_from=payload.results.payload_id
+                extracted_from=payload.results.payload_id,
             )
             for extracted_payload in worker_response.extracted
         ]
 
         self.log.debug(
             f'Completed scan of {payload.results.payload_id} with '
-            f'{len(worker_response.results) if worker_response.results else 0} results, '
+            f'{len(worker_response.results) if worker_response.results else 0} result keys, '  # type: ignore
             f'{len(additional_dispatches)} additional dispatches, and '
             f'{len(extracted_payloads)} extracted payloads'
         )
