@@ -62,7 +62,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - DeepDispatcher plugin class has been removed
 - `Payload.plugins_run` has been removed in favor of `PayloadResults.plugins_run`)
 - `Payload.worker_results` has been removed in favor of `PayloadResults.workers`
-- `RequestMeta` is no longer passed to plugins, in favor of the `Request` object.
+- `RequestMeta` is no longer passed to plugins, in favor of the `Request` object
+- `plugins_opts` has been removed from plugin `__init__` function. All plugin configuration options
+    are only available in `self.config`
 
 ## [2.0.5] - 2019-06-07
 

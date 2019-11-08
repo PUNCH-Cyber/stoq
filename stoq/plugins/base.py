@@ -22,9 +22,8 @@ from stoq.helpers import StoqConfigParser
 
 
 class BasePlugin(ABC):
-    def __init__(self, config: StoqConfigParser, plugin_opts: Optional[Dict]) -> None:
+    def __init__(self, config: StoqConfigParser) -> None:
         self.config = config
-        self.plugin_opts = plugin_opts
         self.plugin_name = config.get('Core', 'Name')
         self.__author__ = config.get('Documentation', 'Author', fallback='')
         self.__version__ = config.get('Documentation', 'Version', fallback='')

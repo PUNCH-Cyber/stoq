@@ -186,8 +186,8 @@ from stoq.data_classes import Payload, Request, WorkerResponse
 
 
 class WorkerPlugin(BasePlugin, ABC):
-    def __init__(self, config: StoqConfigParser, plugin_opts: Optional[Dict]) -> None:
-        super().__init__(config, plugin_opts)
+    def __init__(self, config: StoqConfigParser) -> None:
+        super().__init__(config)
 
         required_worker_plugin_names = config.get(
             'options', 'required_workers', fallback=None
