@@ -764,13 +764,12 @@ class Stoq(StoqPluginManager):
                     payload, plugin, request, set()
                 )
             except RuntimeError as e:
-                msg = f'Error resolving dependencies for plugin {plugin}'
-                self.log.exception(msg)
+                self.log.exception(e)
                 request.errors.append(
                     Error(
                         payload_id=payload.results.payload_id,
                         plugin_name=plugin,
-                        error=helpers.format_exc(e, msg=msg),
+                        error=helpers.format_exc(e),
                     )
                 )
                 continue
@@ -802,7 +801,16 @@ class Stoq(StoqPluginManager):
         try:
             plugin: WorkerPlugin = self.load_plugin(plugin_name)  # type: ignore
         except Exception as e:
-            raise RuntimeError(f'Worker plugin {plugin_name} failed to load') from e
+            msg = f'Worker plugin {plugin_name} failed to load'
+            self.log.exception(msg)
+            request.errors.append(
+                Error(
+                    payload_id=payload.results.payload_id,
+                    plugin_name=plugin_name,
+                    error=helpers.format_exc(e, msg=msg),
+                )
+            )
+            return set(), set()
 
         if plugin_name in payload.results.plugins_run['workers']:
             return set(), set()
