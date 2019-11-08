@@ -22,5 +22,5 @@ Version = 0.1
 Website = https://github.com/PUNCH-Cyber/stoq-plugins-public
 Description = Configurable stoQ Worker plugin
 
-[Options]
+[options]
 important_option = cybercybercyber

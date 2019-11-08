@@ -27,7 +27,7 @@ class ConfigurableWorker(WorkerPlugin):
         pass
 
     def get_important_option(self):
-        return self.config.get('Options', 'important_option')
+        return self.config.get('options', 'important_option')
 
     def get_crazy_runtime_option(self):
-        return self.plugin_opts['crazy_runtime_option']
+        return self.config.getint('options', 'crazy_runtime_option')

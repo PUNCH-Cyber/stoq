@@ -172,9 +172,9 @@ class StoqPluginManager:
                 )
         if self._plugin_opts.get(plugin_name):
             plugin_config.read_dict(
-                {'options': self._plugin_opts.get(plugin_name)}  # type: ignore
+                {'options': self._plugin_opts[plugin_name]}  # type: ignore
             )
-        plugin = plugin_class(plugin_config, self._plugin_opts.get(plugin_name))
+        plugin = plugin_class(plugin_config)
         self._loaded_plugins[plugin_name] = plugin
         return plugin
 
