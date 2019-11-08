@@ -28,7 +28,7 @@ log = logging.getLogger()
 
 class StoqPluginInstaller:
 
-    DEFAULT_REPO = 'git+https://github.com/PUNCH-Cyber/stoq-plugins-public.git'
+    DEFAULT_REPO = 'git+https://github.com/PUNCH-Cyber/stoq-plugins-public.git@v2'
 
     @staticmethod
     def install(
