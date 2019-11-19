@@ -26,6 +26,14 @@ __init__
 All plugin classes are instantiated exactly the same way. If the plugin requires additional
 configuration options, the `__init__` function may be added to your plugin class.
 
+Key Changes:
+
+    - `from configparser import ConfigParser` has been replaced with a helper function and
+      should be imported as `from stoq.helpers import StoqConfigParser`
+    - `plugins_opts` has been deprecated. All plugin options are now available within the
+      `config` argument. `plugins_opts` must be removed from the `__init__` signature as
+      well as from `super().__init__`
+
 v2
 ^^
 
@@ -63,12 +71,20 @@ v3
 ArchiverPlugin
 --------------
 
+Key Updates:
+
+    - import of `RequestMeta` is replaced with `Request`
+    - The `archive` function signature accepts a `Request` object rather than `RequestMeta`
+    - `def archive` is an async function, and must be changed to `async def archive`
+    - `def get` is an async function, and must be changed to `async def get`
+
 v2
 ^^
 
 ::
 
-    from stoq import Payload, RequestMeta, ArchiverPlugin, ArchiverResponse
+    from stoq.plugins import ArchiverPlugin
+    from stoq import Payload, RequestMeta, ArchiverResponse
 
 
     class MyArchiver(ArchiverPlugin):
@@ -86,7 +102,8 @@ v3
 
 ::
 
-    from stoq import Payload, RequestMeta, ArchiverPlugin, ArchiverResponse
+    from stoq.plugins import ArchiverPlugin
+    from stoq import Payload, RequestMeta, ArchiverResponse
 
 
     class MyArchiver(ArchiverPlugin):
@@ -102,12 +119,17 @@ v3
 ConnectorPlugin
 ---------------
 
+Key Updates:
+
+    - `def save` is an async function, and must be changed to `async def save`
+
 v2
 ^^
 
 ::
 
-    from stoq import StoqResponse, ConnectorPlugin
+    from stoq.plugins import ConnectorPlugin
+    from stoq import StoqResponse
 
 
     class MyConnector(ConnectorPlugin):
@@ -120,7 +142,8 @@ v3
 
 ::
 
-    from stoq import StoqResponse, ConnectorPlugin
+    from stoq.plugins import ConnectorPlugin
+    from stoq import StoqResponse
 
 
     class MyConnector(ConnectorPlugin):
@@ -131,17 +154,22 @@ v3
 DecoratorPlugin
 ---------------
 
+Key Updates:
+
+    - `def decorate` is an async function, and must be changed to `async def decorate`
+
 v2
 ^^
 
 ::
 
-    from stoq import StoqResponse, DecoratorPlugin, DecoratorResponse
+    from stoq.plugins import DecoratorPlugin
+    from stoq import StoqResponse, DecoratorResponse
 
 
     class MyDecorator(DecoratorPlugin):
         def decorate(self, response: StoqResponse) -> DecoratorResponse:
-            return DecoratorResponse
+            return DecoratorResponse()
 
 
 v3
@@ -149,23 +177,31 @@ v3
 
 ::
 
-    from stoq import StoqResponse, DecoratorPlugin, DecoratorResponse
+    from stoq.plugins import DecoratorPlugin
+    from stoq import StoqResponse, DecoratorResponse
 
 
     class MyDecorator(DecoratorPlugin):
         async def decorate(self, response: StoqResponse) -> DecoratorResponse:
-            return DecoratorResponse
+            return DecoratorResponse()
 
 
 DispatcherPlugin
 ----------------
+
+Key Updates:
+
+    - import of `RequestMeta` is replaced with `Request`
+    - The `get_dispatches` function signature accepts a `Request` object rather than `RequestMeta`
+    - `def get_dispatches` is an async function, and must be changed to `async def get_dispatches`
 
 v2
 ^^
 
 ::
 
-    from stoq import Payload, RequestMeta, DispatcherPlugin, DispatcherResponse
+    from stoq.plugins import DispatcherPlugin
+    from stoq import Payload, RequestMeta, DispatcherResponse
 
 
     class MyDispatcher(DispatcherPlugin):
@@ -180,7 +216,8 @@ v3
 
 ::
 
-    from stoq import Payload, Request, DispatcherPlugin, DispatcherResponse
+    from stoq.plugins import DispatcherPlugin
+    from stoq import Payload, Request, DispatcherResponse
 
 
     class MyDispatcher(DispatcherPlugin):
@@ -194,13 +231,20 @@ v3
 ProviderPlugin
 --------------
 
+Key Updates:
+
+    - `from queue import Queue` is replaced with `from asyncio import Queue`
+    - `def ingest` is an async function, and must be changed to `async def ingest`
+    - When placing objects on the `Queue`, the call must be awaited, `await queue.put()`
+
 v2
 ^^
 
 ::
 
     from queue import Queue
-    from stoq import Payload, RequestMeta, ProviderPlugin
+    from stoq.plugins import ProviderPlugin
+    from stoq import Payload
 
 
     class MyProvider(ProviderPlugin):
@@ -214,7 +258,8 @@ v3
 ::
 
     from asyncio import Queue
-    from stoq import Payload, Request, ProviderPlugin
+    from stoq.plugins import ProviderPlugin
+    from stoq import Payload
 
 
     class MyProvider(ProviderPlugin):
@@ -225,12 +270,19 @@ v3
 WorkerPlugin
 ------------
 
+Key Updates:
+
+    - import of `RequestMeta` is replaced with `Request`
+    - The `scan` function signature accepts a `Request` object rather than `RequestMeta`
+    - `def scan` is an async function, and must be changed to `async def scan`
+
 v2
 ^^
 
 ::
 
-    from stoq import Payload, RequestMeta, WorkerPlugin, WorkerResponse
+    from stoq.plugins import WorkerPlugin
+    from stoq import Payload, RequestMeta, WorkerResponse
 
 
     class MyWorker(WorkerPlugin):
@@ -243,7 +295,8 @@ v3
 
 ::
 
-    from stoq import Payload, Request, WorkerPlugin, WorkerResponse
+    from stoq.plugins import WorkerPlugin
+    from stoq import Payload, Request, WorkerResponse
 
 
     class MyWorker(WorkerPlugin):
