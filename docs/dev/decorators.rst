@@ -1,5 +1,4 @@
 .. _plugindecorator:
-.. module:: stoq
 
 Decorator Plugins
 =================

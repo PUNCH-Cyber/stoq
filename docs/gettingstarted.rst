@@ -70,27 +70,27 @@ List Plugins
 Installed plugins can be easily listed by using the ``stoq`` command::
 
     $ stoq list
-    stoQ :: v2.x.x :: an automated analysis framework
+    stoQ :: v3.x.x :: an automated analysis framework
     -------------------------------------------------
-    xdpcarve                      v2.0.0     Carve and decode streams from XDP documents
-    stdout                        v2.0.0     Sends content to STDOUT
-    rtf                           v2.0.0     Extract objects from RTF payloads
-    hash                          v2.0.0     Hash content
-    dirmon                        v2.0.0     Monitor a directory for newly created files for processing
-    vtmis-search                  v2.0.0     Search VTMIS API
-    peinfo                        v2.0.0     Gather relevant information about an executable using pefile
-    javaclass                     v2.0.0     Decodes and extracts information from Java Class files
-    filedir                       v2.0.0     Ingest a file or directory for processing
-    yara                          v2.0.0     Process a payload using yara
-    decompress                    v2.0.0     Extract content from a multitude of archive formats
-    ole                           v2.0.0     Carve OLE streams within Microsoft Office Documents
-    iocextract                    v2.0.0     Regex routines to extract and normalize IOC's from a payload
-    mraptor                       v2.0.0     Port of mraptor3 from oletools
-    trid                          v2.0.0     Identify file types from their TrID signature
-    smtp                          v2.0.0     SMTP Parser Worker
-    exif                          v2.0.0     Processes a payload using ExifTool
-    pecarve                       v2.0.0     Carve portable executable files from a data stream
-    swfcarve                      v2.0.0     Carve and decompress SWF files from a data stream
+    xdpcarve                      v3.0.0     Carve and decode streams from XDP documents
+    stdout                        v3.0.0     Sends content to STDOUT
+    rtf                           v3.0.0     Extract objects from RTF payloads
+    hash                          v3.0.0     Hash content
+    dirmon                        v3.0.0     Monitor a directory for newly created files for processing
+    vtmis-search                  v3.0.0     Search VTMIS API
+    peinfo                        v3.0.0     Gather relevant information about an executable using pefile
+    javaclass                     v3.0.0     Decodes and extracts information from Java Class files
+    filedir                       v3.0.0     Ingest a file or directory for processing
+    yara                          v3.0.0     Process a payload using yara
+    decompress                    v3.0.0     Extract content from a multitude of archive formats
+    ole                           v3.0.0     Carve OLE streams within Microsoft Office Documents
+    iocextract                    v3.0.0     Regex routines to extract and normalize IOC's from a payload
+    mraptor                       v3.0.0     Port of mraptor3 from oletools
+    trid                          v3.0.0     Identify file types from their TrID signature
+    smtp                          v3.0.0     SMTP Parser Worker
+    exif                          v3.0.0     Processes a payload using ExifTool
+    pecarve                       v3.0.0     Carve portable executable files from a data stream
+    swfcarve                      v3.0.0     Carve and decompress SWF files from a data stream
 
 .. _scanmode:
 
@@ -123,15 +123,13 @@ Now, let's run ``stoq`` with the ``hash`` plugin::
                     },
                     "dispatch_to": []
                 },
-                "workers": [
-                    {
-                        "hash": {
-                            "sha256": "47c6e9b402324ea6c54dd95ad3fdf4b48b18775053b105e241a371a3731488c0",
-                            "md5": "16d9f6e5421d99beb46d7ab1500c1799",
-                            "sha1": "9e6414bf28a2c98fbd13172817db80380c5eeb6a"
-                        }
+                "workers": {
+                    "hash": {
+                        "sha256": "47c6e9b402324ea6c54dd95ad3fdf4b48b18775053b105e241a371a3731488c0",
+                        "md5": "16d9f6e5421d99beb46d7ab1500c1799",
+                        "sha1": "9e6414bf28a2c98fbd13172817db80380c5eeb6a"
                     }
-                ],
+                }
                 "archivers": {},
                 "plugins_run": {
                     "workers": [
@@ -177,29 +175,28 @@ Ok, now let's scan the payload again, but this time we will use both plugins::
                     },
                     "dispatch_to": []
                 },
-                "workers": [
-                    {
-                        "hash": {
-                            "sha256": "47c6e9b402324ea6c54dd95ad3fdf4b48b18775053b105e241a371a3731488c0",
-                            "md5": "16d9f6e5421d99beb46d7ab1500c1799",
-                            "sha1": "9e6414bf28a2c98fbd13172817db80380c5eeb6a"
+                "workers": {
+                    "hash": {
+                        "sha256": "47c6e9b402324ea6c54dd95ad3fdf4b48b18775053b105e241a371a3731488c0",
+                        "md5": "16d9f6e5421d99beb46d7ab1500c1799",
+                        "sha1": "9e6414bf28a2c98fbd13172817db80380c5eeb6a"
                         }
-                        "peinfo": {
-                            "imphash": "6238d5d3f08e2b63c437c2ba9e1f7151",
-                            "compile_time": "2013-04-20 10:50:10",
-                            "packer": null,
-                            "is_packed": false,
-                            "is_exe": true,
-                            "is_dll": false,
-                            "is_driver": false,
-                            "is_valid": null,
-                            "is_suspicious": null,
-                            "machine_type": "IMAGE_FILE_MACHINE_I386",
-                            "entrypoint": "0x32dc0",
-                            "section_count": 5,
-                            [...TRUNCATED...]
+                    "peinfo": {
+                        "imphash": "6238d5d3f08e2b63c437c2ba9e1f7151",
+                        "compile_time": "2013-04-20 10:50:10",
+                        "packer": null,
+                        "is_packed": false,
+                        "is_exe": true,
+                        "is_dll": false,
+                        "is_driver": false,
+                        "is_valid": null,
+                        "is_suspicious": null,
+                        "machine_type": "IMAGE_FILE_MACHINE_I386",
+                        "entrypoint": "0x32dc0",
+                        "section_count": 5,
+                        [...TRUNCATED...]
                     }
-                ],
+                }
                 "archivers": {},
                 "plugins_run": {
                     "workers": [
@@ -305,12 +302,13 @@ To set ``--request-source`` simply add the argument to the `stoq` command::
 
     $ stoq scan [...] --request-source my_mail
     {
-        "results": [
+        "results": {
             {
+                [...]
                 "payload_id": "27774a9a-5a03-4d59-b51b-37583683b666",
                 [...]
             }
-        ],
+        }
         "request_meta": {
             "archive_payloads": true,
             "source": "my_mail",
@@ -327,12 +325,13 @@ line argument. This option requires key/value pairs separated by an ``=``::
 
     $ stoq scan [...] --request-source my_mail --request-extra server=mail-server-01 postfix=true
     {
-        "results": [
+        "results": {
             {
+                [...]
                 "payload_id": "27774a9a-5a03-4d59-b51b-37583683b666",
                 [...]
             }
-        ],
+        }
         "request_meta": {
             "archive_payloads": true,
             "source": "my_mail",
@@ -347,9 +346,13 @@ line argument. This option requires key/value pairs separated by an ``=``::
         "scan_id": "e107f362-0b40-455e-bfef-da7c606637ca"
     }
 
-Additionally, RequestMeta may be defined when scanning a payload using a ``Stoq`` object
+Additionally, RequestMeta may be defined when scanning a payload using a ``Stoq`` object::
 
+    >>> import asyncio
     >>> from stoq import Stoq, RequestMeta
     >>> s = Stoq()
+    >>> loop = asyncio.get_event_loop()
     >>> request_meta = RequestMeta(source='my_mail', extra_data={'server': 'mail-server-01', 'postfix': True})
-    >>> s.scan(b'this is a test payload', request_meta=request_meta)
+    >>> results = loop.run_until_complete(
+    ...     s.scan(b'this is a test payload', request_meta=request_meta)
+    ... )

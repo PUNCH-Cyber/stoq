@@ -23,8 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     The `Request` object contains all payloads, request metadata, results, and errors from 
     all other completed plugins. This will allow for all neccessary plugins to have a full 
     understanding of the current state of the complete `Request`.
-- `WorkerPlugin`s now have a configuration option of `required_worker_plugins`.
-    This allows for chained worker dependencies. If `required_worker_plugins` is defined, the 
+- `WorkerPlugin`s now have a configuration option of `required_workers`.
+    This allows for chained worker dependencies. If `required_workers` is defined, the 
     parent plugin will not be run until all required plugins are completed successfully. The
     parent plugin may then use results from other completed plugins for their respective 
     scanning tasks.
@@ -65,6 +65,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `RequestMeta` is no longer passed to plugins, in favor of the `Request` object
 - `plugins_opts` has been removed from plugin `__init__` function. All plugin configuration options
     are only available in `self.config`
+
+## [2.0.7] - 2019-11-18
+
+### Changed
+
+- Fix plugin requirements path when installing from Github
+
+## [2.0.6] - 2019-11-08
+
+### Changed
+
+- Fix issue where deep dispatchers defined from the CLI were not passed to `Stoq()`
+- Update URL for plugins to include v2 branch when using `--github`
 
 ## [2.0.5] - 2019-06-07
 

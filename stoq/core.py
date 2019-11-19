@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 #   Copyright 2014-2018 PUNCH Cyber Analytics Group
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,9 +33,8 @@
 
     ``Stoq`` is the primary class for interacting with `stoQ` and its plugins.
     All arguments, except for plugins to be used, must be defined upon instantiation.
-    Plugins can be loaded at any time. However, to ensure consistent
-    behavior, it is recommended that all required plugins be loaded
-    upon instantiation.
+    Plugins can be loaded at any time. However, to ensure consistent behavior, it is
+    recommended that all required plugins be loaded upon instantiation.
 
     For these examples, it is assumed the below :ref:`plugins have been installed <installplugins>` in
     `$CWD/plugins`:
@@ -46,7 +43,6 @@
         - filedir
         - hash
         - yara
-
 
     .. _individualscan:
 
@@ -60,6 +56,7 @@
 
     1. First, import the required class:
 
+        >>> import asyncio
         >>> from stoq import Stoq, RequestMeta
 
 
@@ -77,11 +74,12 @@
     4. We can now load a payload, and scan it individually with `stoQ`:
 
         >>> src = '/tmp/bad.exe'
+        >>> loop = asyncio.get_event_loop()
         >>> with open(src, 'rb') as src_payload:
         ...     meta = RequestMeta(extra_data={'filename': src})
-        ...     results = await s.scan(
+        ...     results = loop.run_until_complete(s.scan(
         ...             content=src_payload.read(),
-        ...             request_meta=meta)
+        ...             request_meta=meta))
         >>> print(results)
         ...    {
         ...        "time": "...",
@@ -96,8 +94,7 @@
         ...                    },
         ...                    "dispatch_to": []
         ...                },
-        ...                "workers": [
-        ...                    {
+        ...                "workers": {
         ...                        "hash": {
         ... [...]
 
@@ -150,7 +147,8 @@
         ...     plugins_opts=plugins_opts,
         ...     always_dispatch=always_dispatch
         ... )
-        >>> await s.run()
+        >>> loop = asyncio.get_event_loop()
+        >>> loop.run_until_complete(s.run())
 
 
     A few things are happening here:
@@ -207,6 +205,7 @@
     metadata (i.e., filename, source path, etc...) is also made available:
 
         >>> import os
+        >>> import asyncio
         >>> from stoq.data_classes import PayloadMeta, Payload
         >>> filename = '/tmp/test_file.exe'
         >>> with open(filename, 'rb') as src:
@@ -233,18 +232,29 @@
     simply be passed to the `Stoq.scan` function. A ``Payload`` object will automatically
     be created.:
 
+        >>> loop = asyncio.get_event_loop()
         >>> start_dispatch = ['yara']
-        >>> results = await s.scan('raw bytes', add_start_dispatch=start_dispatch)
+        >>> results = loop.run_until_complete(
+        ...     s.scan('raw bytes', add_start_dispatch=start_dispatch)
+        ... )
 
 
     From ``Payload`` object
     ^^^^^^^^^^^^^^^^^^^^^^^
 
-    If a ``Payload`` object has already been instatiated, as detailed above, the
-    ``scan_request`` function may be called:
+    If a ``Payload`` object has already been instantiated, as detailed above, the
+    ``scan_request`` function may be called. First, a new `Request` object must
+    be instantiated with the `Payload` object that we previously created:
 
+        >>> import asyncio
+        >>> from stoq import Payload, Request, RequestMeta
         >>> start_dispatch = ['yara']
-        >>> results = await s.scan_request(payload, add_start_dispatch=start_dispatch)
+        >>> loop = asyncio.get_event_loop()
+        >>> payload = Payload(b'content to scan')
+        >>> request = Request(payloads=[payload], request_meta=RequestMeta())
+        >>> results = loop.run_until_complete(
+        ...    s.scan_request(request, add_start_dispatch=start_dispatch)
+        ... )
 
 
     Save Results
@@ -256,7 +266,7 @@
     the ``filedir`` plugin which will save the results to a specified directory.:
 
         >>> connector = s.load_plugin('filedir')
-        >>> await connector.save(results)
+        >>> loop.run_until_complete(connector.save(results))
 
     Split Results
     -------------
@@ -264,8 +274,8 @@
     In some cases it may be required to split results out individually. For example, when
     saving results to different indexes depending on plugin name, such as with ElasticSearch or Splunk.
 
-        >>> results = await s.scan_request(payload)
-        >>> results.split()
+        >>> results = loop.run_until_complete(s.scan(payload))
+        >>> split_results = results.split()
 
     Reconstructing Subresponse Results
     ----------------------------------
@@ -295,8 +305,8 @@
     information on default paths, please refer to the :ref:`getting started documentation <stoqhome>`::
 
         >>> from stoq import Stoq
-        >>> plugins_directories = ['/usr/local/stoq/plugins', '/home/.stoq/plugins']
-        >>> s = Stoq(plugin_dir_list=plugins_directories)
+        >>> plugin_directories = ['/usr/local/stoq/plugins', '/home/.stoq/plugins']
+        >>> s = Stoq(plugin_dir_list=plugin_directories)
 
 
     API
@@ -304,11 +314,12 @@
 
 """
 
-import asyncio
-import configparser
-import logging
 import os
+import asyncio
+import logging
+import configparser
 from collections import defaultdict
+from pythonjsonlogger import jsonlogger  # type: ignore
 from logging.handlers import RotatingFileHandler
 from typing import (
     AsyncGenerator,
@@ -324,7 +335,9 @@ from typing import (
 )
 
 import stoq.helpers as helpers
-from pythonjsonlogger import jsonlogger  # type: ignore
+from stoq.utils import ratelimited
+from stoq.exceptions import StoqException
+from stoq.plugin_manager import StoqPluginManager
 from stoq.data_classes import (
     ArchiverResponse,
     DecoratorResponse,
@@ -339,7 +352,6 @@ from stoq.data_classes import (
     StoqResponse,
     WorkerResponse,
 )
-from stoq.plugin_manager import StoqPluginManager
 from stoq.plugins import (
     ArchiverPlugin,
     ConnectorPlugin,
@@ -347,9 +359,6 @@ from stoq.plugins import (
     DispatcherPlugin,
     WorkerPlugin,
 )
-from stoq.utils import ratelimited
-
-from .exceptions import StoqException
 
 
 # Created to enable `None' as a valid paramater
@@ -398,7 +407,7 @@ class Stoq(StoqPluginManager):
         :param max_queue: Max Queue size for Providers plugins
         :param max_recursion: Maximum level of recursion into a payload and extracted payloads
         :param max_required_worker_depth: Maximum depth for required worker plugins dependencies
-    ) -> None:
+
         """
         if not base_dir:
             base_dir = os.getcwd()
@@ -501,9 +510,6 @@ class Stoq(StoqPluginManager):
         :param add_start_dispatch: Force first round of scanning to use specified plugins
         :param ratelimit: Rate limit calls to scan
 
-        :return: Complete scan results
-        :rtype: StoqResponse
-
         """
         self.log.debug(
             f'Content received ({len(content)} bytes): '
@@ -570,9 +576,6 @@ class Stoq(StoqPluginManager):
 
         :param request: ``Request`` object of payload(s) to be scanned
         :param add_start_dispatch: Force first round of scanning to use specified plugins
-
-        :return: Complete scan results
-        :rtype: StoqResponse
 
         """
 
@@ -663,6 +666,13 @@ class Stoq(StoqPluginManager):
     async def reconstruct_all_subresponses(
         self, stoq_response: StoqResponse
     ) -> AsyncGenerator[StoqResponse, None]:
+        """
+
+        Generate a new `StoqResponse` object for each `Payload` within
+        the `Request`
+
+        """
+
         for i, new_root_payload_result in enumerate(stoq_response.results):
             parent_payload_ids = {stoq_response.results[i].payload_id}
             # Contruct a new root Payload object since StoqResponse only has the
@@ -822,15 +832,18 @@ class Stoq(StoqPluginManager):
         else:
             deferred.add((payload, plugin_name))
 
-        if len(plugin.required_plugin_names) != 0:
+        if len(plugin.required_workers) != 0:
             self.log.debug(
-                f'{plugin_name} has dependencies of {", ".join(plugin.required_plugin_names)}'
+                f'{plugin_name} has dependencies of {", ".join(plugin.required_workers)}'
             )
 
             plugin_dependency_chain = init_plugin_dependency_chain.copy()
             plugin_dependency_chain.add(plugin_name)
-            for required_plugin in plugin.required_plugin_names:
-                required_plugin_can_run, required_plugin_deferred = self._resolve_plugin_dependencies(
+            for required_plugin in plugin.required_workers:
+                (
+                    required_plugin_can_run,
+                    required_plugin_deferred,
+                ) = self._resolve_plugin_dependencies(
                     payload,
                     required_plugin,
                     request,
@@ -879,7 +892,7 @@ class Stoq(StoqPluginManager):
                 pass
 
     def _plugin_can_run(self, payload: Payload, worker_plugin: WorkerPlugin) -> bool:
-        for required_plugin_name in worker_plugin.required_plugin_names:
+        for required_plugin_name in worker_plugin.required_workers:
             if required_plugin_name not in payload.results.plugins_run['workers']:
                 return False
         return True

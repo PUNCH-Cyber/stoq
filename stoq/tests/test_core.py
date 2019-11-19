@@ -266,7 +266,7 @@ class TestCore(asynctest.TestCase):
         s = Stoq(base_dir=utils.get_data_dir())
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.EXTRACTED_DISPATCH_TO = ['simple_worker']
-        simple_worker.required_plugin_names.add('dummy_worker')
+        simple_worker.required_workers.add('dummy_worker')
         response = await s.scan(
             self.generic_content, add_start_dispatch=['simple_worker']
         )
@@ -304,9 +304,9 @@ class TestCore(asynctest.TestCase):
         s = Stoq(base_dir=utils.get_data_dir())
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.EXTRACTED_DISPATCH_TO = ['simple_worker']
-        simple_worker.required_plugin_names.add('dummy_worker')
+        simple_worker.required_workers.add('dummy_worker')
         dummy_worker = s.load_plugin('dummy_worker')
-        dummy_worker.required_plugin_names.add('extract_payload')
+        dummy_worker.required_workers.add('extract_payload')
         response = await s.scan(
             self.generic_content, add_start_dispatch=['simple_worker']
         )
@@ -326,9 +326,9 @@ class TestCore(asynctest.TestCase):
         s = Stoq(base_dir=utils.get_data_dir(), max_required_worker_depth=1)
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.EXTRACTED_DISPATCH_TO = ['simple_worker']
-        simple_worker.required_plugin_names.add('dummy_worker')
+        simple_worker.required_workers.add('dummy_worker')
         dummy_worker = s.load_plugin('dummy_worker')
-        dummy_worker.required_plugin_names.add('extract_payload')
+        dummy_worker.required_workers.add('extract_payload')
         response = await s.scan(
             self.generic_content, add_start_dispatch=['simple_worker']
         )
@@ -339,9 +339,9 @@ class TestCore(asynctest.TestCase):
         s = Stoq(base_dir=utils.get_data_dir(), max_required_worker_depth=2000)
         simple_worker = s.load_plugin('simple_worker')
         simple_worker.EXTRACTED_DISPATCH_TO = ['simple_worker']
-        simple_worker.required_plugin_names.add('dummy_worker')
+        simple_worker.required_workers.add('dummy_worker')
         dummy_worker = s.load_plugin('dummy_worker')
-        dummy_worker.required_plugin_names.add('simple_worker')
+        dummy_worker.required_workers.add('simple_worker')
         response = await s.scan(
             self.generic_content, add_start_dispatch=['simple_worker']
         )

@@ -21,7 +21,7 @@ import stoq
 # -- Project information -----------------------------------------------------
 
 project = 'stoQ'
-copyright = '2018, PUNCH Cyber Analytic Group'
+copyright = '2014-present, PUNCH Cyber Analytic Group'
 author = 'Marcus LaFerrera'
 
 # The short X.Y version
@@ -44,6 +44,7 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
     'sphinx_autodoc_typehints',
+    'sphinx.ext.doctest',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

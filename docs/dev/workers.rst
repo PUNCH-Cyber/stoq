@@ -1,5 +1,4 @@
-.. _pluginproviders:
-.. module:: stoq
+.. _pluginworkers:
 
 Worker Plugins
 ==============

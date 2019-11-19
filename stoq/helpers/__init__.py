@@ -32,7 +32,7 @@ class StoqConfigParser(ConfigParser):
 
     def getlist(self, section, option, *args, **kwargs):
         """
-        Create a list from config option using comma delimited string
+        Create a `list()` from `ConfigParser` option using comma delimited string
 
         """
         value = self.get(section, option, fallback=kwargs.get('fallback', ''))
@@ -40,10 +40,21 @@ class StoqConfigParser(ConfigParser):
             return value
         return [o.strip() for o in value.split(',') if o]
 
+    def getset(self, section, option, *args, **kwargs):
+        """
+        Create a `set()` from `ConfigParser` option using comma delimited string
+
+        """
+        value = self.get(section, option, fallback=kwargs.get('fallback', ''))
+        if isinstance(value, set):
+            return value
+        return set(o.strip() for o in value.split(',') if o)
+
 
 class JsonComplexEncoder(json.JSONEncoder):
     """
-    Extends the default JSON encoder to handle bytes and sets
+    Extends the default JSON encoder to handle bytes, sets, and datetime
+
     """
 
     def default(self, o) -> Any:
@@ -61,28 +72,52 @@ class JsonComplexEncoder(json.JSONEncoder):
 
 
 def dumps(data, indent=4, compactly=False):
+    """
+    Wrapper for JSON encoding
+
+    """
     if compactly is True or not indent:
         indent = None
     return json.dumps(data, indent=indent, cls=JsonComplexEncoder, ensure_ascii=False)
 
 
 def get_md5(content: bytes) -> str:
+    """
+    Return MD5 hash of bytes
+
+    """
     return hashlib.md5(content).hexdigest()
 
 
 def get_sha1(content: bytes) -> str:
+    """
+    Return SHA1 hash of bytes
+
+    """
     return hashlib.sha1(content).hexdigest()
 
 
 def get_sha256(content: bytes) -> str:
+    """
+    Return SHA256 hash of bytes
+
+    """
     return hashlib.sha256(content).hexdigest()
 
 
 def get_sha512(content: bytes) -> str:
+    """
+    Return SHA512 hash of bytes
+
+    """
     return hashlib.sha512(content).hexdigest()
 
 
 def format_exc(exc: Exception, limit: int = -1, msg: Optional[str] = None):
+    """
+    Format `Exceptions` for use with `Stoq` error handling
+    
+    """
     # Inspired from https://github.com/python/cpython/blob/3.7/Lib/traceback.py#L560-L563
     tb = traceback.format_tb(exc.__traceback__, limit=limit)[0].split('\n')[0].strip()
     stype = type(exc).__qualname__
@@ -100,6 +135,10 @@ def merge_dicts(
     d1: DefaultDict[str, List[str]],
     d2: Union[DefaultDict[str, List[str]], Dict[str, List[str]]],
 ) -> DefaultDict[str, List[str]]:
+    """
+    Merge two `dict()` objects
+
+    """
     for k, v in d2.items():
         d1[k].extend(v)
     return d1

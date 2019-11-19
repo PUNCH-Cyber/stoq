@@ -39,7 +39,7 @@ def main() -> None:
             )
         )
     except FileNotFoundError as err:
-        print(f"$STOQ_HOME is invalid: {err}", file=sys.stderr)
+        print(f"$STOQ_HOME is invalid, exiting: {err}", file=sys.stderr)
         sys.exit(1)
 
     parser = argparse.ArgumentParser(
@@ -56,10 +56,10 @@ Examples:
 
     $ %(prog)s scan mybadfile.exe -s yara
 
-    - Ingest from RabbitMQ, force all payloads through yara, trid, and exif,
+    - Ingest from PubSub, force all payloads through yara, trid, and exif,
       then save results to file:
 
-    $ %(prog)s run -a yara trid exif -P rabbitmq -C file
+    $ %(prog)s run -a yara trid exif -P pubsub -C file
 
     - Monitor a directory (specified in dirmon.stoq) for newly created files
       send them to workers, and archive all payloads into MongoDB:
@@ -135,7 +135,7 @@ Examples:
         subparser.add_argument(
             '--max-recursion',
             type=int,
-            default=3,
+            default=None,
             help='Maximum level of recursion into a payload and extracted payloads',
         )
         subparser.add_argument('--plugin-opts', nargs='+', help='Plugin options')
