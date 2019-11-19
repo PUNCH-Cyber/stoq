@@ -1,5 +1,4 @@
 .. _pluginarchiver:
-.. module:: stoq
 
 Archiver Plugins
 ================

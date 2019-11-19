@@ -53,7 +53,7 @@
     Or, when instantiating the ``Stoq()`` class::
 
         >>> import stoq
-        >>> workers= ['yara']
+        >>> workers = ['yara']
         >>> s = Stoq(always_dispatch=workers, [...])
 
     Lastly, worker plugins can be defined by dispatcher plugins. As mentioned previously,
@@ -73,29 +73,62 @@
     ::
 
         from typing import Dict, List, Optional
-        from configparser import ConfigParser
 
+        from stoq.plugins import WorkerPlugin
+        from stoq.helpers import StoqConfigParser
         from stoq.data_classes import (
             Payload,
-            RequestMeta,
+            Request,
             WorkerResponse,
         )
-        from stoq.plugins import WorkerPlugin
 
 
         class ExampleWorker(WorkerPlugin):
-            def __init__(self, config: ConfigParser, plugin_opts: Optional[Dict]) -> None:
-                super().__init__(config, plugin_opts)
-                self.useful = config.get('options', 'useful', fallback=False)
+            def __init__(self, config: StoqConfigParser) -> None:
+                super().__init__(config)
+                self.useful = config.getboolean('options', 'useful', fallback=False)
 
             async def scan(
-                self, payload: Payload, request_meta: RequestMeta
+                self, payload: Payload, request: Request
             ) -> Optional[WorkerResponse]:
-                if self.useful:
-                    wr = WorkerResponse({'worker_results': 'something useful'})
-                else:
-                    wr = WorkerResponse({'worker_results': 'something not useful'})
-                return wr
+                response = {'worker_results': f'useful: {self.useful}'}
+                return WorkerResponse(response)
+
+    Required Workers
+    ----------------
+
+    `required_workers` is a configuration option specific to `WorkerPlugin` class.
+    The purpose of this option is to allow a user to define worker dependencies. For
+    example, WorkerA must be run after WorkerB because WorkerA requires the results
+    from WorkerB to run successfully. This configuration option may be set in the
+    `.stoq` configuration file for the `WorkerPlugin`, or within the `__init__` 
+    function.
+
+    ::
+
+        from typing import List, Optional
+
+        from stoq.plugins import WorkerPlugin
+        from stoq.helpers import StoqConfigParser
+        from stoq.data_classes import (
+            Payload,
+            Request,
+            WorkerResponse,
+        )
+        class WorkerA(WorkerPlugin):
+            def __init__(self, config: StoqConfigParser) -> None:
+                super().__init__(config)
+                self.required_workers = config.getset(
+                    'options', 'required_workers', fallback=set('WorkerB')
+                )
+
+            async def scan(
+                self, payload: Payload, request: Request
+            ) -> Optional[WorkerResponse]:
+                is_bad: bool = payload.results.workers['WorkerB']['is_bad']
+                response = {'worker_results': f'is_bad: {is_bad}'}
+                return WorkerResponse(response)
+
 
     Extracted Payloads
     ------------------
@@ -107,8 +140,9 @@
     ::
 
         from typing import Dict, List, Optional
-        from configparser import ConfigParser
 
+        from stoq.plugins import WorkerPlugin
+        from stoq.helpers import StoqConfigParser
         from stoq.data_classes import (
             ExtractedPayload,
             Payload,
@@ -116,23 +150,20 @@
             RequestMeta,
             WorkerResponse,
         )
-        from stoq.plugins import WorkerPlugin
 
 
         class ExampleWorker(WorkerPlugin):
-            def __init__(self, config: ConfigParser, plugin_opts: Optional[Dict]) -> None:
-                super().__init__(config, plugin_opts)
-                self.useful = config.get('options', 'useful', fallback=False)
+            def __init__(self, config: StoqConfigParser) -> None:
+                super().__init__(config)
+                self.useful = config.getboolean('options', 'useful', fallback=False)
 
             async def scan(
-                self, payload: Payload, request_meta: RequestMeta
+                self, payload: Payload, request: Request
             ) -> Optional[WorkerResponse]:
-                p = ExtractedPayload(b'Lorem ipsum')
-                if self.useful:
-                    wr = WorkerResponse({'worker_results': 'something useful'}, extracted=[p])
-                else:
-                    wr = WorkerResponse({'worker_results': 'something not useful'}, extracted=[p])
-                return wr
+                extracted_payloads: List = []
+                extracted_payloads.append(ExtractedPayload(b'Lorem ipsum'))
+                response = {'worker_results': f'useful: {self.useful}'}
+                return WorkerResponse(response, extracted=extracted_payloads)
 
 
     Dispatch To
@@ -143,34 +174,22 @@
 
     ::
 
-        from typing import Dict, List, Optional
-        from configparser import ConfigParser
-
-        from stoq.data_classes import (
-            ExtractedPayload,
-            Payload,
-            PayloadMeta,
-            RequestMeta,
-            WorkerResponse,
-        )
-        from stoq.plugins import WorkerPlugin
+        >>> meta = PayloadMeta(dispatch_to='yara')
+        >>> extracted_payload = ExtractedPayload(b'this is a payload with bad stuff', meta)
 
 
-        class ExampleWorker(WorkerPlugin):
-            def __init__(self, config: ConfigParser, plugin_opts: Optional[Dict]) -> None:
-                super().__init__(config, plugin_opts)
-                self.useful = config.get('options', 'useful', fallback=False)
+    Should Scan
+    -----------
 
-            async def scan(
-                self, payload: Payload, request_meta: RequestMeta
-            ) -> Optional[WorkerResponse]:
-                dispatch_meta = PayloadMeta(dispatch_to='yara')
-                p = ExtractedPayload(b'this is a payload with bad stuff', dispatch_meta)
-                if self.useful:
-                    wr = WorkerResponse({'worker_results': 'something useful'}, extracted=[p])
-                else:
-                    wr = WorkerResponse({'worker_results': 'something not useful'}, extracted=[p])
-                return wr
+    Likewise, there may be cases where an extracted payload should not be scanned by workers,
+    but should be added to the results or archived. Simply set `PayloadMeta.should_scan` to
+    `False`.
+
+    ::
+
+        >>> meta = PayloadMeta(should_scan=False)
+        >>> extracted_payload = ExtractedPayload(b'this is a payload', meta)
+
 
     API
     ===
@@ -188,16 +207,9 @@ from stoq.data_classes import Payload, Request, WorkerResponse
 class WorkerPlugin(BasePlugin, ABC):
     def __init__(self, config: StoqConfigParser) -> None:
         super().__init__(config)
-
-        required_worker_plugin_names = config.get(
-            'options', 'required_workers', fallback=None
+        self.required_workers = config.getset(
+            'options', 'required_workers', fallback=set()
         )
-        if required_worker_plugin_names:
-            self.required_plugin_names = set(
-                w.strip() for w in required_worker_plugin_names.split(',')
-            )
-        else:
-            self.required_plugin_names = set()
 
     @abstractmethod
     async def scan(

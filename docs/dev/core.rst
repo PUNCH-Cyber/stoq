@@ -12,4 +12,5 @@ Exceptions
 ==========
 
 .. autoexception:: stoq.exceptions.StoqException
+.. autoexception:: stoq.exceptions.StoqPluginNotFound
 .. autoexception:: stoq.exceptions.StoqPluginException

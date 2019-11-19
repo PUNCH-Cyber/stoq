@@ -63,7 +63,8 @@ stoq.cfg
 The recommended location for storing static plugin configuration options is in `stoq.cfg`.  The reason for this
 if all plugin options defined in the plugin's `.stoq` file will be overwritten when the plugin is upgraded.
 
-To define plugin options in `stoq.cfg` simply add a section header of the plugin name, then define the plugin options::
+To define plugin options in `stoq.cfg` simply add a section header of the plugin name, then define the plugin options.
+For example, to define the plugin option `source_dir` for the `dirmon` plugin, the below can be added to `stoq.cfg`::
 
     [dirmon]
     source_dir = /tmp/monitor
@@ -105,7 +106,7 @@ plugin configuration file with all *required* fields::
 Additionally, some optional settings may be defined::
 
     [options]
-    min_stoq_version = 2.0.0
+    min_stoq_version = 3.0.0
 
 * **options**
     - **min_stoq_version**: Minimum version of stoQ required to work properly. If the version of `stoQ` is less than the version defined, a warning will be raised.
@@ -137,20 +138,41 @@ for worker plugins) and ``get_dispatches`` (required for dispatcher plugins)
 methods exist.::
 
     from typing import Optional
+    from stoq import Payload, Request, WorkerResponse
     from stoq.plugins import DispatcherPlugin, WorkerPlugin
 
     class MultiClassPlugin(WorkerPlugin, DispatcherPlugin):
         async def scan(
-            self, payload: Payload, request_meta: RequestMeta
+            self, payload: Payload, request: Request
         ) -> Optional[WorkerResponse]:
             # do worker plugin stuff here
             return
 
         async def get_dispatches(
-            self, payload: Payload, request_meta: RequestMeta
+            self, payload: Payload, request: Request
         ) -> Optional[DispatcherResponse]:
             # do dispatcher plugin stuff here
             return
+
+
+.. _pluginlogging:
+
+Plugin Logging
+**************
+
+Upon instantiation, plugins are provided a `Logger` object within the plugin class
+named `self.log`. This is just a standard Python logging object that supports the
+log levels `debug`, `info`, `warning`, `error`, and `critical`.::
+
+    from typing import Optional
+    from stoq.plugins import WorkerPlugin
+    from stoq import Payload, Request, WorkerResponse
+
+    class LoggingPlugin(WorkerPlugin):
+        async def scan(
+            self, payload: Payload, request: Request
+        ) -> Optional[WorkerResponse]:
+            self.log.info('Scanning payload now')
 
 
 .. _pluginclasses:

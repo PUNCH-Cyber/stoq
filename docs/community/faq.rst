@@ -4,17 +4,25 @@ Frequently Asked Questions
 ==========================
 
 
-- **What is the difference between stoQ v1 and v2?**
+- **What is the difference between stoQ v2 and v3?**
 
-    The basic workflow and concept between the two versions are nearly similar, but under the hood a lot has changed. Version 2 of stoQ was a complete rewrite filled with lots of lessons learned, optimizations, and best practices. Additionally, we made the decision to ensure a modern version of python was used in order to leverage many of the added benefits and features.
+    The basic workflow and concept between the two versions are nearly similar, but under the hood 
+    a lot has changed. Version 2 of stoQ was a complete rewrite of v1, filled with lots of lessons learned, 
+    optimizations, and best practices. Additionally, we made the decision to ensure a modern version 
+    of python was used in order to leverage many of the added benefits and features.
 
-- **Are plugins from v1 compatiable with v2?**
+    stoQ v3 built upon v2, but added many additional features such as native AsyncIO support, streamlined
+    data flow, and passing the full request stte to each worker plugin. A full list of changes can be 
+    found in the `CHANGELOG <https://github.com/PUNCH-Cyber/stoq/blob/v2/CHANGELOG.md>`.
 
-    Unfortunately, no. However, porting plugins to version 2 is very simple.
+- **Are plugins from v2 compatiable with v3?**
 
-- **Is v1 of stoQ still available?**
+    Unfortunately, no. However, porting plugins to v3 is very simple. You can read more about that
+    :ref:`here <upgradingplugins>`.
 
-    Absolutely, though it is no longer maintained (minus major bug fixes or security issues) in favor of v2. You can get the `framework here <https://github.com/PUNCH-Cyber/stoq/tree/v1>`_ and the `plugins here <https://github.com/PUNCH-Cyber/stoq-plugins-public/tree/v1>`_.
+- **Is v1 or v2 of stoQ still available?**
+
+    Absolutely, though they are no longer maintained (minus major bug fixes or security issues) in favor of v3. 
 
 - **Why should I use stoQ?**
 

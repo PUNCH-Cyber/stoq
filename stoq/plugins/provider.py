@@ -74,17 +74,17 @@
 
     ::
 
-        from queue import Queue
+        from asyncio import Queue
         from typing import Dict, Optional
-        from configparser import ConfigParser
 
         from stoq import Payload, PayloadMeta
         from stoq.plugins import ProviderPlugin
+        from stoq.helpers import StoqConfigParser
 
 
         class ExampleProvider(ProviderPlugin):
-            def __init__(self, config: ConfigParser, plugin_opts: Optional[Dict]) -> None:
-                super().__init__(config, plugin_opts)
+            def __init__(self, config: StoqConfigParser) -> None:
+                super().__init__(config)
                 self.meta = config.get('options', 'meta', fallback='This msg will always be')
 
             async def ingest(self, queue: Queue) -> None:

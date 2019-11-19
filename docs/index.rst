@@ -13,10 +13,10 @@ Release |release|
     :target: https://pypi.org/project/stoq-framework/
 .. image:: https://img.shields.io/pypi/pyversions/stoq-framework.svg
     :target: https://pypi.org/project/stoq-framework/
-.. image:: https://travis-ci.org/PUNCH-Cyber/stoq.svg?branch=master
-    :target: https://travis-ci.org/PUNCH-Cyber/stoq
-.. image:: https://coveralls.io/repos/github/PUNCH-Cyber/stoq/badge.svg?branch=master
-    :target: https://coveralls.io/github/PUNCH-Cyber/stoq?branch=master
+.. image::  https://api.travis-ci.org/PUNCH-Cyber/stoq.svg?branch=dev
+    :target: https://api.travis-ci.org/PUNCH-Cyber/stoq.svg?branch=dev
+.. image:: https://coveralls.io/repos/github/PUNCH-Cyber/stoq/badge.svg?branch=dev
+    :target: https://coveralls.io/github/PUNCH-Cyber/stoq?branch=dev
 
 
 Overview
@@ -54,16 +54,6 @@ decided to open source our work in hopes of helping the wider Network Defense co
 Since then, we've been constantly enhancing stoQ thanks to the feedback and contributions
 from the community of stoQ users.
 
-What is new in stoQ v3?
-***********************
-
-The recent changes made to stoQ were to meant for implementing a foundation for running and
-designing coroutines. The changes to date for stoQ v3 consist of:
-    - Removal of DeepDispatcher functionality within the Architecture
-    - Updated type check for PayloadResults to be a Dictionary
-    - Supports Async IO design and the asyncio package
-
-
 Why use stoQ?
 *************
 
@@ -72,6 +62,7 @@ that have similar capabilities to stoQ. However, stoQ is fundamentally different
 when compared to other solutions available. Some key differences are:
 
     - Extremely lightweight and designed with simplicity in mind.
+    - Fully supports AsyncIO
     - A wide range of `publicly available plugins <https://github.com/PUNCH-Cyber/stoq-plugins-public>`_.
     - `stoQ` makes no assumptions about your workflow. Analysts decide everything, from where data
       originates, how it is scanned/decoded/processed, to where it is saved.
@@ -80,7 +71,7 @@ when compared to other solutions available. Some key differences are:
     - Written to be easily and quickly extended. All you need is a plugin.
     - Can be used in an enterprise environment or by individuals without the need for client/server
       infrastructure
-    - Overwhelming majority of code is covered by unit tests.
+    - Over 95% of code is covered by unittests.
     - All core functions and plugins leverage typing and are type-checked at commit.
     - Actively developed since 2011, open source since 2015.
     - Extensive up-to-date documentation.
@@ -140,42 +131,40 @@ the hashes of the payload::
                     },
                     "dispatch_to": []
                 },
-                "workers": [
-                    {
-                        "hash": {
-                            "sha256": "47c6e9b102324ea6c54dd95ad3fdf4b48b18775053b105e241a371a3731488c0",
-                            "md5": "16d9f6e5491d99beb46d7ab1500c1799",
-                            "sha1": "9e6414bf2802c98fbd13172817db80380c5eeb6a"
-                        },
-                        "exif": {
-                            "SourceFile": "/tmp/tmp3r4juo8e",
-                            "ExifToolVersion": 11.11,
-                            "FileName": "tmp3r4juo8e",
-                            "Directory": "/tmp",
-                            "FileSize": 507904,
-                            "FileModifyDate": "...",
-                            "FileAccessDate": "...",
-                            "FileInodeChangeDate": ".",
-                            "FilePermissions": 600,
-                            "FileType": "Win32 EXE",
-                            "FileTypeExtension": "EXE",
-                            "MIMEType": "application/octet-stream",
-                            "MachineType": 332,
-                            "TimeStamp": "2013:04:20 10:50:10-04:00",
-                            "ImageFileCharacteristics": 258,
-                            "PEType": 267,
-                            "LinkerVersion": 9.0,
-                            "CodeSize": 386048,
-                            "InitializedDataSize": 120832,
-                            "UninitializedDataSize": 0,
-                            "EntryPoint": 208320,
-                            "OSVersion": 5.0,
-                            "ImageVersion": 0.0,
-                            "SubsystemVersion": 5.0,
-                            "Subsystem": 2
-                        }
+                "workers": {
+                    "hash": {
+                        "sha256": "47c6e9b102324ea6c54dd95ad3fdf4b48b18775053b105e241a371a3731488c0",
+                        "md5": "16d9f6e5491d99beb46d7ab1500c1799",
+                        "sha1": "9e6414bf2802c98fbd13172817db80380c5eeb6a"
+                    },
+                    "exif": {
+                        "SourceFile": "/tmp/tmp3r4juo8e",
+                        "ExifToolVersion": 11.11,
+                        "FileName": "tmp3r4juo8e",
+                        "Directory": "/tmp",
+                        "FileSize": 507904,
+                        "FileModifyDate": "...",
+                        "FileAccessDate": "...",
+                        "FileInodeChangeDate": ".",
+                        "FilePermissions": 600,
+                        "FileType": "Win32 EXE",
+                        "FileTypeExtension": "EXE",
+                        "MIMEType": "application/octet-stream",
+                        "MachineType": 332,
+                        "TimeStamp": "2013:04:20 10:50:10-04:00",
+                        "ImageFileCharacteristics": 258,
+                        "PEType": 267,
+                        "LinkerVersion": 9.0,
+                        "CodeSize": 386048,
+                        "InitializedDataSize": 120832,
+                        "UninitializedDataSize": 0,
+                        "EntryPoint": 208320,
+                        "OSVersion": 5.0,
+                        "ImageVersion": 0.0,
+                        "SubsystemVersion": 5.0,
+                        "Subsystem": 2
                     }
-                ],
+                }
                 "archivers": {},
                 "plugins_run": {
                     "workers": [
@@ -217,64 +206,62 @@ Or, carve a few executable files out of a Microsoft Word document::
                     },
                     "dispatch_to": []
                 },
-                "workers": [
-                    {
-                        "exif": {
-                            "SourceFile": "/tmp/tmpbqtisxjd",
-                            "ExifToolVersion": 11.11,
-                            "FileName": "tmpbqtisxjd",
-                            "Directory": "/tmp",
-                            "FileSize": 558592,
-                            "FileModifyDate": "...",
-                            "FileAccessDate": "...",
-                            "FileInodeChangeDate": "...",
-                            "FilePermissions": 600,
-                            "FileType": "DOC",
-                            "FileTypeExtension": "DOC",
-                            "MIMEType": "application/msword",
-                            "Identification": 42476,
-                            "LanguageCode": 1033,
-                            "DocFlags": 4616,
-                            "System": 0,
-                            "Word97": 0,
-                            "Author": "xxxxxxxxxxxx",
-                            "Template": "Normal",
-                            "LastModifiedBy": "xxxxxxxxxxxx",
-                            "Software": "Microsoft Office Word",
-                            "CreateDate": "2017:11:13 21:27:00",
-                            "ModifyDate": "2017:11:13 21:28:00",
-                            "Security": 0,
-                            "CodePage": 1252,
-                            "Company": "",
-                            "CharCountWithSpaces": 20,
-                            "AppVersion": 14.0,
-                            "ScaleCrop": 0,
-                            "LinksUpToDate": 0,
-                            "SharedDoc": 0,
-                            "HyperlinksChanged": 0,
-                            "TitleOfParts": "",
-                            "HeadingPairs": [
-                                "Título",
-                                1
-                            ],
-                            "CompObjUserTypeLen": 36,
-                            "CompObjUserType": "Documento do Microsoft Word 97-2003",
-                            "LastPrinted": "0000:00:00 00:00:00",
-                            "RevisionNumber": 2,
-                            "TotalEditTime": 1,
-                            "Words": 3,
-                            "Characters": 18,
-                            "Pages": 1,
-                            "Paragraphs": 1,
-                            "Lines": 1
-                        },
-                        "hash": {
-                            "sha256": "4e3a682b2187f7c722b88af9bff5292fd7beb4d77233d1b3bc46f0bfc4891068",
-                            "md5": "137720063880f80270a61181b021d000",
-                            "sha1": "08bc0a52ee27ad0ceaa87bf394b1faa7a43bf27e"
-                        }
+                "workers": {
+                    "exif": {
+                        "SourceFile": "/tmp/tmpbqtisxjd",
+                        "ExifToolVersion": 11.11,
+                        "FileName": "tmpbqtisxjd",
+                        "Directory": "/tmp",
+                        "FileSize": 558592,
+                        "FileModifyDate": "...",
+                        "FileAccessDate": "...",
+                        "FileInodeChangeDate": "...",
+                        "FilePermissions": 600,
+                        "FileType": "DOC",
+                        "FileTypeExtension": "DOC",
+                        "MIMEType": "application/msword",
+                        "Identification": 42476,
+                        "LanguageCode": 1033,
+                        "DocFlags": 4616,
+                        "System": 0,
+                        "Word97": 0,
+                        "Author": "xxxxxxxxxxxx",
+                        "Template": "Normal",
+                        "LastModifiedBy": "xxxxxxxxxxxx",
+                        "Software": "Microsoft Office Word",
+                        "CreateDate": "2017:11:13 21:27:00",
+                        "ModifyDate": "2017:11:13 21:28:00",
+                        "Security": 0,
+                        "CodePage": 1252,
+                        "Company": "",
+                        "CharCountWithSpaces": 20,
+                        "AppVersion": 14.0,
+                        "ScaleCrop": 0,
+                        "LinksUpToDate": 0,
+                        "SharedDoc": 0,
+                        "HyperlinksChanged": 0,
+                        "TitleOfParts": "",
+                        "HeadingPairs": [
+                            "Título",
+                            1
+                        ],
+                        "CompObjUserTypeLen": 36,
+                        "CompObjUserType": "Documento do Microsoft Word 97-2003",
+                        "LastPrinted": "0000:00:00 00:00:00",
+                        "RevisionNumber": 2,
+                        "TotalEditTime": 1,
+                        "Words": 3,
+                        "Characters": 18,
+                        "Pages": 1,
+                        "Paragraphs": 1,
+                        "Lines": 1
+                    },
+                    "hash": {
+                        "sha256": "4e3a682b2187f7c722b88af9bff5292fd7beb4d77233d1b3bc46f0bfc4891068",
+                        "md5": "137720063880f80270a61181b021d000",
+                        "sha1": "08bc0a52ee27ad0ceaa87bf394b1faa7a43bf27e"
                     }
-                ],
+                }
                 "archivers": {},
                 "plugins_run": {
                     "workers": [
@@ -299,60 +286,58 @@ Or, carve a few executable files out of a Microsoft Word document::
                     },
                     "dispatch_to": []
                 },
-                "workers": [
-                    {
-                        "exif": {
-                            "SourceFile": "/tmp/tmpyi0yx_wf",
-                            "ExifToolVersion": 11.11,
-                            "FileName": "tmpyi0yx_wf",
-                            "Directory": "/tmp",
-                            "FileSize": 31232,
-                            "FileModifyDate": "...",
-                            "FileAccessDate": "...",
-                            "FileInodeChangeDate": "...",
-                            "FilePermissions": 600,
-                            "FileType": "Win32 EXE",
-                            "FileTypeExtension": "EXE",
-                            "MIMEType": "application/octet-stream",
-                            "MachineType": 332,
-                            "TimeStamp": "2016:07:15 21:44:45-04:00",
-                            "ImageFileCharacteristics": 258,
-                            "PEType": 267,
-                            "LinkerVersion": 14.0,
-                            "CodeSize": 8192,
-                            "InitializedDataSize": 22528,
-                            "UninitializedDataSize": 0,
-                            "EntryPoint": 10496,
-                            "OSVersion": 10.0,
-                            "ImageVersion": 10.0,
-                            "SubsystemVersion": 10.0,
-                            "Subsystem": 2,
-                            "FileVersionNumber": "10.0.14393.0",
-                            "ProductVersionNumber": "10.0.14393.0",
-                            "FileFlagsMask": 63,
-                            "FileFlags": 0,
-                            "FileOS": 262148,
-                            "ObjectFileType": 1,
-                            "FileSubtype": 0,
-                            "LanguageCode": "0409",
-                            "CharacterSet": "04B0",
-                            "CompanyName": "Microsoft Corporation",
-                            "FileDescription": "Windows Calculator",
-                            "FileVersion": "10.0.14393.0 (rs1_release.160715-1616)",
-                            "InternalName": "CALC",
-                            "LegalCopyright": "© Microsoft Corporation. All rights reserved.",
-                            "OriginalFileName": "CALC.EXE",
-                            "ProductName": "Microsoft® Windows® Operating System",
-                            "ProductVersion": "10.0.14393.0",
-                            "Warning": "Possibly corrupt Version resource"
-                        },
-                        "hash": {
-                            "sha256": "c74f41325775de4777000161a057342cc57a04e8b7be17b06576412eff574dc5",
-                            "md5": "40e85286357723f326980a3b30f84e4f",
-                            "sha1": "2e391131f9b77a8ec0e0172113692f9e2ccceaf0"
-                        }
+                "workers": {
+                    "exif": {
+                        "SourceFile": "/tmp/tmpyi0yx_wf",
+                        "ExifToolVersion": 11.11,
+                        "FileName": "tmpyi0yx_wf",
+                        "Directory": "/tmp",
+                        "FileSize": 31232,
+                        "FileModifyDate": "...",
+                        "FileAccessDate": "...",
+                        "FileInodeChangeDate": "...",
+                        "FilePermissions": 600,
+                        "FileType": "Win32 EXE",
+                        "FileTypeExtension": "EXE",
+                        "MIMEType": "application/octet-stream",
+                        "MachineType": 332,
+                        "TimeStamp": "2016:07:15 21:44:45-04:00",
+                        "ImageFileCharacteristics": 258,
+                        "PEType": 267,
+                        "LinkerVersion": 14.0,
+                        "CodeSize": 8192,
+                        "InitializedDataSize": 22528,
+                        "UninitializedDataSize": 0,
+                        "EntryPoint": 10496,
+                        "OSVersion": 10.0,
+                        "ImageVersion": 10.0,
+                        "SubsystemVersion": 10.0,
+                        "Subsystem": 2,
+                        "FileVersionNumber": "10.0.14393.0",
+                        "ProductVersionNumber": "10.0.14393.0",
+                        "FileFlagsMask": 63,
+                        "FileFlags": 0,
+                        "FileOS": 262148,
+                        "ObjectFileType": 1,
+                        "FileSubtype": 0,
+                        "LanguageCode": "0409",
+                        "CharacterSet": "04B0",
+                        "CompanyName": "Microsoft Corporation",
+                        "FileDescription": "Windows Calculator",
+                        "FileVersion": "10.0.14393.0 (rs1_release.160715-1616)",
+                        "InternalName": "CALC",
+                        "LegalCopyright": "© Microsoft Corporation. All rights reserved.",
+                        "OriginalFileName": "CALC.EXE",
+                        "ProductName": "Microsoft® Windows® Operating System",
+                        "ProductVersion": "10.0.14393.0",
+                        "Warning": "Possibly corrupt Version resource"
+                    },
+                    "hash": {
+                        "sha256": "c74f41325775de4777000161a057342cc57a04e8b7be17b06576412eff574dc5",
+                        "md5": "40e85286357723f326980a3b30f84e4f",
+                        "sha1": "2e391131f9b77a8ec0e0172113692f9e2ccceaf0"
                     }
-                ],
+                }
                 "archivers": {},
                 "plugins_run": {
                     "workers": [
@@ -376,42 +361,40 @@ Or, carve a few executable files out of a Microsoft Word document::
                     },
                     "dispatch_to": []
                 },
-                "workers": [
-                    {
-                        "exif": {
-                            "SourceFile": "/tmp/tmpsiaa54tm",
-                            "ExifToolVersion": 11.11,
-                            "FileName": "tmpsiaa54tm",
-                            "Directory": "/tmp",
-                            "FileSize": 507904,
-                            "FileModifyDate": "...",
-                            "FileAccessDate": "...",
-                            "FileInodeChangeDate": "...",
-                            "FilePermissions": 600,
-                            "FileType": "Win32 EXE",
-                            "FileTypeExtension": "EXE",
-                            "MIMEType": "application/octet-stream",
-                            "MachineType": 332,
-                            "TimeStamp": "2013:04:20 10:50:10-04:00",
-                            "ImageFileCharacteristics": 258,
-                            "PEType": 267,
-                            "LinkerVersion": 9.0,
-                            "CodeSize": 386048,
-                            "InitializedDataSize": 120832,
-                            "UninitializedDataSize": 0,
-                            "EntryPoint": 208320,
-                            "OSVersion": 5.0,
-                            "ImageVersion": 0.0,
-                            "SubsystemVersion": 5.0,
-                            "Subsystem": 2
-                        },
-                        "hash": {
-                            "sha256": "47c6e9b102324ea6c54dd95ad3fdf4b48b18775053b105e241a371a3731488c0",
-                            "md5": "16d9f6e5491d99beb46d7ab1500c1799",
-                            "sha1": "9e6414bf2802c98fbd13172817db80380c5eeb6a"
-                        }
+                "workers": {
+                    "exif": {
+                        "SourceFile": "/tmp/tmpsiaa54tm",
+                        "ExifToolVersion": 11.11,
+                        "FileName": "tmpsiaa54tm",
+                        "Directory": "/tmp",
+                        "FileSize": 507904,
+                        "FileModifyDate": "...",
+                        "FileAccessDate": "...",
+                        "FileInodeChangeDate": "...",
+                        "FilePermissions": 600,
+                        "FileType": "Win32 EXE",
+                        "FileTypeExtension": "EXE",
+                        "MIMEType": "application/octet-stream",
+                        "MachineType": 332,
+                        "TimeStamp": "2013:04:20 10:50:10-04:00",
+                        "ImageFileCharacteristics": 258,
+                        "PEType": 267,
+                        "LinkerVersion": 9.0,
+                        "CodeSize": 386048,
+                        "InitializedDataSize": 120832,
+                        "UninitializedDataSize": 0,
+                        "EntryPoint": 208320,
+                        "OSVersion": 5.0,
+                        "ImageVersion": 0.0,
+                        "SubsystemVersion": 5.0,
+                        "Subsystem": 2
+                    },
+                    "hash": {
+                        "sha256": "47c6e9b102324ea6c54dd95ad3fdf4b48b18775053b105e241a371a3731488c0",
+                        "md5": "16d9f6e5491d99beb46d7ab1500c1799",
+                        "sha1": "9e6414bf2802c98fbd13172817db80380c5eeb6a"
                     }
-                ],
+                }
                 "archivers": {},
                 "plugins_run": {
                     "workers": [
@@ -437,8 +420,6 @@ Or, carve a few executable files out of a Microsoft Word document::
     }
 
 
-*The combinations are nearly limitless..all you need is a plugin.*
-
 ------------------------------------
 
 Guides
@@ -450,12 +431,13 @@ User and Development Guide
 Want to get started using `stoQ` or write your own plugins? Start reading here.
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 3
 
    installation
    gettingstarted
    dev/core
    dev/plugin_overview
+   dev/upgrading_plugins
    dev/packaging
 
 Community Guide

@@ -36,7 +36,7 @@ The setup.py file is a standard ``setuptools`` script. ``include_package_data`` 
     from setuptools import setup, find_packages
     setup(
         name="example_plugin",
-        version="2.0.0",
+        version="3.0.0",
         author="Marcus LaFerrera (@mlaferrera)",
         url="https://github.com/PUNCH-Cyber/stoq-plugins-public",
         license="Apache License 2.0",

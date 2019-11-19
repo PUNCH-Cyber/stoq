@@ -57,9 +57,12 @@ class PayloadMeta:
         :param extra_data: Additional metadata that should be added to the results
         :param dispatch_to: Force payload to be dispatched to specified plugins
 
+        >>> from stoq import PayloadMeta
         >>> extra_data = {'filename': 'bad.exe', 'source': 'suricata'}
         >>> dispatch_to = ['yara']
-        >>> payload_meta = PayloadMeta( should_archive=True, extra_data=extra_data, dispatch_to=dispatch_to)
+        >>> payload_meta = PayloadMeta(
+        ...     should_archive=True, extra_data=extra_data, dispatch_to=dispatch_to
+        ... )
 
         """
 
@@ -94,6 +97,7 @@ class Payload:
         :param extracted_from: Unique payload ID the payload was extracted from
         :param payload_id: Unique ID of payload
 
+        >>> from stoq import PayloadMeta, Payload
         >>> content = b'This is a raw payload'
         >>> payload_meta = PayloadMeta(should_archive=True)
         >>> payload = Payload(content, payload_meta=payload_meta)
@@ -128,6 +132,7 @@ class RequestMeta:
         :param source: Request source information
         :param extra_data: Additional metadata that should be added to the results
 
+        >>> from stoq import RequestMeta
         >>> extra_data = {'source': 'Ingest from data dump directory'}
         >>> request = RequestMeta(archive_payload=True, extra_data=extra_data)
 
@@ -259,11 +264,14 @@ class ExtractedPayload:
         Object to store extracted payloads for further analysis
         :param content: Raw bytes of extracted payload
         :param payload_meta: ``PayloadMeta`` object containing metadata about extracted payload
+
+        >>> from stoq import PayloadMeta, ExtractedPayload
         >>> src = '/tmp/bad.exe'
         >>> data = open(src, 'rb').read()
         >>> extra_data = {'source': src}
         >>> extracted_meta = PayloadMeta(should_archive=True, extra_data=extra_data)
         >>> extracted_payload = ExtractedPayload(content=data, payload_meta=extracted_meta)
+
         """
 
         self.content = content
@@ -283,12 +291,13 @@ class WorkerResponse:
         Object containing response from worker plugins
 
         :param results: Results from worker scan
-        :param extracted: ``ExtractedPayload`` object of extracted payloads from scan
+        :param extracted: ``ExtractedPayload`` objects of extracted payloads from scan
         :param errors: Errors that occurred
 
+        >>> from stoq import WorkerResponse, ExtractedPayload
         >>> results = {'is_bad': True, 'filetype': 'executable'}
-        >>> extracted_payload = ExtractedPayload(content=data, payload_meta=extracted_meta)
-        >>> response = WorkerResponse(results=results, extracted=[extracted_payload])
+        >>> extracted_payload = [ExtractedPayload(content=data, payload_meta=extracted_meta)]
+        >>> response = WorkerResponse(results=results, extracted=extracted_payload)
 
         """
         self.results = results
@@ -314,7 +323,8 @@ class ArchiverResponse:
         :param results: Results from archiver plugin
         :param errors: Errors that occurred
 
-        >>> results = {'file_id': '12345}
+        >>> from stoq import ArchiverResponse
+        >>> results = {'file_id': '12345'}
         >>> archiver_response = ArchiverResponse(results=results)
 
         """
@@ -343,6 +353,7 @@ class DispatcherResponse:
         :param meta: Metadata pertaining to dispatching results
         :param errors: Errors that occurred
 
+        >>> from stoq import DispatcherResponse
         >>> plugins = ['yara', 'exif']
         >>> meta = {'hit': 'exe_file'}
         >>> dispatcher = DispatcherResponse(plugin_names=plugins, meta=meta)
@@ -369,6 +380,7 @@ class DecoratorResponse:
         :param results: Results from decorator plugin
         :param errors: Errors that occurred
 
+        >>> from stoq import DecoratorResponse
         >>> results = {'decorator_key': 'decorator_value'}
         >>> errors = ['This plugin failed for a reason']
         >>> response = DecoratorResponse(results=results, errors=errors)

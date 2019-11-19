@@ -57,7 +57,7 @@
 
         >>> import stoq
         >>> dest_archivers = ['filedir']
-        >>> s = Stoq(dest_archivers=dest_archivers, [...])
+        >>> s = Stoq(dest_archivers=dest_archivers)
 
 
     .. _archiversource:
@@ -98,7 +98,7 @@
 
         >>> import stoq
         >>> source_archivers = ['filedir']
-        >>> s = Stoq(source_archivers=source_archivers, [...])
+        >>> s = Stoq(source_archivers=source_archivers)
 
 
     .. _writingplugin:
@@ -130,20 +130,20 @@
     ::
 
         from typing import Dict, Optional
-        from configparser import ConfigParser
 
         from stoq.plugins import ArchiverPlugin
-        from stoq.data_classes import ArchiverResponse, Payload, RequestMeta, PayloadMeta
+        from stoq.helpers import StoqConfigParser
+        from stoq.data_classes import ArchiverResponse, Payload, Request, PayloadMeta
 
 
         class ExampleArchiver(ArchiverPlugin):
-            def __init__(self, config: ConfigParser, plugin_opts: Optional[Dict]) -> None:
-                super().__init__(config, plugin_opts)
+            def __init__(self, config: StoqConfigParser) -> None:
+                super().__init__(config)
                 self.archive_path = config.get(
                     'options', 'archive_path', fallback='/tmp/archive_payload')
 
             async def archive(
-                self, payload: Payload, request_meta: RequestMeta
+                self, payload: Payload, request: Request
             ) -> Optional[ArchiverResponse]:
                 with open(f'{self.archive_path}', 'wb) as out:
                     out.write(payload.content)
@@ -184,11 +184,13 @@ class ArchiverPlugin(BasePlugin):
 
         :return: ArchiverResponse object. Results are used to retrieve payload.
 
+        >>> import asyncio
         >>> from stoq import Stoq, Payload
         >>> payload = Payload(b'this is going to be saved')
         >>> s = Stoq()
+        >>> loop = asyncio.get_event_loop()
         >>> archiver = s.load_plugin('filedir')
-        >>> await archiver.archive(payload)
+        >>> loop.run_until_complete(archiver.archive(payload))
         ... {'path': '/tmp/bad.exe'}
 
         """
@@ -199,15 +201,17 @@ class ArchiverPlugin(BasePlugin):
         Retrieve payload for processing
 
         :param task: Task to be processed to load payload. Must contain `ArchiverResponse`
-        results from `ArchiverPlugin.archive()`
+                     results from `ArchiverPlugin.archive()`
 
         :return: Payload object for scanning
 
-        >>> from stoq import Stoq
+        >>> import asyncio
+        >>> from stoq import Stoq, ArchiverResponse
         >>> s = Stoq()
+        >>> loop = asyncio.get_event_loop()
         >>> archiver = s.load_plugin('filedir')
         >>> task = ArchiverResponse(results={'path': '/tmp/bad.exe'})
-        >>> payload = await archiver.get(task)
+        >>> payload = loop.run_until_complete(archiver.get(task))
 
         """
         pass

@@ -54,6 +54,8 @@ Then, simply open the `stoq` directory and install::
     $ python3 setup.py install
 
 
+.. note:: Depending on your environment, you may also need to run `pip3 install wheel` to successfully install stoQ
+
 .. _installplugins:
 
 Installing Plugins
