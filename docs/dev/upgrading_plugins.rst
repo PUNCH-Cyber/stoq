@@ -12,11 +12,11 @@ be slightly modified for use with v3. Some key changes include:
     - Full asyncio support with all plugins
     - The entire request state is passed to dispatchers, workers, and archivers. This 
       includes making all payloads, and their respective results, available to them.
-    - A `Logger` object is now available to all plugins upono instantiation
+    - A ``Logger`` object is now available to all plugins upono instantiation
     - Errors from plugins are no longer simply a list of strings, they are now a list
-      of `Error` objects
-    - Configuration parameters are passed to each plugin as a `StoqConfigParser` object
-      rather than a `ConfigParser` object
+      of ``Error`` objects
+    - Configuration parameters are passed to each plugin as a ``StoqConfigParser`` object
+      rather than a ``ConfigParser`` object
     - DeepDispatcher plugins have been deprecated
 
 
@@ -24,15 +24,15 @@ __init__
 --------
 
 All plugin classes are instantiated exactly the same way. If the plugin requires additional
-configuration options, the `__init__` function may be added to your plugin class.
+configuration options, the ``__init__`` function may be added to your plugin class.
 
 Key Changes:
 
-    - `from configparser import ConfigParser` has been replaced with a helper function and
-      should be imported as `from stoq.helpers import StoqConfigParser`
-    - `plugins_opts` has been deprecated. All plugin options are now available within the
-      `config` argument. `plugins_opts` must be removed from the `__init__` signature as
-      well as from `super().__init__`
+    - ``from configparser import ConfigParser`` has been replaced with a helper function and
+      should be imported as ``from stoq.helpers import StoqConfigParser``
+    - ``plugins_opts`` has been deprecated. All plugin options are now available within the
+      ``config`` argument. ``plugins_opts`` must be removed from the ``__init__`` signature as
+      well as from ``super().__init__``
 
 v2
 ^^
@@ -73,10 +73,10 @@ ArchiverPlugin
 
 Key Updates:
 
-    - import of `RequestMeta` is replaced with `Request`
-    - The `archive` function signature accepts a `Request` object rather than `RequestMeta`
-    - `def archive` is an async function, and must be changed to `async def archive`
-    - `def get` is an async function, and must be changed to `async def get`
+    - import of ``RequestMeta`` is replaced with ``Request``
+    - The ``archive`` function signature accepts a ``Request`` object rather than ``RequestMeta``
+    - ``def archive`` is an async function, and must be changed to ``async def archive``
+    - ``def get`` is an async function, and must be changed to ``async def get``
 
 v2
 ^^
@@ -121,7 +121,7 @@ ConnectorPlugin
 
 Key Updates:
 
-    - `def save` is an async function, and must be changed to `async def save`
+    - ``def save`` is an async function, and must be changed to ``async def save``
 
 v2
 ^^
@@ -156,7 +156,7 @@ DecoratorPlugin
 
 Key Updates:
 
-    - `def decorate` is an async function, and must be changed to `async def decorate`
+    - ``def decorate`` is an async function, and must be changed to ``async def decorate``
 
 v2
 ^^
@@ -191,9 +191,9 @@ DispatcherPlugin
 
 Key Updates:
 
-    - import of `RequestMeta` is replaced with `Request`
-    - The `get_dispatches` function signature accepts a `Request` object rather than `RequestMeta`
-    - `def get_dispatches` is an async function, and must be changed to `async def get_dispatches`
+    - import of ``RequestMeta`` is replaced with ``Request``
+    - The ``get_dispatches`` function signature accepts a ``Request`` object rather than ``RequestMeta``
+    - ``def get_dispatches`` is an async function, and must be changed to ``async def get_dispatches``
 
 v2
 ^^
@@ -233,9 +233,9 @@ ProviderPlugin
 
 Key Updates:
 
-    - `from queue import Queue` is replaced with `from asyncio import Queue`
-    - `def ingest` is an async function, and must be changed to `async def ingest`
-    - When placing objects on the `Queue`, the call must be awaited, `await queue.put()`
+    - ``from queue import Queue`` is replaced with ``from asyncio import Queue``
+    - ``def ingest`` is an async function, and must be changed to ``async def ingest``
+    - When placing objects on the ``Queue``, the call must be awaited, ``await queue.put()``
 
 v2
 ^^
@@ -272,9 +272,9 @@ WorkerPlugin
 
 Key Updates:
 
-    - import of `RequestMeta` is replaced with `Request`
-    - The `scan` function signature accepts a `Request` object rather than `RequestMeta`
-    - `def scan` is an async function, and must be changed to `async def scan`
+    - import of ``RequestMeta`` is replaced with ``Request``
+    - The ``scan`` function signature accepts a ``Request`` object rather than ``RequestMeta``
+    - ``def scan`` is an async function, and must be changed to ``async def scan``
 
 v2
 ^^

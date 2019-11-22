@@ -34,15 +34,15 @@ look for ``stoq.cfg`` in ``$STOQ_HOME`` if running from the command line, or ``$
 used as a library.
 
 
-Plugin options may also be defined in `stoq.cfg`. More information on how to configure plugins
-in `stoq.cfg` can be found in :ref:`plugin configuration <pluginconfigstoqcfg>`.
+Plugin options may also be defined in ``stoq.cfg``. More information on how to configure plugins
+in ``stoq.cfg`` can be found in :ref:`plugin configuration <pluginconfigstoqcfg>`.
 
 .. _stoqhome:
 
 $STOQ_HOME
 ----------
 
-When using the ``stoq`` command, stoQ will default to using $HOME/.stoq as it's home directory.
+When using the ``stoq`` command, stoQ will default to using ``$HOME/.stoq`` as it's home directory.
 This path is important as it is used as the default path for plugins and configuration files.
 You can easily override this by setting the ``$STOQ_HOME`` environment variable. For example,
 we can set stoQ's home directory to ``/opt/stoq`` like so::
@@ -298,7 +298,7 @@ There are two command line options avaiable for RequestMeta.
     - ``--request-source``
     - ``--request-extra``
 
-To set ``--request-source`` simply add the argument to the `stoq` command::
+To set ``--request-source`` simply add the argument to the ``stoq`` command::
 
     $ stoq scan [...] --request-source my_mail
     {

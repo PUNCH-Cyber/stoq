@@ -22,9 +22,9 @@ Configuration
 Plugins may be provided configuration options in one of four ways. In order of precendece:
 
     - From the command line
-    - Upon instantiation of `Stoq()`
-    - Defined in `stoq.cfg`
-    - Defined in the plugin's `.stoq` configuration file
+    - Upon instantiation of ``Stoq()``
+    - Defined in ``stoq.cfg``
+    - Defined in the plugin's ``.stoq`` configuration file
 
 .. _pluginconfigcmdline:
 
@@ -60,11 +60,11 @@ argument::
 stoq.cfg
 --------
 
-The recommended location for storing static plugin configuration options is in `stoq.cfg`.  The reason for this
-if all plugin options defined in the plugin's `.stoq` file will be overwritten when the plugin is upgraded.
+The recommended location for storing static plugin configuration options is in ``stoq.cfg``.  The reason for this
+if all plugin options defined in the plugin's ``.stoq`` file will be overwritten when the plugin is upgraded.
 
-To define plugin options in `stoq.cfg` simply add a section header of the plugin name, then define the plugin options.
-For example, to define the plugin option `source_dir` for the `dirmon` plugin, the below can be added to `stoq.cfg`::
+To define plugin options in ``stoq.cfg`` simply add a section header of the plugin name, then define the plugin options.
+For example, to define the plugin option ``source_dir`` for the ``dirmon`` plugin, the below can be added to ``stoq.cfg``::
 
     [dirmon]
     source_dir = /tmp/monitor
@@ -160,9 +160,9 @@ methods exist.::
 Plugin Logging
 **************
 
-Upon instantiation, plugins are provided a `Logger` object within the plugin class
-named `self.log`. This is just a standard Python logging object that supports the
-log levels `debug`, `info`, `warning`, `error`, and `critical`.::
+Upon instantiation, plugins are provided a ``Logger`` object within the plugin class
+named ``self.log``. This is just a standard Python logging object that supports the
+log levels ``debug``, ``info``, ``warning``, ``error``, and ``critical``.::
 
     from typing import Optional
     from stoq.plugins import WorkerPlugin
@@ -174,6 +174,35 @@ log levels `debug`, `info`, `warning`, `error`, and `critical`.::
         ) -> Optional[WorkerResponse]:
             self.log.info('Scanning payload now')
 
+
+.. _pluginerrors:
+
+Errors
+******
+
+Errors from plugins must be handled with the ``Error`` class. This helps to ensure a
+consistent and standardized error message handling across the framework. All plugin
+classes are capable of handling errors, except for the ``ConnectorPlugin`` class. The
+following is an example of adding a error to a ``WorkerResponse``.::
+
+    
+    from typing import Optional
+    from stoq.plugins import WorkerPlugin
+    from stoq import Error, Payload, Request, WorkerResponse
+
+    class ErrorPlugin(WorkerPlugin):
+        async def scan(
+            self, payload: Payload, request: Request
+        ) -> Optional[WorkerResponse]:
+            errors: List[Error] = []
+            errors.append(
+                Error(
+                    error='This is an error message that will be in StoqResponse', 
+                    plugin_name=self.plugin_name, 
+                    payload_id=payload.results.payload_id
+                )
+            )
+            return WorkerResponse(errors=errors)
 
 .. _pluginclasses:
 
