@@ -1,4 +1,5 @@
 Sphinx~=2.2
+sphinx_rtd_theme~=0.4.3
 sphinx-autodoc-typehints~=1.10
 beautifulsoup4~=4.8
 python-json-logger~=0.1

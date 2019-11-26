@@ -45,6 +45,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx_autodoc_typehints',
     'sphinx.ext.doctest',
+    'sphinx.ext.todo',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -71,28 +72,24 @@ language = None
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'friendly'
+pygments_style = 'sphinx'
 
 
 # -- Options for HTML output -------------------------------------------------
 
+github_url = 'https://github.com/PUNCH-Cyber/stoq'
+#  html_logo = '_static/stoq.png'
+
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-html_theme_options = {
-    'show_powered_by': False,
-    'github_user': 'PUNCH-Cyber',
-    'github_repo': 'stoq',
-    'github_banner': True,
-    'show_related': False,
-    'note_bg': '#FFF59C',
-}
+html_theme_options = {'analytics_id': 'UA-70371250-1'}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -107,7 +104,7 @@ html_static_path = ['_static']
 # default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
 # 'searchbox.html']``.
 #
-html_sidebars = {'**': ['sidebarindex.html', 'sourcelink.html', 'searchbox.html']}
+#  html_sidebars = {'**': ['sidebarindex.html', 'sourcelink.html', 'searchbox.html']}
 
 
 # -- Options for HTMLHelp output ---------------------------------------------

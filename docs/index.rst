@@ -435,21 +435,16 @@ Want to get started using `stoQ` or write your own plugins? Start reading here.
 
    installation
    gettingstarted
-   dev/core
-   dev/plugin_overview
-   dev/upgrading_plugins
-   dev/packaging
+   dev/index
+   faq
 
 Community Guide
 ---------------
-Looking at learning more about the project and how to contribute? Read on.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
-   community/faq
-   community/contributing
-   community/codeofconduct
+   community/index
 
 Indices and tables
 ==================
