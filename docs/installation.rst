@@ -34,7 +34,7 @@ Stable
 
 The simplest way to get started is to install stoQ from pip::
 
-    $ pip3 install stoq-framework
+    $ pip3 install stoq-framework==3.0.0b2
 
 
 .. _installlatestdev:
@@ -119,22 +119,3 @@ Plugins may be upgraded (or downgraded) by adding the `--upgrade` command line o
     to include the plugin configuration file. It is highly recommended that the plugin directory be backed up
     regularly to ensure important information is not lost, or plugin configuration options be defined in `stoq.cfg`.
 
-.. _devenv:
-
-Dev Environment
-***************
-
-Want to try stoQ out or setup a development environment? It's simple. Just clone the stoQ
-repository then startup a virtual machine using `Vagrant`.
-
-First, clone the repository::
-
-    $ git clone https://github.com/PUNCH-Cyber/stoq
-
-Then, simply go into the ``stoq`` directory and startup `Vagrant`::
-
-    $ cd stoq
-    $ vagrant up
-
-.. note:: You'll need to ensure you have `Vagrant <https://www.vagrantup.com>`_ installed
-          and setup.
