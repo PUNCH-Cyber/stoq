@@ -11,7 +11,7 @@ def version():
     version_pattern = r"__version__\W*=\W*'([^']+)'"
     src = os.path.join(os.path.dirname(__file__), 'stoq/__init__.py')
     with open(src, 'r') as f:
-        v, = re.findall(version_pattern, f.read())
+        (v,) = re.findall(version_pattern, f.read())
     return v
 
 
@@ -43,5 +43,6 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
 )

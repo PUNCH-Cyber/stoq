@@ -1,5 +1,4 @@
 .. _pluginproviders:
-.. module:: stoq
 
 Provider Plugins
 ================

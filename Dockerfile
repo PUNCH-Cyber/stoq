@@ -5,8 +5,8 @@ ENV USER stoq
 ENV GROUP stoq
 ENV STOQ_HOME /home/$USER/.stoq
 ENV STOQ_TMP /tmp/stoq
-ENV XORSEARCH_VER 1_11_1
-ENV EXIFTOOL_VER 11.20
+ENV XORSEARCH_VER 1_11_2
+ENV EXIFTOOL_VER 11.77
 
 RUN groupadd -r $USER && useradd -r -g $GROUP $USER && \
     mkdir -p /home/$USER/.stoq/plugins

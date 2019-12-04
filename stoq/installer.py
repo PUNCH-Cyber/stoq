@@ -28,7 +28,7 @@ log = logging.getLogger()
 
 class StoqPluginInstaller:
 
-    DEFAULT_REPO = 'git+https://github.com/PUNCH-Cyber/stoq-plugins-public.git'
+    DEFAULT_REPO = 'git+https://github.com/PUNCH-Cyber/stoq-plugins-public.git@v3'
 
     @staticmethod
     def install(
@@ -68,7 +68,7 @@ class StoqPluginInstaller:
                 .replace('@', '/')
             )
             path = plugin_path.split('subdirectory=')[1]
-            requirements = f'{url}/master/{path}/requirements.txt'
+            requirements = f'{url}/{path}/requirements.txt'
             with NamedTemporaryFile() as temp_file:
                 response = requests.get(requirements)
                 if response.status_code == 200:

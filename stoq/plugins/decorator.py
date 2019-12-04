@@ -64,15 +64,15 @@
     ::
 
         from typing import Dict, Optional
-        from configparser import ConfigParser
 
-        from stoq.data_classes import StoqResponse, DecoratorResponse
         from stoq.plugins import DecoratorPlugin
+        from stoq.helpers import StoqConfigParser
+        from stoq.data_classes import StoqResponse, DecoratorResponse
 
 
         class ExampleDecorator(DecoratorPlugin):
-            def __init__(self, config: ConfigParser, plugin_opts: Optional[Dict]) -> None:
-                super().__init__(config, plugin_opts)
+            def __init__(self, config: StoqConfigParser) -> None:
+                super().__init__(config)
                 self.msg = config.get('options', 'msg', fallback='do_more msg')
 
             async def decorate(self, response: StoqResponse) -> Optional[DecoratorResponse]:

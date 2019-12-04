@@ -9,8 +9,7 @@ Overview
 `stoQ` is a highly flexible framework because of its ability to leverage plugins for each
 layer of operations. One of the biggest benefits to this approach is that it ensures the
 user is able to quickly and easily pivot to and from different technologies in their stack,
-without having to drastically alter workflow. To better understand the `stoQ` workflow and
-how each of the below plugins are used, check out the :ref:`stoQ workflow section <workflow>`.
+without having to drastically alter workflow. 
 
 For a full listing of all publicly available plugins, check out the `stoQ public plugins <https://github.com/PUNCH-Cyber/stoq-plugins-public>`_ repository.
 
@@ -22,9 +21,9 @@ Configuration
 Plugins may be provided configuration options in one of four ways. In order of precendece:
 
     - From the command line
-    - Upon instantiation of `Stoq()`
-    - Defined in `stoq.cfg`
-    - Defined in the plugin's `.stoq` configuration file
+    - Upon instantiation of ``Stoq()``
+    - Defined in ``stoq.cfg``
+    - Defined in the plugin's ``.stoq`` configuration file
 
 .. _pluginconfigcmdline:
 
@@ -60,10 +59,11 @@ argument::
 stoq.cfg
 --------
 
-The recommended location for storing static plugin configuration options is in `stoq.cfg`.  The reason for this
-if all plugin options defined in the plugin's `.stoq` file will be overwritten when the plugin is upgraded.
+The recommended location for storing static plugin configuration options is in ``stoq.cfg``.  The reason for this
+if all plugin options defined in the plugin's ``.stoq`` file will be overwritten when the plugin is upgraded.
 
-To define plugin options in `stoq.cfg` simply add a section header of the plugin name, then define the plugin options::
+To define plugin options in ``stoq.cfg`` simply add a section header of the plugin name, then define the plugin options.
+For example, to define the plugin option ``source_dir`` for the ``dirmon`` plugin, the below can be added to ``stoq.cfg``::
 
     [dirmon]
     source_dir = /tmp/monitor
@@ -105,7 +105,7 @@ plugin configuration file with all *required* fields::
 Additionally, some optional settings may be defined::
 
     [options]
-    min_stoq_version = 2.0.0
+    min_stoq_version = 3.0.0
 
 * **options**
     - **min_stoq_version**: Minimum version of stoQ required to work properly. If the version of `stoQ` is less than the version defined, a warning will be raised.
@@ -137,21 +137,71 @@ for worker plugins) and ``get_dispatches`` (required for dispatcher plugins)
 methods exist.::
 
     from typing import Optional
+    from stoq import Payload, Request, WorkerResponse
     from stoq.plugins import DispatcherPlugin, WorkerPlugin
 
     class MultiClassPlugin(WorkerPlugin, DispatcherPlugin):
         async def scan(
-            self, payload: Payload, request_meta: RequestMeta
+            self, payload: Payload, request: Request
         ) -> Optional[WorkerResponse]:
             # do worker plugin stuff here
             return
 
         async def get_dispatches(
-            self, payload: Payload, request_meta: RequestMeta
+            self, payload: Payload, request: Request
         ) -> Optional[DispatcherResponse]:
             # do dispatcher plugin stuff here
             return
 
+
+.. _pluginlogging:
+
+Plugin Logging
+**************
+
+Upon instantiation, plugins are provided a ``Logger`` object within the plugin class
+named ``self.log``. This is just a standard Python logging object that supports the
+log levels ``debug``, ``info``, ``warning``, ``error``, and ``critical``.::
+
+    from typing import Optional
+    from stoq.plugins import WorkerPlugin
+    from stoq import Payload, Request, WorkerResponse
+
+    class LoggingPlugin(WorkerPlugin):
+        async def scan(
+            self, payload: Payload, request: Request
+        ) -> Optional[WorkerResponse]:
+            self.log.info('Scanning payload now')
+
+
+.. _pluginerrors:
+
+Errors
+******
+
+Errors from plugins must be handled with the ``Error`` class. This helps to ensure a
+consistent and standardized error message handling across the framework. All plugin
+classes are capable of handling errors, except for the ``ConnectorPlugin`` class. The
+following is an example of adding a error to a ``WorkerResponse``.::
+
+    
+    from typing import Optional
+    from stoq.plugins import WorkerPlugin
+    from stoq import Error, Payload, Request, WorkerResponse
+
+    class ErrorPlugin(WorkerPlugin):
+        async def scan(
+            self, payload: Payload, request: Request
+        ) -> Optional[WorkerResponse]:
+            errors: List[Error] = []
+            errors.append(
+                Error(
+                    error='This is an error message that will be in StoqResponse', 
+                    plugin_name=self.plugin_name, 
+                    payload_id=payload.results.payload_id
+                )
+            )
+            return WorkerResponse(errors=errors)
 
 .. _pluginclasses:
 

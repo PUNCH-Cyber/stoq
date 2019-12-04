@@ -87,22 +87,21 @@
     ::
 
         from typing import Dict, Optional
-        from configparser import ConfigParser
 
-        from stoq.data_classes import Payload, DispatcherResponse, RequestMeta
         from stoq.plugins import DispatcherPlugin
+        from stoq.helpers import StoqConfigParser
+        from stoq.data_classes import Payload, DispatcherResponse, Request
 
 
         class ExampleDispatcher(DispatcherPlugin):
-            def __init__(self, config: ConfigParser, plugin_opts: Optional[Dict]) -> None:
-                super().__init__(config, plugin_opts)
+            def __init__(self, config: StoqConfigParser) -> None:
+                super().__init__(config)
                 self.msg = config.get('options', 'msg', fallback='Useful content here')
 
             async def get_dispatches(
-                self, payload: Payload, request_meta: RequestMeta
+                self, payload: Payload, request: Request
             ) -> Optional[DispatcherResponse]:
                 dr = DispatcherResponse()
-                dr.errors.append('This is an example error and is completely optional')
                 dr.meta['example_key'] = 'Useful metadata info'
                 dr.meta['msg'] = self.msg
                 return dr
