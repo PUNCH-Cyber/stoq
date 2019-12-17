@@ -6,7 +6,7 @@ ENV GROUP stoq
 ENV STOQ_HOME /home/$USER/.stoq
 ENV STOQ_TMP /tmp/stoq
 ENV XORSEARCH_VER 1_11_2
-ENV EXIFTOOL_VER 11.77
+ENV EXIFTOOL_VER 11.80
 
 RUN groupadd -r $USER && useradd -r -g $GROUP $USER && \
     mkdir -p /home/$USER/.stoq/plugins
@@ -29,13 +29,14 @@ RUN apt-get update && \
     libc6-i386 \
     libssl-dev \
     swig \
-    lib32ncurses5 && \
+    lib32ncurses6 && \
     apt-get clean -y && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN pip install stoq-framework six && \
+RUN pip install stoq-framework\>=3.0.0b0 six && \
     git clone https://github.com/PUNCH-Cyber/stoq-plugins-public ${STOQ_TMP}/stoq-plugins-public && \
     cd ${STOQ_TMP}/stoq-plugins-public && \
+    git checkout v3 && \
     for plugin in `ls -d */`; do stoq install $plugin; done
 
 WORKDIR ${STOQ_TMP}
