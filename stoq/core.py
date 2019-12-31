@@ -419,7 +419,7 @@ class Stoq(StoqPluginManager):
 
         self.max_queue = max_queue or config.getint('core', 'max_queue', fallback=100)
         self.provider_consumers = provider_consumers or config.getint(
-            'core', 'provider_consumers', fallback=50
+            'core', 'provider_consumers', fallback=2
         )
         self.max_recursion = max_recursion or config.getint(
             'core', 'max_recursion', fallback=10
