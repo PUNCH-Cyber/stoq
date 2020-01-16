@@ -33,6 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `StoqConfigParser` to `stoq.helpers` to extend options for `Stoq` and plugin configurations.
 - Parallelization is performed across all of the plugins that can run in a given round, 
     instead of parallelizing across all of the plugins to perform on a given payload (#147)
+- Ensure `plugin_name` is set to the name of the plugin class in case `Name` is not defined in 
+  the plugin's configuration.
 
 ### Changed
 

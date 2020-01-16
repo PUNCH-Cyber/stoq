@@ -24,7 +24,7 @@ from stoq.helpers import StoqConfigParser
 class BasePlugin(ABC):
     def __init__(self, config: StoqConfigParser) -> None:
         self.config = config
-        self.plugin_name = config.get('Core', 'Name')
+        self.plugin_name = config.get('Core', 'Name', fallback=self.__class__.__name__)
         self.__author__ = config.get('Documentation', 'Author', fallback='')
         self.__version__ = config.get('Documentation', 'Version', fallback='')
         self.__website__ = config.get('Documentation', 'Website', fallback='')
