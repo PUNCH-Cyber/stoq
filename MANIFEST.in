@@ -1,4 +1,4 @@
 graft stoq
 include requirements.txt
 include README.md
-global-exclude __pycache__ *.pyc
+global-exclude __pycache__ *.pyc .mypy_cache
