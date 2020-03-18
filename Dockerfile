@@ -6,9 +6,11 @@ ENV GROUP stoq
 ENV STOQ_HOME /home/$USER/.stoq
 ENV STOQ_TMP /tmp/stoq
 ENV XORSEARCH_VER 1_11_2
-ENV EXIFTOOL_VER 11.86
+ENV EXIFTOOL_VER 11.91
 
-RUN groupadd -r $USER && useradd -r -g $GROUP $USER && \
+RUN groupadd -r $GROUP && \
+    useradd -r -g $GROUP $USER && \
+    install -d $STOQ_HOME -o $USER -g $GROUP && \
     mkdir -p /home/$USER/.stoq/plugins
 
 RUN apt-get update && \
@@ -63,4 +65,5 @@ RUN wget -O trid_linux_64.zip "http://mark0.net/download/trid_linux_64.zip" && \
 
 RUN rm -rf $STOQ_TMP
 
+USER $USER
 ENTRYPOINT ["stoq"]
