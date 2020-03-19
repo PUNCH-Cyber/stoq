@@ -22,10 +22,11 @@ import traceback
 from bs4 import UnicodeDammit  # type: ignore
 from configparser import ConfigParser
 from typing import Any, Optional, Dict, DefaultDict, Union, List
+from stoq.exceptions import StoqException
 
 
 class StoqConfigParser(ConfigParser):
-    """ 
+    """
     Extends ConfigParser to simplfy handling of common configuration options
 
     """
@@ -50,6 +51,16 @@ class StoqConfigParser(ConfigParser):
             return value
         return set(o.strip() for o in value.split(',') if o)
 
+    def getjson(self, section, option, *args, **kwargs) -> Any:
+        """
+        Create a Python object from `ConfigParser` option using JSON syntax
+
+        """
+        try:
+            value = json.loads(self.get(section, option, fallback=kwargs.get('fallback', '')))
+        except Exception as err:
+            raise StoqException(f"Unable to parse [{section}] -> {option} as JSON. Error: {err}")
+        return value
 
 class JsonComplexEncoder(json.JSONEncoder):
     """
@@ -116,7 +127,7 @@ def get_sha512(content: bytes) -> str:
 def format_exc(exc: Exception, limit: int = -1, msg: Optional[str] = None):
     """
     Format `Exceptions` for use with `Stoq` error handling
-    
+
     """
     # Inspired from https://github.com/python/cpython/blob/3.7/Lib/traceback.py#L560-L563
     tb = traceback.format_tb(exc.__traceback__, limit=limit)[0].split('\n')[0].strip()
