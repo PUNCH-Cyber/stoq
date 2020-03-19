@@ -17,9 +17,24 @@
 import uuid
 from copy import deepcopy
 from datetime import datetime
-from typing import Dict, List, Optional, DefaultDict, Union
+from typing import Dict, List, Optional, DefaultDict, Union, Any
 
 import stoq.helpers as helpers
+
+class VersionInfo:
+    def __init__(self, stoq_plugin_version: str) -> None:
+        """
+
+        Object for keeping track of version information of the plugin that was run
+
+        :param stoq_plugin_version: Version of the plugin
+
+        """
+        self.stoq_plugin_version = stoq_plugin_version
+        self.extra_info = None
+
+    def add_extra_version_info(self, extra_info: Any) -> None:
+        self.extra_info = extra_info
 
 
 class Error:
@@ -42,7 +57,7 @@ class Error:
         >>> payload = Payload(b'test bytes')
         >>> err = Error(
         ...     error='This is our error message',
-        ...     plugin_name='test_plugin', 
+        ...     plugin_name='test_plugin',
         ...     payload_id=payload.results.payload_id
         ... )
         >>> errors.append(err)
@@ -220,7 +235,7 @@ class Request:
     ):
         """
 
-        Object that contains the state of a ``Stoq`` scan. This object is accessible within 
+        Object that contains the state of a ``Stoq`` scan. This object is accessible within
         all archiver, dispatcher, and worker plugins.
 
         :param payloads: All payloads that are being processed, to include extracted payloads

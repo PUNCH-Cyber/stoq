@@ -21,7 +21,7 @@ from typing import Optional
 
 
 from stoq import Stoq, StoqException, StoqPluginNotFound
-from stoq.data_classes import Payload, WorkerResponse, Request
+from stoq.data_classes import Payload, WorkerResponse, Request, VersionInfo
 from stoq.plugin_manager import StoqPluginManager
 from stoq.plugins import WorkerPlugin
 import stoq.tests.utils as utils
@@ -63,6 +63,13 @@ class TestPluginManager(unittest.TestCase):
             simple_worker.__website__,
         )
         self.assertEqual('Simple stoQ Worker plugin', simple_worker.__description__)
+
+    def test_version_info(self):
+        pm = StoqPluginManager([utils.get_plugins_dir()])
+        version_info_plugin = pm.load_plugin('version_info_plugin')
+        self.assertTrue(isinstance(version_info_plugin.version_info, VersionInfo))
+        self.assertEqual('0.1', version_info_plugin.version_info.stoq_plugin_version)
+        self.assertEqual({'3rdPartyVersion':'0.2'}, version_info_plugin.version_info.extra_info)
 
     def test_plugin_missing_objects(self):
         pm = StoqPluginManager([utils.get_invalid_plugins_dir()])

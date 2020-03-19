@@ -14,21 +14,17 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import logging
-from abc import ABC
-from typing import Dict, Optional
+from typing import Optional
 
+from stoq.data_classes import Payload, Request, WorkerResponse
+from stoq.plugins import WorkerPlugin
 from stoq.helpers import StoqConfigParser
-from stoq.data_classes import VersionInfo
 
-
-class BasePlugin(ABC):
+class VersionInfoPlugin(WorkerPlugin):
     def __init__(self, config: StoqConfigParser) -> None:
-        self.config = config
-        self.plugin_name = config.get('Core', 'Name', fallback=self.__class__.__name__)
-        self.__author__ = config.get('Documentation', 'Author', fallback='')
-        self.__version__ = config.get('Documentation', 'Version', fallback='')
-        self.__website__ = config.get('Documentation', 'Website', fallback='')
-        self.__description__ = config.get('Documentation', 'Description', fallback='')
-        self.log = logging.getLogger(f'stoq.{self.plugin_name}')
-        self.version_info = VersionInfo(self.__version__)
+        super().__init__(config)
+        self.version_info.add_extra_version_info({'3rdPartyVersion':'0.2'})
+    async def scan(
+        self, payload: Payload, request: Request
+    ) -> Optional[WorkerResponse]:
+        return None
