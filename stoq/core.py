@@ -110,7 +110,7 @@
     retrieved from multiple disparate data sources using `Archiver` plugins.
 
     1. First, import the required class:
-
+        >>> import asyncio
         >>> from stoq import Stoq
 
 
