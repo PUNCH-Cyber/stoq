@@ -57,7 +57,7 @@ class StoqConfigParser(ConfigParser):
 
         """
         try:
-            value = json.loads(self.get(section, option, fallback=kwargs.get('fallback', '')))
+            value = json.loads(self.get(section, option, fallback=kwargs.get('fallback', '{}')))
         except Exception as err:
             raise StoqException(f"Unable to parse [{section}] -> {option} as JSON. Error: {err}")
         return value

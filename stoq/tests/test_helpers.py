@@ -86,7 +86,7 @@ class TestHelpers(unittest.TestCase):
 
     def test_stoq_config_getjson(self):
         config = helpers.StoqConfigParser()
-        config.read(join('data', 'config.cfg'))
+        config.read(join('stoq', 'tests', 'data', 'config.cfg'))
 
         # List
         self.assertEqual(config.getjson('options', 'list'), ['item1', 'item2'])
@@ -98,6 +98,9 @@ class TestHelpers(unittest.TestCase):
         with self.assertRaises(StoqException) as exc:
             config.getjson('options', 'invalid')
         self.assertTrue('Unable to parse [options] -> invalid as JSON.' in str(exc.exception))
+
+        # Fallback
+        self.assertEqual(config.getjson('options', 'doesnotexist'), {})
 
 class ClassWithAttrs:
     def __init__(self):
