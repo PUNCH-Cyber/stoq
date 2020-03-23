@@ -41,6 +41,9 @@ RUN pip install stoq-framework\>=3.0.0b3 six && \
     git checkout v3 && \
     for plugin in `ls -d */`; do stoq install $plugin; done
 
+# Ensure the latest version of the IANA TLDs are in the appropriate place for the iocextract plugin
+ADD https://data.iana.org/TLD/tlds-alpha-by-domain.txt $STOQ_HOME/plugins/iocextract/
+
 WORKDIR ${STOQ_TMP}
 # Install xorsearch
 RUN wget -O XORSearch.zip "https://didierstevens.com/files/software/XORSearch_V${XORSEARCH_VER}.zip" && \
