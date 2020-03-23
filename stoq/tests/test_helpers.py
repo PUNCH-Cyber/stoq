@@ -17,7 +17,8 @@
 import unittest
 from datetime import datetime
 from collections import defaultdict
-
+from stoq.exceptions import StoqException
+from os.path import join
 import stoq.helpers as helpers
 
 
@@ -83,6 +84,23 @@ class TestHelpers(unittest.TestCase):
             '015e6d23e760f612cca616c54f110cb12dd54213f1e046c7607081372402eff4936b379296ed549236020afb37bd3e728a044a4243754f095498c98bc24f77e0',
         )
 
+    def test_stoq_config_getjson(self):
+        config = helpers.StoqConfigParser()
+        config.read(join('stoq', 'tests', 'data', 'config.cfg'))
+
+        # List
+        self.assertEqual(config.getjson('options', 'list'), ['item1', 'item2'])
+
+        # Dictionary
+        self.assertEqual(config.getjson('options', 'dict'), {'key':'value'})
+
+        # Invalid JSON
+        with self.assertRaises(StoqException) as exc:
+            config.getjson('options', 'invalid')
+        self.assertTrue('Unable to parse [options] -> invalid as JSON.' in str(exc.exception))
+
+        # Fallback
+        self.assertEqual(config.getjson('options', 'doesnotexist'), {})
 
 class ClassWithAttrs:
     def __init__(self):
