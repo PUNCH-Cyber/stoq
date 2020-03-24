@@ -31,3 +31,6 @@ class ConfigurableWorker(WorkerPlugin):
 
     def get_crazy_runtime_option(self):
         return self.config.getint('options', 'crazy_runtime_option')
+
+    def getjson_option(self, option):
+        return self.config.getjson('options', option)

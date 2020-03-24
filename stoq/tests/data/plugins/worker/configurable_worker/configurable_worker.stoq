@@ -24,3 +24,19 @@ Description = Configurable stoQ Worker plugin
 
 [options]
 important_option = cybercybercyber
+
+# Tests for getjson feature
+list = [
+    "item1",
+    "item2"
+    ]
+dict = {
+    "key": "value"
+    }
+invalid = {"key":}
+sq_dict: {
+    "bar'foo": "value"
+    }
+dq_dict: {
+    'bar"foo': "value"
+    }
