@@ -15,6 +15,7 @@
 #   limitations under the License.
 
 import json
+import ast
 import hashlib
 import datetime
 import traceback
@@ -57,7 +58,7 @@ class StoqConfigParser(ConfigParser):
 
         """
         try:
-            value = json.loads(self.get(section, option, fallback=kwargs.get('fallback', '{}')))
+            value = ast.literal_eval(self.get(section, option, fallback=kwargs.get('fallback', '{}')))
         except Exception as err:
             raise StoqException(f"Unable to parse [{section}] -> {option} as JSON. Error: {err}")
         return value
