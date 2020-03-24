@@ -129,13 +129,16 @@ class TestPluginManager(unittest.TestCase):
         self.assertEqual(plugin.get_important_option(), 'cybercybercyber')
 
         # Test StoqConfigParser.getjson reading from configuration file
-        self.assertEqual(plugin.getjson_list_option(), ['item1', 'item2'])
-        self.assertEqual(plugin.getjson_dict_option(), {'key':'value'})
+        self.assertEqual(plugin.getjson_option('list'), ['item1', 'item2'])
+        self.assertEqual(plugin.getjson_option('dict'), {'key':'value'})
+        self.assertEqual(plugin.getjson_option('sq_dict'), {"bar'foo": "value"})
+        self.assertEqual(plugin.getjson_option('dq_dict'), {'bar"foo': "value"})
         with self.assertRaises(StoqException) as exc:
-            plugin.getjson_invalid_option()
+            plugin.getjson_option('invalid')
         self.assertTrue('Unable to parse [options] -> invalid as JSON.' in str(exc.exception))
+
         # Test fallback
-        self.assertEqual(plugin.getjson_doesnotexist_option(), {})
+        self.assertEqual(plugin.getjson_option('doesnotexist'), {})
 
     def test_plugin_opts(self):
         pm = StoqPluginManager(
@@ -144,17 +147,21 @@ class TestPluginManager(unittest.TestCase):
                 'crazy_runtime_option': 16,
                 'list': ['item3', 'item4'],
                 'dict': {'key1': 'value1'},
-                'invalid':''
+                'invalid':'',
+                'sq_dict': {"foo'bar": "value"},
+                'dq_dict': {'foo"bar': "value"}
                 }},
         )
         plugin = pm.load_plugin('configurable_worker')
         self.assertEqual(plugin.get_crazy_runtime_option(), 16)
 
         # Test StoqConfigParser.getjson reading from plugin_opts
-        self.assertEqual(plugin.getjson_list_option(), ['item3', 'item4'])
-        self.assertEqual(plugin.getjson_dict_option(), {'key1':'value1'})
+        self.assertEqual(plugin.getjson_option('list'), ['item3', 'item4'])
+        self.assertEqual(plugin.getjson_option('dict'), {'key1':'value1'})
+        self.assertEqual(plugin.getjson_option('sq_dict'), {"foo'bar": "value"})
+        self.assertEqual(plugin.getjson_option('dq_dict'), {'foo"bar': "value"})
         with self.assertRaises(StoqException) as exc:
-            plugin.getjson_invalid_option()
+            plugin.getjson_option('invalid')
         self.assertTrue('Unable to parse [options] -> invalid as JSON.' in str(exc.exception))
 
     def test_plugin_opts_from_stoq_cfg(self):

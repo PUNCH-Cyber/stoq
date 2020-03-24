@@ -32,14 +32,5 @@ class ConfigurableWorker(WorkerPlugin):
     def get_crazy_runtime_option(self):
         return self.config.getint('options', 'crazy_runtime_option')
 
-    def getjson_list_option(self):
-        return self.config.getjson('options', 'list')
-
-    def getjson_dict_option(self):
-        return self.config.getjson('options', 'dict')
-
-    def getjson_invalid_option(self):
-        return self.config.getjson('options', 'invalid')
-
-    def getjson_doesnotexist_option(self):
-        return self.config.getjson('options', 'doesnotexist')
+    def getjson_option(self, option):
+        return self.config.getjson('options', option)
