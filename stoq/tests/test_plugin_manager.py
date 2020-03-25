@@ -133,9 +133,8 @@ class TestPluginManager(unittest.TestCase):
         self.assertEqual(plugin.getjson_option('dict'), {'key':'value'})
         self.assertEqual(plugin.getjson_option('sq_dict'), {"bar'foo": "value"})
         self.assertEqual(plugin.getjson_option('dq_dict'), {'bar"foo': "value"})
-        with self.assertRaises(StoqException) as exc:
+        with self.assertRaises(SyntaxError) as exc:
             plugin.getjson_option('invalid')
-        self.assertTrue('Unable to parse [options] -> invalid as JSON.' in str(exc.exception))
 
         # Test fallback
         self.assertEqual(plugin.getjson_option('doesnotexist'), {})
@@ -160,9 +159,8 @@ class TestPluginManager(unittest.TestCase):
         self.assertEqual(plugin.getjson_option('dict'), {'key1':'value1'})
         self.assertEqual(plugin.getjson_option('sq_dict'), {"foo'bar": "value"})
         self.assertEqual(plugin.getjson_option('dq_dict'), {'foo"bar': "value"})
-        with self.assertRaises(StoqException) as exc:
+        with self.assertRaises(SyntaxError) as exc:
             plugin.getjson_option('invalid')
-        self.assertTrue('Unable to parse [options] -> invalid as JSON.' in str(exc.exception))
 
     def test_plugin_opts_from_stoq_cfg(self):
         s = Stoq(base_dir=utils.get_data_dir())

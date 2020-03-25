@@ -52,16 +52,16 @@ class StoqConfigParser(ConfigParser):
             return value
         return set(o.strip() for o in value.split(',') if o)
 
-    def getjson(self, section, option, *args, **kwargs) -> Any:
+    def getjson(self, section, option, *args, **kwargs) -> Union[Dict, List]:
         """
         Create a Python object from `ConfigParser` option using JSON syntax
+        no fallback returns an empty dictionary
 
         """
-        try:
-            value = ast.literal_eval(self.get(section, option, fallback=kwargs.get('fallback', '{}')))
-        except Exception as err:
-            raise StoqException(f"Unable to parse [{section}] -> {option} as JSON. Error: {err}")
-        return value
+        value = self.get(section, option, fallback=kwargs.get('fallback', {}))
+        if isinstance(value, dict):
+            return value
+        return ast.literal_eval(value)
 
 class JsonComplexEncoder(json.JSONEncoder):
     """
