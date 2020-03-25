@@ -10,9 +10,9 @@ With the release of stoQ v3, a few enhancements were introduced that requires v2
 be slightly modified for use with v3. Some key changes include:
 
     - Full asyncio support with all plugins
-    - The entire request state is passed to dispatchers, workers, and archivers. This 
+    - The entire request state is passed to dispatchers, workers, and archivers. This
       includes making all payloads, and their respective results, available to them.
-    - A ``Logger`` object is now available to all plugins upono instantiation
+    - A ``Logger`` object is now available to all plugins upon instantiation
     - Errors from plugins are no longer simply a list of strings, they are now a list
       of ``Error`` objects
     - Configuration parameters are passed to each plugin as a ``StoqConfigParser`` object
