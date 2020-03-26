@@ -195,8 +195,8 @@ Examples:
         if args.plugin_opts:
             plugin_opts = {}
             for arg in args.plugin_opts:
-                plugin_name, plugin_option = arg.split(':')
-                opt, value = plugin_option.split('=')
+                plugin_name, plugin_option = arg.split(':', 1)
+                opt, value = plugin_option.split('=', 1)
                 if value.lower() == 'true':
                     value = True
                 elif value.lower() == 'false':
@@ -216,7 +216,7 @@ Examples:
             request_meta.source = args.request_source
         if args.request_extra:
             for arg in args.request_extra:
-                extra_key, extra_value = arg.split('=')
+                extra_key, extra_value = arg.split('=', 1)
                 if extra_value.lower() == 'true':
                     extra_value = True
                 elif extra_value.lower() == 'false':
