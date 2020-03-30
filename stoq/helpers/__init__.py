@@ -15,7 +15,6 @@
 #   limitations under the License.
 
 import json
-import ast
 import hashlib
 import datetime
 import traceback
