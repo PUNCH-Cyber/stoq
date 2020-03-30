@@ -59,9 +59,9 @@ class StoqConfigParser(ConfigParser):
 
         """
         value = self.get(section, option, fallback=kwargs.get('fallback', {}))
-        if isinstance(value, dict):
+        if isinstance(value, (dict, list)):
             return value
-        return ast.literal_eval(value)
+        return json.loads(value)
 
 class JsonComplexEncoder(json.JSONEncoder):
     """

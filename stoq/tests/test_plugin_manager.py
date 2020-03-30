@@ -18,6 +18,7 @@
 import logging
 import unittest
 from typing import Optional
+import json
 
 
 from stoq import Stoq, StoqException, StoqPluginNotFound
@@ -132,8 +133,7 @@ class TestPluginManager(unittest.TestCase):
         self.assertEqual(plugin.getjson_option('list'), ['item1', 'item2'])
         self.assertEqual(plugin.getjson_option('dict'), {'key':'value'})
         self.assertEqual(plugin.getjson_option('sq_dict'), {"bar'foo": "value"})
-        self.assertEqual(plugin.getjson_option('dq_dict'), {'bar"foo': "value"})
-        with self.assertRaises(SyntaxError) as exc:
+        with self.assertRaises(json.decoder.JSONDecodeError) as exc:
             plugin.getjson_option('invalid')
 
         # Test fallback
@@ -144,11 +144,11 @@ class TestPluginManager(unittest.TestCase):
             [utils.get_plugins_dir()],
             {'configurable_worker': {
                 'crazy_runtime_option': 16,
-                'list': ['item3', 'item4'],
-                'dict': {'key1': 'value1'},
-                'invalid':'',
-                'sq_dict': {"foo'bar": "value"},
-                'dq_dict': {'foo"bar': "value"}
+                'list': json.dumps(['item3', 'item4']),
+                'dict': json.dumps({'key1': 'value1'}),
+                'invalid':'invalid json blob',
+                'sq_dict': json.dumps({"foo'bar": "value"}),
+                'dq_dict': json.dumps({'foo"bar': "value"})
                 }},
         )
         plugin = pm.load_plugin('configurable_worker')
@@ -159,7 +159,7 @@ class TestPluginManager(unittest.TestCase):
         self.assertEqual(plugin.getjson_option('dict'), {'key1':'value1'})
         self.assertEqual(plugin.getjson_option('sq_dict'), {"foo'bar": "value"})
         self.assertEqual(plugin.getjson_option('dq_dict'), {'foo"bar': "value"})
-        with self.assertRaises(SyntaxError) as exc:
+        with self.assertRaises(json.decoder.JSONDecodeError) as exc:
             plugin.getjson_option('invalid')
 
     def test_plugin_opts_from_stoq_cfg(self):

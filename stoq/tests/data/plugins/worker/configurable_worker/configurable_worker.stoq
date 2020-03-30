@@ -37,6 +37,3 @@ invalid = {"key":}
 sq_dict: {
     "bar'foo": "value"
     }
-dq_dict: {
-    'bar"foo': "value"
-    }
