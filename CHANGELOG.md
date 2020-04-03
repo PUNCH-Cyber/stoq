@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `getjson()` function to allow plugins to use valid json strings are configuration 
+    options (@ytreister, #144)
+
 ### Changed
 
 - Fix stoq command line to properly parsed `--plugin-opts` and `--request-source` 
@@ -48,7 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PayloadResults` is now an object of `Payload.results`, rather than an independent object
 - Most objects have been removed from `Payload` and are now availabe in `Payload.results`, 
     namely `extracted_by`, `extracted_from`, `payload_id`, `size`, `payload_meta`
-- `Payload.plugins_run` moved to `PayloadResults.plugins_runs` and is now a `Dict[str, List[str]]` 
+- `Payload.plugins_run` moved to `PayloadResults.plugins_run` and is now a `Dict[str, List[str]]` 
     rather than `Dict[str, List[List[str]]]`
 - `PayloadResults.workers` is now a `Dict[str, Dict]` rather than `List[Dict[str, Dict]]`
 - `PayloadMeta` is now an object of `PayloadResults.payload_meta` 
@@ -69,7 +74,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 
 - DeepDispatcher plugin class has been removed
-- `Payload.plugins_run` has been removed in favor of `PayloadResults.plugins_run`)
+- `Payload.plugins_run` has been removed in favor of `PayloadResults.plugins_run
 - `Payload.worker_results` has been removed in favor of `PayloadResults.workers`
 - `RequestMeta` is no longer passed to plugins, in favor of the `Request` object
 - `plugins_opts` has been removed from plugin `__init__` function. All plugin configuration options
