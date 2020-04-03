@@ -18,6 +18,7 @@
 import logging
 import unittest
 from typing import Optional
+import json
 
 
 from stoq import Stoq, StoqException, StoqPluginNotFound
@@ -128,13 +129,38 @@ class TestPluginManager(unittest.TestCase):
         plugin = pm.load_plugin('configurable_worker')
         self.assertEqual(plugin.get_important_option(), 'cybercybercyber')
 
+        # Test StoqConfigParser.getjson reading from configuration file
+        self.assertEqual(plugin.getjson_option('list'), ['item1', 'item2'])
+        self.assertEqual(plugin.getjson_option('dict'), {'key':'value'})
+        self.assertEqual(plugin.getjson_option('sq_dict'), {"bar'foo": "value"})
+        with self.assertRaises(json.decoder.JSONDecodeError) as exc:
+            plugin.getjson_option('invalid')
+
+        # Test fallback
+        self.assertEqual(plugin.getjson_option('doesnotexist'), {})
+
     def test_plugin_opts(self):
         pm = StoqPluginManager(
             [utils.get_plugins_dir()],
-            {'configurable_worker': {'crazy_runtime_option': 16}},
+            {'configurable_worker': {
+                'crazy_runtime_option': 16,
+                'list': json.dumps(['item3', 'item4']),
+                'dict': json.dumps({'key1': 'value1'}),
+                'invalid':'invalid json blob',
+                'sq_dict': json.dumps({"foo'bar": "value"}),
+                'dq_dict': json.dumps({'foo"bar': "value"})
+                }},
         )
         plugin = pm.load_plugin('configurable_worker')
         self.assertEqual(plugin.get_crazy_runtime_option(), 16)
+
+        # Test StoqConfigParser.getjson reading from plugin_opts
+        self.assertEqual(plugin.getjson_option('list'), ['item3', 'item4'])
+        self.assertEqual(plugin.getjson_option('dict'), {'key1':'value1'})
+        self.assertEqual(plugin.getjson_option('sq_dict'), {"foo'bar": "value"})
+        self.assertEqual(plugin.getjson_option('dq_dict'), {'foo"bar': "value"})
+        with self.assertRaises(json.decoder.JSONDecodeError) as exc:
+            plugin.getjson_option('invalid')
 
     def test_plugin_opts_from_stoq_cfg(self):
         s = Stoq(base_dir=utils.get_data_dir())
