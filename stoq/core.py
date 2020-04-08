@@ -943,7 +943,7 @@ class Stoq(StoqPluginManager):
         ]
 
         self.log.debug(
-            f'Completed scan of {payload.results.payload_id} with '
+            f'Completed scan of {payload.results.payload_id} with WorkerPlugin {plugin.plugin_name} '
             f'{len(worker_response.results) if worker_response.results else 0} result keys, '  # type: ignore
             f'{len(additional_dispatches)} additional dispatches, and '
             f'{len(extracted_payloads)} extracted payloads'
