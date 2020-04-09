@@ -17,24 +17,30 @@
 import uuid
 from copy import deepcopy
 from datetime import datetime
-from typing import Dict, List, Optional, DefaultDict, Union, Any
+from typing import Dict, List, Optional, DefaultDict, Union
 
 import stoq.helpers as helpers
 
 class VersionInfo:
-    def __init__(self, stoq_plugin_version: str) -> None:
+    def __init__(self, plugin_version: str) -> None:
         """
 
         Object for keeping track of version information of the plugin that was run
 
-        :param stoq_plugin_version: Version of the plugin
+        :param plugin_version: Version of the stoQ plugin
 
         """
-        self.stoq_plugin_version = stoq_plugin_version
-        self.extra_info = None
+        self.plugin_version = plugin_version
+        self.extra_info: Dict = {}
 
-    def add_extra_version_info(self, extra_info: Any) -> None:
-        self.extra_info = extra_info
+    def add_version_info(self, extra_info: Dict) -> None:
+        self.extra_info.update(extra_info)
+
+    def __str__(self) -> str:
+        return helpers.dumps(self)
+
+    def __repr__(self):
+        return repr(self.__dict__)
 
 
 class Error:
