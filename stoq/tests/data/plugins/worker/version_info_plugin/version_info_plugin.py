@@ -23,7 +23,7 @@ from stoq.helpers import StoqConfigParser
 class VersionInfoPlugin(WorkerPlugin):
     def __init__(self, config: StoqConfigParser) -> None:
         super().__init__(config)
-        self.version_info.add_extra_version_info({'3rdPartyVersion':'0.2'})
+        self.version_info.add_version_info({'3rdPartyVersion':'0.2'})
     async def scan(
         self, payload: Payload, request: Request
     ) -> Optional[WorkerResponse]:
