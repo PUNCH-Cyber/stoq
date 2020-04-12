@@ -9,7 +9,7 @@ Overview
 `stoQ` is a highly flexible framework because of its ability to leverage plugins for each
 layer of operations. One of the biggest benefits to this approach is that it ensures the
 user is able to quickly and easily pivot to and from different technologies in their stack,
-without having to drastically alter workflow. 
+without having to drastically alter workflow.
 
 For a full listing of all publicly available plugins, check out the `stoQ public plugins <https://github.com/PUNCH-Cyber/stoq-plugins-public>`_ repository.
 
@@ -77,7 +77,7 @@ Plugin .stoq configuration file
 Each plugin must have a ``.stoq`` configuration file. The configuration file resides in
 the same directory as the plugin module. The plugin's configuration file allows for
 configuring a plugin with default or static settings. The configuration file is a standard
-YAML file and is parsed using the ``configparser`` module. The following is an example
+INI file and is parsed using the ``configparser`` module. The following is an example
 plugin configuration file with all *required* fields::
 
     [Core]
@@ -174,6 +174,31 @@ log levels ``debug``, ``info``, ``warning``, ``error``, and ``critical``.::
             self.log.info('Scanning payload now')
 
 
+.. _pluginversioninfo:
+
+Plugin Version info
+*******************
+
+Upon instantiation, plugins will have a ``VersionInfo`` object which can be accessed
+using ``self.version_info``.  The ``VersionInfo`` object has the plugin's version number
+defined in the plugin's configuration file as the member variable ``plugin_version``.
+Additionally, ``extra_info`` is a dictionary that can be used to store additional version
+information.  This is useful for capturing version information of 3rd party tools that the
+plugin runs.  A developer may choose to add version_info to their `WorkerResponse`` results
+or use a decorator to extract version information from plugins that ran during a scan.::
+
+    from stoq.helpers import StoqConfigParser
+    from stoq.plugins import WorkerPlugin
+    from some_3rd_party_tool import get_version
+
+    class RunThirdPartyPlugin(WorkerPlugin):
+        def __init__(self, config: StoqConfigParser) -> None:
+            super().__init__(config)
+            self.version_info.add_version_info(
+                {'3rdPartyToolVersion': get_version()}
+            )
+
+
 .. _pluginerrors:
 
 Errors
@@ -184,7 +209,7 @@ consistent and standardized error message handling across the framework. All plu
 classes are capable of handling errors, except for the ``ConnectorPlugin`` class. The
 following is an example of adding a error to a ``WorkerResponse``.::
 
-    
+
     from typing import Optional
     from stoq.plugins import WorkerPlugin
     from stoq import Error, Payload, Request, WorkerResponse
@@ -196,8 +221,8 @@ following is an example of adding a error to a ``WorkerResponse``.::
             errors: List[Error] = []
             errors.append(
                 Error(
-                    error='This is an error message that will be in StoqResponse', 
-                    plugin_name=self.plugin_name, 
+                    error='This is an error message that will be in StoqResponse',
+                    plugin_name=self.plugin_name,
                     payload_id=payload.results.payload_id
                 )
             )
