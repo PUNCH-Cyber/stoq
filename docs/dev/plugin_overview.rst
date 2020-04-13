@@ -185,7 +185,7 @@ can be accessed using ``self.version_info.plugin_version``.  Additionally, ``ext
 dictionary that can be used to store additional version information.  The
 ``VersionInfo.add_version_info()`` method can be used to add extra version information.  This
 is useful for capturing version information of 3rd party tools that the plugin runs.  A developer
-may choose to add version_info to their `WorkerResponse`` results or use a decorator to extract
+may choose to add version_info to their ``WorkerResponse`` results or use a decorator to extract
 version information from plugins that ran during a scan.::
 
     from stoq.helpers import StoqConfigParser
