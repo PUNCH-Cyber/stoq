@@ -19,7 +19,6 @@ from abc import ABC
 from typing import Dict, Optional
 
 from stoq.helpers import StoqConfigParser
-from stoq.data_classes import VersionInfo
 
 
 class BasePlugin(ABC):
@@ -31,4 +30,3 @@ class BasePlugin(ABC):
         self.__website__ = config.get('Documentation', 'Website', fallback='')
         self.__description__ = config.get('Documentation', 'Description', fallback='')
         self.log = logging.getLogger(f'stoq.{self.plugin_name}')
-        self.version_info = VersionInfo(self.__version__)

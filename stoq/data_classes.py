@@ -21,16 +21,17 @@ from typing import Dict, List, Optional, DefaultDict, Union
 
 import stoq.helpers as helpers
 
+
 class VersionInfo:
-    def __init__(self, plugin_version: str) -> None:
+    def __init__(self, plugin_version: Optional[str] = None) -> None:
         """
 
-        Object for keeping track of version information of the plugin that was run
+        Object for keeping track of version information in worker plugins
 
-        :param plugin_version: Version of the stoQ plugin
+        :param plugin_version: Version of the stoQ worker plugin
 
         """
-        self.plugin_version = plugin_version
+        self.plugin_version = plugin_version or ''
         self.extra_info: Dict = {}
 
     def add_version_info(self, extra_info: Dict) -> None:
@@ -336,6 +337,7 @@ class WorkerResponse:
         self,
         results: Optional[Dict] = None,
         extracted: Optional[List[ExtractedPayload]] = None,
+        version_info: Optional[VersionInfo] = None,
         errors: Optional[List[Error]] = None,
         dispatch_to: Optional[List[str]] = None,
     ) -> None:
@@ -345,7 +347,9 @@ class WorkerResponse:
 
         :param results: Results from worker scan
         :param extracted: ``ExtractedPayload`` objects of extracted payloads from scan
+        :param version_info: ``VersionInfo`` object containing plugin versioning information
         :param errors: Errors that occurred
+        :param dispatch_to: List of additional worker plugins that payload should be dispatched to
 
         >>> from stoq import WorkerResponse, ExtractedPayload
         >>> results = {'is_bad': True, 'filetype': 'executable'}
@@ -355,6 +359,7 @@ class WorkerResponse:
         """
         self.results = results
         self.extracted = extracted or []
+        self.version_info = version_info or VersionInfo()
         self.errors = errors or []
         self.dispatch_to = dispatch_to or []
 

@@ -129,6 +129,44 @@
                 response = {'worker_results': f'is_bad: {is_bad}'}
                 return WorkerResponse(response)
 
+    Version Information
+    -------------------
+
+    Worker plugin version information can be collected for later use, such as
+    dispatching or within a decorator plugin. The ``VersionInfo`` object can
+    contain the version information of the worker plugin itself, as well as 
+    additional version information from 3rd party tools used by the plugin.
+
+    All version information is available in the ``WorkerResponse`` object,
+    and can be accessed at a later time for the duration of the ``Request``.
+
+
+    ::
+
+        from typing import Dict, List, Optional
+
+        from stoq.plugins import WorkerPlugin
+        from stoq.helpers import StoqConfigParser
+        from stoq.data_classes import (
+            Payload,
+            Request,
+            WorkerResponse,
+            VersionInfo
+        )
+
+
+        class ExampleWorker(WorkerPlugin):
+            def __init__(self, config: StoqConfigParser) -> None:
+                super().__init__(config)
+
+            async def scan(
+                self, payload: Payload, request: Request
+            ) -> Optional[WorkerResponse]:
+                version_info = VersionInfo(self.__version__)
+                version_info.add_version_info({'3rd_party_tool': 'v1.0'})
+                response = {'worker_results': 'something useful'}
+                return WorkerResponse(response, version_info=version_info)
+
 
     Extracted Payloads
     ------------------

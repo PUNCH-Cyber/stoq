@@ -174,32 +174,6 @@ log levels ``debug``, ``info``, ``warning``, ``error``, and ``critical``.::
             self.log.info('Scanning payload now')
 
 
-.. _versioninfo:
-
-Version Info
-************
-
-Upon instantiation, plugins will have a ``VersionInfo`` object which can be accessed
-using ``self.version_info``.  The version number defined in the plugin's configuration file
-can be accessed using ``self.version_info.plugin_version``.  Additionally, ``extra_info`` is a
-dictionary that can be used to store additional version information.  The
-``VersionInfo.add_version_info()`` method can be used to add extra version information.  This
-is useful for capturing version information of 3rd party tools that the plugin runs.  A developer
-may choose to add ``self.version_info`` to their ``WorkerResponse`` results or use a decorator to
-extract version information from plugins that ran during a scan.::
-
-    from stoq.helpers import StoqConfigParser
-    from stoq.plugins import WorkerPlugin
-    from some_3rd_party_tool import get_version
-
-    class RunThirdPartyPlugin(WorkerPlugin):
-        def __init__(self, config: StoqConfigParser) -> None:
-            super().__init__(config)
-            self.version_info.add_version_info(
-                {'3rdPartyToolVersion': get_version()}
-            )
-
-
 .. _pluginerrors:
 
 Errors

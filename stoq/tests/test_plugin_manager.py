@@ -64,22 +64,6 @@ class TestPluginManager(unittest.TestCase):
         )
         self.assertEqual('Simple stoQ Worker plugin', simple_worker.__description__)
 
-    def test_version_info(self):
-        pm = StoqPluginManager([utils.get_plugins_dir()])
-        version_info_plugin = pm.load_plugin('version_info_plugin')
-        self.assertTrue(isinstance(version_info_plugin.version_info, VersionInfo))
-        self.assertEqual('0.1', version_info_plugin.version_info.plugin_version)
-        self.assertEqual(
-            {'3rdPartyVersion': '0.2'}, version_info_plugin.version_info.extra_info
-        )
-
-    def test_version_info_invalid_add_type(self):
-        pm = StoqPluginManager([utils.get_plugins_dir()])
-        version_info_plugin = pm.load_plugin('version_info_plugin')
-        self.assertTrue(isinstance(version_info_plugin.version_info, VersionInfo))
-        with self.assertRaises(ValueError):
-            version_info_plugin.version_info.add_version_info('invalid_version_info_type')
-
     def test_plugin_missing_objects(self):
         pm = StoqPluginManager([utils.get_invalid_plugins_dir()])
         worker = pm.load_plugin('missing_config_objects')

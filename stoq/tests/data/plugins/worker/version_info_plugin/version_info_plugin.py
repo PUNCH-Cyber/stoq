@@ -16,15 +16,20 @@
 
 from typing import Optional
 
-from stoq.data_classes import Payload, Request, WorkerResponse
 from stoq.plugins import WorkerPlugin
 from stoq.helpers import StoqConfigParser
+from stoq.data_classes import Payload, Request, WorkerResponse, VersionInfo
+
 
 class VersionInfoPlugin(WorkerPlugin):
     def __init__(self, config: StoqConfigParser) -> None:
         super().__init__(config)
-        self.version_info.add_version_info({'3rdPartyVersion':'0.2'})
-    async def scan(
-        self, payload: Payload, request: Request
-    ) -> Optional[WorkerResponse]:
-        return None
+        self.INVALID_VERSION = False
+
+    async def scan(self, payload: Payload, request: Request) -> WorkerResponse:
+        version_info = VersionInfo(self.__version__)
+        if self.INVALID_VERSION:
+            version_info.add_version_info('invalid version info')
+        else:
+            version_info.add_version_info({'3rdPartyVersion': '0.2'})
+        return WorkerResponse(version_info=version_info)

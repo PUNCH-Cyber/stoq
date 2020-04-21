@@ -34,6 +34,7 @@ from stoq.data_classes import (
     RequestMeta,
     StoqResponse,
     WorkerResponse,
+    VersionInfo,
 )
 
 
@@ -466,6 +467,25 @@ class TestCore(asynctest.TestCase):
         self.assertIn('simple_worker', response.results[0].workers)
         self.assertEqual(len(response.errors), 1)
         self.assertIn('Test error', response.errors[0].error)
+
+    async def test_worker_version_info(self):
+        s = Stoq(base_dir=utils.get_data_dir())
+        version_info_plugin = s.load_plugin('version_info_plugin')
+        response = await version_info_plugin.scan(
+            Payload(self.generic_content), Request()
+        )
+        self.assertTrue(isinstance(response.version_info, VersionInfo))
+        self.assertEqual('0.1', response.version_info.plugin_version)
+        self.assertEqual({'3rdPartyVersion': '0.2'}, response.version_info.extra_info)
+
+    async def test_worker_version_info_invalid_version(self):
+        s = Stoq(base_dir=utils.get_data_dir())
+        version_info_plugin = s.load_plugin('version_info_plugin')
+        version_info_plugin.INVALID_VERSION = True
+        with self.assertRaises(ValueError) as context:
+            response = await version_info_plugin.scan(
+                Payload(self.generic_content), Request()
+            )
 
     async def test_source_archiver_exception(self):
         s = Stoq(base_dir=utils.get_data_dir(), source_archivers=['simple_archiver'])
