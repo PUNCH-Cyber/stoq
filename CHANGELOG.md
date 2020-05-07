@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix stoq command line to properly parsed `--plugin-opts` and `--request-source` 
     arguments that contain `=` or `:` characters
+- Ensure `always_dispatch` in `stoq.cfg` leverages `getlist()` when `Stoq()` is
+    is instantiated. (#149) 
 
 ## [3.0.0] - 2020-03-18
 
@@ -46,7 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Parallelization is performed across all of the plugins that can run in a given round, 
     instead of parallelizing across all of the plugins to perform on a given payload (#147)
 - Ensure `plugin_name` is set to the name of the plugin class in case `Name` is not defined in 
-  the plugin's configuration.
+    the plugin's configuration.
 
 ### Changed
 

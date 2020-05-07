@@ -485,7 +485,7 @@ class Stoq(StoqPluginManager):
             d: self.load_plugin(d) for d in decorators if d  # type: ignore
         }
 
-        self.always_dispatch = always_dispatch or config.get(
+        self.always_dispatch = always_dispatch or config.getlist(
             'core', 'always_dispatch', fallback=[]
         )
         if self.always_dispatch:
