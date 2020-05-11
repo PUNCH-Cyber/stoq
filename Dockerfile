@@ -35,14 +35,11 @@ RUN apt-get update && \
     apt-get clean -y && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN pip install stoq-framework\>=3.0.0b3 six && \
+RUN pip install stoq-framework\>=3.0.0 six && \
     git clone https://github.com/PUNCH-Cyber/stoq-plugins-public ${STOQ_TMP}/stoq-plugins-public && \
     cd ${STOQ_TMP}/stoq-plugins-public && \
     git checkout v3 && \
     for plugin in `ls -d */`; do stoq install $plugin; done
-
-# Ensure the latest version of the IANA TLDs are in the appropriate place for the iocextract plugin
-ADD https://data.iana.org/TLD/tlds-alpha-by-domain.txt $STOQ_HOME/plugins/iocextract/
 
 WORKDIR ${STOQ_TMP}
 # Install xorsearch
@@ -67,6 +64,11 @@ RUN wget -O trid_linux_64.zip "http://mark0.net/download/trid_linux_64.zip" && \
     unzip -qq triddefs -d $STOQ_HOME/plugins/trid
 
 RUN rm -rf $STOQ_TMP
+
+# Ensure the latest version of the IANA TLDs are in the appropriate place for the iocextract plugin
+ADD https://data.iana.org/TLD/tlds-alpha-by-domain.txt $STOQ_HOME/plugins/iocextract/
+
+RUN chmod 644 $STOQ_HOME/plugins/iocextract/tlds-alpha-by-domain.txt
 
 USER $USER
 ENTRYPOINT ["stoq"]
