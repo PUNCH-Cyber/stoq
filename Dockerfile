@@ -10,8 +10,7 @@ ENV EXIFTOOL_VER 11.91
 
 RUN groupadd -r $GROUP && \
     useradd -r -g $GROUP $USER && \
-    install -d $STOQ_HOME -o $USER -g $GROUP && \
-    mkdir -p /home/$USER/.stoq/plugins
+    install -d $STOQ_HOME -d $STOQ_HOME/plugins -o $USER -g $GROUP
 
 RUN apt-get update && \
     apt-get install -y software-properties-common && \
@@ -33,22 +32,27 @@ RUN apt-get update && \
     swig \
     lib32ncurses6 && \
     apt-get clean -y && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    pip install six
 
-RUN pip install stoq-framework\>=3.0.0 six && \
-    git clone https://github.com/PUNCH-Cyber/stoq-plugins-public ${STOQ_TMP}/stoq-plugins-public && \
-    cd ${STOQ_TMP}/stoq-plugins-public && \
-    git checkout v3 && \
-    for plugin in `ls -d */`; do stoq install $plugin; done
+COPY . ${STOQ_TMP}
 
 WORKDIR ${STOQ_TMP}
+
+# Install stoQ
+RUN python3 setup.py install
+
+# Install stoQ plugins and related binaries
+RUN git clone --depth 1 -b v3 https://github.com/PUNCH-Cyber/stoq-plugins-public ${STOQ_TMP}/stoq-plugins-public && \
+    cd ${STOQ_TMP}/stoq-plugins-public && \
+    for plugin in $(ls -d */); do stoq install $plugin; done
+
 # Install xorsearch
 RUN wget -O XORSearch.zip "https://didierstevens.com/files/software/XORSearch_V${XORSEARCH_VER}.zip" && \
     unzip -qq XORSearch -d XORSearch && \
     gcc -o /usr/local/bin/xorsearch XORSearch/XORSearch.c
 
 # Install exiftool
-RUN wget -O exif.tgz "https://www.sno.phy.queensu.ca/~phil/exiftool/Image-ExifTool-${EXIFTOOL_VER}.tar.gz" && \
+RUN wget -O exif.tgz "https://exiftool.org/Image-ExifTool-${EXIFTOOL_VER}.tar.gz" && \
     tar -xvf exif.tgz && \
     cd Image-ExifTool-${EXIFTOOL_VER} && \
     perl Makefile.PL && \
@@ -63,12 +67,13 @@ RUN wget -O trid_linux_64.zip "http://mark0.net/download/trid_linux_64.zip" && \
     wget -O triddefs.zip "http://mark0.net/download/triddefs.zip" && \
     unzip -qq triddefs -d $STOQ_HOME/plugins/trid
 
-RUN rm -rf $STOQ_TMP
-
 # Ensure the latest version of the IANA TLDs are in the appropriate place for the iocextract plugin
 ADD https://data.iana.org/TLD/tlds-alpha-by-domain.txt $STOQ_HOME/plugins/iocextract/
 
 RUN chmod 644 $STOQ_HOME/plugins/iocextract/tlds-alpha-by-domain.txt
+
+# Clean up
+RUN rm -rf /var/lib/apt/lists/* $STOQ_TMP /tmp/* /var/tmp/*
 
 USER $USER
 ENTRYPOINT ["stoq"]
