@@ -44,6 +44,14 @@ Frequently Asked Questions
 
     As with anything that "scales", it depends. Infrastructure, location, resources, and many other things come into play. In our experience, it is possible to scan hundreds of millions of payloads per day with the right setup. Overall, we have been very pleased with it's ability to scale to fit all of our needs without issue.
 
+- **stoQ seems slow when decoding json, can this be improved?**
+
+  Possibly. stoQ leverages BeautifulSoup's UnicodeDammit function to serialize bytes into proper json serializable content. In order to limit the python library requirements and maximize compatibility, we purposefully limit core dependencies. BeautifulSoup by default attempts to leverage the python library `cchardet`, which is much more efficient than the default python library that BeautifulSoup falls back to `chardet`. Simply install `cchardet` via pip, and you may see a nice performance boost if you have complex results with bytes.
+
+- **I know stoQ supports async operations, but my plugins don't seem to be completing any faster!**
+
+  While all current stoQ plugins support the latest version of stoQ, not all of them will run asynchronously. There are several reasons for this. Some depend on 3rd party libraries that are not asyncio compatiable. For these, we will keep an eye out for updated 3rd party libraries that support asyncio. For many others, it is simply a matter of competing priorities. We, and very gratefully, several contributors to stoQ have been updating plugins for full asyncio support, it is still a time consuming process. If you would like to help in this effort, please do! We are more than happy to accept all of the help you are willing to volunteer.
+
 - **Do you plan on maintaining this project long term?**
 
     Absolutely. We use stoQ in several production grade capabilities, as do many stoQ users. We've been developing it since 2011, and will continue to do so.
