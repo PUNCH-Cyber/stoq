@@ -74,6 +74,6 @@ RUN wget -O trid_linux_64.zip "http://mark0.net/download/trid_linux_64.zip" && \
 # Clean up
 RUN rm -rf $STOQ_TMP /tmp/* /var/tmp/*
 
-WORKDIR $STOQ_HOME
+WORKDIR /home/$USER
 USER $USER
 ENTRYPOINT ["stoq"]
