@@ -174,7 +174,7 @@
 
     ::
 
-        >>> meta = PayloadMeta(dispatch_to='yara')
+        >>> meta = PayloadMeta(dispatch_to=['yara'])
         >>> extracted_payload = ExtractedPayload(b'this is a payload with bad stuff', meta)
 
 
