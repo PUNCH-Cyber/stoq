@@ -1,5 +1,5 @@
 <p align="center">
-<img src="http://stoq.punchcyber.com/i/stoq.png" width="300"><br />
+<img src="https://stoq.punchcyber.com/i/stoq.png" width="300"><br />
 </p>
 
 [![Join the community on Spectrum](https://withspectrum.github.io/badge/badge.svg)](https://spectrum.chat/stoq)
