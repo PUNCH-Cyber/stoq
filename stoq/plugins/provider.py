@@ -59,15 +59,19 @@
     Writing a plugin
     ================
 
-    `Provider plugins` add either ``Payload`` objects to the `stoQ` queue, or a ``str``.
-    If a ``Payload`` object is added, `stoQ` will begin processing the payload. However,
-    if a ``str`` is added, `stoQ` will pass it to ``Archiver`` plugins that were
-    loaded when ``Stoq`` was instantiated with the ``source_archivers`` argument.
+    `Provider plugins` add ``Payload`` or ``Request`` objects to the `stoQ` queue, or a ``str``.
+    If a ``Payload`` object is added, `stoQ` will begin processing the payload.  If a ``Request`` object
+    is added, `stoQ` will begin processing the request (which should contain at least one payload).
+    If a ``str`` is added, `stoQ` will pass it to ``Archiver`` plugins that were loaded when ``Stoq``
+    was instantiated with the ``source_archivers`` argument.
 
     A `provider` plugin must be a subclass of the ``ProviderPlugin`` class.
 
     As with any plugin, a :ref:`configuration file <pluginconfig>` must also exist
     and be properly configured.
+
+    If a ``Request`` object is added to the queue and has `request_meta` set, then the
+    `request_meta` passed to the ``Stoq`` `run()` method is ignored for this request.
 
     Example
     -------

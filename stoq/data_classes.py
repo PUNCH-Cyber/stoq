@@ -42,7 +42,7 @@ class Error:
         >>> payload = Payload(b'test bytes')
         >>> err = Error(
         ...     error='This is our error message',
-        ...     plugin_name='test_plugin', 
+        ...     plugin_name='test_plugin',
         ...     payload_id=payload.results.payload_id
         ... )
         >>> errors.append(err)
@@ -166,6 +166,9 @@ class RequestMeta:
     def __repr__(self):
         return repr(self.__dict__)
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
 
 class PayloadResults:
     def __init__(
@@ -220,7 +223,7 @@ class Request:
     ):
         """
 
-        Object that contains the state of a ``Stoq`` scan. This object is accessible within 
+        Object that contains the state of a ``Stoq`` scan. This object is accessible within
         all archiver, dispatcher, and worker plugins.
 
         :param payloads: All payloads that are being processed, to include extracted payloads
