@@ -20,4 +20,4 @@ Module = request_provider
 Author = Yair Treister
 Version = 0.1
 Website = https://github.com/PUNCH-Cyber/stoq-plugins-public
-Description = Simple stoQ Provider plugin
+Description = Provider that provides request objects
