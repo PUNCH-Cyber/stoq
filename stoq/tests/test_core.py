@@ -667,6 +667,31 @@ class TestCore(asynctest.TestCase):
         dummy_worker.scan.assert_awaited_once()
         dummy_connector.save.assert_awaited_once()
 
+    async def test_provider_with_request(self):
+        logging.disable(logging.NOTSET)
+        s = Stoq(
+            base_dir=utils.get_data_dir(),
+            providers=['request_provider'],
+            log_level='DEBUG'
+        )
+        # Run a provider that provides a Request containing request_meta
+        run_request_meta = RequestMeta(extra_data={'dummy': '2'})
+        with self.assertLogs(level='DEBUG') as cm:
+            await s.run(request_meta=run_request_meta)
+        self.assertIn('DEBUG:stoq:Request received: RequestMeta:', cm.output[1])
+        self.assertIn('"extra_data": {"dummy": "1"}', cm.output[1])
+        self.assertNotIn('"extra_data": {"dummy": "2"}', cm.output[1])
+
+        # Now run a provider that provides a Request without request_meta
+        provider_plugin = s.load_plugin('request_provider')
+        provider_plugin.SPECIFY_REQUEST_META = False
+        with self.assertLogs(level='DEBUG') as cm:
+            await s.run(request_meta=run_request_meta)
+        self.assertIn('DEBUG:stoq:Request received: RequestMeta:', cm.output[1])
+        self.assertIn('"extra_data": {"dummy": "2"}', cm.output[1])
+        self.assertNotIn('"extra_data": {"dummy": "1"}', cm.output[1])
+        logging.disable(logging.CRITICAL)
+
     def test_stoqresponse_to_str(self):
         response = StoqResponse(Request(), [])
         response_str = str(response)

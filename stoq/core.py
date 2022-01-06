@@ -105,7 +105,7 @@
     ---------------
 
     Using stoQ with providers allows for the scanning of multiple payloads from
-    multiple sources. This method will instantiate a `Queue` which payloads
+    multiple sources. This method will instantiate a `Queue` which payloads or requests
     are published to for scanning by `stoQ`. Additionally, payloads may be
     retrieved from multiple disparate data sources using `Archiver` plugins.
 
@@ -545,20 +545,20 @@ class Stoq(StoqPluginManager):
             f'Starting provider queue: RequestMeta: {request_meta}, '
             f'start_dispatches: {add_start_dispatch}'
         )
-        payload_queue: asyncio.Queue = asyncio.Queue(maxsize=self.max_queue)
+        provider_queue: asyncio.Queue = asyncio.Queue(maxsize=self.max_queue)
         providers = [
-            asyncio.ensure_future(plugin.ingest(payload_queue))
+            asyncio.ensure_future(plugin.ingest(provider_queue))
             for name, plugin in self._loaded_provider_plugins.items()
         ]
         workers = [
             asyncio.ensure_future(
-                self._consume(payload_queue, request_meta, add_start_dispatch)
+                self._consume(provider_queue, request_meta, add_start_dispatch)
             )
             for n in range(self.provider_consumers)
         ]
         try:
             await asyncio.gather(*providers)
-            await payload_queue.join()
+            await provider_queue.join()
         except KeyboardInterrupt:
             pass
         except Exception as e:
@@ -857,19 +857,24 @@ class Stoq(StoqPluginManager):
 
     async def _consume(
         self,
-        payload_queue: asyncio.Queue,
+        provider_queue: asyncio.Queue,
         request_meta: Optional[RequestMeta] = None,
         add_start_dispatch: Optional[List[str]] = None,
     ) -> None:
         while True:
             try:
-                task = await payload_queue.get()
-                # Determine whether the provider has returned a `Payload`, or a task.
+                task = await provider_queue.get()
+                # Determine whether the provider has returned a `Payload`, `Request` or a task.
                 # If it is a task, load the defined archiver plugin to load the
                 # `Payload`, otherwise, simply continue on with the scanning.
                 if isinstance(task, Payload):
                     request = Request([task], request_meta)
                     await self.scan_request(request, add_start_dispatch)
+                elif isinstance(task, Request):
+                    # Only set request_meta if the task does not have request_meta already set
+                    if task.request_meta == RequestMeta():
+                        task.request_meta = request_meta
+                    await self.scan_request(task, add_start_dispatch)
                 else:
                     for source_archiver, task_meta in task.items():
                         self.log.debug(
@@ -888,7 +893,7 @@ class Stoq(StoqPluginManager):
                             self.log.warn(
                                 f'"{task_meta}" failed with archiver "{source_archiver}": {str(e)}'
                             )
-                payload_queue.task_done()
+                provider_queue.task_done()
             except asyncio.QueueEmpty:
                 pass
 
