@@ -632,6 +632,12 @@ class Stoq(StoqPluginManager):
                 else:
                     payload_idx = hashes_seen[payload_hash]
                     for idx in payload_idx:
+                        if request.payloads[idx].results.payload_id in extracted_payload.results.extracted_from:
+                            # Handle self extracting payload
+                            dup_idx = extracted_payload.results.extracted_from.index(request.payloads[idx].results.payload_id)
+                            del extracted_payload.results.extracted_by[dup_idx]
+                            del extracted_payload.results.extracted_from[dup_idx]
+                            self.log.debug(f'Self extracting payload detected for {request.payloads[idx].results.payload_id}')
                         request.payloads[idx].results.extracted_by.extend(
                             extracted_payload.results.extracted_by
                         )
