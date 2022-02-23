@@ -298,7 +298,7 @@ class TestCore(asynctest.TestCase):
             'extract_payload', response.results[1].plugins_run['workers'][0]
         )
         self.assertEqual('simple_worker', response.results[1].extracted_by[0])
-        self.assertEqual('extract_payload', response.results[1].extracted_by[1])
+        self.assertEqual(1, len(response.results[1].extracted_by))
 
     async def test_scan_with_nested_required_plugin(self):
         s = Stoq(base_dir=utils.get_data_dir())
@@ -506,6 +506,10 @@ class TestCore(asynctest.TestCase):
         s = Stoq(base_dir=utils.get_data_dir(), always_dispatch=['simple_worker'])
         response = await s.scan(self.generic_content)
         self.assertEqual(len(response.results), 2)
+
+        # Make sure extracted_from does not include the result payload_id
+        for result in response.results:
+            self.assertNotIn(result.payload_id, result.extracted_from)
 
     @asynctest.skipIf(
         sys.version_info >= (3, 8), 'skipping because python >= 3.8 breaks test'
